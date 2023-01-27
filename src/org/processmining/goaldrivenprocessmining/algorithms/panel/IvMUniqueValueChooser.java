@@ -51,10 +51,6 @@ public class IvMUniqueValueChooser extends JPanel {
 				}
 			}
 			AttributeClassifier[] arrAtt = new AttributeClassifier[l.size()];
-			for (int i = 0; i < l.size(); i++) {
-				arrAtt[i] = new AttributeClassifier( l.get(i));
-				System.out.println(arrAtt[i]);
-			}
 			replaceClassifiers(arrAtt);
 		}
 	}

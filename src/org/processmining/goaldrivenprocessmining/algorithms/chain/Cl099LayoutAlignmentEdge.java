@@ -1,6 +1,8 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
+import org.processmining.goaldrivenprocessmining.algorithms.DfmVisualisation;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
+import org.processmining.goaldrivenprocessmining.objectHelper.MapValueGroupObject;
 import org.processmining.plugins.InductiveMiner.Triple;
 import org.processmining.plugins.graphviz.dot.Dot;
 import org.processmining.plugins.graphviz.visualisation.DotPanel;
@@ -15,7 +17,6 @@ import org.processmining.plugins.inductiveVisualMiner.helperClasses.IvMModel;
 import org.processmining.plugins.inductiveVisualMiner.ivmlog.IvMLogInfo;
 import org.processmining.plugins.inductiveVisualMiner.mode.Mode;
 import org.processmining.plugins.inductiveVisualMiner.traceview.TraceViewEventColourMap;
-import org.processmining.plugins.inductiveVisualMiner.visualisation.DfmVisualisation;
 import org.processmining.plugins.inductiveVisualMiner.visualisation.ProcessTreeVisualisation;
 import org.processmining.plugins.inductiveVisualMiner.visualisation.ProcessTreeVisualisationInfo;
 import org.processmining.plugins.inductiveVisualMiner.visualisation.ProcessTreeVisualisationParameters;
@@ -49,7 +50,7 @@ public class Cl099LayoutAlignmentEdge extends DataChainLinkComputationAbstract<G
 	@Override
 	public IvMObject<?>[] createInputObjects() {
 		return new IvMObject<?>[] { GoalDrivenObject.model_edge, GoalDrivenObject.aligned_log_info_edge, IvMObject.selected_visualisation_mode,
-				IvMObject.selected_graph_user_settings };
+				IvMObject.selected_graph_user_settings, GoalDrivenObject.map_value_group };
 	}
 
 //	@Override
@@ -66,8 +67,8 @@ public class Cl099LayoutAlignmentEdge extends DataChainLinkComputationAbstract<G
 	@Override
 	public IvMObjectValues execute(GoalDrivenConfiguration configuration, IvMObjectValues inputs,
 			IvMCanceller canceller) throws Exception {
-		System.out.println("Align layout edge");
 		IvMModel model = inputs.get(GoalDrivenObject.model_edge);
+		MapValueGroupObject mapValueGroup = inputs.get(GoalDrivenObject.map_value_group);
 		IvMLogInfo logInfo = inputs.get(GoalDrivenObject.aligned_log_info_edge);
 		Mode mode = inputs.get(IvMObject.selected_visualisation_mode);
 		DotPanelUserSettings settings = inputs.get(IvMObject.selected_graph_user_settings);
@@ -84,11 +85,11 @@ public class Cl099LayoutAlignmentEdge extends DataChainLinkComputationAbstract<G
 			p = visualiser.fancy(model, data, visualisationParameters);
 		} else {
 			DfmVisualisation visualiser = new DfmVisualisation();
-			p = visualiser.fancy(model, data, visualisationParameters);
+			p = visualiser.fancy(model, data, visualisationParameters, mapValueGroup);
 		}
 
 		//keep the user settings of the dot panel
-		settings.applyToDot(p.getA());
+//		settings.applyToDot(p.getA());
 
 		//compute svg from dot
 		SVGDiagram diagram = DotPanel.dot2svg(p.getA());

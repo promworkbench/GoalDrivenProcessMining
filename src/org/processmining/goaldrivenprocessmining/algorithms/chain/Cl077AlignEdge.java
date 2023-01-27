@@ -64,14 +64,10 @@ public class Cl077AlignEdge extends DataChainLinkComputationAbstract<GoalDrivenC
 		//	protected Pair<IvMLogNotFiltered, IvMLogInfo> executeLink(
 		//			Septuple<IvMModel, XEventPerformanceClassifier, XLog, XEventClasses, XEventClasses, InductiveVisualMinerAlignment, InductiveVisualMinerConfiguration> input,
 		//			IvMCanceller canceller) throws Exception {
-		System.out.println("Align edge");
 		IvMModel model = inputs.get(GoalDrivenObject.model_edge);
 		XEventPerformanceClassifier performanceClassifier = new XEventPerformanceClassifier(
 				AttributeClassifiers.constructClassifier(inputs.get(GoalDrivenObject.selected_classifier1)));
 		XLog log = inputs.get(GoalDrivenObject.log_edge);
-		System.out.println("&&&&&");
-		System.out.println(inputs.get(GoalDrivenObject.xlog_info_edge).getNumberOfTraces());
-		System.out.println("&&&&&");
 		XEventClasses eventClasses = inputs.get(GoalDrivenObject.xlog_info_edge).getEventClasses();
 		XEventClasses eventClassesPerformance = inputs.get(GoalDrivenObject.xlog_info_performance_edge).getEventClasses();
 

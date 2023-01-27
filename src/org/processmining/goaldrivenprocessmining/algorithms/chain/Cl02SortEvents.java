@@ -49,9 +49,6 @@ public class Cl02SortEvents<C> extends DataChainLinkComputationAbstract<C> {
 
 			//ask the user whether to fix it
 			if (onIllogicalTimeStamps.call(null)) {
-
-				System.out.println("sort events in log");
-
 				XLog sortedLog = new XLogImpl(log.getAttributes());
 				for (XTrace trace : log) {
 

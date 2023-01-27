@@ -1,5 +1,7 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
+import org.processmining.goaldrivenprocessmining.algorithms.DfmVisualisation;
+import org.processmining.goaldrivenprocessmining.objectHelper.MapValueGroupObject;
 import org.processmining.plugins.InductiveMiner.Triple;
 import org.processmining.plugins.graphviz.dot.Dot;
 import org.processmining.plugins.graphviz.visualisation.DotPanel;
@@ -13,7 +15,6 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 import org.processmining.plugins.inductiveVisualMiner.helperClasses.IvMModel;
 import org.processmining.plugins.inductiveVisualMiner.mode.Mode;
 import org.processmining.plugins.inductiveVisualMiner.traceview.TraceViewEventColourMap;
-import org.processmining.plugins.inductiveVisualMiner.visualisation.DfmVisualisation;
 import org.processmining.plugins.inductiveVisualMiner.visualisation.ProcessTreeVisualisation;
 import org.processmining.plugins.inductiveVisualMiner.visualisation.ProcessTreeVisualisationInfo;
 import org.processmining.plugins.inductiveVisualMiner.visualisation.ProcessTreeVisualisationParameters;
@@ -35,7 +36,7 @@ public class Cl066LayoutModelEdges<C> extends DataChainLinkComputationAbstract<C
 	@Override
 	public IvMObject<?>[] createInputObjects() {
 		return new IvMObject<?>[] { GoalDrivenObject.model_edge, IvMObject.selected_visualisation_mode,
-				IvMObject.selected_graph_user_settings };
+				IvMObject.selected_graph_user_settings, GoalDrivenObject.map_value_group };
 	}
 
 	@Override
@@ -46,8 +47,8 @@ public class Cl066LayoutModelEdges<C> extends DataChainLinkComputationAbstract<C
 	@Override
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs,
 			IvMCanceller canceller) throws Exception {
-		System.out.println("Convert model to graph edge");
 		IvMModel model = inputs.get(GoalDrivenObject.model_edge);
+		MapValueGroupObject mapValueGroup = inputs.get(GoalDrivenObject.map_value_group);
 		Mode mode = inputs.get(IvMObject.selected_visualisation_mode);
 		DotPanelUserSettings graphSettings = inputs.get(IvMObject.selected_graph_user_settings);
 
@@ -61,7 +62,7 @@ public class Cl066LayoutModelEdges<C> extends DataChainLinkComputationAbstract<C
 			p = visualiser.fancy(model, data, parameters);
 		} else {
 			DfmVisualisation visualiser = new DfmVisualisation();
-			p = visualiser.fancy(model, data, parameters);
+			p = visualiser.fancy(model, data, parameters, mapValueGroup);
 		}
 
 		//set the graph direction

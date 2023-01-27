@@ -1,5 +1,6 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
+import org.processmining.plugins.InductiveMiner.dfgOnly.log2logInfo.IMLog2IMLogInfo;
 import org.processmining.plugins.InductiveMiner.mining.IMLogInfo;
 import org.processmining.plugins.InductiveMiner.mining.logs.IMLog;
 import org.processmining.plugins.inductiveVisualMiner.Selection;
@@ -25,7 +26,7 @@ public class Cl05Mine<C> extends DataChainLinkComputationAbstract<C> {
 
 	@Override
 	public IvMObject<?>[] createInputObjects() {
-		return new IvMObject<?>[] { IvMObject.imlog_activity_filtered, IvMObject.imlog_info_activity_filtered,
+		return new IvMObject<?>[] { GoalDrivenObject.im_log_high_level,
 				IvMObject.selected_miner, IvMObject.selected_noise_threshold };
 	}
 
@@ -36,8 +37,10 @@ public class Cl05Mine<C> extends DataChainLinkComputationAbstract<C> {
 
 	@Override
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
-		IMLog log = inputs.get(IvMObject.imlog_activity_filtered);
-		IMLogInfo logInfo = inputs.get(IvMObject.imlog_info_activity_filtered);
+		System.out.println("--- Cl05");
+		IMLog log = inputs.get(GoalDrivenObject.im_log_high_level);
+		IMLog2IMLogInfo log2logInfo = inputs.get(IvMObject.selected_miner).getLog2logInfo();
+		IMLogInfo logInfo = log2logInfo.createLogInfo(log);
 		VisualMinerWrapper miner = inputs.get(IvMObject.selected_miner);
 		double noise_threshold = inputs.get(IvMObject.selected_noise_threshold);
 

@@ -32,7 +32,6 @@ public class GoalDrivenPlugin {
 	@Visualizer
 	@UITopiaVariant(affiliation = "RWTH Aachen", author = "Hieu Le", email = "hieu.le@rwth-aachen.de")
 	public JComponent visualise(final PluginContext context, final GoalDrivenLauncher launcher, ProMCanceller canceller) throws UnknownTreeNodeException {
-		System.out.println("Visualise Inductive vm");
 		//set launcher non-favourite
 		if (context instanceof UIPluginContext) {
 			((UIPluginContext) context).getGlobalContext().getResourceManager().getResourceForInstance(launcher)
@@ -49,10 +48,8 @@ public class GoalDrivenPlugin {
 		if (launcher.getConfiguration() != null) {
 			configuration = launcher.getConfiguration();
 		} else {
-			System.out.println("Initiate config default");
 			configuration = new GoalDrivenConfigurationDefault(canceller, context.getExecutor());
 		}
-		System.out.println("Initiated config default");
 
 		GoalDrivenController controller = new GoalDrivenController(context, configuration, log,
 				canceller);
@@ -62,7 +59,6 @@ public class GoalDrivenPlugin {
 			//pre-set the miner if necessary
 			if (launcher.getMiner() != null) {
 				controller.setObject(IvMObject.selected_miner, launcher.getMiner());
-				configuration.getPanel().getMinerSelection().setSelectedItem(launcher.getMiner());
 			}
 		} else if (launcher.preMinedTree != null) {
 			//launch with pre-mined tree

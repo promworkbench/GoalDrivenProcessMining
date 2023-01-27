@@ -12,10 +12,10 @@ import javax.swing.JOptionPane;
 import org.deckfour.xes.model.XEvent;
 import org.processmining.cohortanalysis.cohort.Cohort;
 import org.processmining.framework.plugin.ProMCanceller;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl012UniqueValues;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl01GatherAttributes;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl02SortEvents;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl03MakeLog;
+import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl0456MakeHighLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl04FilterLogOnActivities;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl055MineEdges;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl05Mine;
@@ -541,7 +541,7 @@ public class GoalDrivenConfigurationDefault extends GoalDrivenConfigurationAbstr
 				state, canceller, executor, this, panel);
 
 		chain.register(new Cl01GatherAttributes());
-		chain.register(new Cl012UniqueValues());
+//		chain.register(new Cl012UniqueValues());
 
 		sortEvents = new Cl02SortEvents<>();
 		chain.register(sortEvents);
@@ -564,6 +564,7 @@ public class GoalDrivenConfigurationDefault extends GoalDrivenConfigurationAbstr
 
 		chain.register(new Cl03MakeLog<GoalDrivenConfiguration>());
 		chain.register(new Cl04FilterLogOnActivities());
+		chain.register(new Cl0456MakeHighLevelLog());
 		chain.register(new Cl05Mine<GoalDrivenConfiguration>());
 		chain.register(new Cl06LayoutModel<GoalDrivenConfiguration>());
 		chain.register(new Cl07Align());

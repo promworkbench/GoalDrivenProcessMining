@@ -47,7 +47,6 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 	public IvMObjectValues execute(GoalDrivenConfiguration configuration, IvMObjectValues inputs,
 			IvMCanceller canceller) throws Exception {
 		XLog log = inputs.get(IvMObject.input_log);
-		System.out.println("execute cl01 gather ");
 		IvMVirtualAttributeFactory virtualAttributes = configuration.getVirtualAttributes();
 		AttributesInfo info = new AttributesInfoImpl(log, virtualAttributes);
 		Collection<Attribute> attributes = info.getEventAttributes();
@@ -61,11 +60,6 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 				true);
 		AttributeClassifier[] attributeClassifiers = p.getA();
 		AttributeClassifier[] firstClassifier = new AttributeClassifier[] { p.getB() };
-		System.out.println("c01 gather");
-		for (AttributeClassifier at: firstClassifier) {
-			System.out.println(at.toString());
-			System.out.println(at.toString());
-		}
 
 		return new IvMObjectValues().//
 				s(IvMObject.attributes_info, info).//

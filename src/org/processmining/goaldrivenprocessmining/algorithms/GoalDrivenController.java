@@ -1,9 +1,26 @@
 package org.processmining.goaldrivenprocessmining.algorithms;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
+
+import javax.swing.Box;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
@@ -11,6 +28,10 @@ import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.MapValueGroupObject;
+import org.processmining.goaldrivenprocessmining.panelHelper.ColorRenderer;
+import org.processmining.goaldrivenprocessmining.panelHelper.GroupActConfig;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.InductiveMiner.mining.logs.IMTrace;
 import org.processmining.plugins.graphviz.dot.Dot;
@@ -34,6 +55,7 @@ import org.processmining.plugins.inductiveVisualMiner.mode.Mode;
 import org.processmining.plugins.inductiveVisualMiner.mode.ModePaths;
 import org.processmining.plugins.inductiveVisualMiner.traceview.TraceViewEventColourMap;
 import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.VisualMinerWrapper;
+import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.DfgMiner;
 import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.Miner;
 import org.processmining.plugins.inductiveVisualMiner.visualisation.LocalDotEdge;
 import org.processmining.plugins.inductiveVisualMiner.visualisation.LocalDotNode;
@@ -44,6 +66,8 @@ import com.google.gwt.dev.util.collect.HashMap;
 import com.kitfox.svg.SVGDiagram;
 
 import gnu.trove.set.hash.THashSet;
+import info.clearthought.layout.TableLayout;
+import info.clearthought.layout.TableLayoutConstants;
 
 public class GoalDrivenController {
 	private final GoalDrivenPanel panel;
@@ -51,8 +75,9 @@ public class GoalDrivenController {
 	private final DataChain<GoalDrivenConfiguration> chain;
 	private final PluginContext context;
 	private final UserStatus userStatus;
-	public GoalDrivenController(final PluginContext context,
-			final GoalDrivenConfiguration configuration, final XLog log, final ProMCanceller canceller) {
+
+	public GoalDrivenController(final PluginContext context, final GoalDrivenConfiguration configuration,
+			final XLog log, final ProMCanceller canceller) {
 
 		this.configuration = configuration;
 		this.panel = configuration.getPanel();
@@ -71,41 +96,42 @@ public class GoalDrivenController {
 		});
 
 		//set up exception handling
-//		chain.setOnException(new OnException() {
-//			public void onException(Exception e) {
-//				setStatus("- error - aborted -", 0);
-//			}
-//		});
-//
-//		//set up status handling
-//		chain.setOnStatus(new OnStatus<GoalDrivenConfiguration>() {
-//			public void startComputation(final DataChainLinkComputation<GoalDrivenConfiguration> chainLink) {
-//				SwingUtilities.invokeLater(new Runnable() {
-//					public void run() {
-//						setStatus(chainLink.getStatusBusyMessage(), chainLink.hashCode());
-//					}
-//				});
-//			}
-//
-//			public void endComputation(final DataChainLinkComputation<GoalDrivenConfiguration> chainLink) {
-//				SwingUtilities.invokeLater(new Runnable() {
-//					public void run() {
-//						setStatus(null, chainLink.hashCode());
-//					}
-//				});
-//			}
-//		});
+		//		chain.setOnException(new OnException() {
+		//			public void onException(Exception e) {
+		//				setStatus("- error - aborted -", 0);
+		//			}
+		//		});
+		//
+		//		//set up status handling
+		//		chain.setOnStatus(new OnStatus<GoalDrivenConfiguration>() {
+		//			public void startComputation(final DataChainLinkComputation<GoalDrivenConfiguration> chainLink) {
+		//				SwingUtilities.invokeLater(new Runnable() {
+		//					public void run() {
+		//						setStatus(chainLink.getStatusBusyMessage(), chainLink.hashCode());
+		//					}
+		//				});
+		//			}
+		//
+		//			public void endComputation(final DataChainLinkComputation<GoalDrivenConfiguration> chainLink) {
+		//				SwingUtilities.invokeLater(new Runnable() {
+		//					public void run() {
+		//						setStatus(null, chainLink.hashCode());
+		//					}
+		//				});
+		//			}
+		//		});
 
 		//start the chain
 		chain.setFixedObject(IvMObject.input_log, log);
 	}
-	
-	
+
 	protected void initGui(final ProMCanceller canceller, final GoalDrivenConfiguration configuration) {
 
 		initGuiClassifiers1();
 
 		initGuiUniqueValue();
+
+		initGuiControlBar();
 
 		initGuiMiner();
 
@@ -132,12 +158,12 @@ public class GoalDrivenController {
 	protected void initGuiMiner() {
 		//miner
 		setObject(IvMObject.selected_miner, new Miner());
-		panel.getMinerSelection().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				chain.setObject(IvMObject.selected_miner,
-						(VisualMinerWrapper) panel.getMinerSelection().getSelectedItem());
-			}
-		});
+		chain.setObject(IvMObject.selected_miner, (VisualMinerWrapper) new DfgMiner());
+		//		panel.getMinerSelection().addActionListener(new ActionListener() {
+		//			public void actionPerformed(ActionEvent arg0) {
+		//				
+		//			}
+		//		});
 
 		//noise threshold
 		setObject(IvMObject.selected_noise_threshold, 1.0);
@@ -191,13 +217,18 @@ public class GoalDrivenController {
 			}
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
-				System.out.println("update graph gui");
 				if (inputs.has(IvMObject.graph_svg_aligned) && inputs.has(IvMObject.graph_dot_aligned)) {
+					System.out.println("--- in");
 					Dot dot = inputs.get(IvMObject.graph_dot_aligned);
+					File t = new File("C:\\D\\data\\abc");
+					dot.exportToFile(t);
 					SVGDiagram svg = inputs.get(IvMObject.graph_svg_aligned);
 					panel.getGraph().changeDot(dot, svg, true);
 				} else {
+					System.out.println("--- not in");
 					Dot dot = inputs.get(IvMObject.graph_dot);
+					File t = new File("C:\\D\\data\\abc");
+					dot.exportToFile(t);
 					SVGDiagram svg = inputs.get(IvMObject.graph_svg);
 					panel.getGraph().changeDot(dot, svg, true);
 				}
@@ -213,6 +244,7 @@ public class GoalDrivenController {
 		});
 
 		//mode switch
+		System.out.println("select visualisation mode");
 		setObject(IvMObject.selected_visualisation_mode, new ModePaths());
 
 		//register the requirements of the modes
@@ -261,12 +293,9 @@ public class GoalDrivenController {
 					String sourceNode = e.getSource().getLabel().split("&")[0];
 					String targetNode = e.getTarget().getLabel().split("&")[0];
 					selection.select(dotElement);
-					System.out.println("graph listener");
-					AttributeClassifier[] unique_values = panel.getUniqueValues().getSelectedClassifier();
 					HashMap<String, Object> passValues = new HashMap<String, Object>();
 					passValues.put("source", sourceNode);
 					passValues.put("target", targetNode);
-					passValues.put("unique_values", unique_values);					
 					chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
 
 				}
@@ -296,18 +325,19 @@ public class GoalDrivenController {
 			}
 
 			public IvMObject<?>[] createOptionalObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.graph_dot_aligned_edge, GoalDrivenObject.graph_svg_aligned_edge };
+				return new IvMObject<?>[] { GoalDrivenObject.graph_dot_aligned_edge,
+						GoalDrivenObject.graph_svg_aligned_edge };
 			}
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
-				System.out.println("update graph gui edge");
-				if (inputs.has(GoalDrivenObject.graph_svg_aligned_edge) && inputs.has(GoalDrivenObject.graph_dot_aligned_edge)) {
-					System.out.println("yes");
+				if (inputs.has(GoalDrivenObject.graph_svg_aligned_edge)
+						&& inputs.has(GoalDrivenObject.graph_dot_aligned_edge)) {
 					Dot dot = inputs.get(GoalDrivenObject.graph_dot_aligned_edge);
+					File t = new File("C:\\D\\data\\abc3");
+					dot.exportToFile(t);
 					SVGDiagram svg = inputs.get(GoalDrivenObject.graph_svg_aligned_edge);
 					panel.getGraph2().changeDot(dot, svg, true);
 				} else {
-					System.out.println("no");
 					Dot dot = inputs.get(GoalDrivenObject.graph_dot_edge);
 					SVGDiagram svg = inputs.get(GoalDrivenObject.graph_svg_edge);
 					panel.getGraph2().changeDot(dot, svg, true);
@@ -356,8 +386,8 @@ public class GoalDrivenController {
 		//update data on classifiers
 		panel.getClassifiers1().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("init gui classifier 1 - action listener");
-				chain.setObject(GoalDrivenObject.selected_classifier1, panel.getClassifiers1().getSelectedClassifier()[0]);
+				chain.setObject(GoalDrivenObject.selected_classifier1,
+						panel.getClassifiers1().getSelectedClassifier()[0]);
 			}
 		});
 
@@ -383,9 +413,290 @@ public class GoalDrivenController {
 		});
 	}
 
+	protected void initGuiControlBar() {
+		// act button
+		panel.getControlBar().getActButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setVisible(true);
+				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "3");
+
+			}
+		});
+		// filter button
+		panel.getControlBar().getFilterButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setVisible(true);
+				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "1");
+
+			}
+		});
+		// expand button
+		panel.getControlBar().getExpandButton().addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				String label = panel.getControlBar().getExpandButton().getText().split(" ")[0];
+				Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+				double sWidth = screenSize.getWidth();
+				double size[][] = { { 0.5 * sWidth, 0.5 * sWidth },
+						{ TableLayoutConstants.MINIMUM, TableLayoutConstants.FILL } };
+				panel.setLayout(new TableLayout(size));
+				panel.add(panel.getControlBar(), "0,0,1,0");
+				panel.add(panel.getLayeredPanel(), "0,1,1,1");
+				if (label.equals("Collapse")) {
+					double sizeContent[][] = { { 0.5 * sWidth, 0.5 * sWidth }, { TableLayoutConstants.FILL } };
+					panel.getContentPanel().setLayout(new TableLayout(sizeContent));
+					panel.getContentPanel().add(panel.getGraph(), "0,0");
+					panel.getContentPanel().add(panel.getGraph2(), "1,0");
+					panel.getControlBar().getExpandButton().setText("Expand stat window");
+				} else {
+					double sizeContent[][] = { { 0.37 * sWidth, 0.37 * sWidth, 0.26 * sWidth },
+							{ TableLayoutConstants.FILL } };
+					panel.getContentPanel().setLayout(new TableLayout(sizeContent));
+					panel.getContentPanel().add(panel.getGraph(), "0,0");
+					panel.getContentPanel().add(panel.getGraph2(), "1,0");
+					panel.getContentPanel().add(panel.getSidePanel(), "2,0");
+					panel.getControlBar().getExpandButton().setText("Collapse stat window");
+				}
+
+				panel.revalidate();
+				panel.repaint();
+
+			}
+
+		});
+		// act config button
+		panel.getControlBar().getActConfigButton().addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setVisible(true);
+				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "2");
+
+			}
+
+		});
+		// act done button		
+		panel.getConfigCards().getActDisplayPanel().getActDoneButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+
+				AttributeClassifier[] attInclude = new AttributeClassifier[panel.getConfigCards().getActDisplayPanel()
+						.getIncludeTable().getModel().getRowCount()];
+				for (int i = 0; i < attInclude.length; i++) {
+					AttributeClassifier att = (AttributeClassifier) panel.getConfigCards().getActDisplayPanel()
+							.getIncludeTable().getValueAt(i, 0);
+					attInclude[i] = att;
+					if (!panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().keySet().contains(att)) {
+						panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().put(att, "include");
+					} else {
+						panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().replace(att, "include");
+					}
+
+				}
+				AttributeClassifier[] attExclude = new AttributeClassifier[panel.getConfigCards().getActDisplayPanel()
+						.getExcludeTable().getModel().getRowCount()];
+				for (int i = 0; i < attExclude.length; i++) {
+					AttributeClassifier att = (AttributeClassifier) panel.getConfigCards().getActDisplayPanel()
+							.getExcludeTable().getValueAt(i, 0);
+					attExclude[i] = att;
+					if (!panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().keySet().contains(att)) {
+						panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().put(att, "exclude");
+					} else {
+						panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().replace(att, "exclude");
+					}
+				}
+				panel.getConfigCards().setVisible(false);
+				chain.setObject(GoalDrivenObject.selected_unique_values, attInclude);
+				chain.setObject(GoalDrivenObject.unselected_unique_values, attExclude);
+
+			}
+		});
+		// act cancel button
+		panel.getConfigCards().getActDisplayPanel().getActCancelButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				panel.getConfigCards().setVisible(false);
+			}
+		});
+		// filter done button
+		// filter cancel button
+		panel.getConfigCards().getFilterConfigPanel().getFilterCancelButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				panel.getConfigCards().setVisible(false);
+			}
+		});
+		// filter act slider
+		panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (!panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().getSlider()
+						.getValueIsAdjusting()) {
+					chain.setObject(IvMObject.selected_activities_threshold,
+							panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().getValue());
+				}
+			}
+		});
+		// act config new group button
+		panel.getConfigCards().getActConfigPanel().getActConfigNewGroupButton().addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				JTextField groupNameField = new JTextField(5);
+				JTextField yField = new JTextField(5);
+				Color[] options = { Color.RED, Color.GREEN, Color.CYAN, Color.DARK_GRAY, Color.ORANGE, Color.MAGENTA };
+				JComboBox cmb = new JComboBox<>(options);
+				cmb.setRenderer(new ColorRenderer());
+				final JPanel p = new JPanel();
+				p.setOpaque(true);
+				p.setPreferredSize(new Dimension(200, 100));
+				ActionListener l = new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						Color cd = (Color) cmb.getSelectedItem();
+						if (cd != null) {
+							p.setBackground(cd);
+						}
+					}
+				};
+				cmb.addActionListener(l);
+				l.actionPerformed(null); // update current background
+
+				JPanel myPanel = new JPanel();
+				myPanel.add(new JLabel("Group name:"));
+				myPanel.add(groupNameField);
+				myPanel.add(Box.createHorizontalStrut(15)); // a spacer
+				myPanel.add(cmb);
+
+				int result = JOptionPane.showConfirmDialog(null, myPanel, "Please enter group name and choose a color",
+						JOptionPane.OK_CANCEL_OPTION);
+				if (result == JOptionPane.OK_OPTION) {
+					Color groupColor = (Color) cmb.getSelectedItem();
+					String groupName = groupNameField.getText();
+					GroupActConfig newGroup = new GroupActConfig(
+							panel.getConfigCards().getActConfigPanel().getAllGroupPane().getBounds().width, groupName,
+							groupColor, 0);
+					panel.getConfigCards().getActConfigPanel().addNextGroup(newGroup);
+					panel.revalidate();
+					panel.repaint();
+					GroupActObject[] allGroupAct = panel.getConfigCards().getActConfigPanel().getAllGroupAct();
+					chain.setObject(GoalDrivenObject.all_group_act, allGroupAct);
+
+				}
+
+			}
+
+		});
+		// update group act
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Group act to gui";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.all_group_act };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				GroupActObject[] allGroupAct = inputs.get(GoalDrivenObject.all_group_act);
+				panel.getConfigCards().getActConfigPanel().getGroupComboBox().removeAllItems();
+				for (GroupActObject obj : allGroupAct) {
+					panel.getConfigCards().getActConfigPanel().getGroupComboBox().addItem(obj);
+				}
+				//				System.out.println(((GroupActObject) panel.getConfigCards().getActConfigPanel().getActConfigTable()
+				//						.getValueAt(0, 1)).getGroupName());
+				//				System.out.println(panel.getConfigCards().getActConfigPanel().getActConfigTable()
+				//						.getValueAt(0, 1).getClass());
+				panel.revalidate();
+				panel.repaint();
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+		// update all unique values
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Unique values to act config table";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.all_unique_values };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				AttributeClassifier[] allGroupAct = inputs.get(GoalDrivenObject.all_unique_values);
+				List<AttributeClassifier> currAtt = new ArrayList<AttributeClassifier>();
+				MapValueGroupObject currMapValueGroup = panel.getConfigCards().getActConfigPanel().getMapActGroup();
+				DefaultTableModel actConfigTable = (DefaultTableModel) panel.getConfigCards().getActConfigPanel()
+						.getActConfigTable().getModel();
+				for (int i = 0; i < actConfigTable.getRowCount(); i++) {
+					AttributeClassifier att = (AttributeClassifier) actConfigTable.getValueAt(i, 0);
+					currAtt.add(att);
+					GroupActObject group = (GroupActObject) actConfigTable.getValueAt(i, 1);
+					if (!currMapValueGroup.getMapValueGroup().containsKey(att)) {
+						panel.getConfigCards().getActConfigPanel().getMapActGroup().put(att, group);
+					}
+					if (!Arrays.asList(allGroupAct).contains(att)) {
+						actConfigTable.removeRow(i);
+					}
+				}
+				if (currAtt.size() < allGroupAct.length) {
+					for (AttributeClassifier att : allGroupAct) {
+						if (!currAtt.contains(att)) {
+							if (currMapValueGroup.getMapValueGroup().containsKey(att)) {
+								GroupActObject g = currMapValueGroup.getMapValueGroup().get(att);
+								Object[] data = new Object[] { att, g };
+								actConfigTable.addRow(data);
+							} else {
+								Object[] data = new Object[] { att, new GroupActObject("", Color.WHITE) };
+								actConfigTable.addRow(data);
+							}
+						}
+					}
+				}
+				chain.setObject(GoalDrivenObject.map_value_group, currMapValueGroup);
+				panel.revalidate();
+				panel.repaint();
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+		// act config done button
+		panel.getConfigCards().getActConfigPanel().getActConfigDoneButton().addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				DefaultTableModel actConfigTable = (DefaultTableModel) panel.getConfigCards().getActConfigPanel()
+						.getActConfigTable().getModel();
+				MapValueGroupObject mapValueGroup = new MapValueGroupObject();
+				MapValueGroupObject currMapValueGroup = panel.getConfigCards().getActConfigPanel().getMapActGroup();
+				for (int i = 0; i < actConfigTable.getRowCount(); i++) {
+					AttributeClassifier att = (AttributeClassifier) actConfigTable.getValueAt(i, 0);
+					GroupActObject group = (GroupActObject) actConfigTable.getValueAt(i, 1);
+
+					mapValueGroup.put(att, group);
+					if (!currMapValueGroup.getMapValueGroup().containsKey(att)) {
+						panel.getConfigCards().getActConfigPanel().getMapActGroup().put(att, group);
+					} else {
+						currMapValueGroup.getMapValueGroup().replace(att, group);
+					}
+
+				}
+				for (AttributeClassifier a : mapValueGroup.getMapValueGroup().keySet()) {
+					System.out.println("!!");
+					System.out.println("--- " + a.toString());
+					System.out.println("--- " + mapValueGroup.getMapValueGroup().get(a).getGroupName());
+				}
+				chain.setObject(GoalDrivenObject.map_value_group, mapValueGroup);
+
+				panel.getConfigCards().setVisible(false);
+			}
+
+		});
+
+	}
+
 	protected void initGuiUniqueValue() {
 		//get the selected classifier to the gui
-		System.out.println("init gui unique value");
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
 
 			public String getName() {
@@ -393,12 +704,60 @@ public class GoalDrivenController {
 			}
 
 			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.unique_values_for_gui };
+				return new IvMObject<?>[] { GoalDrivenObject.all_unique_values };
 			}
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
-				AttributeClassifier[] selected_values = inputs.get(GoalDrivenObject.unique_values_for_gui);
-				panel.getUniqueValues().getMultiComboBox().setSelectedItems(selected_values);
+				AttributeClassifier[] allUniqueValues = inputs.get(GoalDrivenObject.all_unique_values);
+				List<AttributeClassifier> lAttInclude = new ArrayList<>();
+				List<AttributeClassifier> lAttExclude = new ArrayList<>();
+				TableModel includeModel = panel.getConfigCards().getActDisplayPanel().getIncludeTable().getModel();
+				for (int i = 0; i < includeModel.getRowCount(); i++) {
+					AttributeClassifier att = (AttributeClassifier) includeModel.getValueAt(i, 0);
+					if (Arrays.asList(allUniqueValues).contains(att)) {
+						lAttInclude.add((AttributeClassifier) includeModel.getValueAt(i, 0));
+					}
+				}
+				TableModel excludeModel = panel.getConfigCards().getActDisplayPanel().getExcludeTable().getModel();
+				for (int i = 0; i < excludeModel.getRowCount(); i++) {
+					AttributeClassifier att = (AttributeClassifier) excludeModel.getValueAt(i, 0);
+					if (Arrays.asList(allUniqueValues).contains(att)) {
+						lAttExclude.add((AttributeClassifier) excludeModel.getValueAt(i, 0));
+					}
+				}
+				for (int i = 0; i < allUniqueValues.length; i++) {
+					if (!lAttInclude.contains(allUniqueValues[i]) && !lAttExclude.contains(allUniqueValues[i])) {
+						if (panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().containsKey(allUniqueValues[i])) {
+							if (panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().get(allUniqueValues[i])
+									.equals("include")) {
+								lAttInclude.add(allUniqueValues[i]);
+							} else {
+								lAttExclude.add(allUniqueValues[i]);
+							}
+						} else {
+							panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().put(allUniqueValues[i], "include");
+							lAttInclude.add(allUniqueValues[i]);
+						}
+						
+
+					}
+				}
+				AttributeClassifier[] arrAttInclude = new AttributeClassifier[lAttInclude.size()];
+				for (int i = 0; i < arrAttInclude.length; i++) {
+					arrAttInclude[i] = lAttInclude.get(i);
+				}
+				AttributeClassifier[] arrAttExclude = new AttributeClassifier[lAttExclude.size()];
+				for (int i = 0; i < arrAttExclude.length; i++) {
+					arrAttExclude[i] = lAttExclude.get(i);
+				}
+
+				panel.getConfigCards().getActDisplayPanel().updateConfigTable(
+						panel.getConfigCards().getActDisplayPanel().getIncludeTable(), arrAttInclude, "Exclude");
+				panel.getConfigCards().getActDisplayPanel().updateConfigTable(
+						panel.getConfigCards().getActDisplayPanel().getExcludeTable(), arrAttExclude, "Include");
+
+				chain.setObject(GoalDrivenObject.selected_unique_values, arrAttInclude);
+				chain.setObject(GoalDrivenObject.unselected_unique_values, arrAttExclude);
 
 			}
 
@@ -407,34 +766,6 @@ public class GoalDrivenController {
 			}
 		});
 
-		//update data on classifiers
-		panel.getUniqueValues().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("init gui unique value - action listener");
-				chain.setObject(GoalDrivenObject.selected_unique_values, panel.getUniqueValues().getSelectedClassifier());
-			}
-		});
-
-		//update classifiers on data
-		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
-			public String getName() {
-				return "set unique values";
-			}
-
-			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.unique_values };
-			}
-
-			public void invalidate(GoalDrivenPanel panel) {
-				panel.getUniqueValues().setEnabled(false);
-			}
-
-			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
-				AttributeClassifier[] classifiers = inputs.get(GoalDrivenObject.unique_values);
-				panel.getUniqueValues().setEnabled(true);
-				panel.getUniqueValues().replaceClassifiers(classifiers);
-			}
-		});
 	}
 
 	protected void initGuiPreMiningFilters(IvMDecoratorI decorator) {
@@ -608,27 +939,25 @@ public class GoalDrivenController {
 	 * @param message
 	 * @param number
 	 */
-//	public void setStatus(String message, int number) {
-//		userStatus.setStatus(message, number);
-//		panel.getStatusLabel().setText(userStatus.getText());
-//		panel.getStatusLabel().repaint();
-//	}
+	//	public void setStatus(String message, int number) {
+	//		userStatus.setStatus(message, number);
+	//		panel.getStatusLabel().setText(userStatus.getText());
+	//		panel.getStatusLabel().repaint();
+	//	}
 	//
 
 	private <C> void updateObjectInGui(final IvMObject<C> object, final C value, final boolean fixed) {
 		if (object.equals(IvMObject.selected_miner)) {
-			panel.getMinerSelection().setSelectedItem(value);
 		} else if (object.equals(IvMObject.model) && fixed) {
 			//			panel.getActivitiesSlider().setVisible(false);
 			//			panel.getPathsSlider().setVisible(false);
 			panel.getPreMiningFiltersButton().setVisible(false);
-			panel.getMinerLabel().setVisible(false);
-			panel.getMinerSelection().setVisible(false);
 		} else if (object.equals(GoalDrivenObject.selected_classifier1) && fixed) {
 			//			panel.getEditModelButton().setVisible(false);
 			panel.getClassifierLabel().setVisible(false);
 			panel.getClassifiers1().setVisible(false);
-		} else if (object.equals(GoalDrivenObject.selected_classifier1) || object.equals(GoalDrivenObject.classifier_for_gui1)) {
+		} else if (object.equals(GoalDrivenObject.selected_classifier1)
+				|| object.equals(GoalDrivenObject.classifier_for_gui1)) {
 			panel.getClassifiers1().getMultiComboBox().setSelectedItem(((AttributeClassifier[]) value)[0]);
 		} else if (object.equals(IvMObject.selected_noise_threshold)) {
 			//			panel.getPathsSlider().setValue((Double) value);

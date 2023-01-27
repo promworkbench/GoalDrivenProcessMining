@@ -2,7 +2,10 @@ package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
 import org.deckfour.xes.info.XLogInfo;
 import org.deckfour.xes.model.XLog;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.MapValueGroupObject;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
+import org.processmining.plugins.InductiveMiner.mining.logs.IMLog;
 import org.processmining.plugins.graphviz.dot.Dot;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
 import org.processmining.plugins.inductiveVisualMiner.helperClasses.IvMModel;
@@ -29,11 +32,11 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	public static final IvMObject<XLogInfo> xlog_info_performance_edge = c("xlog info performance edge", XLogInfo.class);
 	public static final IvMObject<XLog> log_edge = c("log edge", XLog.class);
 	public static final IvMObject<AttributeClassifier[]> classifiers1 = c("classifiers", AttributeClassifier[].class);
+	
+	
 	public static final IvMObject<AttributeClassifier[]> unique_values = c("unique values",
 			AttributeClassifier[].class);
 	public static final IvMObject<AttributeClassifier[]> classifier_for_gui1 = c("classifier for gui 1",
-			AttributeClassifier[].class);
-	public static final IvMObject<AttributeClassifier[]> unique_values_for_gui = c("unique value for gui",
 			AttributeClassifier[].class);
 	public static final IvMObject<AttributeClassifier> selected_classifier1 = c("selected classifier1",
 			AttributeClassifier.class);
@@ -41,6 +44,15 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 			AttributeClassifier[].class);
 	public static final IvMObject<AttributeClassifier[]> unselected_unique_values = c("unselected unique values",
 			AttributeClassifier[].class);
+	
+	// im log in high level
+	public static final IvMObject<IMLog> im_log_high_level = c("IM log for high level", IMLog.class);
+	public static final IvMObject<IMLog> im_log_info_high_level = c("IM log info for high level", IMLog.class);
+	public static final IvMObject<AttributeClassifier[]> all_unique_values = c("all unique values", AttributeClassifier[].class);
+	
+	// act config 
+	public static final IvMObject<GroupActObject[]> all_group_act = c("IM log for high level", GroupActObject[].class);
+	public static final IvMObject<MapValueGroupObject> map_value_group = c("IM log for high level", MapValueGroupObject.class);
 	
 	
 	public GoalDrivenObject(String name, Class<C> clazz) {

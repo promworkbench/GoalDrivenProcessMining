@@ -42,8 +42,9 @@ public class Cl055MineEdges<C> extends DataChainLinkComputationAbstract<C> {
 
 	@Override
 	public IvMObject<?>[] createInputObjects() {
-		return new IvMObject<?>[] { GoalDrivenObject.selected_classifier1, IvMObject.input_log,
-				GoalDrivenObject.selected_source_target_node, IvMObject.selected_miner, IvMObject.selected_noise_threshold };
+		return new IvMObject<?>[] { GoalDrivenObject.selected_classifier1, IvMObject.imlog_activity_filtered,
+				GoalDrivenObject.selected_source_target_node, IvMObject.selected_miner,
+				IvMObject.selected_noise_threshold, GoalDrivenObject.unselected_unique_values };
 	}
 
 	@Override
@@ -54,16 +55,20 @@ public class Cl055MineEdges<C> extends DataChainLinkComputationAbstract<C> {
 
 	@Override
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
-		System.out.println("Get model edge");
-		XLog log = inputs.get(IvMObject.input_log);
+		XLog log = inputs.get(IvMObject.imlog_activity_filtered).toXLog();
+		System.out.println("--- cl055");
 
 		HashMap<String, Object> passValues = inputs.get(GoalDrivenObject.selected_source_target_node);
 		String source = (String) passValues.get("source");
 		String target = (String) passValues.get("target");
-		AttributeClassifier[] sValues = (AttributeClassifier[]) passValues.get("unique_values");
-		String[] selectedValues = new String[sValues.length];
-		for (int i = 0; i < sValues.length; i++) {
-			selectedValues[i] = sValues[i].toString();
+		AttributeClassifier[] uValues = inputs.get(GoalDrivenObject.unselected_unique_values);
+		for (AttributeClassifier att : uValues) {
+			System.out.println(att.toString());
+		}
+		
+		String[] unselectedValues = new String[uValues.length];
+		for (int i = 0; i < uValues.length; i++) {
+			unselectedValues[i] = uValues[i].toString();
 		}
 
 		String selectedAttribute = inputs.get(GoalDrivenObject.selected_classifier1).toString();
@@ -82,7 +87,7 @@ public class Cl055MineEdges<C> extends DataChainLinkComputationAbstract<C> {
 				} else {
 					if (value.equals(target)) {
 						newTr.add(ev);
-						newLog.add(newTr);						
+						newLog.add(newTr);
 						newTr = new XTraceImpl(aMap);
 						if (value.equals(source)) {
 							sourceFound = true;
@@ -91,7 +96,7 @@ public class Cl055MineEdges<C> extends DataChainLinkComputationAbstract<C> {
 							sourceFound = false;
 						}
 					} else {
-						if (!Arrays.asList(selectedValues).contains(value)) {
+						if (Arrays.asList(unselectedValues).contains(value)) {
 							newTr.add(ev);
 						}
 
@@ -108,14 +113,6 @@ public class Cl055MineEdges<C> extends DataChainLinkComputationAbstract<C> {
 			}
 
 		}
-		System.out.println("####");
-		for (XTrace tr : newLog) {
-			System.out.println("@@");
-			for (XEvent ev : tr) {
-				System.out.println(ev.getAttributes().get(selectedAttribute).toString());
-			}
-		}
-		System.out.println("####");
 		XEventPerformanceClassifier performanceClassifier = new XEventPerformanceClassifier(
 				AttributeClassifiers.constructClassifier(inputs.get(GoalDrivenObject.selected_classifier1)));
 		XLifeCycleClassifier lifeCycleClassifier = inputs.get(IvMObject.selected_miner).getLifeCycleClassifier();
@@ -123,7 +120,6 @@ public class Cl055MineEdges<C> extends DataChainLinkComputationAbstract<C> {
 		IMLog iLog = new IMLogImpl(newLog, performanceClassifier.getActivityClassifier(), lifeCycleClassifier);
 		IMLog2IMLogInfo miner1 = inputs.get(IvMObject.selected_miner).getLog2logInfo();
 		IMLogInfo imLogInfo = miner1.createLogInfo(iLog);
-		System.out.println(imLogInfo.getNumberOfTraces());
 		VisualMinerWrapper miner = inputs.get(IvMObject.selected_miner);
 		double noise_threshold = inputs.get(IvMObject.selected_noise_threshold);
 
@@ -133,8 +129,10 @@ public class Cl055MineEdges<C> extends DataChainLinkComputationAbstract<C> {
 		XLogInfo xLogInfo = XLogInfoFactory.createLogInfo(newLog, performanceClassifier.getActivityClassifier());
 		XLogInfo xLogInfoPerformance = XLogInfoFactory.createLogInfo(newLog, performanceClassifier);
 		return new IvMObjectValues().//
-				s(GoalDrivenObject.model_edge, model).s(GoalDrivenObject.log_edge, newLog).s(GoalDrivenObject.xlog_info_edge, xLogInfo)
-				.s(GoalDrivenObject.xlog_info_performance_edge, xLogInfoPerformance);
+				s(GoalDrivenObject.model_edge, model).
+				s(GoalDrivenObject.log_edge, newLog).
+				s(GoalDrivenObject.xlog_info_edge, xLogInfo).
+				s(GoalDrivenObject.xlog_info_performance_edge, xLogInfoPerformance);
 	}
 
 }
