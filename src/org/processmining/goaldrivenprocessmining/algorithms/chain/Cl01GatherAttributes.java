@@ -1,21 +1,17 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
+import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
-import org.processmining.plugins.InductiveMiner.AttributeClassifiers;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
-import org.processmining.plugins.InductiveMiner.Pair;
-import org.processmining.plugins.inductiveVisualMiner.attributes.IvMVirtualAttributeFactory;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
-import org.processmining.plugins.inductiveminer2.attributes.Attribute;
-import org.processmining.plugins.inductiveminer2.attributes.AttributesInfo;
-import org.processmining.plugins.inductiveminer2.attributes.AttributesInfoImpl;
 
 public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalDrivenConfiguration> {
 
@@ -31,41 +27,53 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 
 	@Override
 	public IvMObject<?>[] createInputObjects() {
-		return new IvMObject<?>[] { IvMObject.input_log };
+		return new IvMObject<?>[] { 
+			IvMObject.input_log
+			};
 	}
 
 	@Override
 	public IvMObject<?>[] createOutputObjects() {
 		return new IvMObject<?>[] { 
-			IvMObject.attributes_info, 
-			GoalDrivenObject.classifiers1, 
-			GoalDrivenObject.selected_classifier1,
-			GoalDrivenObject.classifier_for_gui1 };
+			GoalDrivenObject.full_xlog,
+			GoalDrivenObject.all_unique_values,
+			GoalDrivenObject.selected_unique_values,
+			GoalDrivenObject.unselected_unique_values
+			};
 	}
 
 	@Override
 	public IvMObjectValues execute(GoalDrivenConfiguration configuration, IvMObjectValues inputs,
 			IvMCanceller canceller) throws Exception {
+		System.out.println("Cl01 - gather att");
 		XLog log = inputs.get(IvMObject.input_log);
-		IvMVirtualAttributeFactory virtualAttributes = configuration.getVirtualAttributes();
-		AttributesInfo info = new AttributesInfoImpl(log, virtualAttributes);
-		Collection<Attribute> attributes = info.getEventAttributes();
-
-		String[] names = new String[attributes.size()];
-		Iterator<Attribute> it = attributes.iterator();
-		for (int i = 0; i < names.length; i++) {
-			names[i] = it.next().getName();
-		}
-		Pair<AttributeClassifier[], AttributeClassifier> p = AttributeClassifiers.getAttributeClassifiers(log, names,
-				true);
-		AttributeClassifier[] attributeClassifiers = p.getA();
-		AttributeClassifier[] firstClassifier = new AttributeClassifier[] { p.getB() };
-
+		AttributeClassifier classifier = new AttributeClassifier(log.getClassifiers().get(0));
 		return new IvMObjectValues().//
-				s(IvMObject.attributes_info, info).//
-				s(GoalDrivenObject.classifiers1, attributeClassifiers).//
-				s(GoalDrivenObject.selected_classifier1, firstClassifier[0]).//
-				s(GoalDrivenObject.classifier_for_gui1, firstClassifier);
+				s(GoalDrivenObject.full_xlog, log).
+				s(GoalDrivenObject.unselected_unique_values, new AttributeClassifier[0]).
+				s(GoalDrivenObject.selected_unique_values, getAllUniqueValues(log, classifier)).// 
+				s(GoalDrivenObject.all_unique_values, getAllUniqueValues(log, classifier));
+	}
+	
+	private AttributeClassifier[] getAllUniqueValues(XLog log, AttributeClassifier classifier) {
+		AttributeClassifier selected_classifier = classifier;
+		List<String> l = new ArrayList<String>();
+		for (int i = 0; i < log.size(); i++) {
+			XTrace tr = log.get(i);
+			for (int j = 0; j < tr.size(); j++) {
+				XEvent e = tr.get(j);
+				if (!l.contains(e.getAttributes().get(selected_classifier.toString()).toString())) {
+
+					l.add(e.getAttributes().get(selected_classifier.toString()).toString());
+				}
+			}
+		}
+		AttributeClassifier[] arrAtt = new AttributeClassifier[l.size()];
+		for (int i = 0; i < l.size(); i++) {
+			arrAtt[i] = new AttributeClassifier(l.get(i));
+
+		}
+		return arrAtt;
 	}
 
 }

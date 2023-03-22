@@ -8,7 +8,6 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers;
 import org.processmining.plugins.InductiveMiner.Quadruple;
-import org.processmining.plugins.inductiveVisualMiner.alignment.AlignmentPerformance;
 import org.processmining.plugins.inductiveVisualMiner.alignment.ImportAlignment;
 import org.processmining.plugins.inductiveVisualMiner.alignment.InductiveVisualMinerAlignment;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
@@ -20,7 +19,7 @@ import org.processmining.plugins.inductiveVisualMiner.ivmlog.IvMLogInfo;
 import org.processmining.plugins.inductiveVisualMiner.ivmlog.IvMLogNotFiltered;
 import org.processmining.plugins.inductiveVisualMiner.performance.XEventPerformanceClassifier;
 
-public class Cl077AlignEdge extends DataChainLinkComputationAbstract<GoalDrivenConfiguration> {
+public class _Cl07Align extends DataChainLinkComputationAbstract<GoalDrivenConfiguration> {
 
 	private static ConcurrentHashMap<Quadruple<IvMModel, XEventPerformanceClassifier, XLog, String>, SoftReference<IvMLogNotFiltered>> cache = new ConcurrentHashMap<>();
 
@@ -36,8 +35,8 @@ public class Cl077AlignEdge extends DataChainLinkComputationAbstract<GoalDrivenC
 
 	@Override
 	public IvMObject<?>[] createInputObjects() {
-		return new IvMObject<?>[] { GoalDrivenObject.model_edge, GoalDrivenObject.selected_classifier1, GoalDrivenObject.log_edge,
-				GoalDrivenObject.xlog_info_edge, GoalDrivenObject.xlog_info_performance_edge };
+		return new IvMObject<?>[] { IvMObject.model, GoalDrivenObject.selected_classifier1, IvMObject.sorted_log,
+				IvMObject.xlog_info, IvMObject.xlog_info_performance };
 	}
 
 	@Override
@@ -47,7 +46,7 @@ public class Cl077AlignEdge extends DataChainLinkComputationAbstract<GoalDrivenC
 
 	@Override
 	public IvMObject<?>[] createOutputObjects() {
-		return new IvMObject<?>[] { GoalDrivenObject.aligned_log_edge, GoalDrivenObject.aligned_log_info_edge };
+		return new IvMObject<?>[] { IvMObject.aligned_log, IvMObject.aligned_log_info };
 	}
 
 	@Override
@@ -64,12 +63,12 @@ public class Cl077AlignEdge extends DataChainLinkComputationAbstract<GoalDrivenC
 		//	protected Pair<IvMLogNotFiltered, IvMLogInfo> executeLink(
 		//			Septuple<IvMModel, XEventPerformanceClassifier, XLog, XEventClasses, XEventClasses, InductiveVisualMinerAlignment, InductiveVisualMinerConfiguration> input,
 		//			IvMCanceller canceller) throws Exception {
-		IvMModel model = inputs.get(GoalDrivenObject.model_edge);
+		IvMModel model = inputs.get(IvMObject.model);
 		XEventPerformanceClassifier performanceClassifier = new XEventPerformanceClassifier(
 				AttributeClassifiers.constructClassifier(inputs.get(GoalDrivenObject.selected_classifier1)));
-		XLog log = inputs.get(GoalDrivenObject.log_edge);
-		XEventClasses eventClasses = inputs.get(GoalDrivenObject.xlog_info_edge).getEventClasses();
-		XEventClasses eventClassesPerformance = inputs.get(GoalDrivenObject.xlog_info_performance_edge).getEventClasses();
+		XLog log = inputs.get(IvMObject.sorted_log);
+		XEventClasses eventClasses = inputs.get(IvMObject.xlog_info).getEventClasses();
+		XEventClasses eventClassesPerformance = inputs.get(IvMObject.xlog_info_performance).getEventClasses();
 
 		if (inputs.has(IvMObject.imported_alignment)) {
 			//see whether the alignment was pre-mined
@@ -79,44 +78,44 @@ public class Cl077AlignEdge extends DataChainLinkComputationAbstract<GoalDrivenC
 			if (ivmLog != null) {
 				System.out.println("Alignment imported");
 				return new IvMObjectValues().//
-						s(GoalDrivenObject.aligned_log_edge, ivmLog).//
-						s(GoalDrivenObject.aligned_log_info_edge, new IvMLogInfo(ivmLog, model));
+						s(IvMObject.aligned_log, ivmLog).//
+						s(IvMObject.aligned_log_info, new IvMLogInfo(ivmLog, model));
 			}
 			System.out.println("Alignment importing failed. Recomputing...");
 		}
 
 		//attempt to get the alignment from cache
-		Quadruple<IvMModel, XEventPerformanceClassifier, XLog, String> cacheKey = Quadruple.of(model,
-				performanceClassifier, log, configuration.getAlignmentComputer().getUniqueIdentifier());
-		SoftReference<IvMLogNotFiltered> fromCacheReference = cache.get(cacheKey);
-		if (fromCacheReference != null) {
-			IvMLogNotFiltered fromCache = fromCacheReference.get();
-			if (fromCache != null) {
-				System.out.println("obtain alignment from cache");
-				IvMLogInfo logInfo = new IvMLogInfo(fromCache, model);
+//		Quadruple<IvMModel, XEventPerformanceClassifier, XLog, String> cacheKey = Quadruple.of(model,
+//				performanceClassifier, log, configuration.getAlignmentComputer().getUniqueIdentifier());
+//		SoftReference<IvMLogNotFiltered> fromCacheReference = cache.get(cacheKey);
+//		if (fromCacheReference != null) {
+//			IvMLogNotFiltered fromCache = fromCacheReference.get();
+//			if (fromCache != null) {
+//				System.out.println("obtain alignment from cache");
+//				IvMLogInfo logInfo = new IvMLogInfo(fromCache, model);
+//
+//				return new IvMObjectValues().//
+//						s(IvMObject.aligned_log, fromCache).//
+//						s(IvMObject.aligned_log_info, logInfo);
+//			}
+//		}
 
-				return new IvMObjectValues().//
-						s(GoalDrivenObject.aligned_log_edge, fromCache).//
-						s(GoalDrivenObject.aligned_log_info_edge, logInfo);
-			}
-		}
-
-		IvMLogNotFiltered aLog = AlignmentPerformance.align(configuration.getAlignmentComputer(), model,
-				performanceClassifier, log, eventClasses, eventClassesPerformance, canceller,
-				configuration.getDecorator());
-		if (aLog == null && !canceller.isCancelled()) {
-			throw new Exception("alignment failed");
-		}
-		if (canceller.isCancelled()) {
-			return null;
-		}
-		IvMLogInfo logInfo = new IvMLogInfo(aLog, model);
-
-		//cache the alignment
-		cache.put(cacheKey, new SoftReference<IvMLogNotFiltered>(aLog));
+//		IvMLogNotFiltered aLog = AlignmentPerformance.align(configuration.getAlignmentComputer(), model,
+//				performanceClassifier, log, eventClasses, eventClassesPerformance, canceller,
+//				configuration.getDecorator());
+//		if (aLog == null && !canceller.isCancelled()) {
+//			throw new Exception("alignment failed");
+//		}
+//		if (canceller.isCancelled()) {
+//			return null;
+//		}
+//		IvMLogInfo logInfo = new IvMLogInfo(aLog, model);
+//
+//		//cache the alignment
+//		cache.put(cacheKey, new SoftReference<IvMLogNotFiltered>(aLog));
 
 		return new IvMObjectValues().//
-				s(GoalDrivenObject.aligned_log_edge, aLog).//
-				s(GoalDrivenObject.aligned_log_info_edge, logInfo);
+				s(IvMObject.aligned_log, null).//
+				s(IvMObject.aligned_log_info, null);
 	}
 }

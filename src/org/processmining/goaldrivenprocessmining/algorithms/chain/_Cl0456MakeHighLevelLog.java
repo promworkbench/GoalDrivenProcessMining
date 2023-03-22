@@ -21,7 +21,7 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 import org.processmining.plugins.inductiveVisualMiner.performance.XEventPerformanceClassifier;
 
-public class Cl0456MakeHighLevelLog extends DataChainLinkComputationAbstract {
+public class _Cl0456MakeHighLevelLog extends DataChainLinkComputationAbstract {
 
 	public String getStatusBusyMessage() {
 		// TODO Auto-generated method stub
@@ -42,7 +42,7 @@ public class Cl0456MakeHighLevelLog extends DataChainLinkComputationAbstract {
 
 	public IvMObject<?>[] createOutputObjects() {
 		// TODO Auto-generated method stub
-		return new IvMObject<?>[] { GoalDrivenObject.im_log_high_level };
+		return new IvMObject<?>[] {  };
 	}
 
 	public IvMObjectValues execute(Object configuration, IvMObjectValues inputs, IvMCanceller canceller)
@@ -50,6 +50,7 @@ public class Cl0456MakeHighLevelLog extends DataChainLinkComputationAbstract {
 		System.out.println("--- Cl0456");
 		XLog log = inputs.get(IvMObject.imlog_activity_filtered).toXLog();
 		String selectedAttribute = inputs.get(GoalDrivenObject.selected_classifier1).toString();
+		/*********/
 		AttributeClassifier[] sValues = inputs.get(GoalDrivenObject.selected_unique_values);
 		String[] selectedValues = new String[sValues.length];
 		for (int i = 0; i < sValues.length; i++) {
@@ -81,7 +82,7 @@ public class Cl0456MakeHighLevelLog extends DataChainLinkComputationAbstract {
 		XLogInfo xLogInfoPerformance = XLogInfoFactory.createLogInfo(log, performanceClassifier);
 
 		return new IvMObjectValues().//
-				s(GoalDrivenObject.im_log_high_level, imLog).//
+//				s(GoalDrivenObject.im_log_high_level, imLog).//
 				s(IvMObject.xlog_info, xLogInfo).//
 				s(IvMObject.xlog_info_performance, xLogInfoPerformance);
 	}

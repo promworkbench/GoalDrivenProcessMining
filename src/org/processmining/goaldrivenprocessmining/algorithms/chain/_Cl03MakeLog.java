@@ -15,7 +15,7 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 import org.processmining.plugins.inductiveVisualMiner.performance.XEventPerformanceClassifier;
 
-public class Cl03MakeLog<C> extends DataChainLinkComputationAbstract<C> {
+public class _Cl03MakeLog<C> extends DataChainLinkComputationAbstract<C> {
 
 	public String getName() {
 		return "make log";
@@ -36,47 +36,6 @@ public class Cl03MakeLog<C> extends DataChainLinkComputationAbstract<C> {
 	}
 
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
-//		System.out.println("Get log");
-//		XLog log = inputs.get(IvMObject.sorted_log);
-//		String selectedAttribute = inputs.get(GoalDrivenObject.selected_classifier1).toString();
-//		AttributeClassifier[] sValues = inputs.get(GoalDrivenObject.selected_unique_values);
-//		String[] selectedValues = new String[sValues.length];
-//		for (int i = 0; i < sValues.length; i++) {
-//			selectedValues[i] = sValues[i].toString();
-//		}
-//		
-//		XAttributeMap aMap = log.getAttributes();
-//		XLogImpl newLog = new XLogImpl(aMap);
-//		for (XTrace tr: log) {
-//			XTraceImpl newTr = new XTraceImpl(aMap);
-//			for (XEvent ev: tr) {				
-//				String value = ev.getAttributes().get(selectedAttribute).toString();
-//				if (Arrays.asList(selectedValues).contains(value)) {
-//					newTr.add(ev);
-//				}
-//			}
-//			if (!newTr.isEmpty()) {
-//				newLog.add(newTr);
-//			}
-//			
-//		}
-//		
-//		
-//		XEventPerformanceClassifier performanceClassifier = new XEventPerformanceClassifier(
-//				AttributeClassifiers.constructClassifier(inputs.get(GoalDrivenObject.selected_classifier1)));
-//		IMLog2IMLogInfo miner = inputs.get(IvMObject.selected_miner).getLog2logInfo();
-//		XLifeCycleClassifier lifeCycleClassifier = inputs.get(IvMObject.selected_miner).getLifeCycleClassifier();
-//
-//		IMLog imLog = new IMLogImpl(newLog, performanceClassifier.getActivityClassifier(), lifeCycleClassifier);
-//		IMLogInfo imLogInfo = miner.createLogInfo(imLog);
-//		XLogInfo xLogInfo = XLogInfoFactory.createLogInfo(log, performanceClassifier.getActivityClassifier());
-//		XLogInfo xLogInfoPerformance = XLogInfoFactory.createLogInfo(log, performanceClassifier);
-//
-//		return new IvMObjectValues().//
-//				s(IvMObject.imlog, imLog).//
-//				s(IvMObject.imlog_info, imLogInfo).//
-//				s(IvMObject.xlog_info, xLogInfo).//
-//				s(IvMObject.xlog_info_performance, xLogInfoPerformance);
 		XLog log = inputs.get(IvMObject.sorted_log);
 		XEventPerformanceClassifier performanceClassifier = new XEventPerformanceClassifier(
 				AttributeClassifiers.constructClassifier(inputs.get(GoalDrivenObject.selected_classifier1)));

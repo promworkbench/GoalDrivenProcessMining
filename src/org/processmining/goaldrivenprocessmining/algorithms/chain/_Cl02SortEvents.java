@@ -15,7 +15,7 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 import org.processmining.plugins.inductiveVisualMiner.helperClasses.ResourceTimeUtils;
 import org.processmining.plugins.inductiveVisualMiner.plugins.SortEventsPlugin.EventsComparator;
 
-public class Cl02SortEvents<C> extends DataChainLinkComputationAbstract<C> {
+public class _Cl02SortEvents<C> extends DataChainLinkComputationAbstract<C> {
 
 	private Function<Object, Boolean> onIllogicalTimeStamps;
 

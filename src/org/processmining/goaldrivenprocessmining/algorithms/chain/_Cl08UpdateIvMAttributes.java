@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.plugins.inductiveVisualMiner.attributes.IvMAttributesInfo;
-import org.processmining.plugins.inductiveVisualMiner.attributes.IvMVirtualAttributeFactory;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
@@ -24,7 +23,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
  * @author sander
  *
  */
-public class Cl08UpdateIvMAttributes extends DataChainLinkComputationAbstract<GoalDrivenConfiguration> {
+public class _Cl08UpdateIvMAttributes extends DataChainLinkComputationAbstract<GoalDrivenConfiguration> {
 
 	public String getName() {
 		return "update IvM attributes";
@@ -46,7 +45,7 @@ public class Cl08UpdateIvMAttributes extends DataChainLinkComputationAbstract<Go
 			IvMCanceller canceller) throws Exception {
 		IvMLogNotFiltered aLog = inputs.get(IvMObject.aligned_log);
 		AttributesInfo attributesInfo = inputs.get(IvMObject.attributes_info);
-		IvMVirtualAttributeFactory virtualAttributes = configuration.getVirtualAttributes();
+//		IvMVirtualAttributeFactory virtualAttributes = configuration.getVirtualAttributes();
 
 		ExecutorService executor = Executors.newFixedThreadPool(
 				Math.max(Runtime.getRuntime().availableProcessors() - 1, 1),
@@ -54,16 +53,16 @@ public class Cl08UpdateIvMAttributes extends DataChainLinkComputationAbstract<Go
 		IvMAttributesInfo result;
 		IvMAttributesInfo resultMerged;
 		try {
-			result = new IvMAttributesInfo(aLog, attributesInfo, virtualAttributes, executor);
+//			result = new IvMAttributesInfo(aLog, attributesInfo, virtualAttributes, executor);
 			executor.shutdown();
 			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-			resultMerged = new IvMAttributesInfo(attributesInfo, result);
+//			resultMerged = new IvMAttributesInfo(attributesInfo, result);
 		} finally {
 			executor.shutdownNow();
 		}
 
 		return new IvMObjectValues().//
-				s(IvMObject.ivm_attributes_info, result).//
-				s(IvMObject.ivm_attributes_info_merged, resultMerged);
+				s(IvMObject.ivm_attributes_info, null).//
+				s(IvMObject.ivm_attributes_info_merged, null);
 	}
 }

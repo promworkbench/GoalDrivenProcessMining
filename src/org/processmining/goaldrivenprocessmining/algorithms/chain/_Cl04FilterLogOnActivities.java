@@ -10,7 +10,7 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
-import org.processmining.goaldrivenprocessmining.objectHelper.MapValueGroupObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.InductiveMiner.dfgOnly.log2logInfo.IMLog2IMLogInfo;
 import org.processmining.plugins.InductiveMiner.mining.IMLogInfo;
@@ -23,7 +23,7 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 import org.processmining.plugins.inductiveVisualMiner.ivmfilter.tree.IvMFilterTree;
 import org.processmining.plugins.inductiveVisualMiner.logFiltering.FilterLeastOccurringActivities;
 
-public class Cl04FilterLogOnActivities extends DataChainLinkComputationAbstract<GoalDrivenConfiguration> {
+public class _Cl04FilterLogOnActivities extends DataChainLinkComputationAbstract<GoalDrivenConfiguration> {
 
 	public String getName() {
 		return "filter log";
@@ -42,7 +42,7 @@ public class Cl04FilterLogOnActivities extends DataChainLinkComputationAbstract<
 	public IvMObject<?>[] createOutputObjects() {
 		return new IvMObject<?>[] { IvMObject.imlog_activity_filtered, IvMObject.imlog_info_activity_filtered,
 				IvMObject.filtered_activities, GoalDrivenObject.all_unique_values,
-				GoalDrivenObject.selected_unique_values, GoalDrivenObject.unselected_unique_values, GoalDrivenObject.map_value_group };
+				GoalDrivenObject.selected_unique_values, GoalDrivenObject.unselected_unique_values, GoalDrivenObject.map_activity_category };
 	}
 
 	public IvMObjectValues execute(GoalDrivenConfiguration configuration, IvMObjectValues inputs,
@@ -80,7 +80,7 @@ public class Cl04FilterLogOnActivities extends DataChainLinkComputationAbstract<
 			IMLogInfo filteredLogInfo = log2logInfo.createLogInfo(newLog);
 
 			return new IvMObjectValues().// 
-					s(GoalDrivenObject.map_value_group, new MapValueGroupObject()).
+					s(GoalDrivenObject.map_activity_category, new MapActivityCategoryObject()).
 					s(GoalDrivenObject.unselected_unique_values, new AttributeClassifier[0]).// 
 					s(GoalDrivenObject.selected_unique_values, getAllUniqueValues(newLog.toXLog(), classifier)).// 
 					s(GoalDrivenObject.all_unique_values, getAllUniqueValues(newLog.toXLog(), classifier)).// 
@@ -89,7 +89,7 @@ public class Cl04FilterLogOnActivities extends DataChainLinkComputationAbstract<
 					s(IvMObject.filtered_activities, removedActivities);
 		} else {
 			return  new IvMObjectValues().// 
-					s(GoalDrivenObject.map_value_group, new MapValueGroupObject()).
+					s(GoalDrivenObject.map_activity_category, new MapActivityCategoryObject()).
 					s(GoalDrivenObject.unselected_unique_values, new AttributeClassifier[0]).
 					s(GoalDrivenObject.selected_unique_values, getAllUniqueValues(imLog.toXLog(), classifier)).// 
 					s(GoalDrivenObject.all_unique_values, getAllUniqueValues(imLog.toXLog(), classifier)).// 
