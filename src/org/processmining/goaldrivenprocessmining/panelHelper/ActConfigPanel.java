@@ -1,6 +1,5 @@
 package org.processmining.goaldrivenprocessmining.panelHelper;
 
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -15,8 +14,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
-import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.MapValueGroupObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.ValueCategoryObject;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 
 import info.clearthought.layout.TableLayout;
@@ -26,20 +25,20 @@ public class ActConfigPanel extends JPanel {
 	private final JButton actConfigCancelButton;
 	private final JButton actConfigDoneButton;
 	private final JButton actConfigNewGroupButton;
-	private final JComboBox<GroupActObject> groupComboBox;
+	private final JComboBox<ValueCategoryObject> groupComboBox;
 	private final AttributeClassifier[] allUniqueValues;
 	private final JScrollPane allGroupPane;
 	private final JPanel allGroupPanel;
 	private final JTable actConfigTable;
 	private int allGroupIndex;
 	private GridBagConstraints c;
-	private MapValueGroupObject mapActGroup;
+	private MapActivityCategoryObject mapActGroup;
 
 	public ActConfigPanel(int width) {
 		double actConfigSize[][] = { { 0.6 * width, 0.4 * width },
 				{ TableLayoutConstants.MINIMUM, TableLayoutConstants.FILL, TableLayoutConstants.MINIMUM } };
 		setLayout(new TableLayout(actConfigSize));
-		this.mapActGroup = new MapValueGroupObject();
+		this.mapActGroup = new MapActivityCategoryObject();
 		// new group button
 		JPanel actStartPanel = new JPanel();
 		actStartPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -47,12 +46,15 @@ public class ActConfigPanel extends JPanel {
 		actStartPanel.add(actConfigNewGroupButton);
 		add(actStartPanel, "0,0,1,0");
 		// table
-		groupComboBox = new JComboBox<GroupActObject>();
+		groupComboBox = new JComboBox<ValueCategoryObject>();
 		allUniqueValues = new AttributeClassifier[0];
 		actConfigTable = this.drawActConfigTable(allUniqueValues);
-		this.setUpGroupColumn(actConfigTable, actConfigTable.getColumnModel().getColumn(1), groupComboBox);
+		actConfigTable.setAutoCreateColumnsFromModel(false);
+//		this.setUpGroupColumn(actConfigTable, actConfigTable.getColumnModel().getColumn(1), groupComboBox);
 		JScrollPane scrollPane = new JScrollPane(actConfigTable);
 		add(scrollPane, "0, 1");
+		
+		
 		// all group pane
 		initializeConstraint();
 		allGroupPanel = new JPanel();
@@ -78,11 +80,11 @@ public class ActConfigPanel extends JPanel {
 		c.gridy = allGroupIndex;
 	}
 	
-	public GroupActObject[] getAllGroupAct() {
-		GroupActObject[] res = new GroupActObject[allGroupPanel.getComponentCount()];
+	public ValueCategoryObject[] getAllGroupAct() {
+		ValueCategoryObject[] res = new ValueCategoryObject[allGroupPanel.getComponentCount()];
 		for (int i = 0; i < res.length; i++) {
 			GroupActConfig t = (GroupActConfig) allGroupPanel.getComponent(i);
-			res[i] = new GroupActObject(t.getGroupName(), t.getGroupColor());
+			res[i] = new ValueCategoryObject("asdf", t.getGroupName(), t.getGroupColor());
 		}
 		
 		return res;
@@ -99,19 +101,19 @@ public class ActConfigPanel extends JPanel {
 	}
 
 	private JTable drawActConfigTable(AttributeClassifier[] acts) {
-		String[] columnNames = { "Activities", "Group" };
+		String[] columnNames = { "Activities" };
 		if (acts.length == 0) {
 			return new JTable(new DefaultTableModel(null, columnNames));
 		}
-		Object[][] data = new Object[acts.length][2];
+		Object[][] data = new Object[acts.length][1];
 		for (int i = 0; i < acts.length; i++) {
 			data[i][0] = acts[i];
-			data[i][1] = new GroupActObject("", Color.WHITE);
+//			data[i][1] = new GroupActObject("", Color.WHITE);
 		}
 		return new JTable(new DefaultTableModel(data, columnNames));
 	}
 
-	private void setUpGroupColumn(JTable table, TableColumn groupColumn, JComboBox<GroupActObject> groupComboBox) {
+	public void setUpColumn(JTable table, TableColumn groupColumn, JComboBox<ValueCategoryObject> groupComboBox) {
 		//Set up the editor for the sport cells.
 		groupColumn.setCellEditor(new DefaultCellEditor(groupComboBox));
 
@@ -119,6 +121,14 @@ public class ActConfigPanel extends JPanel {
 		DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
 		renderer.setToolTipText("Click for combo box");
 		groupColumn.setCellRenderer(renderer);
+	}
+	
+	public void addNewColumnToActConfigTable(String columnName) {
+		DefaultTableModel model =  (DefaultTableModel) this.actConfigTable.getModel();
+		model.addColumn(columnName);
+		TableColumn column = new TableColumn(this.actConfigTable.getColumnCount());
+		column.setHeaderValue(columnName);
+		this.actConfigTable.addColumn(column);
 	}
 //	public static void main(String[] args) {
 //		Color c = Color.WHITE;
@@ -139,7 +149,7 @@ public class ActConfigPanel extends JPanel {
 		return actConfigNewGroupButton;
 	}
 
-	public JComboBox<GroupActObject> getGroupComboBox() {
+	public JComboBox<ValueCategoryObject> getGroupComboBox() {
 		return groupComboBox;
 	}
 
@@ -154,7 +164,7 @@ public class ActConfigPanel extends JPanel {
 	public JPanel getAllGroupPanel() {
 		return allGroupPanel;
 	}
-	public MapValueGroupObject getMapActGroup() {
+	public MapActivityCategoryObject getMapActGroup() {
 		return mapActGroup;
 	}
 	

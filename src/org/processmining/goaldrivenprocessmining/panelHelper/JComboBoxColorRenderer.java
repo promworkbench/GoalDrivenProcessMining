@@ -9,7 +9,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
-public class ColorRenderer extends BasicComboBoxRenderer {
+public class JComboBoxColorRenderer extends BasicComboBoxRenderer {
 	@Override
 	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
 			boolean cellHasFocus) {

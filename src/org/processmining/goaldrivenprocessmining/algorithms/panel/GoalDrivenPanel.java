@@ -7,7 +7,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Toolkit;
-import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -19,17 +18,12 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import org.deckfour.xes.model.XLog;
 import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.goaldrivenprocessmining.panelHelper.ConfigCards;
 import org.processmining.goaldrivenprocessmining.panelHelper.ControlBar;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
-import org.processmining.plugins.graphviz.dot.DotElement;
-import org.processmining.plugins.graphviz.visualisation.listeners.DotElementSelectionListener;
-import org.processmining.plugins.graphviz.visualisation.listeners.GraphChangedListener;
-import org.processmining.plugins.graphviz.visualisation.listeners.SelectionChangedListener;
-import org.processmining.plugins.inductiveVisualMiner.InductiveVisualMinerAnimationPanel;
-import org.processmining.plugins.inductiveVisualMiner.InductiveVisualMinerSelectionColourer;
 import org.processmining.plugins.inductiveVisualMiner.Selection;
 import org.processmining.plugins.inductiveVisualMiner.animation.AnimationEnabledChangedListener;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataState;
@@ -39,13 +33,10 @@ import org.processmining.plugins.inductiveVisualMiner.helperClasses.decoration.I
 import org.processmining.plugins.inductiveVisualMiner.helperClasses.decoration.IvMPanel;
 import org.processmining.plugins.inductiveVisualMiner.ivmfilter.tree.view.IvMFilterTreeView;
 import org.processmining.plugins.inductiveVisualMiner.ivmfilter.tree.view.IvMFilterTreeViews;
-import org.processmining.plugins.inductiveVisualMiner.visualisation.LocalDotEdge;
-import org.processmining.plugins.inductiveVisualMiner.visualisation.LocalDotNode;
 import org.processmining.plugins.inductiveminer2.logs.IMEvent;
 import org.processmining.plugins.inductiveminer2.logs.IMTrace;
 
-import com.kitfox.svg.SVGDiagram;
-
+import graph.GoalDrivenDFG;
 import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
 
@@ -55,8 +46,8 @@ public class GoalDrivenPanel extends IvMPanel {
 	private static final Insets margins = new Insets(2, 0, 0, 0);
 
 	//gui elements
-	private final InductiveVisualMinerAnimationPanel graphPanel;
-	private final InductiveVisualMinerAnimationPanel graphPanel2;
+	private GoalDrivenDFG graphPanel;
+	private GoalDrivenDFG graphPanel2;
 	//stat sidebar
 	private final JPanel sidePanel;
 	//config elemnets
@@ -176,13 +167,8 @@ public class GoalDrivenPanel extends IvMPanel {
 
 		//graph panel
 		{
-			graphPanel = new InductiveVisualMinerAnimationPanel(canceller, decorator);
-			graphPanel.addGraphChangedListener(new GraphChangedListener() {
-
-				public void graphChanged(GraphChangedReason reason, Object newState) {
-					onGraphDirectionChanged.run();
-				}
-			});
+			XLog log = null;
+			graphPanel = new GoalDrivenDFG(log);
 
 			graphPanel.setBorder(blackline);
 			contentPanel.add(graphPanel, "0, 1");
@@ -190,37 +176,9 @@ public class GoalDrivenPanel extends IvMPanel {
 		}
 
 		{
-			graphPanel2 = new InductiveVisualMinerAnimationPanel(canceller, decorator);
-			graphPanel2.setFocusable(true);
-			graphPanel2.addGraphChangedListener(new GraphChangedListener() {
-
-				public void graphChanged(GraphChangedReason reason, Object newState) {
-					onGraphDirectionChanged.run();
-				}
-			});
-
-			//set the node selection change listener
-			graphPanel2.addSelectionChangedListener(new SelectionChangedListener<DotElement>() {
-				public void selectionChanged(Set<DotElement> selectedElements) {
-					//selection of nodes changed; keep track of them
-
-					Selection selection = new Selection();
-					for (DotElement dotElement : graphPanel2.getSelectedElements()) {
-
-						selection.select(dotElement);
-					}
-
-					if (onSelectionChanged != null) {
-						try {
-							onSelectionChanged.call(selection);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-
-					graphPanel2.repaint();
-				}
-			});
+			XLog log = null;
+			graphPanel2 = new GoalDrivenDFG(log);
+			
 			graphPanel2.setBorder(blackline);
 			contentPanel.add(graphPanel2, "1, 1");
 
@@ -233,38 +191,38 @@ public class GoalDrivenPanel extends IvMPanel {
 
 	}
 
-	public void makeNodeSelectable(final LocalDotNode dotNode, boolean select) {
-		dotNode.addSelectionListener(new DotElementSelectionListener() {
-			public void selected(DotElement element, SVGDiagram image) {
-				InductiveVisualMinerSelectionColourer.colourSelectedNode(image, dotNode, true);
-			}
+//	public void makeNodeSelectable(final LocalDotNode dotNode, boolean select) {
+//		dotNode.addSelectionListener(new DotElementSelectionListener() {
+//			public void selected(DotElement element, SVGDiagram image) {
+//				InductiveVisualMinerSelectionColourer.colourSelectedNode(image, dotNode, true);
+//			}
+//
+//			public void deselected(DotElement element, SVGDiagram image) {
+//				InductiveVisualMinerSelectionColourer.colourSelectedNode(image, dotNode, false);
+//			}
+//		});
+//		if (select) {
+//			graphPanel.select(dotNode);
+//		}
+//	}
 
-			public void deselected(DotElement element, SVGDiagram image) {
-				InductiveVisualMinerSelectionColourer.colourSelectedNode(image, dotNode, false);
-			}
-		});
-		if (select) {
-			graphPanel.select(dotNode);
-		}
-	}
-
-	public void makeEdgeSelectable(final LocalDotEdge dotEdge, boolean select) {
-		dotEdge.addSelectionListener(new DotElementSelectionListener() {
-			public void selected(DotElement element, SVGDiagram image) {
-				InductiveVisualMinerSelectionColourer.colourSelectedEdge(graphPanel.getSVG(), dotEdge, true);
-				graphPanel.repaint();
-
-			}
-
-			public void deselected(DotElement element, SVGDiagram image) {
-				InductiveVisualMinerSelectionColourer.colourSelectedEdge(graphPanel.getSVG(), dotEdge, false);
-				graphPanel.repaint();
-			}
-		});
-		if (select) {
-			graphPanel.select(dotEdge);
-		}
-	}
+//	public void makeEdgeSelectable(final LocalDotEdge dotEdge, boolean select) {
+//		dotEdge.addSelectionListener(new DotElementSelectionListener() {
+//			public void selected(DotElement element, SVGDiagram image) {
+//				InductiveVisualMinerSelectionColourer.colourSelectedEdge(graphPanel.getSVG(), dotEdge, true);
+//				graphPanel.repaint();
+//
+//			}
+//
+//			public void deselected(DotElement element, SVGDiagram image) {
+//				InductiveVisualMinerSelectionColourer.colourSelectedEdge(graphPanel.getSVG(), dotEdge, false);
+//				graphPanel.repaint();
+//			}
+//		});
+//		if (select) {
+//			graphPanel.select(dotEdge);
+//		}
+//	}
 
 	public JButton drawButton(String name) {
 		return new JButton(name);
@@ -303,12 +261,20 @@ public class GoalDrivenPanel extends IvMPanel {
 		return configCards;
 	}
 
-	public InductiveVisualMinerAnimationPanel getGraph() {
+	public GoalDrivenDFG getGraph() {
 		return graphPanel;
 	}
+	
+	public void setGraph(GoalDrivenDFG dfg) {
+		this.graphPanel = dfg;
+	}
 
-	public InductiveVisualMinerAnimationPanel getGraph2() {
+	public GoalDrivenDFG getGraph2() {
 		return graphPanel2;
+	}
+	
+	public void setGraph2(GoalDrivenDFG dfg) {
+		this.graphPanel2 = dfg;
 	}
 
 	public IvMClassifierChooser getClassifiers1() {

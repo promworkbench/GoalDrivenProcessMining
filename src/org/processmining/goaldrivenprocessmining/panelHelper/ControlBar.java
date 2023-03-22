@@ -12,6 +12,7 @@ import info.clearthought.layout.TableLayoutConstants;
 
 public class ControlBar extends JPanel{
 	private final JPanel configPanel;
+	private final JButton modeButton;
 	private final JButton filterButton;
 	private final JButton actButton;
 	private final JButton actConfigButton;
@@ -32,10 +33,12 @@ public class ControlBar extends JPanel{
 		{
 			add(configPanel, "0,0");
 			configPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+			modeButton = this.drawButton("Mode");
 			filterButton = this.drawButton("Filter");
 			actButton = this.drawButton("Activity Display");
 			actConfigButton = this.drawButton("Activity Configuration");
 			caseButton = this.drawButton("Case");
+			configPanel.add(modeButton);
 			configPanel.add(filterButton);
 			configPanel.add(actButton);
 			configPanel.add(actConfigButton);
@@ -80,6 +83,10 @@ public class ControlBar extends JPanel{
 
 	public JButton getActConfigButton() {
 		return actConfigButton;
+	}
+
+	public JButton getModeButton() {
+		return modeButton;
 	}
 	
 }

@@ -79,7 +79,7 @@ public class GoalDrivenPlugin {
 		return controller.getPanel();
 	}
 
-	@Plugin(name = "Goal-Driven Process Mining Visualizer", returnLabels = {
+	@Plugin(name = "1AAA", returnLabels = {
 			"Goal-driven User-defined Process Mining" }, returnTypes = { GoalDrivenLauncher.class }, parameterLabels = {
 					"Event log" }, userAccessible = true, categories = { PluginCategory.Discovery,
 							PluginCategory.Analytics, }, help = "Discover a directly follows model interactively. (DFvM)")
