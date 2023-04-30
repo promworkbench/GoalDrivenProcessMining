@@ -539,6 +539,13 @@ public class GoalDrivenController {
 			}
 			
 		});
+		// ungroup nodes popup
+		panel.getSidePanel().getBatchSelectionPopupPanel().getUngroupNodeButton().addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				chain.setObject(GoalDrivenObject.is_in_group_mode, true);
+			}
+			
+		});
 	}
 
 	protected void initGuiUniqueValue() {

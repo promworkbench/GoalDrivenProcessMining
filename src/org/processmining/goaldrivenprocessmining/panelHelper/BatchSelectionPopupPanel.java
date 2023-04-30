@@ -9,6 +9,7 @@ import org.processmining.goaldrivenprocessmining.algorithms.panel.PanelConstants
 public class BatchSelectionPopupPanel extends JPanel {
 	
 	private JButton groupNodeButton;
+	private JButton ungroupNodeButton;
 	
 	public BatchSelectionPopupPanel() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -16,6 +17,8 @@ public class BatchSelectionPopupPanel extends JPanel {
 		
 		groupNodeButton = new JButton("Group");
 		add(groupNodeButton);
+		ungroupNodeButton = new JButton("Ungroup");
+		add(ungroupNodeButton);
 	}
 
 	public JButton getGroupNodeButton() {
@@ -24,6 +27,14 @@ public class BatchSelectionPopupPanel extends JPanel {
 
 	public void setGroupNodeButton(JButton groupNodeButton) {
 		this.groupNodeButton = groupNodeButton;
+	}
+
+	public JButton getUngroupNodeButton() {
+		return ungroupNodeButton;
+	}
+
+	public void setUngroupNodeButton(JButton ungroupNodeButton) {
+		this.ungroupNodeButton = ungroupNodeButton;
 	}
 
 	

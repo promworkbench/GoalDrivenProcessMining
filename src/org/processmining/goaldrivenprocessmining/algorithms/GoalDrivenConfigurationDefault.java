@@ -12,6 +12,7 @@ import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_Cl02MakeH
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_Cl03UpdateCategoryHighLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_Cl04MakeGroupedHighLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_Cl05MakeGroupedHighLevelDFG;
+import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_Cl06UngroupHighLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_Cl01MakeLowLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_Cl02MakeLowLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_Cl03UpdateCategoryLowLevelDFG;
@@ -63,6 +64,7 @@ public class GoalDrivenConfigurationDefault extends GoalDrivenConfigurationAbstr
 		chain.register(new HIGH_Cl03UpdateCategoryHighLevelDFG<GoalDrivenConfiguration>());
 		chain.register(new HIGH_Cl04MakeGroupedHighLevelLog<GoalDrivenConfiguration>());
 		chain.register(new HIGH_Cl05MakeGroupedHighLevelDFG<GoalDrivenConfiguration>());
+		chain.register(new HIGH_Cl06UngroupHighLevelDFG<GoalDrivenConfiguration>());
 		chain.register(new LOW_Cl01MakeLowLevelLog<GoalDrivenConfiguration>());
 		chain.register(new LOW_Cl02MakeLowLevelDFG<GoalDrivenConfiguration>());
 		chain.register(new LOW_Cl03UpdateCategoryLowLevelDFG<GoalDrivenConfiguration>());
