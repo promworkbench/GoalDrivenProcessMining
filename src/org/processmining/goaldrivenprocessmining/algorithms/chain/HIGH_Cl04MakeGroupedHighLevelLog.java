@@ -34,7 +34,7 @@ public class HIGH_Cl04MakeGroupedHighLevelLog<C> extends DataChainLinkComputatio
 	}
 
 	public IvMObject<?>[] createOutputObjects() {
-		return new IvMObject<?>[] {GoalDrivenObject.grouped_high_level_xlog};
+		return new IvMObject<?>[] {GoalDrivenObject.after_grouping_high_level_xlog};
 	}
 
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
@@ -78,7 +78,7 @@ public class HIGH_Cl04MakeGroupedHighLevelLog<C> extends DataChainLinkComputatio
 		}
 
 		return new IvMObjectValues().//
-				s(GoalDrivenObject.grouped_high_level_xlog, newLog);
+				s(GoalDrivenObject.after_grouping_high_level_xlog, newLog);
 	}
 
 }

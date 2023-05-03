@@ -28,7 +28,7 @@ public class HIGH_Cl05MakeGroupedHighLevelDFG<C> extends DataChainLinkComputatio
 
 	@Override
 	public IvMObject<?>[] createInputObjects() {
-		return new IvMObject<?>[] { GoalDrivenObject.grouped_high_level_xlog, GoalDrivenObject.indirected_edges };
+		return new IvMObject<?>[] { GoalDrivenObject.after_grouping_high_level_xlog, GoalDrivenObject.indirected_edges };
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class HIGH_Cl05MakeGroupedHighLevelDFG<C> extends DataChainLinkComputatio
 
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
 		System.out.println("--- HIGH_Cl05MakeHighLevelDFGGrouped");
-		XLog log = inputs.get(GoalDrivenObject.grouped_high_level_xlog);
+		XLog log = inputs.get(GoalDrivenObject.after_grouping_high_level_xlog);
 		IndirectedEdgeCarrierObject indirectedEdges = inputs.get(GoalDrivenObject.indirected_edges);
 		FrequencyEdgeObject frequencyEdge = LogUtils.getFrequencyEdges(log,
 				log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString());
