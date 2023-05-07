@@ -4,9 +4,11 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyEdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyNodeObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLog;
 import org.processmining.goaldrivenprocessmining.objectHelper.IndirectedEdgeCarrierObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapEdgeStrokeWidth;
+import org.processmining.goaldrivenprocessmining.objectHelper.MapGroupLogObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapNodeFillColor;
 import org.processmining.goaldrivenprocessmining.objectHelper.SelectedNodeGroupObject;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
@@ -41,9 +43,9 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 			"Mapping of activities to new categories", MapActivityCategoryObject.class);
 
 	public static final IvMObject<XLog> full_xlog = c("full log", XLog.class);
-	public static final IvMObject<XLog> high_level_xlog = c("high-level event log", XLog.class);
+	public static final IvMObject<GDPMLog> high_level_log = c("high-level event log", GDPMLog.class);
 	public static final IvMObject<GoalDrivenDFG> high_level_dfg = c("high-level DFG", GoalDrivenDFG.class);
-	public static final IvMObject<XLog> low_level_xlog = c("low-level log", XLog.class);
+	public static final IvMObject<GDPMLog> low_level_log = c("low-level log", GDPMLog.class);
 	public static final IvMObject<GoalDrivenDFG> low_level_dfg = c("low-level DFG", GoalDrivenDFG.class);
 	public static final IvMObject<CategoryObject> selected_mode_category = c("selected mode of view for new category",
 			CategoryObject.class);
@@ -62,9 +64,11 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	public static final IvMObject<MapEdgeStrokeWidth> map_edge_stroke_width = c("Mapping for edge stroke width",
 			MapEdgeStrokeWidth.class);
 	public static final IvMObject<SelectedNodeGroupObject> batch_selected_nodes = c("Batch selected nodes from GUI", SelectedNodeGroupObject.class);
-	public static final IvMObject<XLog> after_grouping_high_level_xlog = c("high-level log after grouping nodes", XLog.class);
-	public static final IvMObject<XLog> grouped_xlog = c("log for grouping nodes", XLog.class);
+	public static final IvMObject<GDPMLog> after_grouping_high_level_log = c("high-level log after grouping nodes", GDPMLog.class);
+	public static final IvMObject<GDPMLog> grouped_log = c("log for grouping nodes", GDPMLog.class);
+	public static final IvMObject<GoalDrivenDFG> grouped_dfg = c("dfg for grouping nodes", GoalDrivenDFG.class);
 	public static final IvMObject<Boolean> is_in_group_mode = c("if users are choosing the grouping mode", Boolean.class);
+	public static final IvMObject<MapGroupLogObject> map_group_log = c("mapping from group to log", MapGroupLogObject.class);
 
 	public GoalDrivenObject(String name, Class<C> clazz) {
 		super(name, clazz);

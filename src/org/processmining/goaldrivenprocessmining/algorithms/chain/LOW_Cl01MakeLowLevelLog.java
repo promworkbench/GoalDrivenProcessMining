@@ -8,6 +8,7 @@ import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.model.impl.XLogImpl;
 import org.deckfour.xes.model.impl.XTraceImpl;
+import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLog;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
@@ -40,7 +41,7 @@ public class LOW_Cl01MakeLowLevelLog<C> extends DataChainLinkComputationAbstract
 	@Override
 	public IvMObject<?>[] createOutputObjects() {
 		return new IvMObject<?>[] { 
-			GoalDrivenObject.low_level_xlog
+			GoalDrivenObject.low_level_log
 			};
 	}
 
@@ -101,8 +102,9 @@ public class LOW_Cl01MakeLowLevelLog<C> extends DataChainLinkComputationAbstract
 			}
 
 		}
+		GDPMLog gdpmLog = new GDPMLog(newLog);
 		return new IvMObjectValues().//
-				s(GoalDrivenObject.low_level_xlog, newLog);
+				s(GoalDrivenObject.low_level_log, gdpmLog);
 	}
 
 }

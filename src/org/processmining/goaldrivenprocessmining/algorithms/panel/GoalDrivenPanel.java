@@ -12,9 +12,9 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import org.deckfour.xes.model.XLog;
 import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
+import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLog;
 import org.processmining.goaldrivenprocessmining.panelHelper.ConfigCards;
 import org.processmining.goaldrivenprocessmining.panelHelper.ControlBar;
 import org.processmining.goaldrivenprocessmining.panelHelper.SidePanel;
@@ -88,7 +88,7 @@ public class GoalDrivenPanel extends IvMPanel {
 
 		//graph panel
 		{
-			XLog log = null;
+			GDPMLog log = null;
 			graphPanel = new GoalDrivenDFG(log);
 			graphPanel.setBorder(PanelConstants.BETWEEN_PANEL_BORDER);
 			contentPanel.add(graphPanel, "0, 1");
@@ -97,7 +97,7 @@ public class GoalDrivenPanel extends IvMPanel {
 		}
 
 		{
-			XLog log = null;
+			GDPMLog log = null;
 			graphPanel2 = new GoalDrivenDFG(log);
 			graphPanel2.setBorder(PanelConstants.BETWEEN_PANEL_BORDER);
 			contentPanel.add(graphPanel2, "1, 1");

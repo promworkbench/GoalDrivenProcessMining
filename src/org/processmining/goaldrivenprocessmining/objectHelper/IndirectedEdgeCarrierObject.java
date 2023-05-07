@@ -14,6 +14,11 @@ public class IndirectedEdgeCarrierObject {
 	public List<EdgeObject> getListIndirectedEdge() {
 		return listIndirectedEdge;
 	}
+	
+
+	public void setListIndirectedEdge(List<EdgeObject> listIndirectedEdge) {
+		this.listIndirectedEdge = listIndirectedEdge;
+	}
 
 	public void addEdge(EdgeObject tupleNode) {
 		this.listIndirectedEdge.add(tupleNode);

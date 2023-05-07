@@ -3,7 +3,6 @@ package org.processmining.goaldrivenprocessmining.algorithms.chain;
 import org.deckfour.xes.model.XLog;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyEdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyNodeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.IndirectedEdgeCarrierObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
@@ -24,7 +23,7 @@ public class LOW_Cl03UpdateCategoryLowLevelDFG<C> extends DataChainLinkComputati
 
 	public IvMObject<?>[] createInputObjects() {
 		// TODO Auto-generated method stub
-		return new IvMObject<?>[] { GoalDrivenObject.low_level_xlog, GoalDrivenObject.selected_mode_category,
+		return new IvMObject<?>[] { GoalDrivenObject.low_level_log, GoalDrivenObject.selected_mode_category,
 				GoalDrivenObject.map_activity_category, GoalDrivenObject.low_frequency_edge,
 				GoalDrivenObject.low_frequency_node };
 
@@ -38,10 +37,10 @@ public class LOW_Cl03UpdateCategoryLowLevelDFG<C> extends DataChainLinkComputati
 	public IvMObjectValues execute(Object configuration, IvMObjectValues inputs, IvMCanceller canceller)
 			throws Exception {
 		System.out.println("--- LOW_Cl03UpdateCategoryLowLevelDFG");
-		XLog log = inputs.get(GoalDrivenObject.low_level_xlog);
+		XLog log = inputs.get(GoalDrivenObject.low_level_log).getLog();
 		FrequencyEdgeObject frequencyEdge = inputs.get(GoalDrivenObject.low_frequency_edge);
 		FrequencyNodeObject frequencyNode = inputs.get(GoalDrivenObject.low_frequency_node);
-		GoalDrivenDFG dfg = new GoalDrivenDFG(log, new IndirectedEdgeCarrierObject(), frequencyEdge, frequencyNode);
+		GoalDrivenDFG dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.low_level_log), frequencyEdge, frequencyNode);
 		//		dfg.addControlListener(new EdgeClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 		dfg.repaintNodeStrokeColor(
 				dfg.getNodeStrokeColorFromMapActCat(inputs.get(GoalDrivenObject.map_activity_category),

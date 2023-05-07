@@ -2,14 +2,9 @@ package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
 import java.util.Arrays;
 
-import org.deckfour.xes.model.XAttributeMap;
-import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
-import org.deckfour.xes.model.XTrace;
-import org.deckfour.xes.model.impl.XLogImpl;
-import org.deckfour.xes.model.impl.XTraceImpl;
-import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.IndirectedEdgeCarrierObject;
+import org.processmining.goaldrivenprocessmining.algorithms.LogUtils;
+import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLog;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
@@ -36,8 +31,7 @@ public class HIGH_Cl01MakeHighLevelLog<C> extends DataChainLinkComputationAbstra
 	public IvMObject<?>[] createOutputObjects() {
 		// TODO Auto-generated method stub
 		return new IvMObject<?>[] { 
-			GoalDrivenObject.high_level_xlog,
-			GoalDrivenObject.indirected_edges
+			GoalDrivenObject.high_level_log, GoalDrivenObject.after_grouping_high_level_log
 			};
 	}
 
@@ -45,66 +39,16 @@ public class HIGH_Cl01MakeHighLevelLog<C> extends DataChainLinkComputationAbstra
 			throws Exception {
 		System.out.println("--- HIGH_Cl01MakeHighLevelLog");
 		XLog log = inputs.get(GoalDrivenObject.full_xlog);
-		String selectedAttribute = log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString();
-		/*********/
 		AttributeClassifier[] sValues = inputs.get(GoalDrivenObject.selected_unique_values);
 		String[] selectedValues = new String[sValues.length];
 		for (int i = 0; i < sValues.length; i++) {
 			selectedValues[i] = sValues[i].toString();
 		}
-		XAttributeMap aMap = log.getAttributes();
-		XLogImpl newLog = new XLogImpl(aMap);
-		newLog.getClassifiers().addAll(log.getClassifiers());
-		IndirectedEdgeCarrierObject indirectedEdges = new IndirectedEdgeCarrierObject();
-		for (XTrace tr : log) {
-			XTraceImpl newTr = new XTraceImpl(tr.getAttributes());
-			for (int i = 0; i < tr.size(); i++) {
-				XEvent ev = tr.get(i);
-				String value = ev.getAttributes().get(selectedAttribute).toString();
-				
-				if (Arrays.asList(selectedValues).contains(value)) {
-					if (i != 0) {
-						XEvent evPrev = tr.get(i - 1);
-						String valuePrev = evPrev.getAttributes().get(selectedAttribute).toString();
-						if (!Arrays.asList(selectedValues).contains(valuePrev)) {
-							if (newTr.size() == 0) {
-								EdgeObject obj = new EdgeObject("begin", value);
-								if (!indirectedEdges.getListIndirectedEdge().contains(obj)) {
-									indirectedEdges.addEdge(obj);
-								}
-								
-							} else {
-								EdgeObject obj = new EdgeObject(
-										newTr.get(newTr.size() - 1).getAttributes().get(selectedAttribute).toString(),
-										value);
-								if (!indirectedEdges.getListIndirectedEdge().contains(obj)) {
-									indirectedEdges.addEdge(obj);
-								}
-							}
-						}
-					}
-
-					newTr.add(ev);
-				} else {
-					if (i == tr.size() - 1) {
-						if (!newTr.isEmpty()) {
-							EdgeObject obj = new EdgeObject(
-									newTr.get(newTr.size() - 1).getAttributes().get(selectedAttribute).toString(), "end");
-							if (!indirectedEdges.getListIndirectedEdge().contains(obj)) {
-								indirectedEdges.addEdge(obj);
-							}
-						}
-					}
-				}
-			}
-			if (!newTr.isEmpty()) {
-				newLog.add(newTr);
-			}
-
-		}
+		GDPMLog gdpmLog = LogUtils.projectLogOnSetActivities(log, selectedValues);
+		LogUtils.setUpMapNodeType(gdpmLog, Arrays.asList());
 		return new IvMObjectValues().//
-				s(GoalDrivenObject.high_level_xlog, newLog). 
-				s(GoalDrivenObject.indirected_edges, indirectedEdges);//
+				s(GoalDrivenObject.high_level_log, gdpmLog).
+				s(GoalDrivenObject.after_grouping_high_level_log, gdpmLog);
 	}
 	
 }

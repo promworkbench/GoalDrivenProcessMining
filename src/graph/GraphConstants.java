@@ -16,6 +16,7 @@ public class GraphConstants {
 	public static final String IS_INDIRECTED_EDGE_FIELD = "isDirectedEdge";
 	public static final String STROKE_WIDTH_EDGE_FIELD = "strokeWidth";
 	public static final String FREQUENCY_FILL_COLOR_NODE_FIELD = "freqFillColorNode";
+	public static final String NODE_TYPE_FIELD = "nodeType";
 	public static final String NODE_GROUP = "graph.nodes";
 	public static final String EDGE_GROUP = "graph.edges";
 

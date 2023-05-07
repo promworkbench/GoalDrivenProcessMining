@@ -5,7 +5,6 @@ import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfigurat
 import org.processmining.goaldrivenprocessmining.algorithms.LogUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyEdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyNodeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.IndirectedEdgeCarrierObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
@@ -28,7 +27,7 @@ public class HIGH_Cl02MakeHighLevelDFG<C> extends DataChainLinkComputationAbstra
 
 	@Override
 	public IvMObject<?>[] createInputObjects() {
-		return new IvMObject<?>[] { GoalDrivenObject.high_level_xlog, GoalDrivenObject.indirected_edges };
+		return new IvMObject<?>[] { GoalDrivenObject.high_level_log };
 	}
 
 	@Override
@@ -40,13 +39,12 @@ public class HIGH_Cl02MakeHighLevelDFG<C> extends DataChainLinkComputationAbstra
 	@Override
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
 		System.out.println("--- HIGH_Cl02MakeHighLevelDFG");
-		XLog log = inputs.get(GoalDrivenObject.high_level_xlog);
-		IndirectedEdgeCarrierObject indirectedEdges = inputs.get(GoalDrivenObject.indirected_edges);
+		XLog log = inputs.get(GoalDrivenObject.high_level_log).getLog();
 		FrequencyEdgeObject frequencyEdge = LogUtils.getFrequencyEdges(log,
 				log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString());
 		FrequencyNodeObject frequencyNode = LogUtils.getFrequencyNodeObject(log,
 				log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString());
-		GoalDrivenDFG dfg = new GoalDrivenDFG(log, indirectedEdges, frequencyEdge, frequencyNode);
+		GoalDrivenDFG dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.high_level_log),  frequencyEdge, frequencyNode);
 		dfg.setEdgeClickControl(new EdgeClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 		dfg.addControlListener(new EdgeClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 

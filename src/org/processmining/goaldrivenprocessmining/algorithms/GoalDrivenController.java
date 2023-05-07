@@ -76,11 +76,10 @@ public class GoalDrivenController {
 
 	protected void initGui(final ProMCanceller canceller, final GoalDrivenConfiguration configuration) {
 
-
 		initGuiUniqueValue();
 
 		initGuiControlBar();
-		
+
 		initGuiSidePanel();
 
 		initGuiMiner();
@@ -520,10 +519,10 @@ public class GoalDrivenController {
 		});
 
 	}
-	
+
 	protected void initGuiSidePanel() {
 		// group nodes popup 
-		panel.getSidePanel().getBatchSelectionPopupPanel().getGroupNodeButton().addActionListener( new ActionListener() {
+		panel.getSidePanel().getBatchSelectionPopupPanel().getGroupNodeButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				List<String> selectedNode = new ArrayList<>();
 				Table nodeTable = panel.getGraph().getGraph().getNodeTable();
@@ -534,18 +533,20 @@ public class GoalDrivenController {
 						selectedNode.add(item.getString(GraphConstants.LABEL_FIELD));
 					}
 				}
-				SelectedNodeGroupObject selectedNodeObject = new SelectedNodeGroupObject("Test", selectedNode);
+				SelectedNodeGroupObject selectedNodeObject = new SelectedNodeGroupObject(
+						panel.getSidePanel().getBatchSelectionPopupPanel().getGroupNameField().getText(), selectedNode);
 				chain.setObject(GoalDrivenObject.batch_selected_nodes, selectedNodeObject);
 			}
-			
+
 		});
 		// ungroup nodes popup
-		panel.getSidePanel().getBatchSelectionPopupPanel().getUngroupNodeButton().addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				chain.setObject(GoalDrivenObject.is_in_group_mode, true);
-			}
-			
-		});
+		panel.getSidePanel().getBatchSelectionPopupPanel().getUngroupNodeButton()
+				.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						chain.setObject(GoalDrivenObject.is_in_group_mode, true);
+					}
+
+				});
 	}
 
 	protected void initGuiUniqueValue() {
