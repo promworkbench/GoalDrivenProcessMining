@@ -94,12 +94,12 @@ public class ModePanel extends JPanel {
 	}
 	
 	public void configCategoryCheckBox() {
-		for (JCheckBox cB: this.listCategoriesCheckBox) {
+		for (final JCheckBox cB: this.listCategoriesCheckBox) {
 			cB.addItemListener(new ItemListener() {
 
 				public void itemStateChanged(ItemEvent e) {
 					if (cB.isSelected()) {
-						for (JCheckBox cB2: listCategoriesCheckBox) {
+						for (final JCheckBox cB2: listCategoriesCheckBox) {
 							if (!cB2.equals(cB)) {
 								cB2.setSelected(false);
 							}

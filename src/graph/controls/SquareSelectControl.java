@@ -73,8 +73,8 @@ public class SquareSelectControl extends ControlAdapter {
 					item.setFillColor(GraphConstants.SELECTED_NODE_FILL_COLOR);
 				}
 			}
+			showPopup = true;
 		}
-		showPopup = true;
 		rectangle = null;
 		PopUpGraphic popUpGraphic = new PopUpGraphic();
 		display.addPaintListener(popUpGraphic);

@@ -44,7 +44,7 @@ public class LogUtils {
 			gdpmLog.setMapNodeType(mapNodeType);
 		} else {
 			for (String key : mapNodeType.keySet()) {
-				if (mapNodeType.keySet().contains(key)) {
+				if (gdpmLog.getMapNodeType().keySet().contains(key)) {
 					gdpmLog.getMapNodeType().replace(key, mapNodeType.get(key));
 				} else {
 					gdpmLog.getMapNodeType().put(key, mapNodeType.get(key));

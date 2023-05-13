@@ -65,10 +65,9 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 			MapEdgeStrokeWidth.class);
 	public static final IvMObject<SelectedNodeGroupObject> batch_selected_nodes = c("Batch selected nodes from GUI", SelectedNodeGroupObject.class);
 	public static final IvMObject<GDPMLog> after_grouping_high_level_log = c("high-level log after grouping nodes", GDPMLog.class);
-	public static final IvMObject<GDPMLog> grouped_log = c("log for grouping nodes", GDPMLog.class);
-	public static final IvMObject<GoalDrivenDFG> grouped_dfg = c("dfg for grouping nodes", GoalDrivenDFG.class);
 	public static final IvMObject<Boolean> is_in_group_mode = c("if users are choosing the grouping mode", Boolean.class);
 	public static final IvMObject<MapGroupLogObject> map_group_log = c("mapping from group to log", MapGroupLogObject.class);
+	public static final IvMObject<String> selected_group = c("selected group name from high-level dfg", String.class);
 
 	public GoalDrivenObject(String name, Class<C> clazz) {
 		super(name, clazz);

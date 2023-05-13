@@ -12,6 +12,7 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 import graph.GoalDrivenDFG;
 import graph.controls.EdgeClickControl;
+import graph.controls.GroupNodeControl;
 
 public class HIGH_GROUP_Cl05UngroupHighLevelDFG<C> extends DataChainLinkComputationAbstract<C> {
 
@@ -35,7 +36,7 @@ public class HIGH_GROUP_Cl05UngroupHighLevelDFG<C> extends DataChainLinkComputat
 	}
 
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
-		System.out.println("--- HIGH_Cl06UngroupHighLevelDFG");
+		System.out.println("--- HIGH_GROUP_Cl05UngroupHighLevelDFG");
 		if (inputs.get(GoalDrivenObject.is_in_group_mode)) {
 			XLog log = inputs.get(GoalDrivenObject.high_level_log).getLog();
 			FrequencyEdgeObject frequencyEdge = LogUtils.getFrequencyEdges(log,
@@ -45,6 +46,10 @@ public class HIGH_GROUP_Cl05UngroupHighLevelDFG<C> extends DataChainLinkComputat
 			GoalDrivenDFG dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.high_level_log), frequencyEdge, frequencyNode);
 			dfg.setEdgeClickControl(new EdgeClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 			dfg.addControlListener(new EdgeClickControl(((GoalDrivenConfiguration) configuration).getChain()));
+			GroupNodeControl groupNodeControl = new GroupNodeControl(dfg.getGraph().getNodeTable(),
+					((GoalDrivenConfiguration) configuration).getChain());
+			dfg.setGroupNodeControl(groupNodeControl);
+			dfg.addControlListener(groupNodeControl);
 			HIGH_GROUP_Cl02MakeGroupedHighLevelLog.afterGroupingHighLevelLog = null;
 			
 			return new IvMObjectValues().//

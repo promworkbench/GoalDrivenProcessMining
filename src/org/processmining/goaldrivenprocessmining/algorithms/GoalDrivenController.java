@@ -13,7 +13,9 @@ import java.util.List;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -39,6 +41,7 @@ import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.VisualM
 import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.DfgMiner;
 import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.Miner;
 
+import graph.GoalDrivenDFG;
 import graph.GraphConstants;
 import graph.utils.node.GraphNodeUtils;
 import info.clearthought.layout.TableLayout;
@@ -106,7 +109,7 @@ public class GoalDrivenController {
 		//update layout
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
 			public String getName() {
-				return "model dot";
+				return "high-level dfg update to panel";
 			}
 
 			public IvMObject<?>[] createInputObjects() {
@@ -118,6 +121,35 @@ public class GoalDrivenController {
 					panel.getGraph().updateDFG(inputs.get(GoalDrivenObject.high_level_dfg));
 					panel.revalidate();
 					panel.repaint();
+				}
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+			}
+		});
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+			public String getName() {
+				return "group log";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.selected_group, GoalDrivenObject.map_group_log };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				System.out.println("--- group log ---");
+				if (inputs.has(GoalDrivenObject.map_group_log)) {
+					GoalDrivenDFG groupDfg = inputs.get(GoalDrivenObject.map_group_log).getMapGroupDfg()
+							.get(inputs.get(GoalDrivenObject.selected_group));
+					JFrame frame = new JFrame("Subprocess");
+					JPanel p = new JPanel();
+					p.setBackground(Color.BLACK);
+					p.add(groupDfg);
+					groupDfg.setBackground(Color.BLACK);
+					frame.getContentPane().add(p);
+					frame.pack();
+					frame.setEnabled(true);
+					frame.setVisible(true);
 				}
 			}
 
@@ -374,7 +406,9 @@ public class GoalDrivenController {
 				CategoryObject newCate = inputs.get(GoalDrivenObject.new_category);
 				// create jcombobox
 				JComboBox<ValueCategoryObject> cmb = new JComboBox<>();
-				newCate.getValues().forEach(cmb::addItem);
+				for (ValueCategoryObject val : newCate.getValues()) {
+					cmb.addItem(val);
+				}
 				// add new column + config that column
 				DefaultTableModel model = (DefaultTableModel) panel.getConfigCards().getActConfigPanel()
 						.getActConfigTable().getModel();

@@ -32,7 +32,7 @@ public class HIGH_GROUP_Cl02MakeGroupedHighLevelLog<C> extends DataChainLinkComp
 	}
 
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
-		System.out.println("--- HIGH_Cl04MakeGroupedHighLevelLog ---");
+		System.out.println("--- HIGH_GROUP_Cl02MakeGroupedHighLevelLog ---");
 		List<String> selectedNodes = inputs.get(GoalDrivenObject.batch_selected_nodes).getListNodeLabel();
 		String groupName = inputs.get(GoalDrivenObject.batch_selected_nodes).getGroupName();
 		GDPMLog log;

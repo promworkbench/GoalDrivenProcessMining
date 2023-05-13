@@ -45,7 +45,7 @@ public class HIGH_Cl01MakeHighLevelLog<C> extends DataChainLinkComputationAbstra
 			selectedValues[i] = sValues[i].toString();
 		}
 		GDPMLog gdpmLog = LogUtils.projectLogOnSetActivities(log, selectedValues);
-		LogUtils.setUpMapNodeType(gdpmLog, Arrays.asList());
+		LogUtils.setUpMapNodeType(gdpmLog, Arrays.asList(""));
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.high_level_log, gdpmLog).
 				s(GoalDrivenObject.after_grouping_high_level_log, gdpmLog);

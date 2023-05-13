@@ -30,6 +30,7 @@ import graph.controls.BorderNodeControl;
 import graph.controls.CustomPanControl;
 import graph.controls.DragMultipleNodesControl;
 import graph.controls.EdgeClickControl;
+import graph.controls.GroupNodeControl;
 import graph.controls.SelectMultipleNodesControl;
 import graph.controls.SquareSelectControl;
 import graph.utils.edge.GraphEdgeUtils;
@@ -75,6 +76,7 @@ public class GoalDrivenDFG extends Display {
 	private BorderNodeControl borderNodeControl;
 	private EdgeClickControl edgeClickControl;
 	private SquareSelectControl squareSelectControl;
+	private GroupNodeControl groupNodeControl;
 	// action
 	private ColorAction nodeStrokeColorAction;
 	private ColorAction nodeFillColorAction;
@@ -234,7 +236,6 @@ public class GoalDrivenDFG extends Display {
 			/* drag multiple nodes */
 			dragMultipleNodesControl = new DragMultipleNodesControl();
 			addControlListener(dragMultipleNodesControl);
-
 			squareSelectControl = new SquareSelectControl(this.graph.getNodeTable(), this);
 			addControlListener(squareSelectControl);
 		}
@@ -256,6 +257,7 @@ public class GoalDrivenDFG extends Display {
 		this.removeControlListener(this.wheelZoomControl);
 		this.removeControlListener(this.edgeClickControl);
 		this.removeControlListener(this.squareSelectControl);
+		this.removeControlListener(this.groupNodeControl);
 		this.setDefaultControl();
 	}
 
@@ -389,13 +391,11 @@ public class GoalDrivenDFG extends Display {
 		HashMap<String, Integer> mapNodeFillColor = GraphNodeUtils.getNodeFillColor(frequencyNode,
 				GraphNodeUtils.getMapFreqColor(frequencyNode));
 		for (XTrace trace : log.getLog()) {
-			for (int i = 0; i < trace.size() - 1; i++) {
+			for (int i = 0; i < trace.size(); i++) {
+				// add node for event at i-th
 				XEvent ev1 = trace.get(i);
-				XEvent ev2 = trace.get(i + 1);
 				String value1 = ev1.getAttributes().get(this.eventClassifier).toString();
-				String value2 = ev2.getAttributes().get(this.eventClassifier).toString();
 				Node node1 = null;
-				Node node2 = null;
 				if (!listActName.contains(value1)) {
 					listActName.add(value1);
 					node1 = g.addNode();
@@ -403,23 +403,30 @@ public class GoalDrivenDFG extends Display {
 				} else {
 					node1 = this.getNodeByLabel(g, value1);
 				}
-				if (!listActName.contains(value2)) {
-					listActName.add(value2);
-					node2 = g.addNode();
-					this.configNode(node2, value2, mapNodeFillColor, log.getMapNodeType());
-				} else {
-					node2 = this.getNodeByLabel(g, value2);
+				// add node for event at i+1-th if possible
+				if (i + 1 < trace.size()) {
+					XEvent ev2 = trace.get(i + 1);
+					String value2 = ev2.getAttributes().get(this.eventClassifier).toString();
+					Node node2 = null;
+					if (!listActName.contains(value2)) {
+						listActName.add(value2);
+						node2 = g.addNode();
+						this.configNode(node2, value2, mapNodeFillColor, log.getMapNodeType());
+					} else {
+						node2 = this.getNodeByLabel(g, value2);
+					}
+					EdgeObject edgeObject = new EdgeObject(value1, value2);
+					if (!listEdges.contains(edgeObject)) {
+						Edge e = g.addEdge(node1, node2);
+						listEdges.add(edgeObject);
+						this.configEdge(e, edgeObject, log.getIndirectedEdges(), mapEdgeStrokeWidth);
+					}
 				}
-				EdgeObject edgeObject = new EdgeObject(value1, value2);
-				if (!listEdges.contains(edgeObject)) {
-					Edge e = g.addEdge(node1, node2);
-					listEdges.add(edgeObject);
-					this.configEdge(e, edgeObject, log.getIndirectedEdges(), mapEdgeStrokeWidth);
-				}
+				
 				// if begin act
 				if (i == 0) {
 					Node beginNode = g.getNode(this.beginNodeRow);
-					edgeObject = new EdgeObject("begin", value1);
+					EdgeObject edgeObject = new EdgeObject("begin", value1);
 					if (!listEdges.contains(edgeObject)) {
 						Edge e1 = g.addEdge(beginNode, node1);
 						listEdges.add(edgeObject);
@@ -428,11 +435,11 @@ public class GoalDrivenDFG extends Display {
 
 				}
 				// if end act
-				if (i + 1 == trace.size() - 1) {
+				if (i == trace.size() - 1) {
 					Node endNode = g.getNode(this.endNodeRow);
-					edgeObject = new EdgeObject(value2, "end");
+					EdgeObject edgeObject = new EdgeObject(value1, "end");
 					if (!listEdges.contains(edgeObject)) {
-						Edge e1 = g.addEdge(node2, endNode);
+						Edge e1 = g.addEdge(node1, endNode);
 						listEdges.add(edgeObject);
 						this.configEdge(e1, edgeObject, log.getIndirectedEdges(), mapEdgeStrokeWidth);
 					}
@@ -496,7 +503,7 @@ public class GoalDrivenDFG extends Display {
 		} else {
 			node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
 		}
-		
+
 	}
 
 	private Table initNodeTable() {
@@ -557,6 +564,10 @@ public class GoalDrivenDFG extends Display {
 			this.setEdgeClickControl(dfg.getEdgeClickControl());
 			this.addControlListener(dfg.getEdgeClickControl());
 		}
+		if (dfg.getGroupNodeControl() != null) {
+			this.setGroupNodeControl(dfg.getGroupNodeControl());
+			this.addControlListener(dfg.getGroupNodeControl());
+		}
 		this.revalidate();
 		this.repaint();
 	}
@@ -596,7 +607,7 @@ public class GoalDrivenDFG extends Display {
 		return res;
 	}
 
-	public void repaintNodeStrokeColor(HashMap<String, Color> map) {
+	public void repaintNodeStrokeColor(final HashMap<String, Color> map) {
 		this.getVisualization().removeAction(GraphConstants.NODE_STROKE_COLOR_ACTION);
 		ColorAction conditionalColorAction = new ColorAction(GraphConstants.NODE_GROUP, VisualItem.STROKECOLOR) {
 			public int getColor(VisualItem item) {
@@ -652,6 +663,14 @@ public class GoalDrivenDFG extends Display {
 
 	public BorderNodeControl getBorderNodeControl() {
 		return borderNodeControl;
+	}
+
+	public GroupNodeControl getGroupNodeControl() {
+		return groupNodeControl;
+	}
+
+	public void setGroupNodeControl(GroupNodeControl groupNodeControl) {
+		this.groupNodeControl = groupNodeControl;
 	}
 
 	public ColorAction getNodeStrokeColorAction() {

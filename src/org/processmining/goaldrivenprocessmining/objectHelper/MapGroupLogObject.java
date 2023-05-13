@@ -1,21 +1,39 @@
 package org.processmining.goaldrivenprocessmining.objectHelper;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class MapGroupLogObject {
-	private Map<SelectedNodeGroupObject, GDPMLog> mapGroupLog;
+import graph.GoalDrivenDFG;
 
-	public Map<SelectedNodeGroupObject, GDPMLog> getMapGroupLog() {
+public class MapGroupLogObject {
+	private Map<String, GDPMLog> mapGroupLog;
+	private Map<String, GoalDrivenDFG> mapGroupDfg;
+	
+
+	public MapGroupLogObject() {
+		this.mapGroupLog = new HashMap<>();
+		this.mapGroupDfg = new HashMap<>();
+	}
+
+	public Map<String, GDPMLog> getMapGroupLog() {
 		return mapGroupLog;
 	}
 
-	public void setMapGroupLog(Map<SelectedNodeGroupObject, GDPMLog> mapGroupLog) {
+	public void setMapGroupLog(Map<String, GDPMLog> mapGroupLog) {
 		this.mapGroupLog = mapGroupLog;
 	}
 
+	public Map<String, GoalDrivenDFG> getMapGroupDfg() {
+		return mapGroupDfg;
+	}
+
+	public void setMapGroupDfg(Map<String, GoalDrivenDFG> mapGroupDfg) {
+		this.mapGroupDfg = mapGroupDfg;
+	}
+
 	public int hashCode() {
-		return Objects.hash(mapGroupLog);
+		return Objects.hash(mapGroupDfg, mapGroupLog);
 	}
 
 	public boolean equals(Object obj) {
@@ -26,8 +44,10 @@ public class MapGroupLogObject {
 		if (getClass() != obj.getClass())
 			return false;
 		MapGroupLogObject other = (MapGroupLogObject) obj;
-		return Objects.equals(mapGroupLog, other.mapGroupLog);
+		return Objects.equals(mapGroupDfg, other.mapGroupDfg) && Objects.equals(mapGroupLog, other.mapGroupLog);
 	}
+
+	
 
 	
 }

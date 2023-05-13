@@ -22,7 +22,6 @@ import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeCl
 import org.processmining.plugins.inductiveVisualMiner.animation.AnimationEnabledChangedListener;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataState;
 import org.processmining.plugins.inductiveVisualMiner.helperClasses.ControllerView;
-import org.processmining.plugins.inductiveVisualMiner.helperClasses.decoration.IvMDecoratorI;
 import org.processmining.plugins.inductiveVisualMiner.helperClasses.decoration.IvMPanel;
 
 import graph.GoalDrivenDFG;
@@ -51,9 +50,7 @@ public class GoalDrivenPanel extends IvMPanel {
 
 	public GoalDrivenPanel(GoalDrivenConfiguration configuration, ProMCanceller canceller) {
 		super(configuration.getDecorator());
-		IvMDecoratorI decorator = configuration.getDecorator();
 		setBackground(PanelConstants.BACKGROUND_COLOR);
-		int gridy = 0;
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		double sWidth = screenSize.getWidth();
 
