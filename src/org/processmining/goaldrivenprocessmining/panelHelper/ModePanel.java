@@ -28,7 +28,7 @@ public class ModePanel extends JPanel {
 	private final JButton modeDoneButton;
 
 	public ModePanel(int width) {
-		setBackground(new Color(18, 18, 18));
+//		setBackground(new Color(18, 18, 18));
 		setBounds(0,0,(int) 0.5*width, 200);
 		double modeConfigSize[][] = { { 0.25*width, 0.25*width },
 				{ TableLayoutConstants.MINIMUM, TableLayoutConstants.FILL, TableLayoutConstants.MINIMUM} };

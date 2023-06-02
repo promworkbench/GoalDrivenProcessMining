@@ -98,7 +98,6 @@ public class GoalDrivenController {
 		//miner
 		setObject(IvMObject.selected_miner, new Miner());
 		chain.setObject(IvMObject.selected_miner, (VisualMinerWrapper) new DfgMiner());
-
 		//noise threshold
 		setObject(IvMObject.selected_noise_threshold, 1.0);
 		chain.setObject(IvMObject.selected_noise_threshold, 1.0);

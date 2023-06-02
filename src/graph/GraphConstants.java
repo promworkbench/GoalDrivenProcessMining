@@ -34,7 +34,7 @@ public class GraphConstants {
 
 	//color edge
 	public static final int EDGE_STROKE_COLOR = ColorLib.rgb(255, 255, 255);
-	public static final int CLICK_EDGE_STROKE_COLOR = ColorLib.rgb(207, 102, 121);
+	public static final int CLICK_EDGE_STROKE_COLOR = ColorLib.rgb(141,108,46);
 
 	//action name
 	public static final String NODE_STROKE_COLOR_ACTION = "nodeStrokeColor";

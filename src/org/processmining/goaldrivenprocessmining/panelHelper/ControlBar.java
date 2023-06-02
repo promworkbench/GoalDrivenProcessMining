@@ -1,9 +1,10 @@
 package org.processmining.goaldrivenprocessmining.panelHelper;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -30,11 +31,10 @@ public class ControlBar extends JPanel{
 		double controllerBarSize[][] = { { 0.9 * sWidth, 0.1 * sWidth },
 				{ TableLayoutConstants.MINIMUM, TableLayoutConstants.FILL } };
 		setLayout(new TableLayout(controllerBarSize));
-		setBackground(Color.BLACK);
 		
 		//config panel: filter, activity, case buttons
 		configPanel = new JPanel();
-		configPanel.setBackground(new Color(18, 18, 18));
+		configPanel.setBackground(PanelConstants.CONTROL_BAR_BACKGROUND_COLOR);
 		{
 			add(configPanel, "0,0");
 			configPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -52,7 +52,7 @@ public class ControlBar extends JPanel{
 
 		}
 		expandPanel = new JPanel();
-		expandPanel.setBackground(new Color(18, 18, 18));
+		expandPanel.setBackground(PanelConstants.CONTROL_BAR_BACKGROUND_COLOR);
 		{
 			add(expandPanel, "1, 0");
 			expandButton = this.drawButton("Expand stat window");
@@ -64,6 +64,20 @@ public class ControlBar extends JPanel{
 		JButton button = new JButton(name);
 		button.setBackground(PanelConstants.BUTTON_BACKGROUND_COLOR);
 		button.setForeground(PanelConstants.BUTTON_FOREGROUND_COLOR);
+		
+		button.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseEntered(MouseEvent e) {
+		        button.setBackground(PanelConstants.BUTTON_HOVER_BACKGROUND_COLOR); // Change background color when mouse enters the button
+		        button.setForeground(PanelConstants.BUTTON_HOVER_FOREGROUND_COLOR); // Change text color when mouse enters the button
+		    }
+
+		    @Override
+		    public void mouseExited(MouseEvent e) {
+		        button.setBackground(PanelConstants.BUTTON_BACKGROUND_COLOR); // Restore original background color when mouse exits the button
+		        button.setForeground(PanelConstants.BUTTON_FOREGROUND_COLOR); // Restore original text color when mouse exits the button
+		    }
+		});
 		return button;
 	}
 

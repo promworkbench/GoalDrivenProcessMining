@@ -62,7 +62,6 @@ public class GoalDrivenPanel extends IvMPanel {
 		setOpaque(false);
 
 		controlBar = new ControlBar();
-		controlBar.setBackground(new Color(18, 18, 18));
 		configCards = new ConfigCards();
 
 		add(controlBar, "0, 0, 2, 0");
@@ -149,7 +148,7 @@ public class GoalDrivenPanel extends IvMPanel {
 	public GoalDrivenDFG getGraph() {
 		return graphPanel;
 	}
-	
+
 	public void setGraph(GoalDrivenDFG dfg) {
 		this.graphPanel = dfg;
 	}
@@ -157,11 +156,10 @@ public class GoalDrivenPanel extends IvMPanel {
 	public GoalDrivenDFG getGraph2() {
 		return graphPanel2;
 	}
-	
+
 	public void setGraph2(GoalDrivenDFG dfg) {
 		this.graphPanel2 = dfg;
 	}
-
 
 	public void setOnAnimationEnabledChanged(AnimationEnabledChangedListener onAnimationEnabledChanged) {
 	}
@@ -169,6 +167,5 @@ public class GoalDrivenPanel extends IvMPanel {
 	public ControllerView<DataState> getControllerView() {
 		return controllerView;
 	}
-
 
 }
