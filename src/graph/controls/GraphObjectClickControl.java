@@ -12,15 +12,16 @@ import prefuse.visual.EdgeItem;
 import prefuse.visual.VisualItem;
 import prefuse.visual.expression.InGroupPredicate;
 
-public class EdgeClickControl extends ControlAdapter {
+public class GraphObjectClickControl extends ControlAdapter {
 	private final InGroupPredicate edgeFilter = new InGroupPredicate(GraphConstants.EDGE_GROUP);
+	private final InGroupPredicate nodeFilter = new InGroupPredicate(GraphConstants.NODE_GROUP);
 
 	private DataChain<GoalDrivenConfiguration> chain;
 	
-	public EdgeClickControl() {
+	public GraphObjectClickControl() {
 	}
 
-	public EdgeClickControl(DataChain<GoalDrivenConfiguration> chain) {
+	public GraphObjectClickControl(DataChain<GoalDrivenConfiguration> chain) {
 		this.chain = chain;
 	}
 
@@ -36,8 +37,13 @@ public class EdgeClickControl extends ControlAdapter {
 			if (this.chain != null) {
 				this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues); 
 			}
-			item.getVisualization().repaint();
 		}
+		if (nodeFilter.getBoolean(item)) {
+			if (this.chain != null) {
+				this.chain.setObject(GoalDrivenObject.selected_node, item.getString(GraphConstants.LABEL_FIELD)); 
+			}
+		}
+		item.getVisualization().repaint();
 	}
 
 	public void itemEntered(VisualItem item, java.awt.event.MouseEvent e) {

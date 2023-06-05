@@ -6,13 +6,13 @@ import java.awt.Dimension;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-import org.processmining.goaldrivenprocessmining.algorithms.panel.PanelConstants;
+import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
 
 public class SidePanel extends JPanel {
 	private final BatchSelectionPopupPanel batchSelectionPopupPanel;
 	private final StatisticPanel statisticPanel;
 	public SidePanel() {
-		setBackground(PanelConstants.CONTENT_CARD_COLOR);
+		setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 		setLayout(new BorderLayout());
 		statisticPanel = new StatisticPanel();
 		batchSelectionPopupPanel = new BatchSelectionPopupPanel();
@@ -31,9 +31,9 @@ public class SidePanel extends JPanel {
 	public BatchSelectionPopupPanel getBatchSelectionPopupPanel() {
 		return batchSelectionPopupPanel;
 	}
-//	public StatisticPanel getStatisticPanel() {
-//		return statisticPanel;
-//	}
+	public StatisticPanel getStatisticPanel() {
+		return statisticPanel;
+	}
 	
 	
 }

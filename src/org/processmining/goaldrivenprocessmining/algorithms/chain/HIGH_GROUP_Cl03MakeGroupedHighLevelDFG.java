@@ -11,7 +11,7 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 import graph.GoalDrivenDFG;
-import graph.controls.EdgeClickControl;
+import graph.controls.GraphObjectClickControl;
 import graph.controls.GroupNodeControl;
 
 public class HIGH_GROUP_Cl03MakeGroupedHighLevelDFG<C> extends DataChainLinkComputationAbstract<C> {
@@ -44,8 +44,8 @@ public class HIGH_GROUP_Cl03MakeGroupedHighLevelDFG<C> extends DataChainLinkComp
 		FrequencyNodeObject frequencyNode = LogUtils.getFrequencyNodeObject(log,
 				log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString());
 		GoalDrivenDFG dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.after_grouping_high_level_log), frequencyEdge, frequencyNode);
-		dfg.setEdgeClickControl(new EdgeClickControl(((GoalDrivenConfiguration) configuration).getChain()));
-		dfg.addControlListener(new EdgeClickControl(((GoalDrivenConfiguration) configuration).getChain()));
+		dfg.setEdgeClickControl(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
+		dfg.addControlListener(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 		GroupNodeControl groupNodeControl = new GroupNodeControl(dfg.getGraph().getNodeTable(),
 				((GoalDrivenConfiguration) configuration).getChain());
 		dfg.setGroupNodeControl(groupNodeControl);

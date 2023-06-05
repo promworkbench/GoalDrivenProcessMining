@@ -29,7 +29,7 @@ import graph.controls.BackgroundDoubleClickControl;
 import graph.controls.BorderNodeControl;
 import graph.controls.CustomPanControl;
 import graph.controls.DragMultipleNodesControl;
-import graph.controls.EdgeClickControl;
+import graph.controls.GraphObjectClickControl;
 import graph.controls.GroupNodeControl;
 import graph.controls.SelectMultipleNodesControl;
 import graph.controls.SquareSelectControl;
@@ -74,7 +74,7 @@ public class GoalDrivenDFG extends Display {
 	private FocusControl focusControl;
 	private DragMultipleNodesControl dragMultipleNodesControl;
 	private BorderNodeControl borderNodeControl;
-	private EdgeClickControl edgeClickControl;
+	private GraphObjectClickControl edgeClickControl;
 	private SquareSelectControl squareSelectControl;
 	private GroupNodeControl groupNodeControl;
 	// action
@@ -721,11 +721,11 @@ public class GoalDrivenDFG extends Display {
 		return frequencyNode;
 	}
 
-	public EdgeClickControl getEdgeClickControl() {
+	public GraphObjectClickControl getEdgeClickControl() {
 		return edgeClickControl;
 	}
 
-	public void setEdgeClickControl(EdgeClickControl edgeClickControl) {
+	public void setEdgeClickControl(GraphObjectClickControl edgeClickControl) {
 		this.edgeClickControl = edgeClickControl;
 	}
 

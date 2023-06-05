@@ -14,6 +14,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
+import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLog;
 import org.processmining.goaldrivenprocessmining.panelHelper.ConfigCards;
 import org.processmining.goaldrivenprocessmining.panelHelper.ControlBar;
@@ -50,7 +51,7 @@ public class GoalDrivenPanel extends IvMPanel {
 
 	public GoalDrivenPanel(GoalDrivenConfiguration configuration, ProMCanceller canceller) {
 		super(configuration.getDecorator());
-		setBackground(PanelConstants.BACKGROUND_COLOR);
+		setBackground(GoalDrivenConstants.BACKGROUND_COLOR);
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		double sWidth = screenSize.getWidth();
 
@@ -79,25 +80,25 @@ public class GoalDrivenPanel extends IvMPanel {
 		add(layeredPanel, "0, 1, 2, 1");
 		//controls the margin on the left side of the settings panel
 		sidePanel = new SidePanel();
-		sidePanel.setBorder(PanelConstants.BETWEEN_PANEL_BORDER);
+		sidePanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 		contentPanel.add(sidePanel, "2, 1");
 
 		//graph panel
 		{
 			GDPMLog log = null;
 			graphPanel = new GoalDrivenDFG(log);
-			graphPanel.setBorder(PanelConstants.BETWEEN_PANEL_BORDER);
+			graphPanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 			contentPanel.add(graphPanel, "0, 1");
-			graphPanel.setBackground(PanelConstants.CONTENT_CARD_COLOR);
+			graphPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 
 		}
 
 		{
 			GDPMLog log = null;
 			graphPanel2 = new GoalDrivenDFG(log);
-			graphPanel2.setBorder(PanelConstants.BETWEEN_PANEL_BORDER);
+			graphPanel2.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 			contentPanel.add(graphPanel2, "1, 1");
-			graphPanel2.setBackground(PanelConstants.CONTENT_CARD_COLOR);
+			graphPanel2.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 
 		}
 

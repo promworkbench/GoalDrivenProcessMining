@@ -7,7 +7,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.processmining.goaldrivenprocessmining.algorithms.panel.PanelConstants;
+import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
 
 public class BatchSelectionPopupPanel extends JPanel {
 	
@@ -16,7 +16,7 @@ public class BatchSelectionPopupPanel extends JPanel {
 	private JTextField groupNameField;
 	public BatchSelectionPopupPanel() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBackground(PanelConstants.SIDE_PANEL_CARD_COLOR);
+		setBackground(GoalDrivenConstants.SIDE_PANEL_CARD_COLOR);
 		groupNameField = new JTextField(5);
         Dimension preferredSize = groupNameField.getPreferredSize();
         groupNameField.setMaximumSize(new Dimension(Integer.MAX_VALUE, preferredSize.height));

@@ -580,6 +580,29 @@ public class GoalDrivenController {
 					}
 
 				});
+		//stat panel in side panel
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+			public String getName() {
+				return "update stat for selected objects";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.stat_selected_node };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				if (inputs.has(GoalDrivenObject.stat_selected_node)) {
+					panel.getSidePanel().getStatisticPanel()
+							.setContentMap(inputs.get(GoalDrivenObject.stat_selected_node).getStatValueHashMap());
+					panel.getSidePanel().getStatisticPanel().updateStatistics();
+					panel.revalidate();
+					panel.repaint();
+				}
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+			}
+		});
 	}
 
 	protected void initGuiUniqueValue() {

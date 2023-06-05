@@ -17,6 +17,7 @@ import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_GROUP_Cl0
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_Cl01MakeLowLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_Cl02MakeLowLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_Cl03UpdateCategoryLowLevelDFG;
+import org.processmining.goaldrivenprocessmining.algorithms.chain.STAT_Node;
 import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
 import org.processmining.plugins.inductiveVisualMiner.alignment.AlignmentComputer;
 import org.processmining.plugins.inductiveVisualMiner.alignment.AlignmentComputerImpl;
@@ -70,6 +71,7 @@ public class GoalDrivenConfigurationDefault extends GoalDrivenConfigurationAbstr
 		chain.register(new LOW_Cl01MakeLowLevelLog<GoalDrivenConfiguration>());
 		chain.register(new LOW_Cl02MakeLowLevelDFG<GoalDrivenConfiguration>());
 		chain.register(new LOW_Cl03UpdateCategoryLowLevelDFG<GoalDrivenConfiguration>());
+		chain.register(new STAT_Node<GoalDrivenConfiguration>());
 		return chain;
 	}
 

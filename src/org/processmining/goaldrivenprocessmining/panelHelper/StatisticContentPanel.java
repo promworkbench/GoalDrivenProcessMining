@@ -16,56 +16,60 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
-import org.processmining.goaldrivenprocessmining.algorithms.panel.PanelConstants;
+import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
 
 public class StatisticContentPanel extends JPanel {
 
 	public StatisticContentPanel(Map<String, String> keyValueMap, String headerText) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBackground(PanelConstants.STATISTIC_PANEL_BACKGROUND_COLOR);
+		setBackground(GoalDrivenConstants.STATISTIC_PANEL_BACKGROUND_COLOR);
 		setBorder(BorderFactory.createLineBorder(Color.RED));
 		// Create and add the header label
 		add(Box.createVerticalStrut(10));
-		JLabel headerLabel = new JLabel(headerText);
-		headerLabel.setForeground(Color.WHITE);
-		headerLabel.setFont(headerLabel.getFont().deriveFont(Font.BOLD, 16f));
-		headerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-		add(headerLabel);
-		
+		if (headerText != null) {
+			JLabel headerLabel = new JLabel(headerText);
+			headerLabel.setForeground(Color.WHITE);
+			headerLabel.setFont(headerLabel.getFont().deriveFont(Font.BOLD, 16f));
+			headerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+			add(headerLabel);
+		}
 		int spacing = 10;
         add(Box.createVerticalStrut(20));
-        JPanel childPanel = new JPanel();
-        childPanel.setLayout(new GridLayout(0, 1));
 		// Add a JPanel for each key-value pair
-		for (Map.Entry<String, String> entry : keyValueMap.entrySet()) {
-			JPanel entryPanel = new JPanel();
-			entryPanel.setLayout(new BoxLayout(entryPanel, BoxLayout.Y_AXIS));
+        if (!keyValueMap.isEmpty()) {
+        	JPanel childPanel = new JPanel();
+            childPanel.setLayout(new GridLayout(0, 1));
+        	for (Map.Entry<String, String> entry : keyValueMap.entrySet()) {
+    			JPanel entryPanel = new JPanel();
+    			entryPanel.setLayout(new BoxLayout(entryPanel, BoxLayout.Y_AXIS));
 
-			JLabel keyLabel = new JLabel(entry.getKey());
-			keyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-			JLabel valueLabel = new JLabel(entry.getValue());
-			 // Set background color to RGB(23, 157, 247)
-            entryPanel.setBackground(new Color(23, 157, 247));
+    			JLabel keyLabel = new JLabel(entry.getKey());
+    			keyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+    			JLabel valueLabel = new JLabel(entry.getValue());
+    			 // Set background color to RGB(23, 157, 247)
+                entryPanel.setBackground(new Color(23, 157, 247));
 
-            // Set foreground color to white
-            keyLabel.setForeground(Color.WHITE);
-            valueLabel.setForeground(Color.WHITE);
+                // Set foreground color to white
+                keyLabel.setForeground(Color.WHITE);
+                valueLabel.setForeground(Color.WHITE);
 
-            // Set black border
-            entryPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-            entryPanel.add(keyLabel);
-			entryPanel.add(valueLabel);
+                // Set black border
+                entryPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                entryPanel.add(keyLabel);
+    			entryPanel.add(valueLabel);
 
-			childPanel.add(entryPanel);
-			
-			// Add spacing between child panels
-            entryPanel.setBorder(BorderFactory.createCompoundBorder(
-                entryPanel.getBorder(),
-                new EmptyBorder(spacing, spacing, spacing, spacing)
-            ));
-            add(Box.createVerticalStrut(10));
-		}
-		add(childPanel);
+    			childPanel.add(entryPanel);
+    			
+    			// Add spacing between child panels
+                entryPanel.setBorder(BorderFactory.createCompoundBorder(
+                    entryPanel.getBorder(),
+                    new EmptyBorder(spacing, spacing, spacing, spacing)
+                ));
+                add(Box.createVerticalStrut(10));
+    		}
+    		add(childPanel);
+        }
+		
 	}
 	public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

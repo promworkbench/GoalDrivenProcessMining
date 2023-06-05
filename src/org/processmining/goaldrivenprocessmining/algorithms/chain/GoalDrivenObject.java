@@ -10,7 +10,9 @@ import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategor
 import org.processmining.goaldrivenprocessmining.objectHelper.MapEdgeStrokeWidth;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapGroupLogObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapNodeFillColor;
+import org.processmining.goaldrivenprocessmining.objectHelper.MapStatObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.SelectedNodeGroupObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
 
@@ -32,7 +34,9 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 			AttributeClassifier[].class);
 	public static final IvMObject<AttributeClassifier[]> unselected_unique_values = c("unselected unique values",
 			AttributeClassifier[].class);
-
+	public static final IvMObject<String> selected_node = c("selected node", String.class);
+	public static final IvMObject<StatNodeObject> stat_selected_node = c("stat of the selected node",
+			StatNodeObject.class);
 	// im log in high level
 	public static final IvMObject<AttributeClassifier[]> all_unique_values = c("all unique values",
 			AttributeClassifier[].class);
@@ -63,12 +67,18 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 			MapNodeFillColor.class);
 	public static final IvMObject<MapEdgeStrokeWidth> map_edge_stroke_width = c("Mapping for edge stroke width",
 			MapEdgeStrokeWidth.class);
-	public static final IvMObject<SelectedNodeGroupObject> batch_selected_nodes = c("Batch selected nodes from GUI", SelectedNodeGroupObject.class);
-	public static final IvMObject<GDPMLog> after_grouping_high_level_log = c("high-level log after grouping nodes", GDPMLog.class);
-	public static final IvMObject<Boolean> is_in_group_mode = c("if users are choosing the grouping mode", Boolean.class);
-	public static final IvMObject<MapGroupLogObject> map_group_log = c("mapping from group to log", MapGroupLogObject.class);
+	public static final IvMObject<SelectedNodeGroupObject> batch_selected_nodes = c("Batch selected nodes from GUI",
+			SelectedNodeGroupObject.class);
+	public static final IvMObject<GDPMLog> after_grouping_high_level_log = c("high-level log after grouping nodes",
+			GDPMLog.class);
+	public static final IvMObject<Boolean> is_in_group_mode = c("if users are choosing the grouping mode",
+			Boolean.class);
+	public static final IvMObject<MapGroupLogObject> map_group_log = c("mapping from group to log",
+			MapGroupLogObject.class);
 	public static final IvMObject<String> selected_group = c("selected group name from high-level dfg", String.class);
 
+	//Stat
+	public static final IvMObject<MapStatObject> stat = c("stat of a log", MapStatObject.class);
 	public GoalDrivenObject(String name, Class<C> clazz) {
 		super(name, clazz);
 	}

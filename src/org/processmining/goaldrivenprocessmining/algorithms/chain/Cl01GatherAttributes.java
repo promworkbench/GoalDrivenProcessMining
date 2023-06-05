@@ -8,6 +8,7 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
+import org.processmining.goaldrivenprocessmining.algorithms.StatUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyEdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyNodeObject;
@@ -43,7 +44,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 	public IvMObject<?>[] createOutputObjects() {
 		return new IvMObject<?>[] { GoalDrivenObject.full_xlog, GoalDrivenObject.all_unique_values,
 				GoalDrivenObject.selected_unique_values, GoalDrivenObject.unselected_unique_values,
-				GoalDrivenObject.map_node_fill_color, GoalDrivenObject.map_edge_stroke_width };
+				GoalDrivenObject.map_node_fill_color, GoalDrivenObject.map_edge_stroke_width, GoalDrivenObject.stat };
 	}
 
 	@Override
@@ -62,12 +63,13 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		MapEdgeStrokeWidth mapEdgeStrokeWidth = new MapEdgeStrokeWidth();	
 		mapEdgeStrokeWidth.setMapEdgeStrokeWidth(GraphEdgeUtils.getMapFreqStrokeWidth(frequencyEdges));
 		return new IvMObjectValues().//
-				s(GoalDrivenObject.full_xlog, log)
-				.s(GoalDrivenObject.unselected_unique_values, valuesDistribution.get(1))
-				.s(GoalDrivenObject.selected_unique_values, valuesDistribution.get(0)).// 
+				s(GoalDrivenObject.full_xlog, log).
+				s(GoalDrivenObject.unselected_unique_values, valuesDistribution.get(1)).
+				s(GoalDrivenObject.selected_unique_values, valuesDistribution.get(0)).// 
 				s(GoalDrivenObject.all_unique_values, valuesDistribution.get(2)).
 				s(GoalDrivenObject.map_node_fill_color, mapNodeFillColor).
-				s(GoalDrivenObject.map_edge_stroke_width, mapEdgeStrokeWidth);
+				s(GoalDrivenObject.map_edge_stroke_width, mapEdgeStrokeWidth).
+				s(GoalDrivenObject.stat, StatUtils.computeStatNodeFromLog(log, classifier.toString(), "time:timestamp"));
 	}
 
 	private List<AttributeClassifier[]> getAllUniqueValues(XLog log, AttributeClassifier classifier) {
