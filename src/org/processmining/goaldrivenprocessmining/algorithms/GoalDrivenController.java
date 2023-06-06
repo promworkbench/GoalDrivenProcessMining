@@ -117,7 +117,7 @@ public class GoalDrivenController {
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				if (inputs.has(GoalDrivenObject.high_level_dfg)) {
-					panel.getGraph().updateDFG(inputs.get(GoalDrivenObject.high_level_dfg));
+					panel.getHighDfgPanel().updateDFG(inputs.get(GoalDrivenObject.high_level_dfg));
 					panel.revalidate();
 					panel.repaint();
 				}
@@ -171,7 +171,7 @@ public class GoalDrivenController {
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				if (inputs.has(GoalDrivenObject.low_level_dfg)) {
-					panel.getGraph2().updateDFG(inputs.get(GoalDrivenObject.low_level_dfg));
+					panel.getLowDfgPanel().updateDFG(inputs.get(GoalDrivenObject.low_level_dfg));
 					panel.revalidate();
 					panel.repaint();
 				}
@@ -234,15 +234,15 @@ public class GoalDrivenController {
 				if (label.equals("Collapse")) {
 					double sizeContent[][] = { { 0.5 * sWidth, 0.5 * sWidth }, { TableLayoutConstants.FILL } };
 					panel.getContentPanel().setLayout(new TableLayout(sizeContent));
-					panel.getContentPanel().add(panel.getGraph(), "0,0");
-					panel.getContentPanel().add(panel.getGraph2(), "1,0");
+					panel.getContentPanel().add(panel.getHighDfgPanel(), "0,0");
+					panel.getContentPanel().add(panel.getLowDfgPanel(), "1,0");
 					panel.getControlBar().getExpandButton().setText("Expand stat window");
 				} else {
 					double sizeContent[][] = { { 0.37 * sWidth, 0.37 * sWidth, 0.26 * sWidth },
 							{ TableLayoutConstants.FILL } };
 					panel.getContentPanel().setLayout(new TableLayout(sizeContent));
-					panel.getContentPanel().add(panel.getGraph(), "0,0");
-					panel.getContentPanel().add(panel.getGraph2(), "1,0");
+					panel.getContentPanel().add(panel.getHighDfgPanel(), "0,0");
+					panel.getContentPanel().add(panel.getLowDfgPanel(), "1,0");
 					panel.getContentPanel().add(panel.getSidePanel(), "2,0");
 					panel.getControlBar().getExpandButton().setText("Collapse stat window");
 				}
@@ -558,8 +558,8 @@ public class GoalDrivenController {
 		panel.getSidePanel().getBatchSelectionPopupPanel().getGroupNodeButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				List<String> selectedNode = new ArrayList<>();
-				Table nodeTable = panel.getGraph().getGraph().getNodeTable();
-				Visualization vis = panel.getGraph().getVisualization();
+				Table nodeTable = panel.getHighDfgPanel().getGraph().getNodeTable();
+				Visualization vis = panel.getHighDfgPanel().getVisualization();
 				List<VisualItem> allVisualItems = GraphNodeUtils.getAllNodes(vis, nodeTable);
 				for (VisualItem item : allVisualItems) {
 					if (item.getBoolean(GraphConstants.SELECT_FIELD)) {

@@ -1,12 +1,15 @@
 package org.processmining.goaldrivenprocessmining.algorithms.panel;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Insets;
 import java.awt.Toolkit;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
@@ -35,8 +38,11 @@ public class GoalDrivenPanel extends IvMPanel {
 	private static final Insets margins = new Insets(2, 0, 0, 0);
 
 	//gui elements
-	private GoalDrivenDFG graphPanel;
-	private GoalDrivenDFG graphPanel2;
+	private final JPanel contentLeftPanel;
+	private final JPanel contentRightPanel;
+	private GoalDrivenDFG highDfgPanel;
+	private GoalDrivenDFG lowDfgPanel;
+	private JLabel lowDfgTitle;
 	//stat sidebar
 	private final SidePanel sidePanel;
 	//config elemnets
@@ -46,8 +52,6 @@ public class GoalDrivenPanel extends IvMPanel {
 	private final JLayeredPane layeredPanel;
 
 	private final ControllerView<DataState> controllerView;
-
-	public static final String title = "visual Miner";
 
 	public GoalDrivenPanel(GoalDrivenConfiguration configuration, ProMCanceller canceller) {
 		super(configuration.getDecorator());
@@ -80,25 +84,47 @@ public class GoalDrivenPanel extends IvMPanel {
 		add(layeredPanel, "0, 1, 2, 1");
 		//controls the margin on the left side of the settings panel
 		sidePanel = new SidePanel();
-		sidePanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
+//		sidePanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 		contentPanel.add(sidePanel, "2, 1");
 
 		//graph panel
 		{
+			contentLeftPanel = new JPanel();
+			contentLeftPanel.setLayout(new BorderLayout());
+			contentLeftPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_BACKGROUND_COLOR);
+			contentLeftPanel.setBorder(BorderFactory.createEmptyBorder(10,5,0,5));
+			JLabel hightitle = new JLabel("High-level DFG:");
+			hightitle.setForeground(Color.WHITE);
+			hightitle.setFont(new Font(getFont().getFontName(), Font.BOLD, 20));
+			contentLeftPanel.add(hightitle, BorderLayout.NORTH);
 			GDPMLog log = null;
-			graphPanel = new GoalDrivenDFG(log);
-			graphPanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
-			contentPanel.add(graphPanel, "0, 1");
-			graphPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
-
+			highDfgPanel = new GoalDrivenDFG(log);
+			highDfgPanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
+			highDfgPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
+			contentLeftPanel.add(highDfgPanel, BorderLayout.CENTER);
+			
+			contentPanel.add(contentLeftPanel, "0, 1");
+			
 		}
 
 		{
+			contentRightPanel = new JPanel();
+			contentRightPanel.setLayout(new BorderLayout());
+			contentRightPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_BACKGROUND_COLOR);
+			contentRightPanel.setBorder(BorderFactory.createEmptyBorder(10,5,0,5));
+			JLabel lowtitle = new JLabel("Low-level DFG: ");
+			lowtitle.setForeground(Color.WHITE);
+			lowtitle.setFont(new Font(getFont().getFontName(), Font.BOLD, 20));
+			lowDfgTitle = new JLabel("");
+			lowDfgTitle.setForeground(Color.WHITE);
+			lowDfgTitle.setFont(new Font(getFont().getFontName(), Font.BOLD, 20));
+			contentRightPanel.add(lowtitle, BorderLayout.NORTH);
 			GDPMLog log = null;
-			graphPanel2 = new GoalDrivenDFG(log);
-			graphPanel2.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
-			contentPanel.add(graphPanel2, "1, 1");
-			graphPanel2.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
+			lowDfgPanel = new GoalDrivenDFG(log);
+			lowDfgPanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
+			lowDfgPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
+			contentRightPanel.add(lowDfgPanel, BorderLayout.CENTER);
+			contentPanel.add(contentRightPanel, "1, 1");
 
 		}
 
@@ -146,20 +172,28 @@ public class GoalDrivenPanel extends IvMPanel {
 		return configCards;
 	}
 
-	public GoalDrivenDFG getGraph() {
-		return graphPanel;
+	public GoalDrivenDFG getHighDfgPanel() {
+		return highDfgPanel;
 	}
 
-	public void setGraph(GoalDrivenDFG dfg) {
-		this.graphPanel = dfg;
+	public void setHighDfgPanel(GoalDrivenDFG dfg) {
+		this.highDfgPanel = dfg;
 	}
 
-	public GoalDrivenDFG getGraph2() {
-		return graphPanel2;
+	public GoalDrivenDFG getLowDfgPanel() {
+		return lowDfgPanel;
 	}
 
-	public void setGraph2(GoalDrivenDFG dfg) {
-		this.graphPanel2 = dfg;
+	public void setLowDfgPanel(GoalDrivenDFG dfg) {
+		this.lowDfgPanel = dfg;
+	}
+
+	public JPanel getContentLeftPanel() {
+		return contentLeftPanel;
+	}
+
+	public JPanel getContentRightPanel() {
+		return contentRightPanel;
 	}
 
 	public void setOnAnimationEnabledChanged(AnimationEnabledChangedListener onAnimationEnabledChanged) {
