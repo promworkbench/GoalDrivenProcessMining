@@ -1,6 +1,7 @@
 package org.processmining.goaldrivenprocessmining.algorithms;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,5 +35,6 @@ public class GoalDrivenConstants {
 	public static final Color BUTTON_FOREGROUND_COLOR = Color.BLACK;
 	public static final Color BUTTON_HOVER_BACKGROUND_COLOR = Color.WHITE;
 	public static final Color BUTTON_HOVER_FOREGROUND_COLOR = Color.BLACK;
-
+	// Font
+	public static final Font BOLD_BIG_FONT = new Font("Dialog", Font.BOLD, 20);
 }

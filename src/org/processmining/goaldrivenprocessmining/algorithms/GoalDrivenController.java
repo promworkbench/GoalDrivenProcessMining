@@ -1,8 +1,9 @@
 package org.processmining.goaldrivenprocessmining.algorithms;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -41,11 +42,11 @@ import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.VisualM
 import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.DfgMiner;
 import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.Miner;
 
+import com.google.gwt.dev.util.collect.HashMap;
+
 import graph.GoalDrivenDFG;
 import graph.GraphConstants;
 import graph.utils.node.GraphNodeUtils;
-import info.clearthought.layout.TableLayout;
-import info.clearthought.layout.TableLayoutConstants;
 import prefuse.Visualization;
 import prefuse.data.Table;
 import prefuse.visual.VisualItem;
@@ -166,12 +167,20 @@ public class GoalDrivenController {
 			}
 
 			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.low_level_dfg };
+				return new IvMObject<?>[] { GoalDrivenObject.low_level_dfg, GoalDrivenObject.selected_source_target_node };
 			}
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				if (inputs.has(GoalDrivenObject.low_level_dfg)) {
 					panel.getLowDfgPanel().updateDFG(inputs.get(GoalDrivenObject.low_level_dfg));
+					panel.revalidate();
+					panel.repaint();
+				}
+				if (inputs.has(GoalDrivenObject.selected_source_target_node)) {
+					HashMap<String, Object> passValues = inputs.get(GoalDrivenObject.selected_source_target_node);
+					String source = (String) passValues.get("source");
+					String target = (String) passValues.get("target");
+					panel.getLowDfgTitle().setText("Low-level DFG: " + source + " --> " + target);
 					panel.revalidate();
 					panel.repaint();
 				}
@@ -224,26 +233,28 @@ public class GoalDrivenController {
 
 			public void actionPerformed(ActionEvent e) {
 				String label = panel.getControlBar().getExpandButton().getText().split(" ")[0];
-				Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-				double sWidth = screenSize.getWidth();
-				double size[][] = { { 0.5 * sWidth, 0.5 * sWidth },
-						{ TableLayoutConstants.MINIMUM, TableLayoutConstants.FILL } };
-				panel.setLayout(new TableLayout(size));
-				panel.add(panel.getControlBar(), "0,0,1,0");
-				panel.add(panel.getLayeredPanel(), "0,1,1,1");
+				panel.setLayout(new BorderLayout());
+				panel.add(panel.getControlBar(), BorderLayout.NORTH);
+				panel.add(panel.getLayeredPanel(), BorderLayout.CENTER);
 				if (label.equals("Collapse")) {
-					double sizeContent[][] = { { 0.5 * sWidth, 0.5 * sWidth }, { TableLayoutConstants.FILL } };
-					panel.getContentPanel().setLayout(new TableLayout(sizeContent));
-					panel.getContentPanel().add(panel.getHighDfgPanel(), "0,0");
-					panel.getContentPanel().add(panel.getLowDfgPanel(), "1,0");
+					panel.getContentPanel().setLayout(new GridBagLayout());
+					GridBagConstraints gbcHighDfgPanel = GoalDrivenPanel.createGridBagConstraints(0, 0, 0.5);
+					panel.getContentLeftPanel().add(panel.getHighDfgPanel());
+					panel.getContentPanel().add(panel.getContentLeftPanel(), gbcHighDfgPanel);
+					GridBagConstraints gbcLowDfgPanel = GoalDrivenPanel.createGridBagConstraints(1, 0, 0.5);
+					panel.getContentRightPanel().add(panel.getLowDfgPanel());
+					panel.getContentPanel().add(panel.getContentRightPanel(), gbcLowDfgPanel);
 					panel.getControlBar().getExpandButton().setText("Expand stat window");
 				} else {
-					double sizeContent[][] = { { 0.37 * sWidth, 0.37 * sWidth, 0.26 * sWidth },
-							{ TableLayoutConstants.FILL } };
-					panel.getContentPanel().setLayout(new TableLayout(sizeContent));
-					panel.getContentPanel().add(panel.getHighDfgPanel(), "0,0");
-					panel.getContentPanel().add(panel.getLowDfgPanel(), "1,0");
-					panel.getContentPanel().add(panel.getSidePanel(), "2,0");
+					panel.getContentPanel().setLayout(new GridBagLayout());
+					GridBagConstraints gbcHighDfgPanel = GoalDrivenPanel.createGridBagConstraints(0, 0, 0.37);
+					panel.getContentLeftPanel().add(panel.getHighDfgPanel());
+					panel.getContentPanel().add(panel.getContentLeftPanel(), gbcHighDfgPanel);
+					GridBagConstraints gbcLowDfgPanel = GoalDrivenPanel.createGridBagConstraints(1, 0, 0.37);
+					panel.getContentRightPanel().add(panel.getLowDfgPanel());
+					panel.getContentPanel().add(panel.getContentRightPanel(), gbcLowDfgPanel);
+					GridBagConstraints gbcSidePanel = GoalDrivenPanel.createGridBagConstraints(2, 0, 0.24);
+					panel.getContentPanel().add(panel.getSidePanel(), gbcSidePanel);
 					panel.getControlBar().getExpandButton().setText("Collapse stat window");
 				}
 

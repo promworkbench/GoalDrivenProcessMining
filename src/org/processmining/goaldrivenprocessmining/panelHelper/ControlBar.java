@@ -55,7 +55,7 @@ public class ControlBar extends JPanel{
 		expandPanel.setBackground(GoalDrivenConstants.CONTROL_BAR_BACKGROUND_COLOR);
 		{
 			add(expandPanel, "1, 0");
-			expandButton = this.drawButton("Expand stat window");
+			expandButton = this.drawButton("Collapse stat window");
 			expandPanel.add(expandButton);
 		}
 	}
