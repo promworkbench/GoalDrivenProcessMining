@@ -21,6 +21,7 @@ import graph.controls.GroupNodeControl;
 
 public class HIGH_GROUP_Cl04MakeGroupedLog<C> extends DataChainLinkComputationAbstract<C> {
 	private MapGroupLogObject mapGroupLogObject = null;
+	private XLog currentLog = null;
 
 	public String getName() {
 		return "Make the log for the selected nodes";
@@ -45,6 +46,9 @@ public class HIGH_GROUP_Cl04MakeGroupedLog<C> extends DataChainLinkComputationAb
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
 		System.out.println("--- HIGH_GROUP_Cl04MakeGroupedLog");
 		XLog log = inputs.get(GoalDrivenObject.high_level_log).getLog();
+		if (!log.equals(currentLog)) {
+			
+		}
 		SelectedNodeGroupObject selectedNode = inputs.get(GoalDrivenObject.batch_selected_nodes);
 		GDPMLog gdpmLog = LogUtils.projectLogOnSetActivities(log, selectedNode.getListNodeLabel());
 		LogUtils.setUpMapNodeType(gdpmLog, Arrays.asList(""));

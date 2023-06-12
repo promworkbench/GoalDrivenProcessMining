@@ -14,9 +14,7 @@ import java.util.List;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -46,9 +44,9 @@ import com.google.gwt.dev.util.collect.HashMap;
 
 import graph.GoalDrivenDFG;
 import graph.GraphConstants;
+import graph.controls.GroupNodeControl;
 import graph.utils.node.GraphNodeUtils;
 import prefuse.Visualization;
-import prefuse.data.Table;
 import prefuse.visual.VisualItem;
 
 public class GoalDrivenController {
@@ -127,6 +125,7 @@ public class GoalDrivenController {
 			public void invalidate(GoalDrivenPanel panel) {
 			}
 		});
+
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
 			public String getName() {
 				return "group log";
@@ -139,17 +138,19 @@ public class GoalDrivenController {
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				System.out.println("--- group log ---");
 				if (inputs.has(GoalDrivenObject.map_group_log)) {
-					GoalDrivenDFG groupDfg = inputs.get(GoalDrivenObject.map_group_log).getMapGroupDfg()
-							.get(inputs.get(GoalDrivenObject.selected_group));
-					JFrame frame = new JFrame("Subprocess");
-					JPanel p = new JPanel();
-					p.setBackground(Color.BLACK);
-					p.add(groupDfg);
-					groupDfg.setBackground(Color.BLACK);
-					frame.getContentPane().add(p);
-					frame.pack();
-					frame.setEnabled(true);
-					frame.setVisible(true);
+					if (GroupNodeControl.isGroupNodeClicked) {
+						GoalDrivenDFG groupDfg = inputs.get(GoalDrivenObject.map_group_log).getMapGroupDfg()
+								.get(inputs.get(GoalDrivenObject.selected_group));
+						groupDfg.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
+						groupDfg.addSeeOnlyControls();
+						panel.getSidePanel().getStatisticPanel().getStatPane()
+								.addTab(inputs.get(GoalDrivenObject.selected_group), groupDfg);
+						panel.getSidePanel().revalidate();
+						panel.getSidePanel().repaint();
+						panel.revalidate();
+						panel.repaint();
+					}
+					GroupNodeControl.isGroupNodeClicked = false;
 				}
 			}
 
@@ -167,7 +168,8 @@ public class GoalDrivenController {
 			}
 
 			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.low_level_dfg, GoalDrivenObject.selected_source_target_node };
+				return new IvMObject<?>[] { GoalDrivenObject.low_level_dfg,
+						GoalDrivenObject.selected_source_target_node };
 			}
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
@@ -569,9 +571,8 @@ public class GoalDrivenController {
 		panel.getSidePanel().getBatchSelectionPopupPanel().getGroupNodeButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				List<String> selectedNode = new ArrayList<>();
-				Table nodeTable = panel.getHighDfgPanel().getGraph().getNodeTable();
 				Visualization vis = panel.getHighDfgPanel().getVisualization();
-				List<VisualItem> allVisualItems = GraphNodeUtils.getAllNodes(vis, nodeTable);
+				List<VisualItem> allVisualItems = GraphNodeUtils.getAllNodes(vis);
 				for (VisualItem item : allVisualItems) {
 					if (item.getBoolean(GraphConstants.SELECT_FIELD)) {
 						selectedNode.add(item.getString(GraphConstants.LABEL_FIELD));

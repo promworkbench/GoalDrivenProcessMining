@@ -16,7 +16,7 @@ public class GoalDrivenConstants {
 			);
 	// Color in panel
 	public static final Color BACKGROUND_COLOR = new Color(32,46,59);
-	public static final Color CONTENT_CARD_COLOR = new Color(36,52,67);
+	public static final Color CONTENT_CARD_COLOR = new Color(32,46,59);
 	public static final Color CONTENT_CARD_BACKGROUND_COLOR = new Color(54,77,99);
 	public static final Color SIDE_PANEL_CARD_COLOR = new Color(255, 255, 255);
 	public static final Color STATISTIC_PANEL_BACKGROUND_COLOR = new Color(34, 51, 64);
@@ -24,12 +24,12 @@ public class GoalDrivenConstants {
 	public static final Color STATISTIC_PANEL_TAB_UNSELECTED_COLOR = new Color(100, 138, 170);
 	public static final Color CONTROL_BAR_BACKGROUND_COLOR = new Color(32,46,59);
 	// Color in border
-	public static final Color BORDER_COLOR = new Color(32,46,59);
+	public static final Color BORDER_COLOR = new Color(36,52,67);
 	// Border
 	public static final Border BETWEEN_PANEL_BORDER = BorderFactory.createLineBorder(GoalDrivenConstants.BORDER_COLOR,
-			5, false);
-	public static final Border BETWEEN_CARD_BORDER = BorderFactory.createLineBorder(GoalDrivenConstants.BORDER_COLOR,
-			15, false);
+			6, false);
+//	public static final Border BETWEEN_CARD_BORDER = BorderFactory.createLineBorder(GoalDrivenConstants.BORDER_COLOR,
+//			15, false);
 	// Button
 	public static final Color BUTTON_BACKGROUND_COLOR = new Color(196, 201, 205);
 	public static final Color BUTTON_FOREGROUND_COLOR = Color.BLACK;

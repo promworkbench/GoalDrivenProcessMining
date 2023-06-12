@@ -1,10 +1,12 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
-import org.deckfour.xes.model.XLog;
+import java.util.Arrays;
+
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.goaldrivenprocessmining.algorithms.LogUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyEdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyNodeObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLog;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
@@ -27,7 +29,7 @@ public class HIGH_GROUP_Cl05UngroupHighLevelDFG<C> extends DataChainLinkComputat
 
 	@Override
 	public IvMObject<?>[] createInputObjects() {
-		return new IvMObject<?>[] { GoalDrivenObject.is_in_group_mode, GoalDrivenObject.high_level_log };
+		return new IvMObject<?>[] { GoalDrivenObject.is_in_group_mode };
 	}
 
 	@Override
@@ -38,26 +40,27 @@ public class HIGH_GROUP_Cl05UngroupHighLevelDFG<C> extends DataChainLinkComputat
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
 		System.out.println("--- HIGH_GROUP_Cl05UngroupHighLevelDFG");
 		if (inputs.get(GoalDrivenObject.is_in_group_mode)) {
-			XLog log = inputs.get(GoalDrivenObject.high_level_log).getLog();
-			FrequencyEdgeObject frequencyEdge = LogUtils.getFrequencyEdges(log,
-					log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString());
-			FrequencyNodeObject frequencyNode = LogUtils.getFrequencyNodeObject(log,
-					log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString());
-			GoalDrivenDFG dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.high_level_log), frequencyEdge, frequencyNode);
+			GDPMLog gdpmLog = HIGH_Cl01MakeHighLevelLog.originalHighLog;
+			String classifier = gdpmLog.getLog().getClassifiers().get(0).getDefiningAttributeKeys()[0].toString();
+			LogUtils.setUpMapNodeType(gdpmLog, Arrays.asList(""));
+			HIGH_Cl01MakeHighLevelLog.currentHighLog = gdpmLog;
+
+			FrequencyEdgeObject frequencyEdge = LogUtils.getFrequencyEdges(gdpmLog.getLog(), classifier);
+			FrequencyNodeObject frequencyNode = LogUtils.getFrequencyNodeObject(gdpmLog.getLog(), classifier);
+			GoalDrivenDFG dfg = new GoalDrivenDFG(gdpmLog, frequencyEdge, frequencyNode);
 			dfg.setEdgeClickControl(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 			dfg.addControlListener(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 			GroupNodeControl groupNodeControl = new GroupNodeControl(dfg.getGraph().getNodeTable(),
 					((GoalDrivenConfiguration) configuration).getChain());
 			dfg.setGroupNodeControl(groupNodeControl);
 			dfg.addControlListener(groupNodeControl);
-			HIGH_GROUP_Cl02MakeGroupedHighLevelLog.afterGroupingHighLevelLog = null;
-			
+
 			return new IvMObjectValues().//
 					s(GoalDrivenObject.high_level_dfg, dfg);
 		} else {
 			return null;
 		}
-		
+
 	}
 
 }

@@ -15,6 +15,7 @@ public class GroupNodeControl extends ControlAdapter {
 	private final InGroupPredicate nodeFilter = new InGroupPredicate(GraphConstants.NODE_GROUP);
 	private Table nodeTable;
 	private DataChain<GoalDrivenConfiguration> chain;
+	public static Boolean isGroupNodeClicked = false;
 
 	public GroupNodeControl(Table nodeTable, DataChain<GoalDrivenConfiguration> chain) {
 		this.nodeTable = nodeTable;
@@ -23,8 +24,8 @@ public class GroupNodeControl extends ControlAdapter {
 
 	public void itemClicked(VisualItem item, java.awt.event.MouseEvent e) {
 		if (nodeFilter.getBoolean(item)) {
-			System.out.println(nodeTable.get(item.getRow(), GraphConstants.NODE_TYPE_FIELD));
 			if (nodeTable.get(item.getRow(), GraphConstants.NODE_TYPE_FIELD).equals(NodeType.GROUP_NODE)) {
+				isGroupNodeClicked = true;
 				chain.setObject(GoalDrivenObject.selected_group, item.getString(GraphConstants.LABEL_FIELD));
 			}
 		}

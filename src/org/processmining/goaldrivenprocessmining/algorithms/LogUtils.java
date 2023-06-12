@@ -157,23 +157,26 @@ public class LogUtils {
 		FrequencyEdgeObject res = new FrequencyEdgeObject();
 		List<EdgeObject> listEdges = new ArrayList<>();
 		for (XTrace trace : log) {
-			for (int i = 0; i < trace.size() - 1; i++) {
+			for (int i = 0; i < trace.size(); i++) {
 				XEvent ev1 = trace.get(i);
-				XEvent ev2 = trace.get(i + 1);
 				String val1 = ev1.getAttributes().get(classifier).toString();
-				String val2 = ev2.getAttributes().get(classifier).toString();
-				EdgeObject edge = new EdgeObject(val1, val2);
-				if (!listEdges.contains(edge)) {
-					listEdges.add(edge);
-					res.getFrequencyEdge().put(edge, 1);
-				} else {
-					int curFreq = res.getFrequencyEdge().get(edge);
-					res.getFrequencyEdge().replace(edge, curFreq + 1);
+				if (i + 1 < trace.size()) {
+					XEvent ev2 = trace.get(i + 1);
+					String val2 = ev2.getAttributes().get(classifier).toString();
+					EdgeObject edge = new EdgeObject(val1, val2);
+					if (!listEdges.contains(edge)) {
+						listEdges.add(edge);
+						res.getFrequencyEdge().put(edge, 1);
+					} else {
+						int curFreq = res.getFrequencyEdge().get(edge);
+						res.getFrequencyEdge().replace(edge, curFreq + 1);
+					}
+					
 				}
 				if (i == 0) {
 					val1 = "begin";
-					val2 = ev1.getAttributes().get(classifier).toString();
-					edge = new EdgeObject(val1, val2);
+					String val2 = ev1.getAttributes().get(classifier).toString();
+					EdgeObject edge = new EdgeObject(val1, val2);
 					if (!listEdges.contains(edge)) {
 						listEdges.add(edge);
 						res.getFrequencyEdge().put(edge, 1);
@@ -182,10 +185,10 @@ public class LogUtils {
 						res.getFrequencyEdge().replace(edge, curFreq + 1);
 					}
 				}
-				if (i == trace.size() - 2) {
-					val1 = ev2.getAttributes().get(classifier).toString();
-					val2 = "end";
-					edge = new EdgeObject(val1, val2);
+				if (i == trace.size() - 1) {
+					val1 = ev1.getAttributes().get(classifier).toString();
+					String val2 = "end";
+					EdgeObject edge = new EdgeObject(val1, val2);
 					if (!listEdges.contains(edge)) {
 						listEdges.add(edge);
 						res.getFrequencyEdge().put(edge, 1);
@@ -194,7 +197,6 @@ public class LogUtils {
 						res.getFrequencyEdge().replace(edge, curFreq + 1);
 					}
 				}
-
 			}
 		}
 		return res;

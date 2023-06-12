@@ -39,8 +39,10 @@ public class GraphObjectClickControl extends ControlAdapter {
 			}
 		}
 		if (nodeFilter.getBoolean(item)) {
-			if (this.chain != null) {
-				this.chain.setObject(GoalDrivenObject.selected_node, item.getString(GraphConstants.LABEL_FIELD)); 
+			if (item.getString(GraphConstants.NODE_TYPE_FIELD).equals("ACT_NODE")) {
+				if (this.chain != null) {
+					this.chain.setObject(GoalDrivenObject.selected_node, item.getString(GraphConstants.LABEL_FIELD)); 
+				}
 			}
 		}
 		item.getVisualization().repaint();

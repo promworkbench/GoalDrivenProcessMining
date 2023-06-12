@@ -15,7 +15,6 @@ public class StatisticPanel extends JPanel {
 	private JPanel contentPanel;
 	private JTabbedPane statPane;
 	private StatisticContentPanel statisticContentPanel;
-	private JPanel tab2Panel;
 
 	public StatisticPanel() {
 		setLayout(new BorderLayout());
@@ -28,11 +27,9 @@ public class StatisticPanel extends JPanel {
 
         // Create the panel and add it to a frame
         statisticContentPanel = new StatisticContentPanel(new HashMap<>(), "");
-		tab2Panel = new JPanel();
-		tab2Panel.setBackground(GoalDrivenConstants.STATISTIC_PANEL_BACKGROUND_COLOR);
 		// Add the panels to the tabbed pane
 		statPane.addTab("Statistic", statisticContentPanel);
-		statPane.addTab("Tab 2", tab2Panel);
+//		statPane.addTab("Tab 2", tab2Panel);
 		contentPanel.add(statPane, BorderLayout.CENTER);
 
 		// Add the content panel to the DynamicPanel, initially hidden

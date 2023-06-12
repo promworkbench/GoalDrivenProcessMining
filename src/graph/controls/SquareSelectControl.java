@@ -65,7 +65,7 @@ public class SquareSelectControl extends ControlAdapter {
 	public void mouseReleased(MouseEvent e) {
 		// get all vItem in the rectangle
 		Visualization vis = display.getVisualization();
-		List<VisualItem> allVisualItems = GraphNodeUtils.getAllNodes(vis, nodeTable);
+		List<VisualItem> allVisualItems = GraphNodeUtils.getAllNodes(vis);
 		if (rectangle != null) {
 			for (VisualItem item : allVisualItems) {
 				if (isInsideRectangle(item, rectangle)) {
@@ -122,11 +122,10 @@ public class SquareSelectControl extends ControlAdapter {
 		}
 		public void postPaint(Display d, Graphics2D g) {
 			if (showPopup) {
-				GoalDrivenPanel gdpPanel = (GoalDrivenPanel) display.getParent().getParent().getParent();
+				GoalDrivenPanel gdpPanel = (GoalDrivenPanel) display.getParent().getParent().getParent().getParent();
 				if (gdpPanel.getControlBar().getExpandButton().getText().split(" ")[0].equals("Expand")) {
 					gdpPanel.getControlBar().getExpandButton().doClick();
 				}
-				
 				showPopup = false;
 			}
 		}

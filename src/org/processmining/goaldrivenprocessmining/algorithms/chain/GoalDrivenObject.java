@@ -7,9 +7,7 @@ import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyNodeObjec
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLog;
 import org.processmining.goaldrivenprocessmining.objectHelper.IndirectedEdgeCarrierObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.MapEdgeStrokeWidth;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapGroupLogObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.MapNodeFillColor;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapStatObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.SelectedNodeGroupObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
@@ -63,10 +61,6 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 			FrequencyEdgeObject.class);
 	public static final IvMObject<FrequencyNodeObject> low_frequency_node = c("Frequency of nodes in low-level log",
 			FrequencyNodeObject.class);
-	public static final IvMObject<MapNodeFillColor> map_node_fill_color = c("Mapping for node fill color",
-			MapNodeFillColor.class);
-	public static final IvMObject<MapEdgeStrokeWidth> map_edge_stroke_width = c("Mapping for edge stroke width",
-			MapEdgeStrokeWidth.class);
 	public static final IvMObject<SelectedNodeGroupObject> batch_selected_nodes = c("Batch selected nodes from GUI",
 			SelectedNodeGroupObject.class);
 	public static final IvMObject<GDPMLog> after_grouping_high_level_log = c("high-level log after grouping nodes",

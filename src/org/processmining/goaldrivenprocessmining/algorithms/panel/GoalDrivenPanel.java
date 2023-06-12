@@ -87,7 +87,7 @@ public class GoalDrivenPanel extends JPanel {
 			contentLeftPanel = new JPanel();
 			contentLeftPanel.setLayout(new BorderLayout());
 			contentLeftPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_BACKGROUND_COLOR);
-			contentLeftPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 0, 5));
+			contentLeftPanel.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
 			JLabel hightitle = new JLabel("High-level DFG:");
 			hightitle.setForeground(Color.WHITE);
 			hightitle.setFont(GoalDrivenConstants.BOLD_BIG_FONT);
@@ -106,7 +106,7 @@ public class GoalDrivenPanel extends JPanel {
 			contentRightPanel = new JPanel();
 			contentRightPanel.setLayout(new BorderLayout());
 			contentRightPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_BACKGROUND_COLOR);
-			contentRightPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 0, 5));
+			contentRightPanel.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
 			lowDfgTitle = new JLabel("Low-level DFG: ");
 			lowDfgTitle.setForeground(Color.WHITE);
 			lowDfgTitle.setFont(GoalDrivenConstants.BOLD_BIG_FONT);
