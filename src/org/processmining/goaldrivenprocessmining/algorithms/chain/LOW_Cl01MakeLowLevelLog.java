@@ -10,7 +10,6 @@ import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.model.impl.XLogImpl;
 import org.deckfour.xes.model.impl.XTraceImpl;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLog;
-import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
@@ -32,9 +31,9 @@ public class LOW_Cl01MakeLowLevelLog<C> extends DataChainLinkComputationAbstract
 	@Override
 	public IvMObject<?>[] createInputObjects() {
 		return new IvMObject<?>[] { 
-			IvMObject.input_log,
+			GoalDrivenObject.full_xlog,
 			GoalDrivenObject.selected_source_target_node, 
-			GoalDrivenObject.unselected_unique_values 
+			GoalDrivenObject.config 
 			};
 	}
 
@@ -47,17 +46,13 @@ public class LOW_Cl01MakeLowLevelLog<C> extends DataChainLinkComputationAbstract
 
 	@Override
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
-		XLog log = inputs.get(IvMObject.input_log);
+		XLog log = inputs.get(GoalDrivenObject.full_xlog);
 		System.out.println("--- LOW_Cl01MakeLowLevelLog");
 
 		HashMap<String, Object> passValues = inputs.get(GoalDrivenObject.selected_source_target_node);
 		String source = (String) passValues.get("source");
 		String target = (String) passValues.get("target");
-		AttributeClassifier[] uValues = inputs.get(GoalDrivenObject.unselected_unique_values);
-		String[] unselectedValues = new String[uValues.length];
-		for (int i = 0; i < uValues.length; i++) {
-			unselectedValues[i] = uValues[i].toString();
-		}
+		String[] unselectedValues = inputs.get(GoalDrivenObject.config).getUnselectedActs();
 
 		String selectedAttribute = log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString();
 		XAttributeMap aMap = log.getAttributes();
