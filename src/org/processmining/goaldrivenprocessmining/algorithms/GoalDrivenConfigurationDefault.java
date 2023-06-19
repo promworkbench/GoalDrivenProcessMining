@@ -6,14 +6,12 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import org.processmining.framework.plugin.ProMCanceller;
+import org.processmining.goaldrivenprocessmining.algorithms.chain.CONFIG_Update;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl01GatherAttributes;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_Cl01MakeHighLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_Cl02MakeHighLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_Cl03UpdateCategoryHighLevelDFG;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_GROUP_Cl02MakeGroupedHighLevelLog;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_GROUP_Cl03MakeGroupedHighLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_GROUP_Cl04MakeGroupedLog;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_GROUP_Cl05UngroupHighLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_Cl01MakeLowLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_Cl02MakeLowLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_Cl03UpdateCategoryLowLevelDFG;
@@ -64,14 +62,12 @@ public class GoalDrivenConfigurationDefault extends GoalDrivenConfigurationAbstr
 		chain.register(new HIGH_Cl01MakeHighLevelLog<GoalDrivenConfiguration>());
 		chain.register(new HIGH_Cl02MakeHighLevelDFG<GoalDrivenConfiguration>());
 		chain.register(new HIGH_Cl03UpdateCategoryHighLevelDFG<GoalDrivenConfiguration>());
-		chain.register(new HIGH_GROUP_Cl02MakeGroupedHighLevelLog<GoalDrivenConfiguration>());
-		chain.register(new HIGH_GROUP_Cl03MakeGroupedHighLevelDFG<GoalDrivenConfiguration>());
 		chain.register(new HIGH_GROUP_Cl04MakeGroupedLog<GoalDrivenConfiguration>());
-		chain.register(new HIGH_GROUP_Cl05UngroupHighLevelDFG<GoalDrivenConfiguration>());
 		chain.register(new LOW_Cl01MakeLowLevelLog<GoalDrivenConfiguration>());
 		chain.register(new LOW_Cl02MakeLowLevelDFG<GoalDrivenConfiguration>());
 		chain.register(new LOW_Cl03UpdateCategoryLowLevelDFG<GoalDrivenConfiguration>());
 		chain.register(new STAT_Node<GoalDrivenConfiguration>());
+		chain.register(new CONFIG_Update());
 		return chain;
 	}
 

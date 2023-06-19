@@ -1,20 +1,23 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
+import java.util.HashMap;
+
 import org.deckfour.xes.model.XLog;
+import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyEdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyNodeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLog;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.IndirectedEdgeCarrierObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapGroupLogObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapStatObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.SelectedNodeGroupObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
-
-import com.google.gwt.dev.util.collect.HashMap;
 
 import graph.GoalDrivenDFG;
 
@@ -61,8 +64,8 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 			FrequencyEdgeObject.class);
 	public static final IvMObject<FrequencyNodeObject> low_frequency_node = c("Frequency of nodes in low-level log",
 			FrequencyNodeObject.class);
-	public static final IvMObject<SelectedNodeGroupObject> batch_selected_nodes = c("Batch selected nodes from GUI",
-			SelectedNodeGroupObject.class);
+	public static final IvMObject<GroupActObject> new_group = c("Batch selected nodes from GUI",
+			GroupActObject.class);
 	public static final IvMObject<GDPMLog> after_grouping_high_level_log = c("high-level log after grouping nodes",
 			GDPMLog.class);
 	public static final IvMObject<Boolean> is_in_group_mode = c("if users are choosing the grouping mode",
@@ -70,9 +73,14 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	public static final IvMObject<MapGroupLogObject> map_group_log = c("mapping from group to log",
 			MapGroupLogObject.class);
 	public static final IvMObject<String> selected_group = c("selected group name from high-level dfg", String.class);
-
+	//hash table
+	public static final IvMObject<ActivityHashTable> act_hash_table = c("hash table of activities", ActivityHashTable.class);
 	//Stat
 	public static final IvMObject<MapStatObject> stat = c("stat of a log", MapStatObject.class);
+	//Config
+	public static final IvMObject<Config> config = c("current config of the app", Config.class);
+	public static final IvMObject<UpdateConfig> update_config_object = c("current config of the app", UpdateConfig.class);
+	
 	public GoalDrivenObject(String name, Class<C> clazz) {
 		super(name, clazz);
 	}

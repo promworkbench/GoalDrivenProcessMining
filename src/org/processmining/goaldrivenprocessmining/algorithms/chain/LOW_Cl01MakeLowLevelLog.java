@@ -1,6 +1,7 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
@@ -15,7 +16,6 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
-import com.google.gwt.dev.util.collect.HashMap;
 
 public class LOW_Cl01MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> {
 

@@ -8,7 +8,9 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
+import org.processmining.goaldrivenprocessmining.algorithms.LogUtils;
 import org.processmining.goaldrivenprocessmining.algorithms.StatUtils;
+import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
@@ -36,7 +38,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 	public IvMObject<?>[] createOutputObjects() {
 		return new IvMObject<?>[] { GoalDrivenObject.full_xlog, GoalDrivenObject.all_unique_values,
 				GoalDrivenObject.selected_unique_values, GoalDrivenObject.unselected_unique_values,
-				 GoalDrivenObject.stat };
+				 GoalDrivenObject.stat, GoalDrivenObject.act_hash_table, GoalDrivenObject.config };
 	}
 
 	@Override
@@ -48,11 +50,20 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 				log.getClassifiers().get(0).getDefiningAttributeKeys()[0]);
 		List<AttributeClassifier[]> valuesDistribution = this.getAllUniqueValues(log, classifier);
 		
+		// string
+		String[] values = new String[valuesDistribution.get(1).length];
+		for (int i = 0; i < values.length; i++) {
+			values[i] = valuesDistribution.get(1)[i].toString();
+		}
+		Config config = new Config();
+		config.setSelectedActs(values);
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.full_xlog, log).
 				s(GoalDrivenObject.unselected_unique_values, valuesDistribution.get(1)).
 				s(GoalDrivenObject.selected_unique_values, valuesDistribution.get(0)).// 
 				s(GoalDrivenObject.all_unique_values, valuesDistribution.get(2)).
+				s(GoalDrivenObject.act_hash_table, LogUtils.getActivityHashTable(log)).
+				s(GoalDrivenObject.config, config).
 				s(GoalDrivenObject.stat, StatUtils.computeStatNodeFromLog(log, classifier.toString(), "time:timestamp"));
 	}
 

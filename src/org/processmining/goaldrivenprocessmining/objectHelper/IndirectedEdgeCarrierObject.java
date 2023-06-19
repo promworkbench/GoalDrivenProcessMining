@@ -21,7 +21,9 @@ public class IndirectedEdgeCarrierObject {
 	}
 
 	public void addEdge(EdgeObject tupleNode) {
-		this.listIndirectedEdge.add(tupleNode);
+		if (!listIndirectedEdge.contains(tupleNode)) {
+			this.listIndirectedEdge.add(tupleNode);
+		}
 	}
 
 	public String toString() {

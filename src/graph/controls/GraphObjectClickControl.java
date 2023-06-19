@@ -1,10 +1,10 @@
 package graph.controls;
 
+import java.util.HashMap;
+
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChain;
-
-import com.google.gwt.dev.util.collect.HashMap;
 
 import graph.GraphConstants;
 import prefuse.controls.ControlAdapter;

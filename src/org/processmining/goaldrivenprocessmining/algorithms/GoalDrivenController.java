@@ -10,6 +10,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.JCheckBox;
@@ -26,8 +27,11 @@ import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.SelectedNodeGroupObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
+import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateAction;
+import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateType;
 import org.processmining.goaldrivenprocessmining.objectHelper.ValueCategoryObject;
 import org.processmining.goaldrivenprocessmining.panelHelper.GroupActConfig;
 import org.processmining.goaldrivenprocessmining.panelHelper.NewCategoryPanel;
@@ -39,8 +43,6 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.VisualMinerWrapper;
 import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.DfgMiner;
 import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.Miner;
-
-import com.google.gwt.dev.util.collect.HashMap;
 
 import graph.GoalDrivenDFG;
 import graph.GraphConstants;
@@ -313,12 +315,12 @@ public class GoalDrivenController {
 		panel.getConfigCards().getActDisplayPanel().getActDoneButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 
-				AttributeClassifier[] attInclude = new AttributeClassifier[panel.getConfigCards().getActDisplayPanel()
-						.getIncludeTable().getModel().getRowCount()];
+				String[] attInclude = new String[panel.getConfigCards().getActDisplayPanel().getIncludeTable()
+						.getModel().getRowCount()];
 				for (int i = 0; i < attInclude.length; i++) {
 					AttributeClassifier att = (AttributeClassifier) panel.getConfigCards().getActDisplayPanel()
 							.getIncludeTable().getValueAt(i, 0);
-					attInclude[i] = att;
+					attInclude[i] = att.toString();
 					if (!panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().keySet().contains(att)) {
 						panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().put(att, "include");
 					} else {
@@ -326,12 +328,12 @@ public class GoalDrivenController {
 					}
 
 				}
-				AttributeClassifier[] attExclude = new AttributeClassifier[panel.getConfigCards().getActDisplayPanel()
-						.getExcludeTable().getModel().getRowCount()];
+				String[] attExclude = new String[panel.getConfigCards().getActDisplayPanel().getExcludeTable()
+						.getModel().getRowCount()];
 				for (int i = 0; i < attExclude.length; i++) {
 					AttributeClassifier att = (AttributeClassifier) panel.getConfigCards().getActDisplayPanel()
 							.getExcludeTable().getValueAt(i, 0);
-					attExclude[i] = att;
+					attExclude[i] = att.toString();
 					if (!panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().keySet().contains(att)) {
 						panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().put(att, "exclude");
 					} else {
@@ -339,8 +341,11 @@ public class GoalDrivenController {
 					}
 				}
 				panel.getConfigCards().setVisible(false);
-				chain.setObject(GoalDrivenObject.selected_unique_values, attInclude);
-				chain.setObject(GoalDrivenObject.unselected_unique_values, attExclude);
+				HashMap<String, String[]> updateMap = new HashMap<String, String[]>();
+				updateMap.put("High", attInclude);
+				updateMap.put("Low", attExclude);
+				UpdateConfig updateConfig = new UpdateConfig(UpdateType.SELECTED_ACT, updateMap);
+				chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
 
 			}
 		});
@@ -422,8 +427,6 @@ public class GoalDrivenController {
 					cmb.addItem(val);
 				}
 				// add new column + config that column
-				DefaultTableModel model = (DefaultTableModel) panel.getConfigCards().getActConfigPanel()
-						.getActConfigTable().getModel();
 				JTable table = panel.getConfigCards().getActConfigPanel().getActConfigTable();
 				panel.getConfigCards().getActConfigPanel().addNewColumnToActConfigTable(newCate.getName());
 				panel.getConfigCards().getActConfigPanel().setUpColumn(table,
@@ -578,9 +581,12 @@ public class GoalDrivenController {
 						selectedNode.add(item.getString(GraphConstants.LABEL_FIELD));
 					}
 				}
-				SelectedNodeGroupObject selectedNodeObject = new SelectedNodeGroupObject(
+				GroupActObject selectedNodeObject = new GroupActObject(
 						panel.getSidePanel().getBatchSelectionPopupPanel().getGroupNameField().getText(), selectedNode);
-				chain.setObject(GoalDrivenObject.batch_selected_nodes, selectedNodeObject);
+				UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.ADD,
+						selectedNodeObject);
+				chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
+				chain.setObject(GoalDrivenObject.new_group, selectedNodeObject);
 			}
 
 		});
