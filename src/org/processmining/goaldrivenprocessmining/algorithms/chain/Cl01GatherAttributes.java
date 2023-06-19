@@ -8,9 +8,10 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
-import org.processmining.goaldrivenprocessmining.algorithms.LogUtils;
 import org.processmining.goaldrivenprocessmining.algorithms.StatUtils;
+import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
+import org.processmining.goaldrivenprocessmining.objectHelper.MapStatObject;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
@@ -51,20 +52,30 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		List<AttributeClassifier[]> valuesDistribution = this.getAllUniqueValues(log, classifier);
 		
 		// string
-		String[] values = new String[valuesDistribution.get(1).length];
+		String[] values = new String[valuesDistribution.get(0).length];
 		for (int i = 0; i < values.length; i++) {
-			values[i] = valuesDistribution.get(1)[i].toString();
+			values[i] = valuesDistribution.get(0)[i].toString();
+		}
+		String[] values1 = new String[valuesDistribution.get(1).length];
+		for (int i = 0; i < values1.length; i++) {
+			values1[i] = valuesDistribution.get(1)[i].toString();
 		}
 		Config config = new Config();
 		config.setSelectedActs(values);
+		config.setUnselectedActs(values1);
+		
+		HashMap<String, Object> mapProcessedLog = StatUtils.processLog(log, "time:timestamp");
+		ActivityHashTable activityHashTable = (ActivityHashTable) mapProcessedLog.get("Hash");
+		MapStatObject mapStatObject = (MapStatObject) mapProcessedLog.get("Stat");
+		
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.full_xlog, log).
 				s(GoalDrivenObject.unselected_unique_values, valuesDistribution.get(1)).
 				s(GoalDrivenObject.selected_unique_values, valuesDistribution.get(0)).// 
 				s(GoalDrivenObject.all_unique_values, valuesDistribution.get(2)).
-				s(GoalDrivenObject.act_hash_table, LogUtils.getActivityHashTable(log)).
+				s(GoalDrivenObject.act_hash_table, activityHashTable).
 				s(GoalDrivenObject.config, config).
-				s(GoalDrivenObject.stat, StatUtils.computeStatNodeFromLog(log, classifier.toString(), "time:timestamp"));
+				s(GoalDrivenObject.stat, mapStatObject);
 	}
 
 	private List<AttributeClassifier[]> getAllUniqueValues(XLog log, AttributeClassifier classifier) {

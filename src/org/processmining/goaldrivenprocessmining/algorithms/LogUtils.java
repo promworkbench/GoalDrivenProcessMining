@@ -1,16 +1,11 @@
 package org.processmining.goaldrivenprocessmining.algorithms;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.deckfour.xes.in.XesXmlParser;
 import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
@@ -25,39 +20,21 @@ import org.processmining.goaldrivenprocessmining.objectHelper.IndirectedEdgeCarr
 import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
 
 public class LogUtils {
-	public static ActivityHashTable getActivityHashTable(XLog log) {
-		ActivityHashTable res = new ActivityHashTable();
-		String classifier = log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString();
-		Iterable<XTrace> traceIterable = log;
-		int posTrace = 0;
-		for (XTrace trace : traceIterable) {
-			Iterable<XEvent> eventIterable = trace;
-			int posEvent = 0;
-			for (XEvent event : eventIterable) {
-				String actname = event.getAttributes().get(classifier).toString();
-				res.addActivity(actname, posTrace, posEvent);
-				posEvent++;
-			}
-			posTrace++;
-		}
 
-		return res;
-	}
-
-	public static void main(String[] args) throws Exception {
-		File file = new File("C:\\D\\data\\ma_test.xes");
-
-		// Create an input stream for the XES file
-		InputStream is = new FileInputStream(file);
-
-		// Create a parser for XES files
-		XesXmlParser parser = new XesXmlParser();
-
-		XLog log = parser.parse(is).get(0);
-		ActivityHashTable aht = LogUtils.getActivityHashTable(log);
-		GDPMLog l = LogUtils.removeActivitiesInLog(log, aht, Arrays.asList("a", "e"));
-		System.out.println("done");
-	}
+	//	public static void main(String[] args) throws Exception {
+	//		File file = new File("C:\\D\\data\\ma_test.xes");
+	//
+	//		// Create an input stream for the XES file
+	//		InputStream is = new FileInputStream(file);
+	//
+	//		// Create a parser for XES files
+	//		XesXmlParser parser = new XesXmlParser();
+	//
+	//		XLog log = parser.parse(is).get(0);
+	//		ActivityHashTable aht = LogUtils.getActivityHashTable(log);
+	//		GDPMLog l = LogUtils.removeActivitiesInLog(log, aht, Arrays.asList("a", "e"));
+	//		System.out.println("done");
+	//	}
 
 	public static GDPMLog setUpMapNodeType(GDPMLog gdpmLog, List<String> listGroupActivities) {
 		Map<String, NodeType> mapNodeType = new HashMap<>();
@@ -121,7 +98,7 @@ public class LogUtils {
 	}
 
 	public static GDPMLog removeActivitiesInLog(XLog log, ActivityHashTable activityHashTable, String[] activities) {
-		XLog newLog = (XLog) log.clone();
+		XLog newLog = log;
 		IndirectedEdgeCarrierObject indirectedEdges = new IndirectedEdgeCarrierObject();
 		HashMap<Integer, List<Integer>> removeActInCaseMap = new HashMap<Integer, List<Integer>>();
 		String classifier = log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString();
@@ -141,6 +118,39 @@ public class LogUtils {
 				}
 			}
 		}
+		// record indirected edges
+		for (Integer index : removeActInCaseMap.keySet()) {
+			XTrace trace = log.get(index);
+			List<Integer> removeActs = removeActInCaseMap.get(index);
+			Collections.sort(removeActs);
+			if (trace.size() > removeActs.size()) {
+				List<List<Integer>> listConsecutiveNumber = LogUtils.groupConsecutiveNumbers(removeActs);
+				for (List<Integer> list : listConsecutiveNumber) {
+					int start = list.get(0);
+					int end = list.get(list.size() - 1);
+					String node1 = "";
+					String node2 = "";
+					if (start != end) {
+						if (start == 0) {
+							node1 = "begin";
+						} else {
+							node1 = trace.get(start - 1).getAttributes().get(classifier).toString();
+						}
+						if (end == trace.size() - 1) {
+							node2 = "end";
+						} else {
+							node2 = trace.get(end + 1).getAttributes().get(classifier).toString();
+						}
+					} else {
+						node1 = trace.get(start - 1).getAttributes().get(classifier).toString();
+						node2 = trace.get(start + 1).getAttributes().get(classifier).toString();
+					}
+					indirectedEdges.addEdge(new EdgeObject(node1, node2));
+				}
+			}
+
+		}
+
 		// remove act from traces
 		for (Integer index : removeActInCaseMap.keySet()) {
 			List<XEvent> toRemove = new ArrayList<>();
@@ -149,55 +159,29 @@ public class LogUtils {
 			}
 			newLog.get(index).removeAll(toRemove);
 		}
-		// record indirected edges
-		for (Integer index : removeActInCaseMap.keySet()) {
-			XTrace trace = log.get(index);
-			List<Integer> removeActs = removeActInCaseMap.get(index);
-			Collections.sort(removeActs);
-
-			if (trace.size() > removeActs.size()) {
-				// remove only 1 act in case
-				if (removeActs.size() == 1) {
-					if (removeActs.get(0) == 0) {
-						indirectedEdges.addEdge(
-								new EdgeObject("begin", trace.get(1).getAttributes().get(classifier).toString()));
-					} else if (removeActs.get(0) == trace.size() - 1) {
-						indirectedEdges.addEdge(new EdgeObject(
-								trace.get(trace.size() - 2).getAttributes().get(classifier).toString(), "end"));
-					} else {
-						indirectedEdges.addEdge(new EdgeObject(
-								trace.get(removeActs.get(0) - 1).getAttributes().get(classifier).toString(),
-								trace.get(removeActs.get(0) + 1).getAttributes().get(classifier).toString()));
-					}
-				}
-				// remove many act in case
-				else {
-					String val1 = removeActs.get(0) == 0 ? "begin"
-							: trace.get(removeActs.get(0)).getAttributes().get(classifier).toString();
-					String val2;
-					for (int i = 0; i < removeActs.size() - 1; i++) {
-						int cur = removeActs.get(i);
-						int next = removeActs.get(i + 1);
-						if (next != cur + 1) {
-							indirectedEdges.addEdge(new EdgeObject(val1,
-									trace.get(cur + 1).getAttributes().get(classifier).toString()));
-							val1 = trace.get(next - 1).getAttributes().get(classifier).toString();
-
-						}
-						val2 = next == trace.size() - 1 ? "end"
-								: trace.get(next + 1).getAttributes().get(classifier).toString();
-
-						if (i == removeActs.size() - 2) {
-							indirectedEdges.addEdge(new EdgeObject(val1, val2));
-						}
-					}
-				}
-
-			}
-
-		}
 		return new GDPMLog(newLog, indirectedEdges);
 	}
+	
+	public static List<List<Integer>> groupConsecutiveNumbers(List<Integer> numbers) {
+        List<List<Integer>> result = new ArrayList<>();
+        List<Integer> currentGroup = new ArrayList<>();
+
+        for (int i = 0; i < numbers.size(); i++) {
+            if (i == 0 || numbers.get(i) - numbers.get(i - 1) != 1) {
+                if (!currentGroup.isEmpty()) {
+                    result.add(currentGroup);
+                    currentGroup = new ArrayList<>();
+                }
+            }
+            currentGroup.add(numbers.get(i));
+        }
+
+        if (!currentGroup.isEmpty()) {
+            result.add(currentGroup);
+        }
+
+        return result;
+    }
 
 	public static FrequencyEdgeObject getFrequencyEdges(XLog log, String classifier) {
 		FrequencyEdgeObject res = new FrequencyEdgeObject();
