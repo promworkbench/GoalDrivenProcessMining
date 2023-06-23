@@ -98,7 +98,7 @@ public class LogUtils {
 	}
 
 	public static GDPMLog removeActivitiesInLog(XLog log, ActivityHashTable activityHashTable, String[] activities) {
-		XLog newLog = log;
+		XLog newLog = (XLog) log.clone();
 		IndirectedEdgeCarrierObject indirectedEdges = new IndirectedEdgeCarrierObject();
 		HashMap<Integer, List<Integer>> removeActInCaseMap = new HashMap<Integer, List<Integer>>();
 		String classifier = log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString();

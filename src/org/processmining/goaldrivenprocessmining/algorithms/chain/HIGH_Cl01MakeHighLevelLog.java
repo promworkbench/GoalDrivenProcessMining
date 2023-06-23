@@ -1,6 +1,5 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.deckfour.xes.model.XLog;
@@ -9,7 +8,6 @@ import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLog;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
-import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
@@ -62,17 +60,6 @@ public class HIGH_Cl01MakeHighLevelLog<C> extends DataChainLinkComputationAbstra
 
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.high_level_log, newLogObject);
-	}
-
-	private GDPMLog getCurrentHighLog(XLog log, ActivityHashTable activityHashTable, AttributeClassifier[] sValues) {
-		String[] selectedValues = new String[sValues.length];
-		for (int i = 0; i < sValues.length; i++) {
-			selectedValues[i] = sValues[i].toString();
-		}
-		GDPMLog gdpmLog = LogUtils.removeActivitiesInLog(log, activityHashTable, selectedValues);
-		LogUtils.setUpMapNodeType(gdpmLog, Arrays.asList(""));
-		return gdpmLog;
-
 	}
 
 }

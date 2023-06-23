@@ -25,16 +25,6 @@ public class CustomEdgeStrokeWidthAction extends StrokeAction {
 		this.mapEdgeStrokeWidth = mapEdgeStrokeWidth;
 	}
 
-	//    public double getSize(VisualItem item) {
-	//        Edge edge = (Edge) item;
-	//
-	//        // Get the source and target nodes of the edge
-	//        String source = edge.getSourceNode().getString(GraphConstants.LABEL_FIELD);
-	//        String target = edge.getTargetNode().getString(GraphConstants.LABEL_FIELD);
-	//
-	//        // Customize the stroke width based on the (source, target) tuple
-	//        return this.mapEdgeStrokeWidth.get(new EdgeObject(source, target));
-	//    }
 	public BasicStroke getStroke(VisualItem item) {
 		if (item instanceof Edge) {
 			Edge edge = (Edge) item;
