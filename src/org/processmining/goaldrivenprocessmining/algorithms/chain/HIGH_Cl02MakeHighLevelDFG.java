@@ -1,10 +1,7 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
-import org.deckfour.xes.model.XLog;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
-import org.processmining.goaldrivenprocessmining.algorithms.LogUtils;
-import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyEdgeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyNodeObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
@@ -28,24 +25,20 @@ public class HIGH_Cl02MakeHighLevelDFG<C> extends DataChainLinkComputationAbstra
 
 	@Override
 	public IvMObject<?>[] createInputObjects() {
-		return new IvMObject<?>[] { GoalDrivenObject.high_level_log };
+		return new IvMObject<?>[] { GoalDrivenObject.high_level_log_skeleton };
 	}
 
 	@Override
 	public IvMObject<?>[] createOutputObjects() {
-		return new IvMObject<?>[] { GoalDrivenObject.high_level_dfg, GoalDrivenObject.high_frequency_edge,
-				GoalDrivenObject.high_frequency_node };
+		return new IvMObject<?>[] { GoalDrivenObject.high_level_dfg };
 	}
 
 	@Override
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
 		System.out.println("--- HIGH_Cl02MakeHighLevelDFG");
-		XLog log = inputs.get(GoalDrivenObject.high_level_log).getLog();
-		FrequencyEdgeObject frequencyEdge = LogUtils.getFrequencyEdges(log,
-				log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString());
-		FrequencyNodeObject frequencyNode = LogUtils.getFrequencyNodeObject(log,
-				log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString());
-		GoalDrivenDFG dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.high_level_log),  frequencyEdge, frequencyNode);
+		GDPMLogSkeleton logSkeleton = inputs.get(GoalDrivenObject.high_level_log_skeleton);
+		
+		GoalDrivenDFG dfg = new GoalDrivenDFG(logSkeleton);
 		dfg.setEdgeClickControl(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 		dfg.addControlListener(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 		GroupNodeControl groupNodeControl = new GroupNodeControl(dfg.getGraph().getNodeTable(),
@@ -53,8 +46,8 @@ public class HIGH_Cl02MakeHighLevelDFG<C> extends DataChainLinkComputationAbstra
 		dfg.setGroupNodeControl(groupNodeControl);
 		dfg.addControlListener(groupNodeControl);
 		return new IvMObjectValues().//
-				s(GoalDrivenObject.high_level_dfg, dfg).s(GoalDrivenObject.high_frequency_edge, frequencyEdge)
-				.s(GoalDrivenObject.high_frequency_node, frequencyNode);
+				s(GoalDrivenObject.high_level_dfg, dfg)
+				;
 	}
 
 	

@@ -7,7 +7,7 @@ import java.util.Objects;
 import graph.GoalDrivenDFG;
 
 public class MapGroupLogObject {
-	private Map<String, GDPMLog> mapGroupLog;
+	private Map<String, _GDPMLog> mapGroupLog;
 	private Map<String, GoalDrivenDFG> mapGroupDfg;
 	
 
@@ -16,11 +16,11 @@ public class MapGroupLogObject {
 		this.mapGroupDfg = new HashMap<>();
 	}
 
-	public Map<String, GDPMLog> getMapGroupLog() {
+	public Map<String, _GDPMLog> getMapGroupLog() {
 		return mapGroupLog;
 	}
 
-	public void setMapGroupLog(Map<String, GDPMLog> mapGroupLog) {
+	public void setMapGroupLog(Map<String, _GDPMLog> mapGroupLog) {
 		this.mapGroupLog = mapGroupLog;
 	}
 

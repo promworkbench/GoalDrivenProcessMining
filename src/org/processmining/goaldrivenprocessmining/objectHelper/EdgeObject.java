@@ -1,8 +1,9 @@
 package org.processmining.goaldrivenprocessmining.objectHelper;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class EdgeObject {
+public class EdgeObject implements Serializable {
 	
 	private String node1;
 	private String node2;

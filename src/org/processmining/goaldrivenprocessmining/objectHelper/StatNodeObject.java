@@ -1,47 +1,53 @@
 package org.processmining.goaldrivenprocessmining.objectHelper;
 
-import java.util.HashMap;
+import java.io.Serializable;
 import java.util.Objects;
 
-public class StatNodeObject {
-	
-	public static final String AVG_THROUGHPUT_TIME = "Average throughput time";
-	public static final String TOTAL_OCCURENCE = "Total number of occurrences";
-	public static final String AVG_OCCURENCE = "Average number of occurrences per case";
-	
-	private String nodeName;
-	private HashMap<String, String> statValueHashMap;
-	
-	public StatNodeObject() {
-		this("", new HashMap<>());
+public class StatNodeObject implements Serializable {
+
+	private String avgThroughputTime;
+	private int totalOccurences;
+	private float avgOccurences;
+
+	public StatNodeObject(String avgThroughputTime, int totalOccurences, float avgOccurences) {
+		this.avgThroughputTime = avgThroughputTime;
+		this.totalOccurences = totalOccurences;
+		this.avgOccurences = avgOccurences;
 	}
-	public StatNodeObject(String nodeName, HashMap<String, String> statValueHashMap) {
-		this.nodeName = nodeName;
-		this.statValueHashMap = statValueHashMap;
+
+	public String getAvgThroughputTime() {
+		return avgThroughputTime;
 	}
-	public void addStatValue(String avgThroughputTime, String totalOccurence, String avgOccurence) {
-		this.statValueHashMap.put(AVG_THROUGHPUT_TIME, avgThroughputTime);
-		this.statValueHashMap.put(TOTAL_OCCURENCE, totalOccurence);
-		this.statValueHashMap.put(AVG_OCCURENCE, avgOccurence);
+
+	public void setAvgThroughputTime(String avgThroughputTime) {
+		this.avgThroughputTime = avgThroughputTime;
 	}
-	public String getNodeName() {
-		return nodeName;
+
+	public int getTotalOccurences() {
+		return totalOccurences;
 	}
-	public void setNodeName(String nodeName) {
-		this.nodeName = nodeName;
+
+	public void setTotalOccurences(int totalOccurences) {
+		this.totalOccurences = totalOccurences;
 	}
-	public HashMap<String, String> getStatValueHashMap() {
-		return statValueHashMap;
+
+	public float getAvgOccurences() {
+		return avgOccurences;
 	}
-	public void setStatValueHashMap(HashMap<String, String> statValueHashMap) {
-		this.statValueHashMap = statValueHashMap;
+
+	public void setAvgOccurences(float avgOccurences) {
+		this.avgOccurences = avgOccurences;
 	}
+
 	public String toString() {
-		return "StatNode [nodeName=" + nodeName + ", statValueHashMap=" + statValueHashMap + "]";
+		return "StatNodeObject [avgThroughputTime=" + avgThroughputTime + ", totalOccurences=" + totalOccurences
+				+ ", avgOccurences=" + avgOccurences + "]";
 	}
+
 	public int hashCode() {
-		return Objects.hash(nodeName, statValueHashMap);
+		return Objects.hash(avgOccurences, avgThroughputTime, totalOccurences);
 	}
+
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -50,8 +56,8 @@ public class StatNodeObject {
 		if (getClass() != obj.getClass())
 			return false;
 		StatNodeObject other = (StatNodeObject) obj;
-		return Objects.equals(nodeName, other.nodeName) && Objects.equals(statValueHashMap, other.statValueHashMap);
+		return avgOccurences == other.avgOccurences && Objects.equals(avgThroughputTime, other.avgThroughputTime)
+				&& totalOccurences == other.totalOccurences;
 	}
-	
-		
+
 }

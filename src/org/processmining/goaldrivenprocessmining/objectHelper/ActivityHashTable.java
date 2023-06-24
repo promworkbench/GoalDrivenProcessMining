@@ -1,12 +1,15 @@
 package org.processmining.goaldrivenprocessmining.objectHelper;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.SerializationUtils;
 
-public class ActivityHashTable {
+
+public class ActivityHashTable implements Serializable {
 	private Map<String, Map<Integer, List<Integer>>> activityTable;
 
     public ActivityHashTable() {
@@ -34,6 +37,19 @@ public class ActivityHashTable {
         }
         return null;
     }
+    
+    public Map<String, Map<Integer, List<Integer>>> getActivityTable() {
+		return activityTable;
+	}
+
+	public void setActivityTable(Map<String, Map<Integer, List<Integer>>> activityTable) {
+		this.activityTable = activityTable;
+	}
+
+	@Override
+	public Object clone() {
+		return SerializationUtils.clone(this);
+	}
 
 	public String toString() {
 		return "ActivityHashTable [activityTable=" + activityTable + "]";

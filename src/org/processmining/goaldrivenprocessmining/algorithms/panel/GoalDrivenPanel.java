@@ -19,7 +19,7 @@ import javax.swing.table.DefaultTableModel;
 import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
-import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLog;
+import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.panelHelper.ConfigCards;
 import org.processmining.goaldrivenprocessmining.panelHelper.ControlBar;
 import org.processmining.goaldrivenprocessmining.panelHelper.SidePanel;
@@ -92,7 +92,7 @@ public class GoalDrivenPanel extends JPanel {
 			hightitle.setForeground(Color.WHITE);
 			hightitle.setFont(GoalDrivenConstants.BOLD_BIG_FONT);
 			contentLeftPanel.add(hightitle, BorderLayout.NORTH);
-			GDPMLog log = null;
+			GDPMLogSkeleton log = null;
 			highDfgPanel = new GoalDrivenDFG(log);
 			highDfgPanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 			highDfgPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
@@ -111,7 +111,7 @@ public class GoalDrivenPanel extends JPanel {
 			lowDfgTitle.setForeground(Color.WHITE);
 			lowDfgTitle.setFont(GoalDrivenConstants.BOLD_BIG_FONT);
 			contentRightPanel.add(lowDfgTitle, BorderLayout.NORTH);
-			GDPMLog log = null;
+			GDPMLogSkeleton log = null;
 			lowDfgPanel = new GoalDrivenDFG(log);
 			lowDfgPanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 			lowDfgPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);

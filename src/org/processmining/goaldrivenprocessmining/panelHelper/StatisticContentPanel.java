@@ -4,16 +4,13 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
@@ -71,22 +68,22 @@ public class StatisticContentPanel extends JPanel {
         }
 		
 	}
-	public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            // Create a sample map and header text
-            Map<String, String> keyValueMap = new HashMap<>();
-            keyValueMap.put("Key 1", "Value 1");
-            keyValueMap.put("Key 2", "Value 2");
-            keyValueMap.put("Key 3", "Value 3");
-            String headerText = "Header Text";
-
-            // Create the panel and add it to a frame
-            StatisticContentPanel myPanel = new StatisticContentPanel(keyValueMap, headerText);
-            JFrame frame = new JFrame("MyPanel Example");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.getContentPane().add(myPanel);
-            frame.pack();
-            frame.setVisible(true);
-        });
-    }
+//	public static void main(String[] args) {
+//        SwingUtilities.invokeLater(() -> {
+//            // Create a sample map and header text
+//            Map<String, String> keyValueMap = new HashMap<>();
+//            keyValueMap.put("Key 1", "Value 1");
+//            keyValueMap.put("Key 2", "Value 2");
+//            keyValueMap.put("Key 3", "Value 3");
+//            String headerText = "Header Text";
+//
+//            // Create the panel and add it to a frame
+//            StatisticContentPanel myPanel = new StatisticContentPanel(keyValueMap, headerText);
+//            JFrame frame = new JFrame("MyPanel Example");
+//            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//            frame.getContentPane().add(myPanel);
+//            frame.pack();
+//            frame.setVisible(true);
+//        });
+//    }
 }

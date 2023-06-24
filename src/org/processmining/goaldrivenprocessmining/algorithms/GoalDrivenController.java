@@ -29,6 +29,7 @@ import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPane
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateAction;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateType;
@@ -610,8 +611,13 @@ public class GoalDrivenController {
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				if (inputs.has(GoalDrivenObject.stat_selected_node)) {
+					StatNodeObject statNodeObject = inputs.get(GoalDrivenObject.stat_selected_node);
+					HashMap<String, String> attributes = new HashMap<String, String>();
+					attributes.put("Total occurrences", Integer.toString(statNodeObject.getTotalOccurences()));
+					attributes.put("Average occurrences per case", Float.toString(statNodeObject.getAvgOccurences()));
+					attributes.put("Average throughput time per case", statNodeObject.getAvgThroughputTime());
 					panel.getSidePanel().getStatisticPanel()
-							.setContentMap(inputs.get(GoalDrivenObject.stat_selected_node).getStatValueHashMap());
+							.setContentMap(attributes);
 					panel.getSidePanel().getStatisticPanel().updateStatistics();
 					panel.revalidate();
 					panel.repaint();

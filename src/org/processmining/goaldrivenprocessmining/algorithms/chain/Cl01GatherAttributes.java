@@ -9,9 +9,9 @@ import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.goaldrivenprocessmining.algorithms.StatUtils;
-import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
+import org.processmining.goaldrivenprocessmining.objectHelper.ActivityIndexMapper;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
-import org.processmining.goaldrivenprocessmining.objectHelper.MapStatObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
@@ -39,7 +39,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 	public IvMObject<?>[] createOutputObjects() {
 		return new IvMObject<?>[] { GoalDrivenObject.full_xlog, GoalDrivenObject.all_unique_values,
 				GoalDrivenObject.selected_unique_values, GoalDrivenObject.unselected_unique_values,
-				 GoalDrivenObject.stat, GoalDrivenObject.act_hash_table, GoalDrivenObject.config };
+				GoalDrivenObject.config, GoalDrivenObject.full_log_skeleton };
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		AttributeClassifier classifier = new AttributeClassifier(
 				log.getClassifiers().get(0).getDefiningAttributeKeys()[0]);
 		List<AttributeClassifier[]> valuesDistribution = this.getAllUniqueValues(log, classifier);
-		
+
 		// string
 		String[] values = new String[valuesDistribution.get(0).length];
 		for (int i = 0; i < values.length; i++) {
@@ -60,22 +60,24 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		for (int i = 0; i < values1.length; i++) {
 			values1[i] = valuesDistribution.get(1)[i].toString();
 		}
+		List<String> allAct = new ArrayList<String>();
+		for (int i = 0; i < valuesDistribution.get(2).length; i++) {
+			allAct.add(valuesDistribution.get(2)[i].toString());
+		}
 		Config config = new Config();
 		config.setSelectedActs(values);
 		config.setUnselectedActs(values1);
-		
-		HashMap<String, Object> mapProcessedLog = StatUtils.processLog(log, "time:timestamp");
-		ActivityHashTable activityHashTable = (ActivityHashTable) mapProcessedLog.get("Hash");
-		MapStatObject mapStatObject = (MapStatObject) mapProcessedLog.get("Stat");
-		
+
+		GDPMLogSkeleton gdpmLogSkeleton = StatUtils.processLog(log, "time:timestamp");
+		ActivityIndexMapper activityIndexMapper = new ActivityIndexMapper();
+		activityIndexMapper.assignActivity(allAct);
+
 		return new IvMObjectValues().//
-				s(GoalDrivenObject.full_xlog, log).
-				s(GoalDrivenObject.unselected_unique_values, valuesDistribution.get(1)).
-				s(GoalDrivenObject.selected_unique_values, valuesDistribution.get(0)).// 
-				s(GoalDrivenObject.all_unique_values, valuesDistribution.get(2)).
-				s(GoalDrivenObject.act_hash_table, activityHashTable).
-				s(GoalDrivenObject.config, config).
-				s(GoalDrivenObject.stat, mapStatObject);
+				s(GoalDrivenObject.full_xlog, log)
+				.s(GoalDrivenObject.unselected_unique_values, valuesDistribution.get(1))
+				.s(GoalDrivenObject.selected_unique_values, valuesDistribution.get(0)).// 
+				s(GoalDrivenObject.all_unique_values, valuesDistribution.get(2)).s(GoalDrivenObject.config, config)
+				.s(GoalDrivenObject.full_log_skeleton, gdpmLogSkeleton);
 	}
 
 	private List<AttributeClassifier[]> getAllUniqueValues(XLog log, AttributeClassifier classifier) {

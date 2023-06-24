@@ -6,17 +6,17 @@ import java.util.Map;
 import org.deckfour.xes.model.XLog;
 import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
 
-public class GDPMLog {
+public class _GDPMLog {
 	private XLog log;
 	private IndirectedEdgeCarrierObject indirectedEdges;
 	private Map<String, NodeType> mapNodeType;
 	
-	public GDPMLog(XLog log) {
+	public _GDPMLog(XLog log) {
 		this.log = log;
 		this.indirectedEdges = new IndirectedEdgeCarrierObject();
 		this.mapNodeType = new HashMap<>();
 	}
-	public GDPMLog(XLog log, IndirectedEdgeCarrierObject indirectedEdges) {
+	public _GDPMLog(XLog log, IndirectedEdgeCarrierObject indirectedEdges) {
 		this.log = log;
 		this.indirectedEdges = indirectedEdges;
 		this.mapNodeType = new HashMap<>();

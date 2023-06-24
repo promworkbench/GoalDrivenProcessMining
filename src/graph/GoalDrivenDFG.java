@@ -9,16 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.deckfour.xes.model.XEvent;
-import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyEdgeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyNodeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLog;
-import org.processmining.goaldrivenprocessmining.objectHelper.IndirectedEdgeCarrierObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.StatEdgeObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.ValueCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
@@ -60,13 +57,13 @@ import prefuse.util.ColorLib;
 import prefuse.visual.VisualItem;
 
 public class GoalDrivenDFG extends Display {
-	private GDPMLog log;
+	private GDPMLogSkeleton log;
 	private String eventClassifier;
 	private int beginNodeRow;
 	private int endNodeRow;
 	private Graph graph;
-	private FrequencyEdgeObject frequencyEdge;
-	private FrequencyNodeObject frequencyNode;
+	private HashMap<EdgeObject, StatEdgeObject> frequencyEdge;
+	private HashMap<String, StatNodeObject> frequencyNode;
 	// control 
 	private SelectMultipleNodesControl selectMultipleNodesControl;
 	private BackgroundDoubleClickControl backgroundDoubleClickControl;
@@ -89,15 +86,10 @@ public class GoalDrivenDFG extends Display {
 
 	private DataChain<GoalDrivenConfiguration> chain;
 
-	public GoalDrivenDFG(GDPMLog log) {
-		this(log, new FrequencyEdgeObject(), new FrequencyNodeObject());
-	}
-
-	public GoalDrivenDFG(GDPMLog gdpmLog, FrequencyEdgeObject frequencyEdge, FrequencyNodeObject frequencyNode) {
+	public GoalDrivenDFG(GDPMLogSkeleton gdpmLogSkeleton) {
 		super(new Visualization());
-		this.log = gdpmLog;
-		this.frequencyEdge = frequencyEdge;
-		this.frequencyNode = frequencyNode;
+		this.log = gdpmLogSkeleton;
+		
 		// action
 		this.nodeStrokeColorAction = null;
 		this.nodeFillColorAction = null;
@@ -112,7 +104,8 @@ public class GoalDrivenDFG extends Display {
 		m_vis.putAction("repaint", repaint);
 
 		if (this.log != null) {
-			this.eventClassifier = log.getLog().getClassifiers().get(0).getDefiningAttributeKeys()[0].toString();
+			this.frequencyEdge = gdpmLogSkeleton.getStatObject().getMapStatEdge();
+			this.frequencyNode = gdpmLogSkeleton.getStatObject().getMapStatNode();
 			this.graph = this.makeGraph();
 			m_vis.addGraph("graph", graph);
 			// control
@@ -136,20 +129,20 @@ public class GoalDrivenDFG extends Display {
 		//		double ty = (getHeight() - bounds.getHeight()) / 2 - bounds.getMinY();
 
 		// Apply the translation to all visual items
-//		List<VisualItem> allVisualItems = GraphNodeUtils.getAllNodes(this.getVisualization());
-//		for (VisualItem item: allVisualItems) {
-//			double x = item.getX();
-//			double y = item.getY();
-//			item.setStartX(x);
-//			item.setStartY(y);
-//			item.setX(x + 10);
-//			item.setY(y + 100);
-//			item.setEndX(x + 10);
-//			item.setEndY(y + 100);
-//		}
+		//		List<VisualItem> allVisualItems = GraphNodeUtils.getAllNodes(this.getVisualization());
+		//		for (VisualItem item: allVisualItems) {
+		//			double x = item.getX();
+		//			double y = item.getY();
+		//			item.setStartX(x);
+		//			item.setStartY(y);
+		//			item.setX(x + 10);
+		//			item.setY(y + 100);
+		//			item.setEndX(x + 10);
+		//			item.setEndY(y + 100);
+		//		}
 		Rectangle2D bounds = getVisualization().getBounds("graph");
-	    double tx = (getWidth() - bounds.getWidth()) / 2.0 - bounds.getMinX();
-	    double ty = (getHeight() - bounds.getHeight()) / 2.0 - bounds.getMinY();
+		double tx = (getWidth() - bounds.getWidth()) / 2.0 - bounds.getMinX();
+		double ty = (getHeight() - bounds.getHeight()) / 2.0 - bounds.getMinY();
 		this.pan(tx, ty);
 		this.revalidate();
 		this.repaint();
@@ -278,6 +271,7 @@ public class GoalDrivenDFG extends Display {
 		//		addControlListener(borderNodeControl);
 		/*********************/
 	}
+
 	public void addSeeOnlyControls() {
 		this.removeAllControls();
 		setSize(300, 500); // set display size
@@ -290,8 +284,9 @@ public class GoalDrivenDFG extends Display {
 		addControlListener(wheelZoomControl);
 		focusControl = new FocusControl();
 		addControlListener(focusControl);
-		
+
 	}
+
 	public void removeAllControls() {
 		this.removeControlListener(this.focusControl);
 		this.removeControlListener(this.customPanControl);
@@ -383,24 +378,23 @@ public class GoalDrivenDFG extends Display {
 		m_vis.run(GraphConstants.NODE_STROKE_WIDTH_ACTION);
 	}
 
-	public void setDefaultEdgeStrokeWidth(FrequencyEdgeObject frequencyEdge) {
+	public void setDefaultEdgeStrokeWidth(HashMap<EdgeObject, StatEdgeObject> frequencyEdge) {
 
 		HashMap<EdgeObject, Float> mapEdgeStrokeWidth = new HashMap<>();
-		HashMap<EdgeObject, Integer> mapFrequencyEdge = frequencyEdge.getFrequencyEdge();
 		float min = 0.25f;
 		float max = 5;
 		int minFreq = Integer.MAX_VALUE;
 		int maxFreq = 0;
-		for (EdgeObject edgeObject : mapFrequencyEdge.keySet()) {
-			if (mapFrequencyEdge.get(edgeObject) >= maxFreq) {
-				maxFreq = mapFrequencyEdge.get(edgeObject);
+		for (EdgeObject edgeObject : frequencyEdge.keySet()) {
+			if (frequencyEdge.get(edgeObject).getTotalOccurrences() >= maxFreq) {
+				maxFreq = frequencyEdge.get(edgeObject).getTotalOccurrences();
 			}
-			if (mapFrequencyEdge.get(edgeObject) <= minFreq) {
-				minFreq = mapFrequencyEdge.get(edgeObject);
+			if (frequencyEdge.get(edgeObject).getTotalOccurrences() <= minFreq) {
+				minFreq = frequencyEdge.get(edgeObject).getTotalOccurrences();
 			}
 		}
 		if (maxFreq == minFreq) {
-			for (EdgeObject edge : mapFrequencyEdge.keySet()) {
+			for (EdgeObject edge : frequencyEdge.keySet()) {
 				mapEdgeStrokeWidth.put(edge, 3f);
 			}
 		} else {
@@ -409,8 +403,8 @@ public class GoalDrivenDFG extends Display {
 			int dataRange = maxFreq - minFreq;
 			float ratio = range / dataRange;
 
-			for (EdgeObject edge : mapFrequencyEdge.keySet()) {
-				int value = mapFrequencyEdge.get(edge);
+			for (EdgeObject edge : frequencyEdge.keySet()) {
+				int value = frequencyEdge.get(edge).getTotalOccurrences();
 				float assignedValue = min + ((value - minFreq) * ratio);
 				mapEdgeStrokeWidth.put(edge, assignedValue);
 			}
@@ -435,22 +429,21 @@ public class GoalDrivenDFG extends Display {
 		m_vis.run(GraphConstants.NODE_STROKE_COLOR_ACTION);
 	}
 
-	public void setDefaultNodeFillColor(FrequencyNodeObject frequencyNode) {
+	public void setDefaultNodeFillColor(HashMap<String, StatNodeObject> frequencyNode) {
 		// Find the minimum and maximum values in the data array
-		HashMap<String, Integer> frequencyActivity = frequencyNode.getFrequencyActivity();
 		int minFreq = Integer.MAX_VALUE;
 		int maxFreq = 0;
-		for (String act : frequencyActivity.keySet()) {
-			if (frequencyActivity.get(act) >= maxFreq) {
-				maxFreq = frequencyActivity.get(act);
+		for (String act : frequencyNode.keySet()) {
+			if (frequencyNode.get(act).getTotalOccurences() >= maxFreq) {
+				maxFreq = frequencyNode.get(act).getTotalOccurences();
 			}
-			if (frequencyActivity.get(act) <= minFreq) {
-				minFreq = frequencyActivity.get(act);
+			if (frequencyNode.get(act).getTotalOccurences() <= minFreq) {
+				minFreq = frequencyNode.get(act).getTotalOccurences();
 			}
 		}
 		HashMap<String, Color> mapActColor = new HashMap<String, Color>();
 		if (maxFreq == minFreq) {
-			for (String act : frequencyActivity.keySet()) {
+			for (String act : frequencyNode.keySet()) {
 				mapActColor.put(act, GraphConstants.NODE_FILL_DARK_COLOR);
 			}
 		} else {
@@ -459,8 +452,8 @@ public class GoalDrivenDFG extends Display {
 			Color darkColor = GraphConstants.NODE_FILL_DARK_COLOR;
 			Color lightColor = GraphConstants.NODE_FILL_LIGHT_COLOR;
 
-			for (String act : frequencyActivity.keySet()) {
-				int value = frequencyActivity.get(act);
+			for (String act : frequencyNode.keySet()) {
+				int value = frequencyNode.get(act).getTotalOccurences();
 				double normalizedValue = (value - minFreq) / valueRange;
 
 				// Interpolate the color based on the normalized value
@@ -495,63 +488,80 @@ public class GoalDrivenDFG extends Display {
 	private void addActToTable(Graph g) {
 		List<String> listActName = new ArrayList<>();
 		List<EdgeObject> listEdges = new ArrayList<>();
-		for (XTrace trace : log.getLog()) {
-			for (int i = 0; i < trace.size(); i++) {
-				// add node for event at i-th
-				XEvent ev1 = trace.get(i);
-				String value1 = ev1.getAttributes().get(this.eventClassifier).toString();
-				Node node1 = null;
-				if (!listActName.contains(value1)) {
-					listActName.add(value1);
-					node1 = g.addNode();
-					this.configNode(node1, value1, log.getMapNodeType());
-				} else {
-					node1 = this.getNodeByLabel(g, value1);
-				}
-				// add node for event at i+1-th if possible
-				if (i + 1 < trace.size()) {
-					XEvent ev2 = trace.get(i + 1);
-					String value2 = ev2.getAttributes().get(this.eventClassifier).toString();
-					Node node2 = null;
-					if (!listActName.contains(value2)) {
-						listActName.add(value2);
-						node2 = g.addNode();
-						this.configNode(node2, value2, log.getMapNodeType());
+		try {
+			for (Map.Entry<Integer, List<Integer>> entry : log.getLogSkeleton().entrySet()) {
+				List<Integer> events = entry.getValue();
+				for (int i = 0; i < events.size(); i++) {
+					// add node for event at i-th
+					String value1 = log.getActivityIndexMapper().getActivityFromIndex(events.get(i));
+					Node node1 = null;
+					if (!listActName.contains(value1)) {
+						listActName.add(value1);
+						node1 = g.addNode();
+						this.configNode(node1, value1, log.getMapNodeType());
 					} else {
-						node2 = this.getNodeByLabel(g, value2);
+						node1 = this.getNodeByLabel(g, value1);
 					}
-					EdgeObject edgeObject = new EdgeObject(value1, value2);
-					if (!listEdges.contains(edgeObject)) {
-						Edge e = g.addEdge(node1, node2);
-						listEdges.add(edgeObject);
-						this.configEdge(e, edgeObject, log.getIndirectedEdges());
-					}
-				}
+					// add node for event at i+1-th if possible
+					if (i + 1 < events.size()) {
+						String value2 = log.getActivityIndexMapper().getActivityFromIndex(events.get(i + 1));
+						Node node2 = null;
+						if (!listActName.contains(value2)) {
+							listActName.add(value2);
+							node2 = g.addNode();
+							this.configNode(node2, value2, log.getMapNodeType());
+						} else {
+							node2 = this.getNodeByLabel(g, value2);
+						}
+						EdgeObject edgeObject = new EdgeObject(value1, value2);
+						if (!listEdges.contains(edgeObject)) {
+							Edge e = g.addEdge(node1, node2);
+							listEdges.add(edgeObject);
+							if (log.getListIndirectedEdge().contains(edgeObject)) {
+								this.configEdge(e, edgeObject, true);
+							} else {
+								this.configEdge(e, edgeObject, false);
+							}
 
-				// if begin act
-				if (i == 0) {
-					Node beginNode = g.getNode(this.beginNodeRow);
-					EdgeObject edgeObject = new EdgeObject("begin", value1);
-					if (!listEdges.contains(edgeObject)) {
-						Edge e1 = g.addEdge(beginNode, node1);
-						listEdges.add(edgeObject);
-						this.configEdge(e1, edgeObject, log.getIndirectedEdges());
+						}
+					}
+
+					// if begin act
+					if (i == 0) {
+						Node beginNode = g.getNode(this.beginNodeRow);
+						EdgeObject edgeObject = new EdgeObject("begin", value1);
+						if (!listEdges.contains(edgeObject)) {
+							Edge e1 = g.addEdge(beginNode, node1);
+							listEdges.add(edgeObject);
+							if (log.getListIndirectedEdge().contains(edgeObject)) {
+								this.configEdge(e1, edgeObject, true);
+							} else {
+								this.configEdge(e1, edgeObject, false);
+							}
+						}
+
+					}
+					// if end act
+					if (i == events.size() - 1) {
+						Node endNode = g.getNode(this.endNodeRow);
+						EdgeObject edgeObject = new EdgeObject(value1, "end");
+						if (!listEdges.contains(edgeObject)) {
+							Edge e1 = g.addEdge(node1, endNode);
+							listEdges.add(edgeObject);
+							if (log.getListIndirectedEdge().contains(edgeObject)) {
+								this.configEdge(e1, edgeObject, true);
+							} else {
+								this.configEdge(e1, edgeObject, false);
+							}
+						}
 					}
 
 				}
-				// if end act
-				if (i == trace.size() - 1) {
-					Node endNode = g.getNode(this.endNodeRow);
-					EdgeObject edgeObject = new EdgeObject(value1, "end");
-					if (!listEdges.contains(edgeObject)) {
-						Edge e1 = g.addEdge(node1, endNode);
-						listEdges.add(edgeObject);
-						this.configEdge(e1, edgeObject, log.getIndirectedEdges());
-					}
-				}
-
 			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error adding act and edge to graph", e);
 		}
+
 	}
 
 	private Node getNodeByLabel(Graph g, String label) {
@@ -577,8 +587,8 @@ public class GoalDrivenDFG extends Display {
 		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
 	}
 
-	private void configEdge(Edge e, EdgeObject edgeObject, IndirectedEdgeCarrierObject indirectedEdges) {
-		if (indirectedEdges.getListIndirectedEdge().contains(edgeObject)) {
+	private void configEdge(Edge e, EdgeObject edgeObject, boolean isIndirected) {
+		if (isIndirected) {
 			e.setBoolean(GraphConstants.IS_INDIRECTED_EDGE_FIELD, true);
 		} else {
 			e.setBoolean(GraphConstants.IS_INDIRECTED_EDGE_FIELD, false);
@@ -637,12 +647,12 @@ public class GoalDrivenDFG extends Display {
 			m_vis.putAction(GraphConstants.NODE_FILL_COLOR_ACTION, this.getNodeFillColorAction());
 			m_vis.run(GraphConstants.NODE_FILL_COLOR_ACTION);
 		} else {
-			this.setDefaultNodeFillColor(dfg.getFrequencyNode());
+			this.setDefaultNodeFillColor(dfg.getLog().getStatObject().getMapStatNode());
 		}
 
 		this.setDefaultArrowFillColor();
 		this.setDefaultEdgeStrokeColor();
-		this.setDefaultEdgeStrokeWidth(dfg.getFrequencyEdge());
+		this.setDefaultEdgeStrokeWidth(dfg.getLog().getStatObject().getMapStatEdge());
 		this.setDefaultNodeStrokeWidth();
 		this.setDefaultTextColor();
 		this.setDefaultNodeSize();
@@ -729,7 +739,7 @@ public class GoalDrivenDFG extends Display {
 		this.graph = graph;
 	}
 
-	public GDPMLog getLog() {
+	public GDPMLogSkeleton getLog() {
 		return log;
 	}
 
@@ -803,14 +813,6 @@ public class GoalDrivenDFG extends Display {
 
 	public void setTextColorAction(ColorAction textColorAction) {
 		this.textColorAction = textColorAction;
-	}
-
-	public FrequencyEdgeObject getFrequencyEdge() {
-		return frequencyEdge;
-	}
-
-	public FrequencyNodeObject getFrequencyNode() {
-		return frequencyNode;
 	}
 
 	public GraphObjectClickControl getEdgeClickControl() {

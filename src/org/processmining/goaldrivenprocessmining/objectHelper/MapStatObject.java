@@ -1,32 +1,22 @@
 package org.processmining.goaldrivenprocessmining.objectHelper;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
-import org.deckfour.xes.model.XLog;
-
-public class MapStatObject {
-	private XLog log;
+public class MapStatObject implements Serializable {
 	private HashMap<String, StatNodeObject> mapStatNode;
-	private HashMap<String, StatEdgeObject> mapStatEdge;
+	private HashMap<EdgeObject, StatEdgeObject> mapStatEdge;
 
 	public MapStatObject() {
 		this.mapStatNode = new HashMap<>();
 		this.mapStatEdge = new HashMap<>();
 	}
 
-	public XLog getLog() {
-		return log;
-	}
-
-	public void setLog(XLog log) {
-		this.log = log;
-	}
-
-	public HashMap<String, StatEdgeObject> getMapStatEdge() {
+	public HashMap<EdgeObject, StatEdgeObject> getMapStatEdge() {
 		return mapStatEdge;
 	}
 
-	public void setMapStatEdge(HashMap<String, StatEdgeObject> mapStatEdge) {
+	public void setMapStatEdge(HashMap<EdgeObject, StatEdgeObject> mapStatEdge) {
 		this.mapStatEdge = mapStatEdge;
 	}
 

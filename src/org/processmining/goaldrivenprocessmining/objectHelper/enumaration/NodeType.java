@@ -1,5 +1,7 @@
 package org.processmining.goaldrivenprocessmining.objectHelper.enumaration;
 
-public enum NodeType {
+import java.io.Serializable;
+
+public enum NodeType implements Serializable{
 	ACT_NODE, GROUP_NODE
 }

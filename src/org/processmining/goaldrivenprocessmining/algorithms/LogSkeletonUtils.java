@@ -1,25 +1,25 @@
 package org.processmining.goaldrivenprocessmining.algorithms;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.deckfour.xes.model.XAttributeMap;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
-import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
 import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyEdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyNodeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLog;
+import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.IndirectedEdgeCarrierObject;
+import org.processmining.goaldrivenprocessmining.objectHelper._GDPMLog;
 import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
 
-public class LogUtils {
+public class LogSkeletonUtils {
 
 	//	public static void main(String[] args) throws Exception {
 	//		File file = new File("C:\\D\\data\\ma_test.xes");
@@ -36,7 +36,7 @@ public class LogUtils {
 	//		System.out.println("done");
 	//	}
 
-	public static GDPMLog setUpMapNodeType(GDPMLog gdpmLog, List<String> listGroupActivities) {
+	public static _GDPMLog setUpMapNodeType(_GDPMLog gdpmLog, List<String> listGroupActivities) {
 		Map<String, NodeType> mapNodeType = new HashMap<>();
 		XLog log = gdpmLog.getLog();
 		List<String> allActivities = getAllUniqueActivities(log);
@@ -68,42 +68,92 @@ public class LogUtils {
 		return gdpmLog;
 	}
 
-	public static XLog replaceSetActivitiesInLog(XLog log, ActivityHashTable activityHashTable, List<String> activities,
-			String groupName) {
-		String classifier = log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString();
-		XLog newLog = (XLog) log.clone();
-		for (String act : activities) {
-			Map<Integer, List<Integer>> positions = activityHashTable.getActivityPositions(act);
-			for (Integer i : positions.keySet()) {
-				XTrace trace = newLog.get(i);
-				for (Integer j : positions.get(i)) {
-					XEvent event = trace.get(j);
-					XAttributeMap attributes = event.getAttributes();
-					attributes.replace(classifier, new XAttributeLiteralImpl(classifier, groupName));
-					event.setAttributes(attributes);
+	public static GDPMLogSkeleton restrictLogFrom2Activities(GDPMLogSkeleton logSkeleton, String source, String target,
+			String[] activities) throws Exception {
+
+		int sourceIndex = logSkeleton.getActivityIndexMapper().getIndexFromActivity(source);
+		int targetIndex = logSkeleton.getActivityIndexMapper().getIndexFromActivity(target);
+
+		HashMap<Integer, List<Integer>> newLogSkeleton = new HashMap<Integer, List<Integer>>();
+
+		for (Map.Entry<Integer, List<Integer>> entry : logSkeleton.getLogSkeleton().entrySet()) {
+			int newIndex = 0;
+			List<Integer> events = entry.getValue();
+			List<Integer> newEvents = new ArrayList<Integer>();
+			if (events.contains(sourceIndex) && events.contains(targetIndex)) {
+				Boolean sourceFound = false;
+				for (Integer value : events) {
+					if (!sourceFound) {
+						if (value == sourceIndex) {
+							sourceFound = true;
+							newEvents.add(value);
+						}
+					} else {
+						if (value == targetIndex) {
+							newEvents.add(value);
+							newLogSkeleton.put(newIndex, newEvents);
+							newIndex++;
+							newEvents = new ArrayList<Integer>();
+							if (value == sourceIndex) {
+								sourceFound = true;
+								newEvents.add(value);
+							} else {
+								sourceFound = false;
+							}
+						} else {
+							if (Arrays.asList(activities)
+									.contains(logSkeleton.getActivityIndexMapper().getActivityFromIndex(value))) {
+								newEvents.add(value);
+							}
+
+						}
+
+					}
 				}
 			}
 		}
-
-		return newLog;
+		// update log skeleton
+		logSkeleton.setLogSkeleton(newLogSkeleton);
+		// 
+		
+		
+		return logSkeleton;
 	}
 
-	public static GDPMLog removeActivitiesInLog(XLog log, ActivityHashTable activityHashTable,
-			List<String> activities) {
-		String[] activitiesArray = new String[activities.size()];
-		for (int i = 0; i < activitiesArray.length; i++) {
-			activitiesArray[i] = activities.get(i);
+	public static GDPMLogSkeleton replaceSetActivitiesInLog(GDPMLogSkeleton logSkeleton, List<String> activities,
+			String groupName) {
+
+		ActivityHashTable activityHashTable = logSkeleton.getActivityHashTable();
+		// update map act index
+		logSkeleton.getActivityIndexMapper().assignActivity(Arrays.asList(groupName));
+		// replace in log skeleton
+		for (String act : activities) {
+			Map<Integer, List<Integer>> positions = activityHashTable.getActivityPositions(act);
+			for (Integer key : positions.keySet()) {
+				for (Integer value : positions.get(key)) {
+					try {
+						logSkeleton.getLogSkeleton().get(key).set(value,
+								logSkeleton.getActivityIndexMapper().getIndexFromActivity(groupName));
+					} catch (Exception e) {
+						throw new RuntimeException("Can not replace act name");
+					}
+				}
+			}
+			// update hash table
+			logSkeleton.getActivityHashTable().getActivityTable().put(groupName, positions);
+			logSkeleton.getActivityHashTable().getActivityTable().remove(act);
 		}
-		return removeActivitiesInLog(log, activityHashTable, activitiesArray);
+
+		return logSkeleton;
 	}
 
-	public static GDPMLog removeActivitiesInLog(XLog log, ActivityHashTable activityHashTable, String[] activities) {
-		XLog newLog = (XLog) log.clone();
+	public static GDPMLogSkeleton removeActivitiesInLog(GDPMLogSkeleton logSkeleton, String[] activities) {
+		ActivityHashTable newActivityHashTable = (ActivityHashTable) logSkeleton.getActivityHashTable().clone();
 		IndirectedEdgeCarrierObject indirectedEdges = new IndirectedEdgeCarrierObject();
 		HashMap<Integer, List<Integer>> removeActInCaseMap = new HashMap<Integer, List<Integer>>();
-		String classifier = log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString();
+
 		for (String act : activities) {
-			Map<Integer, List<Integer>> allPosMap = activityHashTable.getActivityPositions(act);
+			Map<Integer, List<Integer>> allPosMap = newActivityHashTable.getActivityPositions(act);
 			for (Integer i : allPosMap.keySet()) {
 				for (int j = 0; j < allPosMap.get(i).size(); j++) {
 					if (removeActInCaseMap.keySet().contains(i)) {
@@ -120,68 +170,65 @@ public class LogUtils {
 		}
 		// record indirected edges
 		for (Integer index : removeActInCaseMap.keySet()) {
-			XTrace trace = log.get(index);
+			int traceLength = logSkeleton.getMapTraceLength().get(index);
 			List<Integer> removeActs = removeActInCaseMap.get(index);
 			Collections.sort(removeActs);
-			if (trace.size() > removeActs.size()) {
-				List<List<Integer>> listConsecutiveNumber = LogUtils.groupConsecutiveNumbers(removeActs);
+			if (traceLength > removeActs.size()) {
+				List<List<Integer>> listConsecutiveNumber = LogSkeletonUtils.groupConsecutiveNumbers(removeActs);
 				for (List<Integer> list : listConsecutiveNumber) {
 					int start = list.get(0);
 					int end = list.get(list.size() - 1);
 					String node1 = "";
 					String node2 = "";
-					if (start != end) {
-						if (start == 0) {
-							node1 = "begin";
-						} else {
-							node1 = trace.get(start - 1).getAttributes().get(classifier).toString();
-						}
-						if (end == trace.size() - 1) {
-							node2 = "end";
-						} else {
-							node2 = trace.get(end + 1).getAttributes().get(classifier).toString();
-						}
+					if (start == 0) {
+						node1 = "begin";
 					} else {
-						node1 = trace.get(start - 1).getAttributes().get(classifier).toString();
-						node2 = trace.get(start + 1).getAttributes().get(classifier).toString();
+						node1 = logSkeleton.getActNameAtPosition(index, start - 1);
+					}
+					if (end == traceLength - 1) {
+						node2 = "end";
+					} else {
+						node2 = logSkeleton.getActNameAtPosition(index, end + 1);
 					}
 					indirectedEdges.addEdge(new EdgeObject(node1, node2));
 				}
 			}
 
 		}
+		logSkeleton.setListIndirectedEdge(indirectedEdges.getListIndirectedEdge());
 
 		// remove act from traces
-		for (Integer index : removeActInCaseMap.keySet()) {
-			List<XEvent> toRemove = new ArrayList<>();
-			for (Integer i : removeActInCaseMap.get(index)) {
-				toRemove.add(newLog.get(index).get(i));
+		for (Integer posTrace : removeActInCaseMap.keySet()) {
+			for (int i = 0; i < removeActInCaseMap.get(posTrace).size(); i++) {
+				int posEvent = removeActInCaseMap.get(posTrace).get(i);
+				logSkeleton.getLogSkeleton().get(posTrace).remove(posEvent - i);
+				logSkeleton.getTimeSkeleton().get(posTrace).remove(posEvent - i);
+
 			}
-			newLog.get(index).removeAll(toRemove);
 		}
-		return new GDPMLog(newLog, indirectedEdges);
+		return logSkeleton;
 	}
-	
+
 	public static List<List<Integer>> groupConsecutiveNumbers(List<Integer> numbers) {
-        List<List<Integer>> result = new ArrayList<>();
-        List<Integer> currentGroup = new ArrayList<>();
+		List<List<Integer>> result = new ArrayList<>();
+		List<Integer> currentGroup = new ArrayList<>();
 
-        for (int i = 0; i < numbers.size(); i++) {
-            if (i == 0 || numbers.get(i) - numbers.get(i - 1) != 1) {
-                if (!currentGroup.isEmpty()) {
-                    result.add(currentGroup);
-                    currentGroup = new ArrayList<>();
-                }
-            }
-            currentGroup.add(numbers.get(i));
-        }
+		for (int i = 0; i < numbers.size(); i++) {
+			if (i == 0 || numbers.get(i) - numbers.get(i - 1) != 1) {
+				if (!currentGroup.isEmpty()) {
+					result.add(currentGroup);
+					currentGroup = new ArrayList<>();
+				}
+			}
+			currentGroup.add(numbers.get(i));
+		}
 
-        if (!currentGroup.isEmpty()) {
-            result.add(currentGroup);
-        }
+		if (!currentGroup.isEmpty()) {
+			result.add(currentGroup);
+		}
 
-        return result;
-    }
+		return result;
+	}
 
 	public static FrequencyEdgeObject getFrequencyEdges(XLog log, String classifier) {
 		FrequencyEdgeObject res = new FrequencyEdgeObject();

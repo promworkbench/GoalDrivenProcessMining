@@ -1,7 +1,5 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
-import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyEdgeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyNodeObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
@@ -23,11 +21,9 @@ public class HIGH_Cl03UpdateCategoryHighLevelDFG<C> extends DataChainLinkComputa
 	public IvMObject<?>[] createInputObjects() {
 		// TODO Auto-generated method stub
 		return new IvMObject<?>[] { 
-			GoalDrivenObject.high_level_log, 
+			GoalDrivenObject.high_level_log_skeleton, 
 			GoalDrivenObject.selected_mode_category,
-			GoalDrivenObject.map_activity_category, 
-			GoalDrivenObject.high_frequency_edge,
-			GoalDrivenObject.high_frequency_node
+			GoalDrivenObject.map_activity_category 
 			};
 
 	}
@@ -40,9 +36,7 @@ public class HIGH_Cl03UpdateCategoryHighLevelDFG<C> extends DataChainLinkComputa
 	public IvMObjectValues execute(Object configuration, IvMObjectValues inputs, IvMCanceller canceller)
 			throws Exception {
 		System.out.println("--- HIGH_Cl03UpdateCategoryHighLevelDFG");
-		FrequencyEdgeObject frequencyEdge = inputs.get(GoalDrivenObject.high_frequency_edge);
-		FrequencyNodeObject frequencyNode = inputs.get(GoalDrivenObject.high_frequency_node);
-		GoalDrivenDFG  dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.high_level_log), frequencyEdge, frequencyNode);
+		GoalDrivenDFG  dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.high_level_log_skeleton));
 //		dfg.addControlListener(new EdgeClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 		dfg.repaintNodeStrokeColor(dfg.getNodeStrokeColorFromMapActCat(inputs.get(GoalDrivenObject.map_activity_category),
 				inputs.get(GoalDrivenObject.selected_mode_category)));
