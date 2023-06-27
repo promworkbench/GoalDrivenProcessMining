@@ -89,7 +89,7 @@ public class GoalDrivenDFG extends Display {
 	public GoalDrivenDFG(GDPMLogSkeleton gdpmLogSkeleton) {
 		super(new Visualization());
 		this.log = gdpmLogSkeleton;
-		
+
 		// action
 		this.nodeStrokeColorAction = null;
 		this.nodeFillColorAction = null;
@@ -614,7 +614,7 @@ public class GoalDrivenDFG extends Display {
 		nodeData.addColumn(GraphConstants.BEGIN_FIELD, boolean.class);
 		nodeData.addColumn(GraphConstants.END_FIELD, boolean.class);
 		nodeData.addColumn(GraphConstants.SELECT_FIELD, boolean.class);
-		//		nodeData.addColumn(GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD, int.class);
+		nodeData.addColumn(GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD, int.class);
 		nodeData.addColumn(GraphConstants.NODE_TYPE_FIELD, NodeType.class);
 		return nodeData;
 	}

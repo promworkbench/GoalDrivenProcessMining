@@ -1,13 +1,11 @@
 package graph.controls;
 
-import java.awt.Color;
 import java.awt.event.MouseEvent;
 
 import graph.GraphConstants;
 import prefuse.Display;
 import prefuse.controls.ControlAdapter;
 import prefuse.data.Table;
-import prefuse.util.ColorLib;
 import prefuse.visual.VisualItem;
 
 public class BackgroundDoubleClickControl extends ControlAdapter {
@@ -26,12 +24,10 @@ public class BackgroundDoubleClickControl extends ControlAdapter {
 					VisualItem item = display.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
 							this.nodeTable.getTuple(i));
 					if (item.getBoolean(GraphConstants.BEGIN_FIELD) || item.getBoolean(GraphConstants.END_FIELD)) {
-						item.setFillColor(ColorLib.color(new Color(3, 218, 197)));
+						item.setFillColor(GraphConstants.BEGIN_END_NODE_COLOR);
 					} else {
-						item.setFillColor(ColorLib.color(GraphConstants.GRADIENT_NODE_FILL_COLOR[item
-								.getInt(GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD)]));
+						item.setFillColor(item.getInt(GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD));
 					}
-
 				}
 			}
 			display.validate();

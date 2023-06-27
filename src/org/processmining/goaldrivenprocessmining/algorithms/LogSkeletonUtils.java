@@ -12,8 +12,6 @@ import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyEdgeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyNodeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.IndirectedEdgeCarrierObject;
 import org.processmining.goaldrivenprocessmining.objectHelper._GDPMLog;
@@ -68,55 +66,63 @@ public class LogSkeletonUtils {
 		return gdpmLog;
 	}
 
-	public static GDPMLogSkeleton restrictLogFrom2Activities(GDPMLogSkeleton logSkeleton, String source, String target,
-			String[] activities) throws Exception {
+	public static GDPMLogSkeleton restrictLogFrom2Activities(GDPMLogSkeleton logSkeleton, String source, String target)
+			throws Exception {
 
-		int sourceIndex = logSkeleton.getActivityIndexMapper().getIndexFromActivity(source);
-		int targetIndex = logSkeleton.getActivityIndexMapper().getIndexFromActivity(target);
+		int sourceIndex = -1;
+		int targetIndex = -1;
+
+		if (!source.isEmpty()) {
+			sourceIndex = logSkeleton.getActivityIndexMapper().getIndexFromActivity(source);
+		}
+		if (!target.isEmpty()) {
+			targetIndex = logSkeleton.getActivityIndexMapper().getIndexFromActivity(target);
+		}
 
 		HashMap<Integer, List<Integer>> newLogSkeleton = new HashMap<Integer, List<Integer>>();
-
+		int newIndex = 0;
 		for (Map.Entry<Integer, List<Integer>> entry : logSkeleton.getLogSkeleton().entrySet()) {
-			int newIndex = 0;
-			List<Integer> events = entry.getValue();
-			List<Integer> newEvents = new ArrayList<Integer>();
-			if (events.contains(sourceIndex) && events.contains(targetIndex)) {
-				Boolean sourceFound = false;
-				for (Integer value : events) {
+			List<Integer> trace = entry.getValue();
+			List<Integer> newTrace = new ArrayList<Integer>();
+			if ((trace.contains(sourceIndex) || sourceIndex < 0) && (trace.contains(targetIndex) || targetIndex < 0)) {
+				Boolean sourceFound = sourceIndex < 0 ? true : false;
+				for (Integer value : trace) {
 					if (!sourceFound) {
-						if (value == sourceIndex) {
+						if (value == sourceIndex || sourceIndex < 0) {
 							sourceFound = true;
-							newEvents.add(value);
+							newTrace.add(value);
 						}
 					} else {
 						if (value == targetIndex) {
-							newEvents.add(value);
-							newLogSkeleton.put(newIndex, newEvents);
+							newTrace.add(value);
+							newLogSkeleton.put(newIndex, newTrace);
 							newIndex++;
-							newEvents = new ArrayList<Integer>();
+							newTrace = new ArrayList<Integer>();
 							if (value == sourceIndex) {
 								sourceFound = true;
-								newEvents.add(value);
+								newTrace.add(value);
 							} else {
 								sourceFound = false;
 							}
 						} else {
-							if (Arrays.asList(activities)
-									.contains(logSkeleton.getActivityIndexMapper().getActivityFromIndex(value))) {
-								newEvents.add(value);
-							}
-
+							newTrace.add(value);
 						}
 
 					}
+				}
+				if (!newTrace.isEmpty() && targetIndex < 0) {
+					newLogSkeleton.put(newIndex, newTrace);
+					newIndex++;
+				} else {
+					newTrace = new ArrayList<Integer>();
 				}
 			}
 		}
 		// update log skeleton
 		logSkeleton.setLogSkeleton(newLogSkeleton);
 		// 
-		
-		
+		LogSkeletonUtils.updateActivityHashTable(logSkeleton);
+		LogSkeletonUtils.updateTraceLength(logSkeleton);
 		return logSkeleton;
 	}
 
@@ -151,59 +157,63 @@ public class LogSkeletonUtils {
 		ActivityHashTable newActivityHashTable = (ActivityHashTable) logSkeleton.getActivityHashTable().clone();
 		IndirectedEdgeCarrierObject indirectedEdges = new IndirectedEdgeCarrierObject();
 		HashMap<Integer, List<Integer>> removeActInCaseMap = new HashMap<Integer, List<Integer>>();
-
+		
 		for (String act : activities) {
-			Map<Integer, List<Integer>> allPosMap = newActivityHashTable.getActivityPositions(act);
-			for (Integer i : allPosMap.keySet()) {
-				for (int j = 0; j < allPosMap.get(i).size(); j++) {
-					if (removeActInCaseMap.keySet().contains(i)) {
-						List<Integer> removeActs = removeActInCaseMap.get(i);
-						removeActs.add(allPosMap.get(i).get(j));
-						removeActInCaseMap.replace(i, removeActs);
-					} else {
-						List<Integer> removeActs = new ArrayList<>();
-						removeActs.add(allPosMap.get(i).get(j));
-						removeActInCaseMap.put(i, removeActs);
+			if(logSkeleton.getActivityHashTable().getActivityTable().keySet().contains(act)) {
+				Map<Integer, List<Integer>> allPosMap = newActivityHashTable.getActivityPositions(act);
+				for (Integer i : allPosMap.keySet()) {
+					for (int j = 0; j < allPosMap.get(i).size(); j++) {
+						if (removeActInCaseMap.keySet().contains(i)) {
+							List<Integer> removeActs = removeActInCaseMap.get(i);
+							removeActs.add(allPosMap.get(i).get(j));
+							removeActInCaseMap.replace(i, removeActs);
+						} else {
+							List<Integer> removeActs = new ArrayList<>();
+							removeActs.add(allPosMap.get(i).get(j));
+							removeActInCaseMap.put(i, removeActs);
+						}
 					}
 				}
 			}
 		}
-		// record indirected edges
-		for (Integer index : removeActInCaseMap.keySet()) {
-			int traceLength = logSkeleton.getMapTraceLength().get(index);
-			List<Integer> removeActs = removeActInCaseMap.get(index);
-			Collections.sort(removeActs);
-			if (traceLength > removeActs.size()) {
-				List<List<Integer>> listConsecutiveNumber = LogSkeletonUtils.groupConsecutiveNumbers(removeActs);
-				for (List<Integer> list : listConsecutiveNumber) {
-					int start = list.get(0);
-					int end = list.get(list.size() - 1);
-					String node1 = "";
-					String node2 = "";
-					if (start == 0) {
-						node1 = "begin";
-					} else {
-						node1 = logSkeleton.getActNameAtPosition(index, start - 1);
+		if (!removeActInCaseMap.isEmpty()) {
+			// record indirected edges
+			for (Integer index : removeActInCaseMap.keySet()) {
+				int traceLength = logSkeleton.getMapTraceLength().get(index);
+				List<Integer> removeActs = removeActInCaseMap.get(index);
+				Collections.sort(removeActs);
+				if (traceLength > removeActs.size()) {
+					List<List<Integer>> listConsecutiveNumber = LogSkeletonUtils.groupConsecutiveNumbers(removeActs);
+					for (List<Integer> list : listConsecutiveNumber) {
+						int start = list.get(0);
+						int end = list.get(list.size() - 1);
+						String node1 = "";
+						String node2 = "";
+						if (start == 0) {
+							node1 = "begin";
+						} else {
+							node1 = logSkeleton.getActNameAtPosition(index, start - 1);
+						}
+						if (end == traceLength - 1) {
+							node2 = "end";
+						} else {
+							node2 = logSkeleton.getActNameAtPosition(index, end + 1);
+						}
+						indirectedEdges.addEdge(new EdgeObject(node1, node2));
 					}
-					if (end == traceLength - 1) {
-						node2 = "end";
-					} else {
-						node2 = logSkeleton.getActNameAtPosition(index, end + 1);
-					}
-					indirectedEdges.addEdge(new EdgeObject(node1, node2));
 				}
+
 			}
+			logSkeleton.setListIndirectedEdge(indirectedEdges.getListIndirectedEdge());
 
-		}
-		logSkeleton.setListIndirectedEdge(indirectedEdges.getListIndirectedEdge());
+			// remove act from traces
+			for (Integer posTrace : removeActInCaseMap.keySet()) {
+				for (int i = 0; i < removeActInCaseMap.get(posTrace).size(); i++) {
+					int posEvent = removeActInCaseMap.get(posTrace).get(i);
+					logSkeleton.getLogSkeleton().get(posTrace).remove(posEvent - i);
+					logSkeleton.getTimeSkeleton().get(posTrace).remove(posEvent - i);
 
-		// remove act from traces
-		for (Integer posTrace : removeActInCaseMap.keySet()) {
-			for (int i = 0; i < removeActInCaseMap.get(posTrace).size(); i++) {
-				int posEvent = removeActInCaseMap.get(posTrace).get(i);
-				logSkeleton.getLogSkeleton().get(posTrace).remove(posEvent - i);
-				logSkeleton.getTimeSkeleton().get(posTrace).remove(posEvent - i);
-
+				}
 			}
 		}
 		return logSkeleton;
@@ -230,70 +240,47 @@ public class LogSkeletonUtils {
 		return result;
 	}
 
-	public static FrequencyEdgeObject getFrequencyEdges(XLog log, String classifier) {
-		FrequencyEdgeObject res = new FrequencyEdgeObject();
-		List<EdgeObject> listEdges = new ArrayList<>();
-		for (XTrace trace : log) {
-			for (int i = 0; i < trace.size(); i++) {
-				XEvent ev1 = trace.get(i);
-				String val1 = ev1.getAttributes().get(classifier).toString();
-				if (i + 1 < trace.size()) {
-					XEvent ev2 = trace.get(i + 1);
-					String val2 = ev2.getAttributes().get(classifier).toString();
-					EdgeObject edge = new EdgeObject(val1, val2);
-					if (!listEdges.contains(edge)) {
-						listEdges.add(edge);
-						res.getFrequencyEdge().put(edge, 1);
-					} else {
-						int curFreq = res.getFrequencyEdge().get(edge);
-						res.getFrequencyEdge().replace(edge, curFreq + 1);
-					}
+	public static void updateActivityHashTable(GDPMLogSkeleton logSkeleton) throws Exception {
+		ActivityHashTable activity = new ActivityHashTable();
+		List<String> addedAct = new ArrayList<>();
 
-				}
-				if (i == 0) {
-					val1 = "begin";
-					String val2 = ev1.getAttributes().get(classifier).toString();
-					EdgeObject edge = new EdgeObject(val1, val2);
-					if (!listEdges.contains(edge)) {
-						listEdges.add(edge);
-						res.getFrequencyEdge().put(edge, 1);
-					} else {
-						int curFreq = res.getFrequencyEdge().get(edge);
-						res.getFrequencyEdge().replace(edge, curFreq + 1);
-					}
-				}
-				if (i == trace.size() - 1) {
-					val1 = ev1.getAttributes().get(classifier).toString();
-					String val2 = "end";
-					EdgeObject edge = new EdgeObject(val1, val2);
-					if (!listEdges.contains(edge)) {
-						listEdges.add(edge);
-						res.getFrequencyEdge().put(edge, 1);
-					} else {
-						int curFreq = res.getFrequencyEdge().get(edge);
-						res.getFrequencyEdge().replace(edge, curFreq + 1);
-					}
-				}
-			}
-		}
-		return res;
-	}
-
-	public static FrequencyNodeObject getFrequencyNodeObject(XLog log, String classifier) {
-		FrequencyNodeObject res = new FrequencyNodeObject();
-		List<String> listNodes = new ArrayList<>();
-		for (XTrace trace : log) {
-			for (XEvent event : trace) {
-				if (!listNodes.contains(event.getAttributes().get(classifier).toString())) {
-					listNodes.add(event.getAttributes().get(classifier).toString());
-					res.getFrequencyActivity().put(event.getAttributes().get(classifier).toString(), 1);
+		for (Map.Entry<Integer, List<Integer>> entry : logSkeleton.getLogSkeleton().entrySet()) {
+			int traceNum = entry.getKey();
+			List<Integer> trace = entry.getValue();
+			for (int j = 0; j < trace.size(); j++) {
+				int eventNum = trace.get(j);
+				if (!addedAct.contains(logSkeleton.getActivityIndexMapper().getActivityFromIndex(eventNum))) {
+					HashMap<Integer, List<Integer>> hashMap = new HashMap<>();
+					hashMap.put(traceNum, Arrays.asList(eventNum));
+					activity.getActivityTable().put(logSkeleton.getActivityIndexMapper().getActivityFromIndex(eventNum),
+							hashMap);
+					addedAct.add(logSkeleton.getActivityIndexMapper().getActivityFromIndex(eventNum));
 				} else {
-					int curFreq = res.getFrequencyActivity().get(event.getAttributes().get(classifier).toString());
-					res.getFrequencyActivity().replace(event.getAttributes().get(classifier).toString(), curFreq + 1);
+					Map<Integer, List<Integer>> hashMap = activity.getActivityTable()
+							.get(logSkeleton.getActivityIndexMapper().getActivityFromIndex(eventNum));
+					if (hashMap.containsKey(traceNum)) {
+						activity.getActivityTable()
+								.get(logSkeleton.getActivityIndexMapper().getActivityFromIndex(eventNum)).get(traceNum)
+								.add(eventNum);
+					} else {
+						List<Integer> listEvents = new ArrayList<Integer>();
+						listEvents.add(eventNum);
+						activity.getActivityTable()
+								.get(logSkeleton.getActivityIndexMapper().getActivityFromIndex(eventNum))
+								.put(traceNum, listEvents);
+					}
 				}
 			}
 		}
-		return res;
+		logSkeleton.setActivityHashTable(activity);
+	}
+	
+	public static void updateTraceLength(GDPMLogSkeleton logSkeleton) {
+		HashMap<Integer, Integer> newTraceLength = new HashMap<Integer, Integer>();
+		for (Integer i: logSkeleton.getLogSkeleton().keySet()) {
+			newTraceLength.put(i, logSkeleton.getLogSkeleton().get(i).size());
+		}
+		logSkeleton.setMapTraceLength(newTraceLength);
 	}
 
 	public static List<String> getAllUniqueActivities(XLog log) {

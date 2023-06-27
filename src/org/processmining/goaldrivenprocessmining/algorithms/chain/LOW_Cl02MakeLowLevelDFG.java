@@ -26,8 +26,7 @@ public class LOW_Cl02MakeLowLevelDFG<C> extends DataChainLinkComputationAbstract
 
 	@Override
 	public IvMObject<?>[] createOutputObjects() {
-		return new IvMObject<?>[] { GoalDrivenObject.low_level_dfg,GoalDrivenObject.low_frequency_edge,
-			GoalDrivenObject.low_frequency_node };
+		return new IvMObject<?>[] { GoalDrivenObject.low_level_dfg };
 	}
 
 	@Override

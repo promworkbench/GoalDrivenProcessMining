@@ -13,7 +13,7 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 public class HIGH_Cl01MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C> {
-
+	public static GDPMLogSkeleton currentHighLogSkeleton = null;
 	public String getStatusBusyMessage() {
 		// TODO Auto-generated method stub
 		return "Making high level event log...";
@@ -60,6 +60,8 @@ public class HIGH_Cl01MakeHighLevelLog<C> extends DataChainLinkComputationAbstra
 
 		// recalculate the stat of new log
 		StatUtils.updateStat(newLogObject);
+		// update global var
+		currentHighLogSkeleton = newLogObject;
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.high_level_log_skeleton, newLogObject);
 	}
