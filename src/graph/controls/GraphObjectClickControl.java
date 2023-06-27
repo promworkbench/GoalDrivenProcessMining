@@ -17,7 +17,7 @@ public class GraphObjectClickControl extends ControlAdapter {
 	private final InGroupPredicate nodeFilter = new InGroupPredicate(GraphConstants.NODE_GROUP);
 
 	private DataChain<GoalDrivenConfiguration> chain;
-	
+
 	public GraphObjectClickControl() {
 	}
 
@@ -35,13 +35,17 @@ public class GraphObjectClickControl extends ControlAdapter {
 			passValues.put("source", sourceNode);
 			passValues.put("target", targetNode);
 			if (this.chain != null) {
-				this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues); 
+				this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
 			}
 		}
 		if (nodeFilter.getBoolean(item)) {
 			if (item.getString(GraphConstants.NODE_TYPE_FIELD).equals("ACT_NODE")) {
 				if (this.chain != null) {
-					this.chain.setObject(GoalDrivenObject.selected_node, item.getString(GraphConstants.LABEL_FIELD)); 
+					this.chain.setObject(GoalDrivenObject.selected_node, item.getString(GraphConstants.LABEL_FIELD));
+				}
+			} else if (item.getString(GraphConstants.NODE_TYPE_FIELD).equals("GROUP_NODE")) {
+				if (this.chain != null) {
+					chain.setObject(GoalDrivenObject.selected_group, item.getString(GraphConstants.LABEL_FIELD));
 				}
 			}
 		}
@@ -69,7 +73,5 @@ public class GraphObjectClickControl extends ControlAdapter {
 	public void setChain(DataChain<GoalDrivenConfiguration> chain) {
 		this.chain = chain;
 	}
-	
-	
-	
+
 }

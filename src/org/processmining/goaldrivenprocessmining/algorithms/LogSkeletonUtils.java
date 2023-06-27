@@ -80,49 +80,64 @@ public class LogSkeletonUtils {
 		}
 
 		HashMap<Integer, List<Integer>> newLogSkeleton = new HashMap<Integer, List<Integer>>();
+		HashMap<Integer, List<String>> newTimeSkeleton = new HashMap<Integer, List<String>>();
 		int newIndex = 0;
 		for (Map.Entry<Integer, List<Integer>> entry : logSkeleton.getLogSkeleton().entrySet()) {
+			int traceNum = entry.getKey();
 			List<Integer> trace = entry.getValue();
 			List<Integer> newTrace = new ArrayList<Integer>();
+			List<String> newTime = new ArrayList<String>();
 			if ((trace.contains(sourceIndex) || sourceIndex < 0) && (trace.contains(targetIndex) || targetIndex < 0)) {
 				Boolean sourceFound = sourceIndex < 0 ? true : false;
-				for (Integer value : trace) {
+				int actPos = 0;
+				for (Integer act : trace) {
 					if (!sourceFound) {
-						if (value == sourceIndex || sourceIndex < 0) {
+						if (act == sourceIndex || sourceIndex < 0) {
 							sourceFound = true;
-							newTrace.add(value);
+							newTrace.add(act);
+							newTime.add(logSkeleton.getTimeSkeleton().get(traceNum).get(actPos));
 						}
 					} else {
-						if (value == targetIndex) {
-							newTrace.add(value);
+						if (act == targetIndex) {
+							newTrace.add(act);
+							newTime.add(logSkeleton.getTimeSkeleton().get(traceNum).get(actPos));
 							newLogSkeleton.put(newIndex, newTrace);
+							newTimeSkeleton.put(newIndex, newTime);
 							newIndex++;
 							newTrace = new ArrayList<Integer>();
-							if (value == sourceIndex) {
+							newTime = new ArrayList<String>();
+							if (act == sourceIndex) {
 								sourceFound = true;
-								newTrace.add(value);
+								newTrace.add(act);
+								newTime.add(logSkeleton.getTimeSkeleton().get(traceNum).get(actPos));
 							} else {
 								sourceFound = false;
 							}
 						} else {
-							newTrace.add(value);
+							newTrace.add(act);
+							newTime.add(logSkeleton.getTimeSkeleton().get(traceNum).get(actPos));
 						}
 
 					}
+					actPos++;
 				}
 				if (!newTrace.isEmpty() && targetIndex < 0) {
 					newLogSkeleton.put(newIndex, newTrace);
+					newTimeSkeleton.put(newIndex, newTime);
 					newIndex++;
 				} else {
 					newTrace = new ArrayList<Integer>();
+					newTime = new ArrayList<String>();
 				}
 			}
 		}
 		// update log skeleton
 		logSkeleton.setLogSkeleton(newLogSkeleton);
+		logSkeleton.setTimeSkeleton(newTimeSkeleton);
 		// 
 		LogSkeletonUtils.updateActivityHashTable(logSkeleton);
-		LogSkeletonUtils.updateTraceLength(logSkeleton);
+		// remove all indirected act
+		logSkeleton.setListIndirectedEdge(new ArrayList<>());
 		return logSkeleton;
 	}
 
@@ -148,18 +163,28 @@ public class LogSkeletonUtils {
 			// update hash table
 			logSkeleton.getActivityHashTable().getActivityTable().put(groupName, positions);
 			logSkeleton.getActivityHashTable().getActivityTable().remove(act);
+			// update map node type
+			logSkeleton.getMapNodeType().put(groupName, NodeType.GROUP_NODE);
 		}
 
 		return logSkeleton;
+	}
+	
+	public static GDPMLogSkeleton removeActivitiesInLog(GDPMLogSkeleton logSkeleton, List<String> activities) {
+		String[] activitiesArray = new String[activities.size()];
+		for (int i = 0; i < activitiesArray.length; i++) {
+			activitiesArray[i] = activities.get(i);
+		}
+		return LogSkeletonUtils.removeActivitiesInLog(logSkeleton, activitiesArray);
 	}
 
 	public static GDPMLogSkeleton removeActivitiesInLog(GDPMLogSkeleton logSkeleton, String[] activities) {
 		ActivityHashTable newActivityHashTable = (ActivityHashTable) logSkeleton.getActivityHashTable().clone();
 		IndirectedEdgeCarrierObject indirectedEdges = new IndirectedEdgeCarrierObject();
 		HashMap<Integer, List<Integer>> removeActInCaseMap = new HashMap<Integer, List<Integer>>();
-		
+
 		for (String act : activities) {
-			if(logSkeleton.getActivityHashTable().getActivityTable().keySet().contains(act)) {
+			if (logSkeleton.getActivityHashTable().getActivityTable().keySet().contains(act)) {
 				Map<Integer, List<Integer>> allPosMap = newActivityHashTable.getActivityPositions(act);
 				for (Integer i : allPosMap.keySet()) {
 					for (int j = 0; j < allPosMap.get(i).size(); j++) {
@@ -179,7 +204,7 @@ public class LogSkeletonUtils {
 		if (!removeActInCaseMap.isEmpty()) {
 			// record indirected edges
 			for (Integer index : removeActInCaseMap.keySet()) {
-				int traceLength = logSkeleton.getMapTraceLength().get(index);
+				int traceLength = logSkeleton.getLogSkeleton().get(index).size();
 				List<Integer> removeActs = removeActInCaseMap.get(index);
 				Collections.sort(removeActs);
 				if (traceLength > removeActs.size()) {
@@ -251,7 +276,9 @@ public class LogSkeletonUtils {
 				int eventNum = trace.get(j);
 				if (!addedAct.contains(logSkeleton.getActivityIndexMapper().getActivityFromIndex(eventNum))) {
 					HashMap<Integer, List<Integer>> hashMap = new HashMap<>();
-					hashMap.put(traceNum, Arrays.asList(eventNum));
+					List<Integer> newHash = new ArrayList<>();
+					newHash.add(eventNum);
+					hashMap.put(traceNum, newHash);
 					activity.getActivityTable().put(logSkeleton.getActivityIndexMapper().getActivityFromIndex(eventNum),
 							hashMap);
 					addedAct.add(logSkeleton.getActivityIndexMapper().getActivityFromIndex(eventNum));
@@ -273,14 +300,6 @@ public class LogSkeletonUtils {
 			}
 		}
 		logSkeleton.setActivityHashTable(activity);
-	}
-	
-	public static void updateTraceLength(GDPMLogSkeleton logSkeleton) {
-		HashMap<Integer, Integer> newTraceLength = new HashMap<Integer, Integer>();
-		for (Integer i: logSkeleton.getLogSkeleton().keySet()) {
-			newTraceLength.put(i, logSkeleton.getLogSkeleton().get(i).size());
-		}
-		logSkeleton.setMapTraceLength(newTraceLength);
 	}
 
 	public static List<String> getAllUniqueActivities(XLog log) {

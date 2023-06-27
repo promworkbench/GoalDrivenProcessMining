@@ -1,11 +1,13 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
+import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 import graph.GoalDrivenDFG;
+import graph.controls.GraphObjectClickControl;
 
 public class LOW_Cl02MakeLowLevelDFG<C> extends DataChainLinkComputationAbstract<C> {
 
@@ -33,6 +35,7 @@ public class LOW_Cl02MakeLowLevelDFG<C> extends DataChainLinkComputationAbstract
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
 		System.out.println("--- LOW_Cl02MakeLowLevelDFG");
 		GoalDrivenDFG dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.low_level_log_skeleton));
+		dfg.addControlListener(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.low_level_dfg, dfg);
 	}

@@ -47,7 +47,6 @@ import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.
 
 import graph.GoalDrivenDFG;
 import graph.GraphConstants;
-import graph.controls.GroupNodeControl;
 import graph.utils.node.GraphNodeUtils;
 import prefuse.Visualization;
 import prefuse.visual.VisualItem;
@@ -141,19 +140,16 @@ public class GoalDrivenController {
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				System.out.println("--- group log ---");
 				if (inputs.has(GoalDrivenObject.map_group_log)) {
-					if (GroupNodeControl.isGroupNodeClicked) {
-						GoalDrivenDFG groupDfg = inputs.get(GoalDrivenObject.map_group_log).getMapGroupDfg()
-								.get(inputs.get(GoalDrivenObject.selected_group));
-						groupDfg.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
-						groupDfg.addSeeOnlyControls();
-						panel.getSidePanel().getStatisticPanel().getStatPane()
-								.addTab(inputs.get(GoalDrivenObject.selected_group), groupDfg);
-						panel.getSidePanel().revalidate();
-						panel.getSidePanel().repaint();
-						panel.revalidate();
-						panel.repaint();
-					}
-					GroupNodeControl.isGroupNodeClicked = false;
+					GoalDrivenDFG groupDfg = inputs.get(GoalDrivenObject.map_group_log).getMapGroupDfg()
+							.get(inputs.get(GoalDrivenObject.selected_group));
+					groupDfg.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
+					groupDfg.addSeeOnlyControls();
+					panel.getSidePanel().getStatisticPanel().getStatPane()
+							.addTab(inputs.get(GoalDrivenObject.selected_group), groupDfg);
+					panel.getSidePanel().revalidate();
+					panel.getSidePanel().repaint();
+					panel.revalidate();
+					panel.repaint();
 				}
 			}
 
@@ -584,8 +580,7 @@ public class GoalDrivenController {
 				}
 				GroupActObject selectedNodeObject = new GroupActObject(
 						panel.getSidePanel().getBatchSelectionPopupPanel().getGroupNameField().getText(), selectedNode);
-				UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.ADD,
-						selectedNodeObject);
+				UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.ADD, selectedNodeObject);
 				chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
 				chain.setObject(GoalDrivenObject.new_group, selectedNodeObject);
 			}
@@ -616,8 +611,7 @@ public class GoalDrivenController {
 					attributes.put("Total occurrences", Integer.toString(statNodeObject.getTotalOccurences()));
 					attributes.put("Average occurrences per case", Float.toString(statNodeObject.getAvgOccurences()));
 					attributes.put("Average throughput time per case", statNodeObject.getAvgThroughputTime());
-					panel.getSidePanel().getStatisticPanel()
-							.setContentMap(attributes);
+					panel.getSidePanel().getStatisticPanel().setContentMap(attributes);
 					panel.getSidePanel().getStatisticPanel().updateStatistics();
 					panel.revalidate();
 					panel.repaint();

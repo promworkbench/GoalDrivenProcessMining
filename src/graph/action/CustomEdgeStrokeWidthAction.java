@@ -1,15 +1,8 @@
 package graph.action;
 
 import java.awt.BasicStroke;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.HashMap;
 
-import org.deckfour.xes.in.XesXmlParser;
-import org.deckfour.xes.model.XEvent;
-import org.deckfour.xes.model.XLog;
-import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 
 import graph.GraphConstants;
@@ -51,25 +44,25 @@ public class CustomEdgeStrokeWidthAction extends StrokeAction {
 		}
 
 	}
-	public static void main(String[] args) throws Exception {
-		File file = new File("C:\\D\\data\\receipt.xes");
-
-		// Create an input stream for the XES file
-		InputStream is = new FileInputStream(file);
-
-		// Create a parser for XES files
-		XesXmlParser parser = new XesXmlParser();
-
-		XLog log = parser.parse(is).get(0);
-		
-		for (int i = 0; i < log.size(); i++) {
-			XTrace trace = log.get(i);
-			XEvent event = trace.get(trace.size()-1);
-			if (event.getAttributes().get("concept:name").toString().equals("Confirmation of receipt")) {
-			}
-		}
-
-
-
-	}
+//	public static void main(String[] args) throws Exception {
+//		File file = new File("C:\\D\\data\\receipt.xes");
+//
+//		// Create an input stream for the XES file
+//		InputStream is = new FileInputStream(file);
+//
+//		// Create a parser for XES files
+//		XesXmlParser parser = new XesXmlParser();
+//
+//		XLog log = parser.parse(is).get(0);
+//		
+//		for (int i = 0; i < log.size(); i++) {
+//			XTrace trace = log.get(i);
+//			XEvent event = trace.get(trace.size()-1);
+//			if (event.getAttributes().get("concept:name").toString().equals("Confirmation of receipt")) {
+//			}
+//		}
+//
+//
+//
+//	}
 }

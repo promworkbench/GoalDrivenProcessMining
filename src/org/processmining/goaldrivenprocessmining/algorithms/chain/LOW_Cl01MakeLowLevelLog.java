@@ -8,7 +8,6 @@ import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 import org.processmining.goaldrivenprocessmining.algorithms.StatUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
-import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
@@ -62,23 +61,19 @@ public class LOW_Cl01MakeLowLevelLog<C> extends DataChainLinkComputationAbstract
 
 		// apply filter
 
-		// apply group
-		List<GroupActObject> groups = config.getListGroupActObjects();
-		for (GroupActObject groupActObject : groups) {
-			newLogSkeleton = LogSkeletonUtils.replaceSetActivitiesInLog(newLogSkeleton, groupActObject.getListAct(),
-					groupActObject.getGroupName());
-		}
+//		// apply group
+//		List<GroupActObject> groups = config.getListGroupActObjects();
+//		for (GroupActObject groupActObject : groups) {
+//			newLogSkeleton = LogSkeletonUtils.replaceSetActivitiesInLog(newLogSkeleton, groupActObject.getListAct(),
+//					groupActObject.getGroupName());
+//		}
 		// apply selected activities
 		List<String> listUnselectedActivities = new ArrayList<String>();
 		for (String act: config.getSelectedActs()) {
 			if (!act.equals(source) && !act.equals(target))
 			listUnselectedActivities.add(act);
 		}
-		String[] unselectedActivities = new String[listUnselectedActivities.size()];
-		for (int i = 0; i < unselectedActivities.length; i++) {
-			unselectedActivities[i] = listUnselectedActivities.get(i);
-		}
-		GDPMLogSkeleton newLogObject = LogSkeletonUtils.removeActivitiesInLog(newLogSkeleton, unselectedActivities);
+		GDPMLogSkeleton newLogObject = LogSkeletonUtils.removeActivitiesInLog(newLogSkeleton, listUnselectedActivities);
 		// apply category
 
 		// recalculate the stat of new log

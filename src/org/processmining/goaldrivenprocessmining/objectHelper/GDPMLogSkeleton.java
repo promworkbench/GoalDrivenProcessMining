@@ -16,8 +16,6 @@ public class GDPMLogSkeleton implements Serializable {
 	private HashMap<Integer, List<Integer>> logSkeleton;
 	// [trace pos -> [time]]
 	private HashMap<Integer, List<String>> timeSkeleton;
-	// trace length
-	private HashMap<Integer, Integer> mapTraceLength;
 	// activity index map
 	private ActivityIndexMapper activityIndexMapper;
 	private List<EdgeObject> listIndirectedEdge;
@@ -30,7 +28,6 @@ public class GDPMLogSkeleton implements Serializable {
 		this.listIndirectedEdge = new ArrayList<>();
 		this.mapNodeType = new HashMap<>();
 		this.activityHashTable = new ActivityHashTable();
-		this.mapTraceLength = new HashMap<>();
 		this.activityIndexMapper = new ActivityIndexMapper();
 		this.statObject = new MapStatObject();
 		this.timeSkeleton = new HashMap<>();
@@ -80,14 +77,6 @@ public class GDPMLogSkeleton implements Serializable {
 
 	public void setActivityHashTable(ActivityHashTable activityHashTable) {
 		this.activityHashTable = activityHashTable;
-	}
-
-	public HashMap<Integer, Integer> getMapTraceLength() {
-		return mapTraceLength;
-	}
-
-	public void setMapTraceLength(HashMap<Integer, Integer> mapTraceLength) {
-		this.mapTraceLength = mapTraceLength;
 	}
 
 	public ActivityIndexMapper getActivityIndexMapper() {

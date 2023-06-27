@@ -100,7 +100,7 @@ public class StatUtils {
 		}
 		// Stat node
 		MapStatObject statObject = new MapStatObject();
-		int numCase = log.getMapTraceLength().size();
+		int numCase = log.getLogSkeleton().size();
 		for (String act : mapActOccurence.keySet()) {
 			String avgTime = StatUtils.getDateString(mapActTime.containsKey(act) ? mapActTime.get(act) / numCase : -1);
 			StatNodeObject statNodeObject = new StatNodeObject(avgTime, mapActOccurence.get(act),
@@ -227,7 +227,6 @@ public class StatUtils {
 			}
 			gdpmLogSkeleton.getLogSkeleton().put(posTrace, listEventSkeletons);
 			gdpmLogSkeleton.getTimeSkeleton().put(posTrace, listTimeSkeletons);
-			gdpmLogSkeleton.getMapTraceLength().put(posTrace, trace.size());
 			posTrace++;
 		}
 		gdpmLogSkeleton.setActivityHashTable(activityHashTable);

@@ -1,14 +1,11 @@
 package graph.controls;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChain;
 
 import graph.GraphConstants;
 import prefuse.controls.ControlAdapter;
 import prefuse.data.Table;
-import prefuse.visual.VisualItem;
 import prefuse.visual.expression.InGroupPredicate;
 
 public class GroupNodeControl extends ControlAdapter {
@@ -22,21 +19,21 @@ public class GroupNodeControl extends ControlAdapter {
 		this.chain = chain;
 	}
 
-	public void itemClicked(VisualItem item, java.awt.event.MouseEvent e) {
-		if (nodeFilter.getBoolean(item)) {
-			if (nodeTable.get(item.getRow(), GraphConstants.NODE_TYPE_FIELD).equals(NodeType.GROUP_NODE)) {
-				isGroupNodeClicked = true;
-				chain.setObject(GoalDrivenObject.selected_group, item.getString(GraphConstants.LABEL_FIELD));
-			}
-		}
-	}
-
-	public DataChain<GoalDrivenConfiguration> getChain() {
-		return chain;
-	}
-
-	public void setChain(DataChain<GoalDrivenConfiguration> chain) {
-		this.chain = chain;
-	}
+//	public void itemClicked(VisualItem item, java.awt.event.MouseEvent e) {
+////		if (nodeFilter.getBoolean(item)) {
+////			if (nodeTable.get(item.getRow(), GraphConstants.NODE_TYPE_FIELD).equals(NodeType.GROUP_NODE)) {
+////				isGroupNodeClicked = true;
+////				chain.setObject(GoalDrivenObject.selected_group, item.getString(GraphConstants.LABEL_FIELD));
+////			}
+////		}
+//	}
+//
+//	public DataChain<GoalDrivenConfiguration> getChain() {
+//		return chain;
+//	}
+//
+//	public void setChain(DataChain<GoalDrivenConfiguration> chain) {
+//		this.chain = chain;
+//	}
 
 }
