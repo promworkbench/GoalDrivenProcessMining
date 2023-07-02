@@ -26,26 +26,28 @@ public class GraphObjectClickControl extends ControlAdapter {
 	}
 
 	public void itemClicked(VisualItem item, java.awt.event.MouseEvent e) {
-		if (edgeFilter.getBoolean(item)) {
-			item.setStrokeColor(GraphConstants.CLICK_EDGE_STROKE_COLOR);
-			EdgeItem edge = (EdgeItem) item;
-			String sourceNode = edge.getSourceItem().getString(GraphConstants.LABEL_FIELD);
-			String targetNode = edge.getTargetItem().getString(GraphConstants.LABEL_FIELD);
-			HashMap<String, Object> passValues = new HashMap<String, Object>();
-			passValues.put("source", sourceNode);
-			passValues.put("target", targetNode);
-			if (this.chain != null) {
-				this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
-			}
-		}
-		if (nodeFilter.getBoolean(item)) {
-			if (item.getString(GraphConstants.NODE_TYPE_FIELD).equals("ACT_NODE")) {
+		if (!e.isControlDown()) {
+			if (edgeFilter.getBoolean(item)) {
+				item.setStrokeColor(GraphConstants.CLICK_EDGE_STROKE_COLOR);
+				EdgeItem edge = (EdgeItem) item;
+				String sourceNode = edge.getSourceItem().getString(GraphConstants.LABEL_FIELD);
+				String targetNode = edge.getTargetItem().getString(GraphConstants.LABEL_FIELD);
+				HashMap<String, Object> passValues = new HashMap<String, Object>();
+				passValues.put("source", sourceNode);
+				passValues.put("target", targetNode);
 				if (this.chain != null) {
-					this.chain.setObject(GoalDrivenObject.selected_node, item.getString(GraphConstants.LABEL_FIELD));
+					this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
 				}
-			} else if (item.getString(GraphConstants.NODE_TYPE_FIELD).equals("GROUP_NODE")) {
-				if (this.chain != null) {
-					chain.setObject(GoalDrivenObject.selected_group, item.getString(GraphConstants.LABEL_FIELD));
+			}
+			if (nodeFilter.getBoolean(item)) {
+				if (item.getString(GraphConstants.NODE_TYPE_FIELD).equals("ACT_NODE")) {
+					if (this.chain != null) {
+						this.chain.setObject(GoalDrivenObject.selected_node, item.getString(GraphConstants.LABEL_FIELD));
+					}
+				} else if (item.getString(GraphConstants.NODE_TYPE_FIELD).equals("GROUP_NODE")) {
+					if (this.chain != null) {
+						chain.setObject(GoalDrivenObject.selected_group, item.getString(GraphConstants.LABEL_FIELD));
+					}
 				}
 			}
 		}

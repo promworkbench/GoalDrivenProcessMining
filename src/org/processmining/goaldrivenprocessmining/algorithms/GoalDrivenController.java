@@ -24,6 +24,7 @@ import javax.swing.table.DefaultTableModel;
 import org.deckfour.xes.model.XLog;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.ProMCanceller;
+import org.processmining.goaldrivenprocessmining.algorithms.chain.CONFIG_Update;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
@@ -590,7 +591,12 @@ public class GoalDrivenController {
 		panel.getSidePanel().getBatchSelectionPopupPanel().getUngroupNodeButton()
 				.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						chain.setObject(GoalDrivenObject.is_in_group_mode, true);
+						List<GroupActObject> listRemove = new ArrayList<GroupActObject>();
+						for (GroupActObject item : CONFIG_Update.currentConfig.getListGroupActObjects()) {
+							listRemove.add(item);
+						}
+						UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.REMOVE, listRemove);
+						chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
 					}
 
 				});

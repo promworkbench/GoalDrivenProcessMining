@@ -1,7 +1,6 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
-import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
@@ -9,46 +8,37 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 import graph.GoalDrivenDFG;
 import graph.controls.GraphObjectClickControl;
-import graph.controls.GroupNodeControl;
 
-public class HIGH_Cl02MakeHighLevelDFG<C> extends DataChainLinkComputationAbstract<C> {
+public class LOW_MakeLowLevelDFG<C> extends DataChainLinkComputationAbstract<C> {
 
 	@Override
 	public String getName() {
-		return "Mine high-level dfg";
+		return "mine low dfg";
 	}
 
 	@Override
 	public String getStatusBusyMessage() {
-		return "Mining high-level dfg..";
+		return "Mining low dfg..";
 	}
 
 	@Override
 	public IvMObject<?>[] createInputObjects() {
-		return new IvMObject<?>[] { GoalDrivenObject.high_level_log_skeleton };
+		return new IvMObject<?>[] { GoalDrivenObject.low_level_log_skeleton, };
 	}
 
 	@Override
 	public IvMObject<?>[] createOutputObjects() {
-		return new IvMObject<?>[] { GoalDrivenObject.high_level_dfg };
+		return new IvMObject<?>[] { GoalDrivenObject.low_level_dfg };
 	}
 
 	@Override
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
-		System.out.println("--- HIGH_Cl02MakeHighLevelDFG");
-		GDPMLogSkeleton logSkeleton = inputs.get(GoalDrivenObject.high_level_log_skeleton);
-		
-		GoalDrivenDFG dfg = new GoalDrivenDFG(logSkeleton);
-		dfg.setEdgeClickControl(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
+		System.out.println("--- LOW_Cl02MakeLowLevelDFG");
+		GoalDrivenDFG dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.low_level_log_skeleton));
 		dfg.addControlListener(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
-		GroupNodeControl groupNodeControl = new GroupNodeControl(dfg.getGraph().getNodeTable(),
-				((GoalDrivenConfiguration) configuration).getChain());
-		dfg.setGroupNodeControl(groupNodeControl);
-		dfg.addControlListener(groupNodeControl);
 		return new IvMObjectValues().//
-				s(GoalDrivenObject.high_level_dfg, dfg)
-				;
+				s(GoalDrivenObject.low_level_dfg, dfg);
 	}
 
-	
+
 }

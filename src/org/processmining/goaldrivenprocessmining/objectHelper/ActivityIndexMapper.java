@@ -41,5 +41,13 @@ public class ActivityIndexMapper implements Serializable {
 		}
 		throw new Exception("Unknown index");
 	}
+	public Boolean isAssigned(String act) {
+		try {
+			int index = this.getIndexFromActivity(act);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
 
 }

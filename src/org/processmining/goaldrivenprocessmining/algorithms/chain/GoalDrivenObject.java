@@ -65,8 +65,6 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 			GroupActObject.class);
 	public static final IvMObject<_GDPMLog> after_grouping_high_level_log = c("high-level log after grouping nodes",
 			_GDPMLog.class);
-	public static final IvMObject<Boolean> is_in_group_mode = c("if users are choosing the grouping mode",
-			Boolean.class);
 	public static final IvMObject<MapGroupLogObject> map_group_log = c("mapping from group to log",
 			MapGroupLogObject.class);
 	public static final IvMObject<String> selected_group = c("selected group name from high-level dfg", String.class);

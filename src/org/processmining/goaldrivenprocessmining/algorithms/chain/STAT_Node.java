@@ -37,9 +37,9 @@ public class STAT_Node<C> extends DataChainLinkComputationAbstract<C> {
 		String selectedAct = inputs.get(GoalDrivenObject.selected_node);
 		GDPMLogSkeleton curLog;
 		if (Arrays.asList(inputs.get(GoalDrivenObject.config).getSelectedActs()).contains(selectedAct)) {
-			curLog = HIGH_Cl01MakeHighLevelLog.currentHighLogSkeleton;
+			curLog = HIGH_MakeHighLevelLog.currentHighLogSkeleton;
 		} else if (Arrays.asList(inputs.get(GoalDrivenObject.config).getUnselectedActs()).contains(selectedAct)) {
-			curLog = LOW_Cl01MakeLowLevelLog.currentLowLogSkeleton;
+			curLog = LOW_MakeLowLevelLog.currentLowLogSkeleton;
 		} else {
 			throw new IllegalArgumentException("No such activity");
 		}

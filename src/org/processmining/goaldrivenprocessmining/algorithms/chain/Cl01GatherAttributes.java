@@ -67,6 +67,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		Config config = new Config();
 		config.setSelectedActs(values);
 		config.setUnselectedActs(values1);
+		CONFIG_Update.currentConfig = config;
 
 		GDPMLogSkeleton gdpmLogSkeleton = StatUtils.processLog(log, "time:timestamp");
 		ActivityIndexMapper activityIndexMapper = new ActivityIndexMapper();

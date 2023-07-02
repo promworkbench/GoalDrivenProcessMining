@@ -1,6 +1,7 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
@@ -13,7 +14,7 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenConfiguration> {
 
-	private Config currentConfig = null;
+	public static Config currentConfig = null;
 
 	@Override
 	public String getName() {
@@ -47,13 +48,15 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 				updatedConfig.setUnselectedActs(selectedActMap.get("Low"));
 				break;
 			case GROUP :
-				GroupActObject groupActObject =  (GroupActObject) update.getUpdateObject();
+				
 				switch (update.getUpdateAction()) {
 					case ADD :
+						GroupActObject groupActObject =  (GroupActObject) update.getUpdateObject();
 						updatedConfig.addGroup(groupActObject);
 						break;
 					case REMOVE :
-						updatedConfig.removeGroup(groupActObject);
+						List<GroupActObject> listGroupActObjects =  (List<GroupActObject>) update.getUpdateObject();
+						updatedConfig.removeGroup(listGroupActObjects);
 						break;
 				}
 
@@ -68,7 +71,9 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 				break;
 			case FILTER :
 				break;
+			
 		}
+		this.currentConfig = updatedConfig;
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.config, updatedConfig);
 	}

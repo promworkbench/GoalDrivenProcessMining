@@ -14,7 +14,7 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 
-public class LOW_Cl01MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> {
+public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> {
 	public static GDPMLogSkeleton currentLowLogSkeleton = null;
 
 	@Override

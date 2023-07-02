@@ -23,7 +23,7 @@ public class BatchSelectionPopupPanel extends JPanel {
 		add(groupNameField);
 		groupNodeButton = new JButton("Group");
 		add(groupNodeButton);
-		ungroupNodeButton = new JButton("Ungroup");
+		ungroupNodeButton = new JButton("Ungroup all");
 		add(ungroupNodeButton);
 	}
 

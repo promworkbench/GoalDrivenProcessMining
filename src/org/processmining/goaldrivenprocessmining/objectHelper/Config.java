@@ -25,6 +25,12 @@ public class Config {
 	// Selected act
 	
 	// Group action
+	
+	public void removeGroup(List<GroupActObject> groupActObjects) {
+		for (GroupActObject groupActObject : groupActObjects) {
+			this.removeGroup(groupActObject);
+		}
+	}
 	public void removeGroup(GroupActObject groupActObject) {
 		if (this.listGroupActObjects.contains(groupActObject)) {
 			this.listGroupActObjects.remove(groupActObject);

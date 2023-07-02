@@ -169,7 +169,7 @@ public class LogSkeletonUtils {
 
 		return logSkeleton;
 	}
-	
+
 	public static GDPMLogSkeleton removeActivitiesInLog(GDPMLogSkeleton logSkeleton, List<String> activities) {
 		String[] activitiesArray = new String[activities.size()];
 		for (int i = 0; i < activitiesArray.length; i++) {
@@ -241,6 +241,13 @@ public class LogSkeletonUtils {
 				}
 			}
 		}
+		// 
+		try {
+			LogSkeletonUtils.updateActivityHashTable(logSkeleton);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return logSkeleton;
 	}
 
@@ -277,7 +284,7 @@ public class LogSkeletonUtils {
 				if (!addedAct.contains(logSkeleton.getActivityIndexMapper().getActivityFromIndex(eventNum))) {
 					HashMap<Integer, List<Integer>> hashMap = new HashMap<>();
 					List<Integer> newHash = new ArrayList<>();
-					newHash.add(eventNum);
+					newHash.add(j);
 					hashMap.put(traceNum, newHash);
 					activity.getActivityTable().put(logSkeleton.getActivityIndexMapper().getActivityFromIndex(eventNum),
 							hashMap);
@@ -288,10 +295,10 @@ public class LogSkeletonUtils {
 					if (hashMap.containsKey(traceNum)) {
 						activity.getActivityTable()
 								.get(logSkeleton.getActivityIndexMapper().getActivityFromIndex(eventNum)).get(traceNum)
-								.add(eventNum);
+								.add(j);
 					} else {
 						List<Integer> listEvents = new ArrayList<Integer>();
-						listEvents.add(eventNum);
+						listEvents.add(j);
 						activity.getActivityTable()
 								.get(logSkeleton.getActivityIndexMapper().getActivityFromIndex(eventNum))
 								.put(traceNum, listEvents);
