@@ -8,6 +8,7 @@ import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 import org.processmining.goaldrivenprocessmining.algorithms.StatUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
@@ -54,19 +55,20 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 		Config config = inputs.get(GoalDrivenObject.config);
 		GDPMLogSkeleton fullLogSkeleton = inputs.get(GoalDrivenObject.full_log_skeleton);
 		GDPMLogSkeleton newLogSkeleton = (GDPMLogSkeleton) fullLogSkeleton.clone();
-
+		
 		// compute for updated combined low level log
-		// restrict to source and target
-		newLogSkeleton = LogSkeletonUtils.restrictLogFrom2Activities(newLogSkeleton, source, target);
 
 		// apply filter
 
 //		// apply group
-//		List<GroupActObject> groups = config.getListGroupActObjects();
-//		for (GroupActObject groupActObject : groups) {
-//			newLogSkeleton = LogSkeletonUtils.replaceSetActivitiesInLog(newLogSkeleton, groupActObject.getListAct(),
-//					groupActObject.getGroupName());
-//		}
+		List<GroupActObject> groups = config.getListGroupActObjects();
+		for (GroupActObject groupActObject : groups) {
+			newLogSkeleton = LogSkeletonUtils.replaceSetActivitiesInLog(newLogSkeleton, groupActObject.getListAct(),
+					groupActObject.getGroupName());
+		}
+		// restrict to source and target
+		newLogSkeleton = LogSkeletonUtils.restrictLogFrom2Activities(newLogSkeleton, source, target);
+
 		// apply selected activities
 		List<String> listUnselectedActivities = new ArrayList<String>();
 		for (String act: config.getSelectedActs()) {

@@ -1,6 +1,7 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
@@ -45,6 +46,7 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 			throws Exception {
 		System.out.println("--- HIGH_Cl01MakeHighLevelLog");
 		Config config = inputs.get(GoalDrivenObject.config);
+		List<GroupActObject> groups = config.getListGroupActObjects();
 		GDPMLogSkeleton newLogSkeleton;
 
 		// analyze the configuration
@@ -52,41 +54,51 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 			newLogSkeleton = (GDPMLogSkeleton) inputs.get(GoalDrivenObject.full_log_skeleton).clone();
 
 		} else {
-			GDPMLogSkeleton fullLogSkeleton = currentHighLogSkeleton == null
-					? inputs.get(GoalDrivenObject.full_log_skeleton)
-					: currentHighLogSkeleton;
-			newLogSkeleton = (GDPMLogSkeleton) fullLogSkeleton.clone();
+			//			GDPMLogSkeleton fullLogSkeleton = currentHighLogSkeleton == null
+			//					? inputs.get(GoalDrivenObject.full_log_skeleton)
+			//					: currentHighLogSkeleton;
+			//			newLogSkeleton = (GDPMLogSkeleton) fullLogSkeleton.clone();
+			newLogSkeleton = (GDPMLogSkeleton) inputs.get(GoalDrivenObject.full_log_skeleton).clone();
 			// apply group
-			List<GroupActObject> groups = config.getListGroupActObjects();
+
 			for (GroupActObject groupActObject : groups) {
-				if (!newLogSkeleton.getActivityIndexMapper().isAssigned(groupActObject.getGroupName())) {
-					// update on high level log
-					newLogSkeleton = LogSkeletonUtils.replaceSetActivitiesInLog(newLogSkeleton, groupActObject.getListAct(),
-							groupActObject.getGroupName());
-					// update map all group log
-					if (!this.mapGroupLogObject.getMapGroupLog().keySet().contains(groupActObject.getGroupName())) {
-						GDPMLogSkeleton groupLogSkeleton = (GDPMLogSkeleton) fullLogSkeleton.clone();
-						List<String> toRemoveAct = new ArrayList<String>();
-						for (String act : groupLogSkeleton.getActivityHashTable().getActivityTable().keySet()) {
-							if (!groupActObject.getListAct().contains(act)) {
-								toRemoveAct.add(act);
-							}
+				// update on high level log
+				newLogSkeleton = LogSkeletonUtils.replaceSetActivitiesInLog(newLogSkeleton, groupActObject.getListAct(),
+						groupActObject.getGroupName());
+				// update map all group log
+				if (!this.mapGroupLogObject.getMapGroupLog().keySet().contains(groupActObject.getGroupName())) {
+					GDPMLogSkeleton groupLogSkeleton = (GDPMLogSkeleton) inputs.get(GoalDrivenObject.full_log_skeleton)
+							.clone();
+					List<String> toRemoveAct = new ArrayList<String>();
+					for (String act : groupLogSkeleton.getActivityHashTable().getActivityTable().keySet()) {
+						if (!groupActObject.getListAct().contains(act)) {
+							toRemoveAct.add(act);
 						}
-						groupLogSkeleton = LogSkeletonUtils.removeActivitiesInLog(groupLogSkeleton, toRemoveAct);
-						this.mapGroupLogObject.getMapGroupLog().put(groupActObject.getGroupName(), groupLogSkeleton);
 					}
+					groupLogSkeleton = LogSkeletonUtils.removeActivitiesInLog(groupLogSkeleton, toRemoveAct);
+					this.mapGroupLogObject.getMapGroupLog().put(groupActObject.getGroupName(), groupLogSkeleton);
 				}
+
 			}
 		}
 		// apply selected activities
-		String[] unselectedActivities = config.getUnselectedActs();
+		List<String> unselectedActivities = new ArrayList<String>();
+		for (GroupActObject groupActObject : groups) {
+			if (Arrays.asList(config.getUnselectedActs()).containsAll(groupActObject.getListAct())) {
+				unselectedActivities.add(groupActObject.getGroupName());
+			}
+		}
+		for (String act : config.getUnselectedActs()) {
+			unselectedActivities.add(act);
+		}
 		newLogSkeleton = LogSkeletonUtils.removeActivitiesInLog(newLogSkeleton, unselectedActivities);
 
 		// apply filter
-		
+
 		// apply for grouped log
 		if (!config.getListGroupActObjects().isEmpty()) {
 			for (String act : this.mapGroupLogObject.getMapGroupLog().keySet()) {
+
 				this.mapGroupLogObject.getMapGroupLog().replace(act, LogSkeletonUtils
 						.removeActivitiesInLog(this.mapGroupLogObject.getMapGroupLog().get(act), unselectedActivities));
 				StatUtils.updateStat(this.mapGroupLogObject.getMapGroupLog().get(act));
@@ -94,7 +106,7 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 				this.mapGroupLogObject.getMapGroupDfg().put(act, dfg);
 			}
 		}
-		
+
 		// apply category
 
 		// recalculate the stat of new log

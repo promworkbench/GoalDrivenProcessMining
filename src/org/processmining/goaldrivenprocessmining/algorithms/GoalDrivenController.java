@@ -25,6 +25,7 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.CONFIG_Update;
+import org.processmining.goaldrivenprocessmining.algorithms.chain.GUI_DisplayGroup;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
@@ -46,7 +47,6 @@ import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.VisualM
 import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.DfgMiner;
 import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.Miner;
 
-import graph.GoalDrivenDFG;
 import graph.GraphConstants;
 import graph.utils.node.GraphNodeUtils;
 import prefuse.Visualization;
@@ -54,16 +54,14 @@ import prefuse.visual.VisualItem;
 
 public class GoalDrivenController {
 	private final GoalDrivenPanel panel;
-	private final GoalDrivenConfiguration configuration;
 	private final DataChain<GoalDrivenConfiguration> chain;
-	private final PluginContext context;
+	private final GUI_DisplayGroup gui_DisplayGroup;
 
 	public GoalDrivenController(final PluginContext context, final GoalDrivenConfiguration configuration,
 			final XLog log, final ProMCanceller canceller) {
+		this.gui_DisplayGroup = new GUI_DisplayGroup();
 
-		this.configuration = configuration;
 		this.panel = configuration.getPanel();
-		this.context = context;
 		chain = configuration.getChain();
 
 		//initialise gui handlers
@@ -89,7 +87,6 @@ public class GoalDrivenController {
 
 		initGuiMiner();
 
-		GoalDrivenExportController.initialise(chain, configuration, panel);
 
 		initGuiGraph();
 		initGuiGraph1();
@@ -129,34 +126,7 @@ public class GoalDrivenController {
 			}
 		});
 
-		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
-			public String getName() {
-				return "group log";
-			}
-
-			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.selected_group, GoalDrivenObject.map_group_log };
-			}
-
-			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
-				System.out.println("--- group log ---");
-				if (inputs.has(GoalDrivenObject.map_group_log)) {
-					GoalDrivenDFG groupDfg = inputs.get(GoalDrivenObject.map_group_log).getMapGroupDfg()
-							.get(inputs.get(GoalDrivenObject.selected_group));
-					groupDfg.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
-					groupDfg.addSeeOnlyControls();
-					panel.getSidePanel().getStatisticPanel().getStatPane()
-							.addTab(inputs.get(GoalDrivenObject.selected_group), groupDfg);
-					panel.getSidePanel().revalidate();
-					panel.getSidePanel().repaint();
-					panel.revalidate();
-					panel.repaint();
-				}
-			}
-
-			public void invalidate(GoalDrivenPanel panel) {
-			}
-		});
+		chain.register(this.gui_DisplayGroup);
 
 	}
 
@@ -308,7 +278,12 @@ public class GoalDrivenController {
 			}
 
 		});
-
+		// mode cancel button
+		panel.getConfigCards().getModePanel().getModeCancelButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setVisible(false);
+			}
+		});
 		// act done button		
 		panel.getConfigCards().getActDisplayPanel().getActDoneButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -405,6 +380,12 @@ public class GoalDrivenController {
 
 			}
 
+		});
+		// act config cancel button
+		panel.getConfigCards().getActConfigPanel().getActConfigCancelButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setVisible(false);
+			}
 		});
 		// update group act
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
@@ -591,12 +572,18 @@ public class GoalDrivenController {
 		panel.getSidePanel().getBatchSelectionPopupPanel().getUngroupNodeButton()
 				.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
+						// reset log
 						List<GroupActObject> listRemove = new ArrayList<GroupActObject>();
 						for (GroupActObject item : CONFIG_Update.currentConfig.getListGroupActObjects()) {
 							listRemove.add(item);
 						}
 						UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.REMOVE, listRemove);
 						chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
+						// delete all current opened group
+						int tabCount = panel.getSidePanel().getStatisticPanel().getStatPane().getTabCount();
+				        for (int i = tabCount - 1; i > 0; i--) {
+				        	panel.getSidePanel().getStatisticPanel().getStatPane().removeTabAt(i);
+				        }
 					}
 
 				});

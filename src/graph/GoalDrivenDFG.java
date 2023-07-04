@@ -30,7 +30,6 @@ import graph.controls.BorderNodeControl;
 import graph.controls.CustomPanControl;
 import graph.controls.DragMultipleNodesControl;
 import graph.controls.GraphObjectClickControl;
-import graph.controls.GroupNodeControl;
 import graph.controls.SelectMultipleNodesControl;
 import graph.controls.SquareSelectControl;
 import graph.utils.node.NodeRenderer;
@@ -74,7 +73,6 @@ public class GoalDrivenDFG extends Display {
 	private BorderNodeControl borderNodeControl;
 	private GraphObjectClickControl edgeClickControl;
 	private SquareSelectControl squareSelectControl;
-	private GroupNodeControl groupNodeControl;
 	// action
 	private ColorAction nodeStrokeColorAction;
 	private ColorAction nodeFillColorAction;
@@ -284,6 +282,8 @@ public class GoalDrivenDFG extends Display {
 		addControlListener(wheelZoomControl);
 		focusControl = new FocusControl();
 		addControlListener(focusControl);
+		dragMultipleNodesControl = new DragMultipleNodesControl();
+		addControlListener(dragMultipleNodesControl);
 
 	}
 
@@ -297,7 +297,6 @@ public class GoalDrivenDFG extends Display {
 		this.removeControlListener(this.wheelZoomControl);
 		this.removeControlListener(this.edgeClickControl);
 		this.removeControlListener(this.squareSelectControl);
-		this.removeControlListener(this.groupNodeControl);
 	}
 
 	public void resetControl() {
@@ -310,7 +309,6 @@ public class GoalDrivenDFG extends Display {
 		this.removeControlListener(this.wheelZoomControl);
 		this.removeControlListener(this.edgeClickControl);
 		this.removeControlListener(this.squareSelectControl);
-		this.removeControlListener(this.groupNodeControl);
 		this.setDefaultControl();
 	}
 
@@ -665,10 +663,6 @@ public class GoalDrivenDFG extends Display {
 			this.setEdgeClickControl(dfg.getEdgeClickControl());
 			this.addControlListener(dfg.getEdgeClickControl());
 		}
-		if (dfg.getGroupNodeControl() != null) {
-			this.setGroupNodeControl(dfg.getGroupNodeControl());
-			this.addControlListener(dfg.getGroupNodeControl());
-		}
 		this.centerGraph();
 		this.revalidate();
 		this.repaint();
@@ -765,14 +759,6 @@ public class GoalDrivenDFG extends Display {
 
 	public BorderNodeControl getBorderNodeControl() {
 		return borderNodeControl;
-	}
-
-	public GroupNodeControl getGroupNodeControl() {
-		return groupNodeControl;
-	}
-
-	public void setGroupNodeControl(GroupNodeControl groupNodeControl) {
-		this.groupNodeControl = groupNodeControl;
 	}
 
 	public ColorAction getNodeStrokeColorAction() {

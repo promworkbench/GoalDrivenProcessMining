@@ -148,9 +148,17 @@ public class LogSkeletonUtils {
 		// update map act index
 		logSkeleton.getActivityIndexMapper().assignActivity(Arrays.asList(groupName));
 		// replace in log skeleton
+		Map<Integer, List<Integer>> newGroupPositions = new HashMap<>();
 		for (String act : activities) {
 			Map<Integer, List<Integer>> positions = activityHashTable.getActivityPositions(act);
 			for (Integer key : positions.keySet()) {
+				if (newGroupPositions.containsKey(key)) {
+					List<Integer> newPositions = newGroupPositions.get(key);
+					newPositions.addAll(positions.get(key));
+					newGroupPositions.put(key, newPositions);
+				} else {
+					newGroupPositions.put(key, positions.get(key));
+				}
 				for (Integer value : positions.get(key)) {
 					try {
 						logSkeleton.getLogSkeleton().get(key).set(value,
@@ -161,11 +169,11 @@ public class LogSkeletonUtils {
 				}
 			}
 			// update hash table
-			logSkeleton.getActivityHashTable().getActivityTable().put(groupName, positions);
 			logSkeleton.getActivityHashTable().getActivityTable().remove(act);
 			// update map node type
 			logSkeleton.getMapNodeType().put(groupName, NodeType.GROUP_NODE);
 		}
+		logSkeleton.getActivityHashTable().getActivityTable().put(groupName, newGroupPositions);
 
 		return logSkeleton;
 	}

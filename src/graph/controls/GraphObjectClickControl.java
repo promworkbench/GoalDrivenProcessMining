@@ -3,6 +3,7 @@ package graph.controls;
 import java.util.HashMap;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
+import org.processmining.goaldrivenprocessmining.algorithms.chain.GUI_DisplayGroup;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChain;
 
@@ -46,7 +47,8 @@ public class GraphObjectClickControl extends ControlAdapter {
 					}
 				} else if (item.getString(GraphConstants.NODE_TYPE_FIELD).equals("GROUP_NODE")) {
 					if (this.chain != null) {
-						chain.setObject(GoalDrivenObject.selected_group, item.getString(GraphConstants.LABEL_FIELD));
+						GUI_DisplayGroup.isSelected = true;
+						this.chain.setObject(GoalDrivenObject.selected_group, item.getString(GraphConstants.LABEL_FIELD));
 					}
 				}
 			}
