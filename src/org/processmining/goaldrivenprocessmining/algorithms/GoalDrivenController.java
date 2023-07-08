@@ -59,22 +59,23 @@ public class GoalDrivenController {
 
 	public GoalDrivenController(final PluginContext context, final GoalDrivenConfiguration configuration,
 			final XLog log, final ProMCanceller canceller) {
-		this.gui_DisplayGroup = new GUI_DisplayGroup();
+		
 
 		this.panel = configuration.getPanel();
-		chain = configuration.getChain();
+		this.chain = configuration.getChain();
+		this.gui_DisplayGroup = new GUI_DisplayGroup(this.chain);
 
 		//initialise gui handlers
 		initGui(canceller, configuration);
 
 		//set up the controller view
-		chain.setOnChange(new Runnable() {
+		this.chain.setOnChange(new Runnable() {
 			public void run() {
 				panel.getControllerView().pushCompleteChainLinks(chain);
 			}
 		});
 		//start the chain
-		chain.setFixedObject(IvMObject.input_log, log);
+		this.chain.setFixedObject(IvMObject.input_log, log);
 	}
 
 	protected void initGui(final ProMCanceller canceller, final GoalDrivenConfiguration configuration) {
@@ -387,7 +388,7 @@ public class GoalDrivenController {
 				panel.getConfigCards().setVisible(false);
 			}
 		});
-		// update group act
+		// update category group act
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
 
 			public String getName() {
@@ -545,6 +546,7 @@ public class GoalDrivenController {
 			}
 
 		});
+		// group button
 
 	}
 

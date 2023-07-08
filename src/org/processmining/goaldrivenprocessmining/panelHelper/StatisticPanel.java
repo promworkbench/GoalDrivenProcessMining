@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
 
@@ -13,7 +12,7 @@ public class StatisticPanel extends JPanel {
 	private String title;
 	private Map<String, String> contentMap;
 	private JPanel contentPanel;
-	private JTabbedPane statPane;
+	private CloseableTabbedPane statPane;
 	private StatisticContentPanel statisticContentPanel;
 
 	public StatisticPanel() {
@@ -22,7 +21,7 @@ public class StatisticPanel extends JPanel {
 		contentPanel = new JPanel(new BorderLayout());
 		contentPanel.setBackground(GoalDrivenConstants.STATISTIC_PANEL_BACKGROUND_COLOR);
 		// Create the tabbed pane
-		statPane = new JTabbedPane();
+		statPane = new CloseableTabbedPane();
 		
 
         // Create the panel and add it to a frame
@@ -67,11 +66,11 @@ public class StatisticPanel extends JPanel {
 		this.contentPanel = contentPanel;
 	}
 
-	public JTabbedPane getStatPane() {
+	public CloseableTabbedPane getStatPane() {
 		return statPane;
 	}
 
-	public void setStatPane(JTabbedPane statPane) {
+	public void setStatPane(CloseableTabbedPane statPane) {
 		this.statPane = statPane;
 	}
 	

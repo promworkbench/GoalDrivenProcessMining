@@ -42,7 +42,7 @@ public class ControlBar extends JPanel{
 			filterButton = this.drawButton("Filter");
 			actButton = this.drawButton("Activity Display");
 			actConfigButton = this.drawButton("Activity Configuration");
-			caseButton = this.drawButton("Case");
+			caseButton = this.drawButton("Group");
 			
 			configPanel.add(modeButton);
 			configPanel.add(filterButton);
