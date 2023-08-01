@@ -8,7 +8,6 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
-import org.processmining.goaldrivenprocessmining.algorithms.StatUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.ActivityIndexMapper;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
@@ -69,7 +68,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		config.setUnselectedActs(values1);
 		CONFIG_Update.currentConfig = config;
 
-		GDPMLogSkeleton gdpmLogSkeleton = StatUtils.processLog(log, "time:timestamp");
+		GDPMLogSkeleton gdpmLogSkeleton = new GDPMLogSkeleton(log);
 		ActivityIndexMapper activityIndexMapper = new ActivityIndexMapper();
 		activityIndexMapper.assignActivity(allAct);
 

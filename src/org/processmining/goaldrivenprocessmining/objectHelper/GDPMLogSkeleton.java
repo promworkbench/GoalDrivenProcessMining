@@ -7,39 +7,31 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.deckfour.xes.model.XLog;
+import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
+import org.processmining.goaldrivenprocessmining.algorithms.StatUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
 
 public class GDPMLogSkeleton implements Serializable {
-	// activity hash table
-	private ActivityHashTable activityHashTable;
-	// [trace pos -> [index of act]]
-	private HashMap<Integer, List<Integer>> logSkeleton;
-	// [trace pos -> [time]]
-	private HashMap<Integer, List<String>> timeSkeleton;
-	// activity index map
-	private ActivityIndexMapper activityIndexMapper;
+
+	private LogSkeleton logSkeleton;
 	private List<EdgeObject> listIndirectedEdge;
 	private Map<String, NodeType> mapNodeType;
 	// stat object
 	private MapStatObject statObject;
 
 	public GDPMLogSkeleton() {
-		this.logSkeleton = new HashMap<>();
+		this.logSkeleton = new LogSkeleton();
 		this.listIndirectedEdge = new ArrayList<>();
 		this.mapNodeType = new HashMap<>();
-		this.activityHashTable = new ActivityHashTable();
-		this.activityIndexMapper = new ActivityIndexMapper();
 		this.statObject = new MapStatObject();
-		this.timeSkeleton = new HashMap<>();
 	}
 
-	public String getActNameAtPosition(int posTrace, int posEvent) {
-		try {
-			return this.activityIndexMapper.getActivityFromIndex(this.logSkeleton.get(posTrace).get(posEvent));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			throw new RuntimeException("Error getting activity name from index");
-		}
+	public GDPMLogSkeleton(XLog log) {
+		this.logSkeleton = LogSkeletonUtils.getLogSkeleton(log);
+		this.listIndirectedEdge = new ArrayList<>();
+		this.mapNodeType = new HashMap<>();
+		this.statObject = StatUtils.getStat(logSkeleton);
 	}
 
 	@Override
@@ -47,11 +39,11 @@ public class GDPMLogSkeleton implements Serializable {
 		return SerializationUtils.clone(this);
 	}
 
-	public HashMap<Integer, List<Integer>> getLogSkeleton() {
+	public LogSkeleton getLogSkeleton() {
 		return logSkeleton;
 	}
 
-	public void setLogSkeleton(HashMap<Integer, List<Integer>> logSkeleton) {
+	public void setLogSkeleton(LogSkeleton logSkeleton) {
 		this.logSkeleton = logSkeleton;
 	}
 
@@ -71,22 +63,6 @@ public class GDPMLogSkeleton implements Serializable {
 		this.mapNodeType = mapNodeType;
 	}
 
-	public ActivityHashTable getActivityHashTable() {
-		return activityHashTable;
-	}
-
-	public void setActivityHashTable(ActivityHashTable activityHashTable) {
-		this.activityHashTable = activityHashTable;
-	}
-
-	public ActivityIndexMapper getActivityIndexMapper() {
-		return activityIndexMapper;
-	}
-
-	public void setActivityIndexMapper(ActivityIndexMapper activityIndexMapper) {
-		this.activityIndexMapper = activityIndexMapper;
-	}
-
 	public void addEdge(EdgeObject tupleNode) {
 		if (!listIndirectedEdge.contains(tupleNode)) {
 			this.listIndirectedEdge.add(tupleNode);
@@ -101,17 +77,9 @@ public class GDPMLogSkeleton implements Serializable {
 		this.statObject = statObject;
 	}
 
-	public HashMap<Integer, List<String>> getTimeSkeleton() {
-		return timeSkeleton;
-	}
-
-	public void setTimeSkeleton(HashMap<Integer, List<String>> timeSkeleton) {
-		this.timeSkeleton = timeSkeleton;
-	}
-
 	public String toString() {
 		return "GDPMLogSkeleton [logSkeleton=" + logSkeleton + ", listIndirectedEdge=" + listIndirectedEdge
-				+ ", mapNodeType=" + mapNodeType + "]";
+				+ ", mapNodeType=" + mapNodeType + ", statObject=" + statObject + "]";
 	}
 
 }

@@ -5,252 +5,78 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.deckfour.xes.model.XEvent;
-import org.deckfour.xes.model.XLog;
-import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
-import org.processmining.goaldrivenprocessmining.objectHelper.ActivityIndexMapper;
+import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
+import org.processmining.goaldrivenprocessmining.objectHelper.LogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapStatObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatEdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
 
 public class StatUtils {
 
-	public static void updateStat(GDPMLogSkeleton log) throws Exception {
-		HashMap<Integer, List<Integer>> logSkeleton = log.getLogSkeleton();
-		HashMap<String, Integer> mapActOccurence = new HashMap<String, Integer>();
-		HashMap<String, Long> mapActTime = new HashMap<String, Long>();
-		List<EdgeObject> listEdges = new ArrayList<>();
-		HashMap<EdgeObject, Integer> mapEdgeFrequency = new HashMap<>();
-
-		for (Map.Entry<Integer, List<Integer>> entry : logSkeleton.entrySet()) {
-			int key = entry.getKey();
-			List<Integer> events = entry.getValue();
-			for (int i = 0; i < events.size(); i++) {
-				String eventName = log.getActivityIndexMapper().getActivityFromIndex(events.get(i));
-				// update act occurence
-				{
-					if (mapActOccurence.containsKey(eventName)) {
-						mapActOccurence.replace(eventName, mapActOccurence.get(eventName) + 1);
-					} else {
-						mapActOccurence.put(eventName, 1);
-					}
-				}
-				// update act time
-				{
-					LocalDateTime time = StatUtils.getDateTime(log.getTimeSkeleton().get(key).get(i));
-					LocalDateTime nextTime = null;
-					if (i < events.size() - 1) {
-						nextTime = StatUtils.getDateTime(log.getTimeSkeleton().get(key).get(i + 1));
-						if (mapActTime.containsKey(eventName)) {
-							mapActTime.replace(eventName, mapActTime.get(eventName)
-									+ StatUtils.getDifferenceBetween2DateTime(time, nextTime));
-						} else {
-							mapActTime.put(eventName, StatUtils.getDifferenceBetween2DateTime(time, nextTime));
-						}
-					}
-				}
-				// stat edge
-				{
-					if (i + 1 < events.size()) {
-						String val2 = log.getActivityIndexMapper().getActivityFromIndex(log.getLogSkeleton().get(key).get(i + 1));
-						EdgeObject edge = new EdgeObject(eventName, val2);
-						if (!listEdges.contains(edge)) {
-							listEdges.add(edge);
-							mapEdgeFrequency.put(edge, 1);
-						} else {
-							int curFreq = mapEdgeFrequency.get(edge);
-							mapEdgeFrequency.replace(edge, curFreq + 1);
-						}
-
-					}
-					if (i == 0) {
-						String val1 = "begin";
-						EdgeObject edge = new EdgeObject(val1, eventName);
-						if (!listEdges.contains(edge)) {
-							listEdges.add(edge);
-							mapEdgeFrequency.put(edge, 1);
-						} else {
-							int curFreq = mapEdgeFrequency.get(edge);
-							mapEdgeFrequency.replace(edge, curFreq + 1);
-						}
-					}
-					if (i == events.size() - 1) {
-						String val2 = "end";
-						EdgeObject edge = new EdgeObject(eventName, val2);
-						if (!listEdges.contains(edge)) {
-							listEdges.add(edge);
-							mapEdgeFrequency.put(edge, 1);
-						} else {
-							int curFreq = mapEdgeFrequency.get(edge);
-							mapEdgeFrequency.replace(edge, curFreq + 1);
-						}
-					}
-				}
-				
-			}
-
-		}
-		// Stat node
+	public static MapStatObject getStat(LogSkeleton logSkeleton) {
+		ActivityHashTable activityHashTable = logSkeleton.getActivityHashTable();
+		EdgeHashTable edgeHashTable = logSkeleton.getEdgeHashTable();
 		MapStatObject statObject = new MapStatObject();
-		int numCase = log.getLogSkeleton().size();
-		for (String act : mapActOccurence.keySet()) {
-			String avgTime = StatUtils.getDateString(mapActTime.containsKey(act) ? mapActTime.get(act) / numCase : -1);
-			StatNodeObject statNodeObject = new StatNodeObject(avgTime, mapActOccurence.get(act),
-					((float) mapActOccurence.get(act)) / numCase);
-			statObject.getMapStatNode().put(act, statNodeObject);
-		}
-		// Stat edge
-		for (EdgeObject edge : mapEdgeFrequency.keySet()) {
-			StatEdgeObject statEdgeObject = new StatEdgeObject(mapEdgeFrequency.get(edge));
-			statObject.getMapStatEdge().put(edge, statEdgeObject);
-		}
-		log.setStatObject(statObject);
+		HashMap<String, Long> mapNodeTotalTime = new HashMap<>();
 
-	}
-
-	public static GDPMLogSkeleton processLog(XLog log, String timeClassifier) {
-		String classifier = log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString();
-		// act hash table
-		ActivityHashTable activityHashTable = new ActivityHashTable();
 		// stat node
-		MapStatObject statObject = new MapStatObject();
-		HashMap<String, Integer> mapActOccurence = new HashMap<String, Integer>();
-		HashMap<String, Long> mapActTime = new HashMap<String, Long>();
+		for (Map.Entry<String, Map<Integer, List<Integer>>> entry : activityHashTable.getActivityTable().entrySet()) {
+			String act = entry.getKey();
+			Map<Integer, List<Integer>> value = entry.getValue();
+			int total = 0;
+			for (Map.Entry<Integer, List<Integer>> entry1 : value.entrySet()) {
+				total += entry1.getValue().size();
+			}
+			statObject.getMapStatNode().put(act,
+					new StatNodeObject(total, (float) total / (float) logSkeleton.getLog().size()));
+		}
 		// stat edge
-		HashMap<EdgeObject, Integer> mapEdgeFrequency = new HashMap<>();
-		// GDPMLogSkeleton
-		GDPMLogSkeleton gdpmLogSkeleton = new GDPMLogSkeleton();
-		List<String> allAct = LogSkeletonUtils.getAllUniqueActivities(log);
-		ActivityIndexMapper activityIndexMapper = new ActivityIndexMapper();
-		activityIndexMapper.assignActivity(allAct);
-		gdpmLogSkeleton.setActivityIndexMapper(activityIndexMapper);
+		for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : edgeHashTable.getEdgeTable().entrySet()) {
+			EdgeObject edge = entry.getKey();
+			String source = edge.getNode1();
+			String target = edge.getNode2();
+			Map<Integer, List<Integer[]>> value = entry.getValue();
+			int total = 0;
+			for (Map.Entry<Integer, List<Integer[]>> entry1 : value.entrySet()) {
+				total += entry1.getValue().size();
 
-		int posTrace = 0;
-		List<EdgeObject> listEdges = new ArrayList<>();
-		for (XTrace trace : log) {
-			int posEvent = 0;
-			List<Integer> listEventSkeletons = new ArrayList<>();
-			List<String> listTimeSkeletons = new ArrayList<>();
-			for (int i = 0; i < trace.size(); i++) {
-				XEvent event = trace.get(i);
-				String eventName = event.getAttributes().get(classifier).toString();
-				//compute act hash table 
-				{
-					activityHashTable.addActivity(eventName, posTrace, posEvent);
-
-				}
-				// update act occurence
-				{
-					if (mapActOccurence.containsKey(eventName)) {
-						mapActOccurence.replace(eventName, mapActOccurence.get(eventName) + 1);
-					} else {
-						mapActOccurence.put(eventName, 1);
-					}
-				}
-				// update act time
-				{
-					LocalDateTime time = StatUtils.getDateTime(event.getAttributes().get(timeClassifier).toString());
-					XEvent nextEvent = null;
-					LocalDateTime nextTime = null;
-					if (i < trace.size() - 1) {
-						nextEvent = trace.get(i + 1);
-						nextTime = StatUtils.getDateTime(nextEvent.getAttributes().get(timeClassifier).toString());
-
-						if (mapActTime.containsKey(eventName)) {
-							mapActTime.replace(eventName, mapActTime.get(eventName)
-									+ StatUtils.getDifferenceBetween2DateTime(time, nextTime));
+				if (!source.equals("begin") && !target.equals("end")) {
+					int traceNum = entry1.getKey();
+					for (Integer[] pos : entry1.getValue()) {
+						int posSource = pos[0];
+						int posTarget = pos[1];
+						LocalDateTime startTime = StatUtils
+								.getDateTime(logSkeleton.getLog().get(traceNum).getTrace().get(posSource).getTime());
+						LocalDateTime endTime = StatUtils
+								.getDateTime(logSkeleton.getLog().get(traceNum).getTrace().get(posTarget).getTime());
+						long different = StatUtils.getDifferenceBetween2DateTime(startTime, endTime);
+						if (!mapNodeTotalTime.keySet().contains(source)) {
+							mapNodeTotalTime.put(source, different);
 						} else {
-							mapActTime.put(eventName, StatUtils.getDifferenceBetween2DateTime(time, nextTime));
+							mapNodeTotalTime.replace(source, mapNodeTotalTime.get(source) + different);
 						}
 					}
 				}
-				//GDPM log skeleton
-				{
-					try {
-						listEventSkeletons.add(activityIndexMapper
-								.getIndexFromActivity(event.getAttributes().get(classifier).toString()));
-						listTimeSkeletons.add(event.getAttributes().get(timeClassifier).toString());
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+			}
 
-				}
-				// stat edge
-				{
-					if (i + 1 < trace.size()) {
-						XEvent ev2 = trace.get(i + 1);
-						String val2 = ev2.getAttributes().get(classifier).toString();
-						EdgeObject edge = new EdgeObject(eventName, val2);
-						if (!listEdges.contains(edge)) {
-							listEdges.add(edge);
-							mapEdgeFrequency.put(edge, 1);
-						} else {
-							int curFreq = mapEdgeFrequency.get(edge);
-							mapEdgeFrequency.replace(edge, curFreq + 1);
-						}
-
-					}
-					if (i == 0) {
-						String val1 = "begin";
-						EdgeObject edge = new EdgeObject(val1, eventName);
-						if (!listEdges.contains(edge)) {
-							listEdges.add(edge);
-							mapEdgeFrequency.put(edge, 1);
-						} else {
-							int curFreq = mapEdgeFrequency.get(edge);
-							mapEdgeFrequency.replace(edge, curFreq + 1);
-						}
-					}
-					if (i == trace.size() - 1) {
-						String val2 = "end";
-						EdgeObject edge = new EdgeObject(eventName, val2);
-						if (!listEdges.contains(edge)) {
-							listEdges.add(edge);
-							mapEdgeFrequency.put(edge, 1);
-						} else {
-							int curFreq = mapEdgeFrequency.get(edge);
-							mapEdgeFrequency.replace(edge, curFreq + 1);
-						}
-					}
-				}
-				posEvent++;
+			if (!mapNodeTotalTime.keySet().contains(source)) {
 
 			}
-			gdpmLogSkeleton.getLogSkeleton().put(posTrace, listEventSkeletons);
-			gdpmLogSkeleton.getTimeSkeleton().put(posTrace, listTimeSkeletons);
-			posTrace++;
+			statObject.getMapStatEdge().put(edge, new StatEdgeObject(total));
 		}
-		gdpmLogSkeleton.setActivityHashTable(activityHashTable);
-
-		// Stat node
-		HashMap<String, StatNodeObject> mapStatNode = statObject.getMapStatNode();
-		int numCase = log.size();
-		for (String act : mapActOccurence.keySet()) {
-			String avgTime = StatUtils.getDateString(mapActTime.containsKey(act) ? mapActTime.get(act) / numCase : -1);
-			StatNodeObject statNodeObject = new StatNodeObject(avgTime, mapActOccurence.get(act),
-					((float) mapActOccurence.get(act)) / numCase);
-			mapStatNode.put(act, statNodeObject);
+		for (Map.Entry<String, Long> entry : mapNodeTotalTime.entrySet()) {
+			StatNodeObject statNodeObject = statObject.getMapStatNode().get(entry.getKey());
+			statNodeObject.setAvgThroughputTime(StatUtils
+					.getDateString(entry.getValue() / statNodeObject.getTotalOccurences()));
+			statObject.getMapStatNode().replace(entry.getKey(), statNodeObject);
 		}
-		statObject.setMapStatNode(mapStatNode);
-		// Stat edge
-		for (EdgeObject edge : mapEdgeFrequency.keySet()) {
-			StatEdgeObject statEdgeObject = new StatEdgeObject(mapEdgeFrequency.get(edge));
-			statObject.getMapStatEdge().put(edge, statEdgeObject);
-		}
-
-		gdpmLogSkeleton.setStatObject(statObject);
-
-		return gdpmLogSkeleton;
-
+		return statObject;
 	}
 
 	public static String getDateString(long time) {

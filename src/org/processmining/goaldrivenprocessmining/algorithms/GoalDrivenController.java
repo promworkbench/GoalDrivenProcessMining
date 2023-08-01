@@ -547,6 +547,13 @@ public class GoalDrivenController {
 
 		});
 		// group button
+		panel.getControlBar().getGroupButton().addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 
 	}
 

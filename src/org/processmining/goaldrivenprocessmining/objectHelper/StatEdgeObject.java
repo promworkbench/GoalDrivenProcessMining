@@ -14,6 +14,9 @@ public class StatEdgeObject implements Serializable {
 	public void setTotalOccurrences(int totalOccurrences) {
 		this.totalOccurrences = totalOccurrences;
 	}
+	public String toString() {
+		return "StatEdgeObject [totalOccurrences=" + totalOccurrences + "]";
+	}
 	
 	
 }

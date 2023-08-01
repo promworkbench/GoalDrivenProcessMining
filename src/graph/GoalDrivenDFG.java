@@ -16,6 +16,7 @@ import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatEdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.TraceSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.ValueCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
@@ -487,72 +488,78 @@ public class GoalDrivenDFG extends Display {
 		List<String> listActName = new ArrayList<>();
 		List<EdgeObject> listEdges = new ArrayList<>();
 		try {
-			for (Map.Entry<Integer, List<Integer>> entry : log.getLogSkeleton().entrySet()) {
-				List<Integer> events = entry.getValue();
-				for (int i = 0; i < events.size(); i++) {
+			for (TraceSkeleton traceSkeleton: this.log.getLogSkeleton().getLog()) {
+				for (int i = 0; i < traceSkeleton.getTrace().size(); i++) {
 					// add node for event at i-th
-					String value1 = log.getActivityIndexMapper().getActivityFromIndex(events.get(i));
-					Node node1 = null;
-					if (!listActName.contains(value1)) {
-						listActName.add(value1);
-						node1 = g.addNode();
-						this.configNode(node1, value1, log.getMapNodeType());
-					} else {
-						node1 = this.getNodeByLabel(g, value1);
-					}
-					// add node for event at i+1-th if possible
-					if (i + 1 < events.size()) {
-						String value2 = log.getActivityIndexMapper().getActivityFromIndex(events.get(i + 1));
-						Node node2 = null;
-						if (!listActName.contains(value2)) {
-							listActName.add(value2);
-							node2 = g.addNode();
-							this.configNode(node2, value2, log.getMapNodeType());
+					if (traceSkeleton.getTrace().get(i).getIsDisplayed()) {
+						String value1 = traceSkeleton.getTrace().get(i).getCurrentName();
+						Node node1 = null;
+						if (!listActName.contains(value1)) {
+							listActName.add(value1);
+							node1 = g.addNode();
+							this.configNode(node1, value1, log.getMapNodeType());
 						} else {
-							node2 = this.getNodeByLabel(g, value2);
+							node1 = this.getNodeByLabel(g, value1);
 						}
-						EdgeObject edgeObject = new EdgeObject(value1, value2);
-						if (!listEdges.contains(edgeObject)) {
-							Edge e = g.addEdge(node1, node2);
-							listEdges.add(edgeObject);
-							if (log.getListIndirectedEdge().contains(edgeObject)) {
-								this.configEdge(e, edgeObject, true);
-							} else {
-								this.configEdge(e, edgeObject, false);
+						
+						// add node for event at i+1-th if possible
+						if (i + 1 < traceSkeleton.getTrace().size()) {
+							if (traceSkeleton.getTrace().get(i + 1).getIsDisplayed()) {
+								String value2 = traceSkeleton.getTrace().get(i+1).getCurrentName();
+								Node node2 = null;
+								if (!listActName.contains(value2)) {
+									listActName.add(value2);
+									node2 = g.addNode();
+									this.configNode(node2, value2, log.getMapNodeType());
+								} else {
+									node2 = this.getNodeByLabel(g, value2);
+								}
+								EdgeObject edgeObject = new EdgeObject(value1, value2);
+								if (!listEdges.contains(edgeObject)) {
+									Edge e = g.addEdge(node1, node2);
+									listEdges.add(edgeObject);
+									if (log.getListIndirectedEdge().contains(edgeObject)) {
+										this.configEdge(e, edgeObject, true);
+									} else {
+										this.configEdge(e, edgeObject, false);
+									}
+
+								}
+							}
+							
+						}
+						// if begin act
+						if (i == 0) {
+							Node beginNode = g.getNode(this.beginNodeRow);
+							EdgeObject edgeObject = new EdgeObject("begin", value1);
+							if (!listEdges.contains(edgeObject)) {
+								Edge e1 = g.addEdge(beginNode, node1);
+								listEdges.add(edgeObject);
+								if (log.getListIndirectedEdge().contains(edgeObject)) {
+									this.configEdge(e1, edgeObject, true);
+								} else {
+									this.configEdge(e1, edgeObject, false);
+								}
 							}
 
 						}
-					}
-
-					// if begin act
-					if (i == 0) {
-						Node beginNode = g.getNode(this.beginNodeRow);
-						EdgeObject edgeObject = new EdgeObject("begin", value1);
-						if (!listEdges.contains(edgeObject)) {
-							Edge e1 = g.addEdge(beginNode, node1);
-							listEdges.add(edgeObject);
-							if (log.getListIndirectedEdge().contains(edgeObject)) {
-								this.configEdge(e1, edgeObject, true);
-							} else {
-								this.configEdge(e1, edgeObject, false);
-							}
-						}
-
-					}
-					// if end act
-					if (i == events.size() - 1) {
-						Node endNode = g.getNode(this.endNodeRow);
-						EdgeObject edgeObject = new EdgeObject(value1, "end");
-						if (!listEdges.contains(edgeObject)) {
-							Edge e1 = g.addEdge(node1, endNode);
-							listEdges.add(edgeObject);
-							if (log.getListIndirectedEdge().contains(edgeObject)) {
-								this.configEdge(e1, edgeObject, true);
-							} else {
-								this.configEdge(e1, edgeObject, false);
+						// if end act
+						if (i == traceSkeleton.getTrace().size() - 1) {
+							Node endNode = g.getNode(this.endNodeRow);
+							EdgeObject edgeObject = new EdgeObject(value1, "end");
+							if (!listEdges.contains(edgeObject)) {
+								Edge e1 = g.addEdge(node1, endNode);
+								listEdges.add(edgeObject);
+								if (log.getListIndirectedEdge().contains(edgeObject)) {
+									this.configEdge(e1, edgeObject, true);
+								} else {
+									this.configEdge(e1, edgeObject, false);
+								}
 							}
 						}
 					}
+
+					
 
 				}
 			}

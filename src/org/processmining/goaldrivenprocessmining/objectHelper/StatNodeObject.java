@@ -8,6 +8,13 @@ public class StatNodeObject implements Serializable {
 	private String avgThroughputTime;
 	private int totalOccurences;
 	private float avgOccurences;
+	
+	
+
+	public StatNodeObject(int totalOccurences, float avgOccurences) {
+		this.totalOccurences = totalOccurences;
+		this.avgOccurences = avgOccurences;
+	}
 
 	public StatNodeObject(String avgThroughputTime, int totalOccurences, float avgOccurences) {
 		this.avgThroughputTime = avgThroughputTime;

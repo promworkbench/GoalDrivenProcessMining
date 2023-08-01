@@ -20,7 +20,7 @@ public class ControlBar extends JPanel{
 	private final JButton filterButton;
 	private final JButton actButton;
 	private final JButton actConfigButton;
-	private final JButton caseButton;
+	private final JButton groupButton;
 	private final JPanel expandPanel;
 	private final JButton expandButton;
 	
@@ -42,13 +42,13 @@ public class ControlBar extends JPanel{
 			filterButton = this.drawButton("Filter");
 			actButton = this.drawButton("Activity Display");
 			actConfigButton = this.drawButton("Activity Configuration");
-			caseButton = this.drawButton("Group");
+			groupButton = this.drawButton("Group");
 			
 			configPanel.add(modeButton);
 			configPanel.add(filterButton);
 			configPanel.add(actButton);
 			configPanel.add(actConfigButton);
-			configPanel.add(caseButton);
+			configPanel.add(groupButton);
 
 		}
 		expandPanel = new JPanel();
@@ -93,8 +93,8 @@ public class ControlBar extends JPanel{
 		return actButton;
 	}
 
-	public JButton getCaseButton() {
-		return caseButton;
+	public JButton getGroupButton() {
+		return groupButton;
 	}
 
 	public JPanel getExpandPanel() {
