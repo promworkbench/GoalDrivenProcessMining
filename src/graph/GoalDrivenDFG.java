@@ -488,78 +488,75 @@ public class GoalDrivenDFG extends Display {
 		List<String> listActName = new ArrayList<>();
 		List<EdgeObject> listEdges = new ArrayList<>();
 		try {
-			for (TraceSkeleton traceSkeleton: this.log.getLogSkeleton().getLog()) {
+			for (TraceSkeleton traceSkeleton : this.log.getLogSkeleton().getLog()) {
 				for (int i = 0; i < traceSkeleton.getTrace().size(); i++) {
 					// add node for event at i-th
-					if (traceSkeleton.getTrace().get(i).getIsDisplayed()) {
-						String value1 = traceSkeleton.getTrace().get(i).getCurrentName();
-						Node node1 = null;
-						if (!listActName.contains(value1)) {
-							listActName.add(value1);
-							node1 = g.addNode();
-							this.configNode(node1, value1, log.getMapNodeType());
-						} else {
-							node1 = this.getNodeByLabel(g, value1);
-						}
-						
-						// add node for event at i+1-th if possible
-						if (i + 1 < traceSkeleton.getTrace().size()) {
-							if (traceSkeleton.getTrace().get(i + 1).getIsDisplayed()) {
-								String value2 = traceSkeleton.getTrace().get(i+1).getCurrentName();
-								Node node2 = null;
-								if (!listActName.contains(value2)) {
-									listActName.add(value2);
-									node2 = g.addNode();
-									this.configNode(node2, value2, log.getMapNodeType());
-								} else {
-									node2 = this.getNodeByLabel(g, value2);
-								}
-								EdgeObject edgeObject = new EdgeObject(value1, value2);
-								if (!listEdges.contains(edgeObject)) {
-									Edge e = g.addEdge(node1, node2);
-									listEdges.add(edgeObject);
-									if (log.getListIndirectedEdge().contains(edgeObject)) {
-										this.configEdge(e, edgeObject, true);
-									} else {
-										this.configEdge(e, edgeObject, false);
-									}
 
-								}
+					String value1 = traceSkeleton.getTrace().get(i).getCurrentName();
+					Node node1 = null;
+					if (!listActName.contains(value1)) {
+						listActName.add(value1);
+						node1 = g.addNode();
+						this.configNode(node1, value1, log.getMapNodeType());
+					} else {
+						node1 = this.getNodeByLabel(g, value1);
+					}
+
+					// add node for event at i+1-th if possible
+					if (i + 1 < traceSkeleton.getTrace().size()) {
+						if (traceSkeleton.getTrace().get(i + 1).getIsDisplayed()) {
+							String value2 = traceSkeleton.getTrace().get(i + 1).getCurrentName();
+							Node node2 = null;
+							if (!listActName.contains(value2)) {
+								listActName.add(value2);
+								node2 = g.addNode();
+								this.configNode(node2, value2, log.getMapNodeType());
+							} else {
+								node2 = this.getNodeByLabel(g, value2);
 							}
-							
-						}
-						// if begin act
-						if (i == 0) {
-							Node beginNode = g.getNode(this.beginNodeRow);
-							EdgeObject edgeObject = new EdgeObject("begin", value1);
+							EdgeObject edgeObject = new EdgeObject(value1, value2);
 							if (!listEdges.contains(edgeObject)) {
-								Edge e1 = g.addEdge(beginNode, node1);
+								Edge e = g.addEdge(node1, node2);
 								listEdges.add(edgeObject);
 								if (log.getListIndirectedEdge().contains(edgeObject)) {
-									this.configEdge(e1, edgeObject, true);
+									this.configEdge(e, edgeObject, true);
 								} else {
-									this.configEdge(e1, edgeObject, false);
+									this.configEdge(e, edgeObject, false);
 								}
-							}
 
+							}
 						}
-						// if end act
-						if (i == traceSkeleton.getTrace().size() - 1) {
-							Node endNode = g.getNode(this.endNodeRow);
-							EdgeObject edgeObject = new EdgeObject(value1, "end");
-							if (!listEdges.contains(edgeObject)) {
-								Edge e1 = g.addEdge(node1, endNode);
-								listEdges.add(edgeObject);
-								if (log.getListIndirectedEdge().contains(edgeObject)) {
-									this.configEdge(e1, edgeObject, true);
-								} else {
-									this.configEdge(e1, edgeObject, false);
-								}
+
+					}
+					// if begin act
+					if (i == 0) {
+						Node beginNode = g.getNode(this.beginNodeRow);
+						EdgeObject edgeObject = new EdgeObject("begin", value1);
+						if (!listEdges.contains(edgeObject)) {
+							Edge e1 = g.addEdge(beginNode, node1);
+							listEdges.add(edgeObject);
+							if (log.getListIndirectedEdge().contains(edgeObject)) {
+								this.configEdge(e1, edgeObject, true);
+							} else {
+								this.configEdge(e1, edgeObject, false);
+							}
+						}
+
+					}
+					// if end act
+					if (i == traceSkeleton.getTrace().size() - 1) {
+						Node endNode = g.getNode(this.endNodeRow);
+						EdgeObject edgeObject = new EdgeObject(value1, "end");
+						if (!listEdges.contains(edgeObject)) {
+							Edge e1 = g.addEdge(node1, endNode);
+							listEdges.add(edgeObject);
+							if (log.getListIndirectedEdge().contains(edgeObject)) {
+								this.configEdge(e1, edgeObject, true);
+							} else {
+								this.configEdge(e1, edgeObject, false);
 							}
 						}
 					}
-
-					
 
 				}
 			}
@@ -579,14 +576,14 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	private void configBeginNode(Node node) {
-		node.setString(GraphConstants.LABEL_FIELD, "");
+		node.setString(GraphConstants.LABEL_FIELD, GraphConstants.BEGIN_NODE_NAME);
 		node.setBoolean(GraphConstants.BEGIN_FIELD, true);
 		node.setBoolean(GraphConstants.END_FIELD, false);
 		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
 	}
 
 	private void configEndNode(Node node) {
-		node.setString(GraphConstants.LABEL_FIELD, "");
+		node.setString(GraphConstants.LABEL_FIELD, GraphConstants.END_NODE_NAME);
 		node.setBoolean(GraphConstants.BEGIN_FIELD, false);
 		node.setBoolean(GraphConstants.END_FIELD, true);
 		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);

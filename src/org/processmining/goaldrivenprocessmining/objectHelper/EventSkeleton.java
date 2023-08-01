@@ -14,6 +14,13 @@ public class EventSkeleton implements Serializable {
 		this.time = time;
 		this.isDisplayed = isDisplayed;
 	}
+	
+	public EventSkeleton(EventSkeleton eventSkeleton) {
+		this.originalName = eventSkeleton.originalName;
+		this.currentName = eventSkeleton.currentName;
+		this.time = eventSkeleton.time;
+		this.isDisplayed = eventSkeleton.isDisplayed;
+	}
 
 	public String getOriginalName() {
 		return originalName;

@@ -47,5 +47,9 @@ public class GraphConstants {
 	public static final String TEXT_COLOR_ACTION = "textColor";
 	public static final String LAYOUT_ACTION = "layout";
 	public static final String NODE_SIZE_ACTION = "nodeSize";
+	
+	//node name
+	public static final String BEGIN_NODE_NAME = "**BEGIN**";
+	public static final String END_NODE_NAME = "**END**";
 
 }

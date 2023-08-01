@@ -1,6 +1,8 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
@@ -45,7 +47,22 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 		Config config = inputs.get(GoalDrivenObject.config);
 		GDPMLogSkeleton fullLogSkeleton = inputs.get(GoalDrivenObject.full_log_skeleton);
 		GDPMLogSkeleton newGdpmLog = (GDPMLogSkeleton) fullLogSkeleton.clone();
-
+		
+		List<String> displayedActs = new ArrayList<String>();
+		for (String act: config.getUnselectedActs()) {
+			displayedActs.add(act);
+		}
+		displayedActs.add(source);
+		displayedActs.add(target);
+		List<String> undisplayedActs = new ArrayList<String>();
+		for (String act: config.getSelectedActs()){
+			if (!act.equals(source) && !act.equals(target)) {
+				undisplayedActs.add(act);
+			}
+		}
+		
+		newGdpmLog = LogSkeletonUtils.addActivitiesInLog(newGdpmLog, displayedActs);
+		newGdpmLog = LogSkeletonUtils.removeActivitiesInLog(newGdpmLog, undisplayedActs);
 		newGdpmLog = LogSkeletonUtils.restrictLogFrom2Activities(newGdpmLog, source, target);
 
 		return new IvMObjectValues().//

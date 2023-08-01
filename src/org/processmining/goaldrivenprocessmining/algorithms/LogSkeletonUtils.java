@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,33 +75,62 @@ public class LogSkeletonUtils {
 		}
 	}
 
+	public static GDPMLogSkeleton getDisplayedLogSkeleton(GDPMLogSkeleton gdpmLog) {
+		GDPMLogSkeleton newGdpmLog = new GDPMLogSkeleton();
+		LogSkeleton newLogSkeleton = new LogSkeleton();
+		LogSkeleton logSkeleton = gdpmLog.getLogSkeleton();
+
+		for (TraceSkeleton traceSkeleton : logSkeleton.getLog()) {
+			TraceSkeleton newTraceSkeleton = new TraceSkeleton();
+			for (EventSkeleton eventSkeleton : traceSkeleton.getTrace()) {
+				if (eventSkeleton.getIsDisplayed()) {
+					newTraceSkeleton.getTrace().add(new EventSkeleton(eventSkeleton));
+				}
+			}
+			newLogSkeleton.getLog().add(newTraceSkeleton);
+		}
+		LogSkeletonUtils.updateLogSkeletonByLog(newLogSkeleton);
+		newGdpmLog.setLogSkeleton(newLogSkeleton);
+		newGdpmLog.setListIndirectedEdge(gdpmLog.getListIndirectedEdge());
+		newGdpmLog.setMapNodeType(gdpmLog.getMapNodeType());
+		newGdpmLog.setStatObject(StatUtils.getStat(newLogSkeleton));
+		return newGdpmLog;
+	}
+
 	public static GDPMLogSkeleton restrictLogFrom2Activities(GDPMLogSkeleton gdpmLog, String source, String target)
 			throws Exception {
 		GDPMLogSkeleton newGdpmLog = new GDPMLogSkeleton();
 		LogSkeleton logSkeleton = gdpmLog.getLogSkeleton();
-		ActivityHashTable activityHashTable = new ActivityHashTable();
+
 		Map<Integer, List<Integer>> allPosSource = logSkeleton.getActivityHashTable().getActivityPositions(source);
 		Map<Integer, List<Integer>> allPosTarget = logSkeleton.getActivityHashTable().getActivityPositions(target);
+		Set<Integer> result = new HashSet<Integer>();
 
-		Set<Integer> result = allPosSource.keySet().stream().distinct().filter(allPosTarget.keySet()::contains)
-				.collect(Collectors.toSet());
+		if (allPosSource == null) {
+			if (allPosTarget == null) {
+				for (int i = 0; i < gdpmLog.getLogSkeleton().getLog().size(); i++) {
+					result.add(i);
+				}
+			} else {
+				result = allPosTarget.keySet();
+			}
+		} else {
+			if (allPosTarget == null) {
+				result = allPosSource.keySet();
+			} else {
+				result = allPosSource.keySet().stream().distinct().filter(allPosTarget.keySet()::contains)
+						.collect(Collectors.toSet());
+			}
+		}
+
 		for (Integer i : result) {
-			List<Integer> posSource = allPosSource.get(i);
-			List<Integer> posTarget = allPosTarget.get(i);
+			List<Integer> posSource = allPosSource == null ? Arrays.asList(-1) : allPosSource.get(i);
+			List<Integer> posTarget = allPosTarget == null ? Arrays.asList(-2) : allPosTarget.get(i);
 			List<TraceSkeleton> traces = LogSkeletonUtils.getTracesFrom2ListPos(logSkeleton, i, posSource, posTarget);
 			newGdpmLog.getLogSkeleton().getLog().addAll(traces);
 		}
 
-		// act hash table
-		for (int traceNum = 0; traceNum < newGdpmLog.getLogSkeleton().getLog().size(); traceNum++) {
-			for (int eventNum = 0; eventNum < newGdpmLog.getLogSkeleton().getLog().get(traceNum).getTrace()
-					.size(); eventNum++) {
-				activityHashTable.addActivity(
-						newGdpmLog.getLogSkeleton().getLog().get(traceNum).getTrace().get(eventNum).getCurrentName(),
-						traceNum, eventNum);
-			}
-		}
-		newGdpmLog.getLogSkeleton().setActivityHashTable(activityHashTable);
+		newGdpmLog.setLogSkeleton(LogSkeletonUtils.updateLogSkeletonByLog(newGdpmLog.getLogSkeleton()));
 		newGdpmLog.setStatObject(StatUtils.getStat(newGdpmLog.getLogSkeleton()));
 
 		return newGdpmLog;
@@ -152,6 +182,14 @@ public class LogSkeletonUtils {
 		return gdpmLog;
 	}
 
+	public static GDPMLogSkeleton addActivitiesInLog(GDPMLogSkeleton gdpmLog, List<String> activities) {
+		String[] activitiesArray = new String[activities.size()];
+		for (int i = 0; i < activitiesArray.length; i++) {
+			activitiesArray[i] = activities.get(i);
+		}
+		return LogSkeletonUtils.addActivitiesInLog(gdpmLog, activitiesArray);
+	}
+
 	public static GDPMLogSkeleton addActivitiesInLog(GDPMLogSkeleton gdpmLog, String[] activities) {
 
 		LogSkeleton logSkeleton = gdpmLog.getLogSkeleton();
@@ -197,6 +235,7 @@ public class LogSkeletonUtils {
 				}
 			}
 		}
+		LogSkeletonUtils.updateLogSkeletonByLog(logSkeleton);
 
 		return logSkeleton;
 
@@ -228,6 +267,7 @@ public class LogSkeletonUtils {
 			}
 
 		}
+		LogSkeletonUtils.updateLogSkeletonByLog(logSkeleton);
 		// update indirected 
 		return logSkeleton;
 	}
@@ -251,11 +291,44 @@ public class LogSkeletonUtils {
 						}
 					}
 				}
-			} else {
+			} else if (!act.equals("begin") && !act.equals("end")) {
 				throw new IllegalStateException("Invalid activity in log");
 			}
 
 		}
+		LogSkeletonUtils.updateLogSkeletonByLog(logSkeleton);
+		return logSkeleton;
+	}
+
+	public static LogSkeleton updateLogSkeletonByLog(LogSkeleton logSkeleton) {
+
+		ActivityHashTable activityHashTable = new ActivityHashTable();
+		EdgeHashTable edgeHashTable = new EdgeHashTable();
+		int traceNum = 0;
+		for (TraceSkeleton traceSkeleton : logSkeleton.getLog()) {
+			for (int i = 0; i < traceSkeleton.getTrace().size(); i++) {
+				EventSkeleton eventSkeleton = traceSkeleton.getTrace().get(i);
+				//act hash table
+				activityHashTable.addActivity(eventSkeleton.getCurrentName(), traceNum, i);
+				//edge hash table
+				if (i == 0) {
+					EdgeObject edgeObject = new EdgeObject("begin", eventSkeleton.getCurrentName());
+					edgeHashTable.addEdge(edgeObject, traceNum, -1, i);
+				}
+				if (i == traceSkeleton.getTrace().size() - 1) {
+					EdgeObject edgeObject = new EdgeObject(eventSkeleton.getCurrentName(), "end");
+					edgeHashTable.addEdge(edgeObject, traceNum, i, -2);
+				} else {
+					EventSkeleton nextEvent = traceSkeleton.getTrace().get(i + 1);
+					EdgeObject edgeObject = new EdgeObject(eventSkeleton.getCurrentName(), nextEvent.getCurrentName());
+					edgeHashTable.addEdge(edgeObject, traceNum, i, i + 1);
+				}
+			}
+			traceNum++;
+		}
+		logSkeleton.setActivityHashTable(activityHashTable);
+		logSkeleton.setEdgeHashTable(edgeHashTable);
+
 		return logSkeleton;
 	}
 
@@ -378,32 +451,62 @@ public class LogSkeletonUtils {
 		TraceSkeleton trace = logSkeleton.getLog().get(traceNum);
 		Collections.sort(posSource);
 		Collections.sort(posTarget);
-		for (int i = 0; i < posSource.size(); i++) {
-			int startIndex = posSource.get(i);
-			int endIndex = -1;
-			if (i + 1 < posSource.size()) {
-				int nextStartIndex = posSource.get(i + 1);
 
-				for (Integer j : posTarget) {
-					if (j > startIndex && j < nextStartIndex) {
-						endIndex = j;
-						break;
-					}
-				}
+		// source = begin node
+		if (posSource.get(0) == -1) {
+			int startIndex = 0;
+			int endIndex;
+			if (posTarget.get(0) == -2) {
+				endIndex = trace.getTrace().size() - 1;
+
 			} else {
-				for (Integer j : posTarget) {
-					if (j > startIndex) {
-						endIndex = j;
-						break;
-					}
-				}
+				endIndex = posTarget.get(0);
 			}
-			if (endIndex != -1) {
+			TraceSkeleton addTrace = new TraceSkeleton();
+			for (int k = startIndex; k <= endIndex; k++) {
+				addTrace.getTrace().add(trace.getTrace().get(k));
+			}
+			traces.add(addTrace);
+			return traces;
+		} else {
+			if (posTarget.get(0) == -2) {
+				int startIndex = posSource.get(posSource.size() - 1);
+				int endIndex = trace.getTrace().size() - 1;
 				TraceSkeleton addTrace = new TraceSkeleton();
 				for (int k = startIndex; k <= endIndex; k++) {
 					addTrace.getTrace().add(trace.getTrace().get(k));
 				}
 				traces.add(addTrace);
+				return traces;
+			} else {
+				for (int i = 0; i < posSource.size(); i++) {
+					int startIndex = posSource.get(i);
+					int endIndex = -1;
+					if (i + 1 < posSource.size()) {
+						int nextStartIndex = posSource.get(i + 1);
+
+						for (Integer j : posTarget) {
+							if (j > startIndex && j < nextStartIndex) {
+								endIndex = j;
+								break;
+							}
+						}
+					} else {
+						for (Integer j : posTarget) {
+							if (j > startIndex) {
+								endIndex = j;
+								break;
+							}
+						}
+					}
+					if (endIndex != -1) {
+						TraceSkeleton addTrace = new TraceSkeleton();
+						for (int k = startIndex; k <= endIndex; k++) {
+							addTrace.getTrace().add(trace.getTrace().get(k));
+						}
+						traces.add(addTrace);
+					}
+				}
 			}
 		}
 
