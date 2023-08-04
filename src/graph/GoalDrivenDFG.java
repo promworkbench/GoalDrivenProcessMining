@@ -11,7 +11,9 @@ import java.util.Map;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.EventSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatEdgeObject;
@@ -486,84 +488,54 @@ public class GoalDrivenDFG extends Display {
 
 	private void addActToTable(Graph g) {
 		List<String> listActName = new ArrayList<>();
-		List<EdgeObject> listEdges = new ArrayList<>();
-		try {
-			for (TraceSkeleton traceSkeleton : this.log.getLogSkeleton().getLog()) {
-				for (int i = 0; i < traceSkeleton.getTrace().size(); i++) {
-					// add node for event at i-th
-
-					String value1 = traceSkeleton.getTrace().get(i).getCurrentName();
-					Node node1 = null;
-					if (!listActName.contains(value1)) {
-						listActName.add(value1);
-						node1 = g.addNode();
-						this.configNode(node1, value1, log.getMapNodeType());
-					} else {
-						node1 = this.getNodeByLabel(g, value1);
-					}
-
-					// add node for event at i+1-th if possible
-					if (i + 1 < traceSkeleton.getTrace().size()) {
-						if (traceSkeleton.getTrace().get(i + 1).getIsDisplayed()) {
-							String value2 = traceSkeleton.getTrace().get(i + 1).getCurrentName();
-							Node node2 = null;
-							if (!listActName.contains(value2)) {
-								listActName.add(value2);
-								node2 = g.addNode();
-								this.configNode(node2, value2, log.getMapNodeType());
-							} else {
-								node2 = this.getNodeByLabel(g, value2);
-							}
-							EdgeObject edgeObject = new EdgeObject(value1, value2);
-							if (!listEdges.contains(edgeObject)) {
-								Edge e = g.addEdge(node1, node2);
-								listEdges.add(edgeObject);
-								if (log.getListIndirectedEdge().contains(edgeObject)) {
-									this.configEdge(e, edgeObject, true);
-								} else {
-									this.configEdge(e, edgeObject, false);
-								}
-
-							}
-						}
-
-					}
-					// if begin act
-					if (i == 0) {
-						Node beginNode = g.getNode(this.beginNodeRow);
-						EdgeObject edgeObject = new EdgeObject("begin", value1);
-						if (!listEdges.contains(edgeObject)) {
-							Edge e1 = g.addEdge(beginNode, node1);
-							listEdges.add(edgeObject);
-							if (log.getListIndirectedEdge().contains(edgeObject)) {
-								this.configEdge(e1, edgeObject, true);
-							} else {
-								this.configEdge(e1, edgeObject, false);
-							}
-						}
-
-					}
-					// if end act
-					if (i == traceSkeleton.getTrace().size() - 1) {
-						Node endNode = g.getNode(this.endNodeRow);
-						EdgeObject edgeObject = new EdgeObject(value1, "end");
-						if (!listEdges.contains(edgeObject)) {
-							Edge e1 = g.addEdge(node1, endNode);
-							listEdges.add(edgeObject);
-							if (log.getListIndirectedEdge().contains(edgeObject)) {
-								this.configEdge(e1, edgeObject, true);
-							} else {
-								this.configEdge(e1, edgeObject, false);
-							}
-						}
-					}
-
+		for (TraceSkeleton traceSkeleton: this.log.getLogSkeleton().getLog()) {
+			for (EventSkeleton eventSkeleton: traceSkeleton.getTrace()) {
+				if (!listActName.contains(eventSkeleton.getActivity().getCurrentName())) {
+					listActName.add(eventSkeleton.getActivity().getCurrentName());
 				}
 			}
-		} catch (Exception e) {
-			throw new RuntimeException("Error adding act and edge to graph", e);
 		}
-
+		
+		HashMap<String, List<String>> allGroup = this.log.getLogSkeleton().getGroupConfig();
+		EdgeHashTable edgeHashTable = this.log.getLogSkeleton().getEdgeHashTable();
+		
+		// add node
+		for (String name : allGroup.keySet()) {
+			Node node1 = null;
+			node1 = g.addNode();
+			this.configNode(node1, name, log.getMapNodeType());
+		}
+		for (String act: listActName) {
+			if (!this.log.getLogSkeleton().isInGroup(act)) {
+				Node node1 = null;
+				node1 = g.addNode();
+				this.configNode(node1, act, log.getMapNodeType());
+			}
+		}
+		// add edge
+		for (EdgeObject edge: edgeHashTable.getEdgeTable().keySet()) {
+			String source = edge.getNode1().getCurrentName();
+			String target = edge.getNode2().getCurrentName();
+			Node node1;
+			Node node2;
+			if (source.equals("begin")) {
+				node1 = g.getNode(this.beginNodeRow);
+			} else if (source.equals("end")) {
+				node1 = g.getNode(this.endNodeRow);
+			} else {
+				node1 = this.getNodeByLabel(g, edge.getNode1().getCurrentName());
+			}
+			if (target.equals("begin")) {
+				node2 = g.getNode(this.beginNodeRow);
+			} else if (target.equals("end")) {
+				node2 = g.getNode(this.endNodeRow);
+			} else {
+				node2 = this.getNodeByLabel(g, edge.getNode2().getCurrentName());
+			}
+			Edge e = g.addEdge(node1, node2);
+			this.configEdge(e, edge);
+		}
+		
 	}
 
 	private Node getNodeByLabel(Graph g, String label) {
@@ -589,8 +561,8 @@ public class GoalDrivenDFG extends Display {
 		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
 	}
 
-	private void configEdge(Edge e, EdgeObject edgeObject, boolean isIndirected) {
-		if (isIndirected) {
+	private void configEdge(Edge e, EdgeObject edgeObject) {
+		if (edgeObject.getIsIndirected()) {
 			e.setBoolean(GraphConstants.IS_INDIRECTED_EDGE_FIELD, true);
 		} else {
 			e.setBoolean(GraphConstants.IS_INDIRECTED_EDGE_FIELD, false);

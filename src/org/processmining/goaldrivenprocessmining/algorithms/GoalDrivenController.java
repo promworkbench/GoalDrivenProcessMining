@@ -19,6 +19,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import org.deckfour.xes.model.XLog;
@@ -29,6 +31,7 @@ import org.processmining.goaldrivenprocessmining.algorithms.chain.GUI_DisplayGro
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
@@ -59,7 +62,6 @@ public class GoalDrivenController {
 
 	public GoalDrivenController(final PluginContext context, final GoalDrivenConfiguration configuration,
 			final XLog log, final ProMCanceller canceller) {
-		
 
 		this.panel = configuration.getPanel();
 		this.chain = configuration.getChain();
@@ -87,7 +89,6 @@ public class GoalDrivenController {
 		initGuiSidePanel();
 
 		initGuiMiner();
-
 
 		initGuiGraph();
 		initGuiGraph1();
@@ -548,12 +549,68 @@ public class GoalDrivenController {
 		});
 		// group button
 		panel.getControlBar().getGroupButton().addActionListener(new ActionListener() {
-			
+
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				
+				panel.getConfigCards().setVisible(true);
+				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "5");
 			}
 		});
+		// group config done button
+		panel.getConfigCards().getGroupConfigPanel().getDoneButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setVisible(false);
+			}
+		});
+		
+		// group config cancel button
+		panel.getConfigCards().getGroupConfigPanel().getCancelButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().getGroupConfigPanel().getDisplayPanel().removeAll();
+				panel.getConfigCards().setVisible(false);
+			}
+		});
+		
+		
+		// update all group in the group config panel
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				// TODO Auto-generated method stub
+				return "all current groups";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				// TODO Auto-generated method stub
+				return new IvMObject<?>[] { GoalDrivenObject.config };
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				// TODO Auto-generated method stub
+
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				Config config = inputs.get(GoalDrivenObject.config);
+				List<GroupActObject> allGroups = config.getListGroupActObjects();
+				panel.getConfigCards().getGroupConfigPanel().getTableModel().setRowCount(0);
+				for (GroupActObject groupActObject : allGroups) {
+					panel.getConfigCards().getGroupConfigPanel().getTableModel()
+							.addRow(new Object[] { groupActObject });
+				}
+
+			}
+
+		});
+		// trigger action when clicking on a row of group config panel
+		panel.getConfigCards().getGroupConfigPanel().getGroupTable().getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                int selectedRow = panel.getConfigCards().getGroupConfigPanel().getGroupTable().getSelectedRow();
+                if (selectedRow >= 0 ) {
+                	panel.getConfigCards().getGroupConfigPanel().updateDisplayPanel(selectedRow);
+                }
+            }
+        });
 
 	}
 
@@ -572,8 +629,9 @@ public class GoalDrivenController {
 				GroupActObject selectedNodeObject = new GroupActObject(
 						panel.getSidePanel().getBatchSelectionPopupPanel().getGroupNameField().getText(), selectedNode);
 				UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.ADD, selectedNodeObject);
+				panel.getSidePanel().getBatchSelectionPopupPanel().getGroupNameField().setText("");
+				
 				chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
-				chain.setObject(GoalDrivenObject.new_group, selectedNodeObject);
 			}
 
 		});
@@ -590,9 +648,9 @@ public class GoalDrivenController {
 						chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
 						// delete all current opened group
 						int tabCount = panel.getSidePanel().getStatisticPanel().getStatPane().getTabCount();
-				        for (int i = tabCount - 1; i > 0; i--) {
-				        	panel.getSidePanel().getStatisticPanel().getStatPane().removeTabAt(i);
-				        }
+						for (int i = tabCount - 1; i > 0; i--) {
+							panel.getSidePanel().getStatisticPanel().getStatPane().removeTabAt(i);
+						}
 					}
 
 				});
@@ -623,6 +681,7 @@ public class GoalDrivenController {
 			public void invalidate(GoalDrivenPanel panel) {
 			}
 		});
+
 	}
 
 	protected void initGuiUniqueValue() {

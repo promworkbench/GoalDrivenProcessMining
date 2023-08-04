@@ -13,6 +13,7 @@ public class ConfigCards extends JPanel {
 	private final ActDisplayPanel actDisplayPanel;
 	private final FilterConfigPanel filterConfigPanel;
 	private final ActConfigPanel actConfigPanel;
+	private final GroupConfigPanel groupConfigPanel;
 	private final CardLayout layoutCard;
 	private final double sWidth;
 
@@ -36,6 +37,9 @@ public class ConfigCards extends JPanel {
 		// Act button panel
 		actDisplayPanel = new ActDisplayPanel(this.getBounds().width);
 		add(actDisplayPanel, "4");
+		// group config panel
+		groupConfigPanel = new GroupConfigPanel();
+		add(groupConfigPanel, "5");
 
 		setBorder(BorderFactory.createLineBorder(Color.blue));
 		setVisible(false);
@@ -61,10 +65,12 @@ public class ConfigCards extends JPanel {
 		return modePanel;
 	}
 
+	public GroupConfigPanel getGroupConfigPanel() {
+		return groupConfigPanel;
+	}
+
 	public double getsWidth() {
 		return sWidth;
 	}
-	
-	
 
 }

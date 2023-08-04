@@ -3,39 +3,28 @@ package org.processmining.goaldrivenprocessmining.objectHelper;
 import java.io.Serializable;
 
 public class EventSkeleton implements Serializable {
-	private String originalName;
-	private String currentName;
+	private ActivitySkeleton activity;
 	private String time;
 	private Boolean isDisplayed;
 
-	public EventSkeleton(String originalName, String currentName, String time, Boolean isDisplayed) {
-		this.originalName = originalName;
-		this.currentName = currentName;
+	public EventSkeleton(ActivitySkeleton activity, String time, Boolean isDisplayed) {
+		this.activity = activity;
 		this.time = time;
 		this.isDisplayed = isDisplayed;
 	}
-	
+
 	public EventSkeleton(EventSkeleton eventSkeleton) {
-		this.originalName = eventSkeleton.originalName;
-		this.currentName = eventSkeleton.currentName;
-		this.time = eventSkeleton.time;
-		this.isDisplayed = eventSkeleton.isDisplayed;
+		this.activity = eventSkeleton.getActivity();
+		this.time = eventSkeleton.getTime();
+		this.isDisplayed = eventSkeleton.getIsDisplayed();
 	}
 
-	public String getOriginalName() {
-		return originalName;
+	public ActivitySkeleton getActivity() {
+		return activity;
 	}
 
-	public void setOriginalName(String originalName) {
-		this.originalName = originalName;
-	}
-
-	public String getCurrentName() {
-		return currentName;
-	}
-
-	public void setCurrentName(String currentName) {
-		this.currentName = currentName;
+	public void setActivity(ActivitySkeleton activity) {
+		this.activity = activity;
 	}
 
 	public String getTime() {
@@ -55,8 +44,8 @@ public class EventSkeleton implements Serializable {
 	}
 
 	public String toString() {
-		return "EventSkeleton [originalName=" + originalName + ", currentName=" + currentName + ", time=" + time
-				+ ", isDisplayed=" + isDisplayed + "]";
+		return "EventSkeleton [activity=" + activity + ", time=" + time + ", isDisplayed=" + isDisplayed + "]";
 	}
 
+	
 }

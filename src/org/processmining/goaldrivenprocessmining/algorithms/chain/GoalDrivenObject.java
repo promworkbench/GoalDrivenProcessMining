@@ -9,7 +9,6 @@ import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyEdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.FrequencyNodeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
-import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.IndirectedEdgeCarrierObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapGroupLogObject;
@@ -61,8 +60,6 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 			FrequencyEdgeObject.class);
 	public static final IvMObject<FrequencyNodeObject> low_frequency_node = c("Frequency of nodes in low-level log",
 			FrequencyNodeObject.class);
-	public static final IvMObject<GroupActObject> new_group = c("Batch selected nodes from GUI",
-			GroupActObject.class);
 	public static final IvMObject<_GDPMLog> after_grouping_high_level_log = c("high-level log after grouping nodes",
 			_GDPMLog.class);
 	public static final IvMObject<MapGroupLogObject> map_group_log = c("mapping from group to log",

@@ -43,10 +43,15 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 		Config config = inputs.get(GoalDrivenObject.config);
 
 		// Replace
-		for (GroupActObject groupActObject : config.getListGroupActObjects()) {
-			gdpmLog = LogSkeletonUtils.replaceSetActivitiesInLog(gdpmLog, groupActObject.getListAct(),
-					groupActObject.getGroupName());
+		if (config.getListGroupActObjects().isEmpty()) {
+			gdpmLog = LogSkeletonUtils.addActivitiesInLog(gdpmLog, config.getSelectedActs());
+		} else {
+			for (GroupActObject groupActObject : config.getListGroupActObjects()) {
+				gdpmLog = LogSkeletonUtils.replaceSetActivitiesInLog(gdpmLog, groupActObject.getListAct(),
+						groupActObject.getGroupName());
+			}
 		}
+		
 
 		// Select/Unselect
 		String[] selectedActs = config.getSelectedActs();

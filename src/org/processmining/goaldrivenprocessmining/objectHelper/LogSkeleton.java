@@ -10,6 +10,7 @@ public class LogSkeleton implements Serializable {
 	private EdgeHashTable edgeHashTable;
 	private List<TraceSkeleton> log;
 	private HashMap<String, List<String>> groupConfig;
+	private List<EdgeObject> listIndirectedEdges;
 
 	public LogSkeleton() {
 		this.log = new ArrayList<>();
@@ -29,6 +30,15 @@ public class LogSkeleton implements Serializable {
 			}
 		}
 		this.groupConfig.put(groupName, newListActivies);
+	}
+
+	public Boolean isInGroup(String act) {
+		for (String key : this.groupConfig.keySet()) {
+			if ( this.groupConfig.get(key).contains(act)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public ActivityHashTable getActivityHashTable() {

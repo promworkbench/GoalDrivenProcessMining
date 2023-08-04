@@ -13,6 +13,15 @@ public class EdgeHashTable implements Serializable {
 		this.edgeTable = new HashMap<>();
 	}
 
+	
+	public void addEdge(EdgeObject edge, Map<Integer, List<Integer[]>> edgeTable) {
+		for (Map.Entry<Integer, List<Integer[]>> entry : edgeTable.entrySet()) {
+			for (Integer[] i : entry.getValue()) {
+				this.addEdge(edge, entry.getKey(), i[0], i[1]);
+			}
+		}
+	}
+	
 	public void addEdge(EdgeObject edge, int caseNumber, int source, int target) {
 		Map<Integer, List<Integer[]>> caseTable = edgeTable.get(edge);
 		if (caseTable == null) {

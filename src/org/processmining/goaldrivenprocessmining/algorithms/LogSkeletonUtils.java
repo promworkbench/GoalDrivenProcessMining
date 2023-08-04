@@ -18,6 +18,7 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
+import org.processmining.goaldrivenprocessmining.objectHelper.ActivitySkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.EventSkeleton;
@@ -55,9 +56,11 @@ public class LogSkeletonUtils {
 		//		System.out.println(Duration.between(start, end));
 
 		GDPMLogSkeleton gdpmLog = new GDPMLogSkeleton(log);
-		GDPMLogSkeleton newLog = LogSkeletonUtils.restrictLogFrom2Activities(gdpmLog, "register request",
-				"check ticket");
-
+//		GDPMLogSkeleton newLog = LogSkeletonUtils.restrictLogFrom2Activities(gdpmLog, "register request",
+//				"check ticket");
+		gdpmLog = LogSkeletonUtils.removeActivitiesInLog(gdpmLog, Arrays.asList("register request", "check ticket"));
+		GDPMLogSkeleton newLog = LogSkeletonUtils.getDisplayedLogSkeleton(gdpmLog);
+		
 		//		System.out.println(LogSkeletonUtils.getTracesFrom2ListPos(gdpmLog.getLogSkeleton(), 0, Arrays.asList(3, 4, 0),
 		//				Arrays.asList(7, 2)));
 
@@ -79,6 +82,8 @@ public class LogSkeletonUtils {
 		GDPMLogSkeleton newGdpmLog = new GDPMLogSkeleton();
 		LogSkeleton newLogSkeleton = new LogSkeleton();
 		LogSkeleton logSkeleton = gdpmLog.getLogSkeleton();
+		// update edge hash table
+		
 
 		for (TraceSkeleton traceSkeleton : logSkeleton.getLog()) {
 			TraceSkeleton newTraceSkeleton = new TraceSkeleton();
@@ -89,9 +94,11 @@ public class LogSkeletonUtils {
 			}
 			newLogSkeleton.getLog().add(newTraceSkeleton);
 		}
-		LogSkeletonUtils.updateLogSkeletonByLog(newLogSkeleton);
+		LogSkeletonUtils.setupEdgeHashTableForDisplayedLogSkeleton(logSkeleton);
+		newLogSkeleton.setEdgeHashTable(logSkeleton.getEdgeHashTable());
+		newLogSkeleton.setActivityHashTable(logSkeleton.getActivityHashTable());
+		newLogSkeleton.setGroupConfig(logSkeleton.getGroupConfig());
 		newGdpmLog.setLogSkeleton(newLogSkeleton);
-		newGdpmLog.setListIndirectedEdge(gdpmLog.getListIndirectedEdge());
 		newGdpmLog.setMapNodeType(gdpmLog.getMapNodeType());
 		newGdpmLog.setStatObject(StatUtils.getStat(newLogSkeleton));
 		return newGdpmLog;
@@ -130,7 +137,7 @@ public class LogSkeletonUtils {
 			newGdpmLog.getLogSkeleton().getLog().addAll(traces);
 		}
 
-		newGdpmLog.setLogSkeleton(LogSkeletonUtils.updateLogSkeletonByLog(newGdpmLog.getLogSkeleton()));
+		newGdpmLog.setLogSkeleton(newGdpmLog.getLogSkeleton());
 		newGdpmLog.setStatObject(StatUtils.getStat(newGdpmLog.getLogSkeleton()));
 
 		return newGdpmLog;
@@ -147,38 +154,30 @@ public class LogSkeletonUtils {
 	public static GDPMLogSkeleton removeActivitiesInLog(GDPMLogSkeleton gdpmLog, String[] activities) {
 
 		LogSkeleton logSkeleton = gdpmLog.getLogSkeleton();
-		List<EdgeObject> listIndirectedEdges = new ArrayList<EdgeObject>();
 		logSkeleton = LogSkeletonUtils.changeLogSkeletonWithUnselection(logSkeleton, Arrays.asList(activities));
 		gdpmLog.setLogSkeleton(logSkeleton);
 
-		for (String act : activities) {
-			if (logSkeleton.getActivityHashTable().getActivityTable().keySet().contains(act)) {
-				Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable().getActivityPositions(act);
-				listIndirectedEdges = LogSkeletonUtils.getListIndirectedEdgesFromMap(allPos, logSkeleton);
-			} else if (logSkeleton.getGroupConfig().keySet().contains(act)) {
-				for (String selectedAct : logSkeleton.getGroupConfig().get(act)) {
-					Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable()
-							.getActivityPositions(selectedAct);
-					List<EdgeObject> listEdges = LogSkeletonUtils.getListIndirectedEdgesFromMap(allPos, logSkeleton);
-					for (EdgeObject edge : listEdges) {
-						if (!listIndirectedEdges.contains(edge)) {
-							listIndirectedEdges.add(edge);
-						}
-					}
-				}
-			} else {
-				throw new IllegalStateException("Invalid activity in log");
-			}
+//		for (String act : activities) {
+//			if (logSkeleton.getActivityHashTable().getActivityTable().keySet().contains(act)) {
+//				Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable().getActivityPositions(act);
+//				listIndirectedEdges = LogSkeletonUtils.getListIndirectedEdgesFromMap(allPos, logSkeleton);
+//			} else if (logSkeleton.getGroupConfig().keySet().contains(act)) {
+//				for (String selectedAct : logSkeleton.getGroupConfig().get(act)) {
+//					Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable()
+//							.getActivityPositions(selectedAct);
+//					List<EdgeObject> listEdges = LogSkeletonUtils.getListIndirectedEdgesFromMap(allPos, logSkeleton);
+//					for (EdgeObject edge : listEdges) {
+//						if (!listIndirectedEdges.contains(edge)) {
+//							listIndirectedEdges.add(edge);
+//						}
+//					}
+//				}
+//			} else {
+//				throw new IllegalStateException("Invalid activity in log");
+//			}
+//
+//		}
 
-		}
-
-		for (EdgeObject edge : gdpmLog.getListIndirectedEdge()) {
-			if (!Arrays.asList(activities).contains(edge.getNode1())
-					&& !Arrays.asList(activities).contains(edge.getNode2())) {
-				listIndirectedEdges.add(edge);
-			}
-		}
-		gdpmLog.setListIndirectedEdge(listIndirectedEdges);
 		return gdpmLog;
 	}
 
@@ -194,10 +193,10 @@ public class LogSkeletonUtils {
 
 		LogSkeleton logSkeleton = gdpmLog.getLogSkeleton();
 		logSkeleton = LogSkeletonUtils.changeLogSkeletonWithSelection(logSkeleton, Arrays.asList(activities));
+		logSkeleton = LogSkeletonUtils.setupListIndirectedEdgesFromLogSkeleton(logSkeleton);
 		gdpmLog.setLogSkeleton(logSkeleton);
 
 		// change list indirected edge
-		gdpmLog.setListIndirectedEdge(LogSkeletonUtils.getListIndirectedEdgesFromLogSkeleton(logSkeleton));
 		return gdpmLog;
 	}
 
@@ -209,14 +208,40 @@ public class LogSkeletonUtils {
 		gdpmLog.setLogSkeleton(logSkeleton);
 
 		// change list indirected edge
-		List<EdgeObject> listIndirectedEdges = new ArrayList<>();
-		for (EdgeObject edge : gdpmLog.getListIndirectedEdge()) {
-			String node1 = activities.contains(edge.getNode1()) ? groupName : edge.getNode1();
-			String node2 = activities.contains(edge.getNode2()) ? groupName : edge.getNode2();
-			listIndirectedEdges.add(new EdgeObject(node1, node2));
-		}
-		gdpmLog.setListIndirectedEdge(listIndirectedEdges);
+//		List<EdgeObject> listIndirectedEdges = new ArrayList<>();
+//		for (EdgeObject edge : gdpmLog.getListIndirectedEdge()) {
+//			ActivitySkeleton node1 = activities.contains(edge.getNode1()) ? new ActivitySkeleton(groupName, groupName)
+//					: edge.getNode1();
+//			ActivitySkeleton node2 = activities.contains(edge.getNode2()) ? new ActivitySkeleton(groupName, groupName)
+//					: edge.getNode2();
+//			listIndirectedEdges.add(new EdgeObject(node1, node2));
+//		}
+//		gdpmLog.setListIndirectedEdge(listIndirectedEdges);
 		return gdpmLog;
+	}
+
+	public static GDPMLogSkeleton ungroupGroupInLog(GDPMLogSkeleton gdpmLog, String groupName) {
+		LogSkeleton logSkeleton = gdpmLog.getLogSkeleton();
+		logSkeleton = LogSkeletonUtils.changeLogSkeletonWithUngroup(logSkeleton, groupName);
+		gdpmLog.setLogSkeleton(logSkeleton);
+
+		return gdpmLog;
+	}
+
+	public static LogSkeleton changeLogSkeletonWithUngroup(LogSkeleton logSkeleton, String groupName) {
+		List<String> affectedActs = logSkeleton.getGroupConfig().get(groupName);
+		// change activity name
+		for (String affectedAct : affectedActs) {
+			Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable().getActivityPositions(affectedAct);
+			for (Map.Entry<Integer, List<Integer>> entry : allPos.entrySet()) {
+				for (Integer pos : entry.getValue()) {
+					logSkeleton.getLog().get(entry.getKey()).getTrace().get(pos).getActivity()
+							.setCurrentName(logSkeleton.getLog().get(entry.getKey()).getTrace().get(pos).getActivity()
+									.getOriginalName());
+				}
+			}
+		}
+		return logSkeleton;
 	}
 
 	public static LogSkeleton changeLogSkeletonWithGroup(LogSkeleton logSkeleton, List<String> listGroupActivities,
@@ -231,11 +256,10 @@ public class LogSkeletonUtils {
 				int traceNum = entry.getKey();
 				List<Integer> positions = entry.getValue();
 				for (Integer position : positions) {
-					logSkeleton.getLog().get(traceNum).getTrace().get(position).setCurrentName(groupName);
+					logSkeleton.getLog().get(traceNum).getTrace().get(position).getActivity().setCurrentName(groupName);
 				}
 			}
 		}
-		LogSkeletonUtils.updateLogSkeletonByLog(logSkeleton);
 
 		return logSkeleton;
 
@@ -267,7 +291,6 @@ public class LogSkeletonUtils {
 			}
 
 		}
-		LogSkeletonUtils.updateLogSkeletonByLog(logSkeleton);
 		// update indirected 
 		return logSkeleton;
 	}
@@ -296,39 +319,6 @@ public class LogSkeletonUtils {
 			}
 
 		}
-		LogSkeletonUtils.updateLogSkeletonByLog(logSkeleton);
-		return logSkeleton;
-	}
-
-	public static LogSkeleton updateLogSkeletonByLog(LogSkeleton logSkeleton) {
-
-		ActivityHashTable activityHashTable = new ActivityHashTable();
-		EdgeHashTable edgeHashTable = new EdgeHashTable();
-		int traceNum = 0;
-		for (TraceSkeleton traceSkeleton : logSkeleton.getLog()) {
-			for (int i = 0; i < traceSkeleton.getTrace().size(); i++) {
-				EventSkeleton eventSkeleton = traceSkeleton.getTrace().get(i);
-				//act hash table
-				activityHashTable.addActivity(eventSkeleton.getCurrentName(), traceNum, i);
-				//edge hash table
-				if (i == 0) {
-					EdgeObject edgeObject = new EdgeObject("begin", eventSkeleton.getCurrentName());
-					edgeHashTable.addEdge(edgeObject, traceNum, -1, i);
-				}
-				if (i == traceSkeleton.getTrace().size() - 1) {
-					EdgeObject edgeObject = new EdgeObject(eventSkeleton.getCurrentName(), "end");
-					edgeHashTable.addEdge(edgeObject, traceNum, i, -2);
-				} else {
-					EventSkeleton nextEvent = traceSkeleton.getTrace().get(i + 1);
-					EdgeObject edgeObject = new EdgeObject(eventSkeleton.getCurrentName(), nextEvent.getCurrentName());
-					edgeHashTable.addEdge(edgeObject, traceNum, i, i + 1);
-				}
-			}
-			traceNum++;
-		}
-		logSkeleton.setActivityHashTable(activityHashTable);
-		logSkeleton.setEdgeHashTable(edgeHashTable);
-
 		return logSkeleton;
 	}
 
@@ -345,22 +335,26 @@ public class LogSkeletonUtils {
 				XEvent event = trace.get(i);
 				String act = event.getAttributes().get(classifier).toString();
 				String time = event.getAttributes().get(TIME_CLASSIFIER).toString();
-				EventSkeleton eventSkeleton = new EventSkeleton(act, act, time, true);
+				EventSkeleton eventSkeleton = new EventSkeleton(new ActivitySkeleton(act, act), time, true);
 				traceSkeleton.getTrace().add(eventSkeleton);
 				//act hash table
 				activityHashTable.addActivity(act, traceNum, i);
 
 				//edge hash table
 				if (i == 0) {
-					EdgeObject edgeObject = new EdgeObject("begin", act);
+					EdgeObject edgeObject = new EdgeObject(new ActivitySkeleton("begin", "begin"),
+							new ActivitySkeleton(act, act));
 					edgeHashTable.addEdge(edgeObject, traceNum, -1, i);
 				}
 				if (i == trace.size() - 1) {
-					EdgeObject edgeObject = new EdgeObject(act, "end");
+					EdgeObject edgeObject = new EdgeObject(new ActivitySkeleton(act, act),
+							new ActivitySkeleton("end", "end"));
 					edgeHashTable.addEdge(edgeObject, traceNum, i, -2);
 				} else {
 					XEvent nextEvent = trace.get(i + 1);
-					EdgeObject edgeObject = new EdgeObject(act, nextEvent.getAttributes().get(classifier).toString());
+					EdgeObject edgeObject = new EdgeObject(new ActivitySkeleton(act, act),
+							new ActivitySkeleton(nextEvent.getAttributes().get(classifier).toString(),
+									nextEvent.getAttributes().get(classifier).toString()));
 					edgeHashTable.addEdge(edgeObject, traceNum, i, i + 1);
 				}
 			}
@@ -370,6 +364,113 @@ public class LogSkeletonUtils {
 		logSkeleton.setActivityHashTable(activityHashTable);
 		logSkeleton.setEdgeHashTable(edgeHashTable);
 		return logSkeleton;
+	}
+
+	public static void setupEdgeHashTableForDisplayedLogSkeleton(LogSkeleton logSkeleton) {
+		EdgeHashTable edgeHashTable = new EdgeHashTable();
+		for (int traceNum = 0; traceNum < logSkeleton.getLog().size(); traceNum++) {
+			TraceSkeleton traceSkeleton = logSkeleton.getLog().get(traceNum);
+			ActivitySkeleton act1 = new ActivitySkeleton("begin", "begin");
+			int act1Index = -1;
+			ActivitySkeleton act2 = new ActivitySkeleton("", "");
+			
+			for (int eventNum = 0; eventNum < traceSkeleton.getTrace().size(); eventNum++) {
+				EventSkeleton eventSkeleton = traceSkeleton.getTrace().get(eventNum);
+				if (eventSkeleton.getIsDisplayed()) {
+					act2 = eventSkeleton.getActivity();
+					EdgeObject edge = new EdgeObject(act1, act2);
+					if (act1Index != eventNum - 1) {
+						edge.setIsIndirected(true);
+					}
+					edgeHashTable.addEdge(edge, traceNum, act1Index, act1Index + 1);
+					act1 = eventSkeleton.getActivity();
+					act1Index += 1;
+				} 
+				if (eventNum == traceSkeleton.getTrace().size() - 1) {
+					act2 = new ActivitySkeleton("end", "end");
+					EdgeObject edge = new EdgeObject(act1, act2);
+					if (act1Index != traceSkeleton.getTrace().size() - 1) {
+						edge.setIsIndirected(true);
+					}
+					edgeHashTable.addEdge(edge, traceNum, act1Index, -2);
+				} 
+				
+			}
+		}
+		
+		Set<EdgeObject> allEdgeObjects = edgeHashTable.getEdgeTable().keySet();
+		
+		for (EdgeObject edgeObject: allEdgeObjects) {
+			if (!edgeObject.getIsIndirected()) {
+				for (EdgeObject edgeObject2 : allEdgeObjects) {
+					if (edgeObject2.equals(edgeObject)) {
+						if (edgeObject2.getIsIndirected()) {
+							// move all pos from false -> true
+							Map<Integer, List<Integer[]>> allFalsePos = edgeHashTable.getEdgePositions(edgeObject);
+							edgeHashTable.addEdge(edgeObject2, allFalsePos);
+							edgeHashTable.getEdgeTable().remove(edgeObject);
+						}
+					}
+				}
+			}
+		}
+		
+		
+		logSkeleton.setEdgeHashTable(edgeHashTable);
+	}
+	
+	
+	public static void setupEdgeHashTable(LogSkeleton logSkeleton) {
+		EdgeHashTable edgeHashTable = new EdgeHashTable();
+		for (int traceNum = 0; traceNum < logSkeleton.getLog().size(); traceNum++) {
+			TraceSkeleton traceSkeleton = logSkeleton.getLog().get(traceNum);
+			ActivitySkeleton act1 = new ActivitySkeleton("begin", "begin");
+			int act1Index = -1;
+			ActivitySkeleton act2 = new ActivitySkeleton("", "");
+			
+			for (int eventNum = 0; eventNum < traceSkeleton.getTrace().size(); eventNum++) {
+				EventSkeleton eventSkeleton = traceSkeleton.getTrace().get(eventNum);
+				if (eventSkeleton.getIsDisplayed()) {
+					act2 = eventSkeleton.getActivity();
+					EdgeObject edge = new EdgeObject(act1, act2);
+					if (act1Index != eventNum - 1) {
+						edge.setIsIndirected(true);
+					}
+					edgeHashTable.addEdge(edge, traceNum, act1Index, eventNum);
+					act1 = eventSkeleton.getActivity();
+					act1Index = eventNum;
+				} 
+				if (eventNum == traceSkeleton.getTrace().size() - 1) {
+					act2 = new ActivitySkeleton("end", "end");
+					EdgeObject edge = new EdgeObject(act1, act2);
+					if (act1Index != traceSkeleton.getTrace().size() - 1) {
+						edge.setIsIndirected(true);
+					}
+					edgeHashTable.addEdge(edge, traceNum, act1Index, -2);
+				} 
+				
+			}
+		}
+		
+		Set<EdgeObject> allEdgeObjects = edgeHashTable.getEdgeTable().keySet();
+		
+		for (EdgeObject edgeObject: allEdgeObjects) {
+			if (!edgeObject.getIsIndirected()) {
+				for (EdgeObject edgeObject2 : allEdgeObjects) {
+					if (edgeObject2.equals(edgeObject)) {
+						if (edgeObject2.getIsIndirected()) {
+							// move all pos from false -> true
+							Map<Integer, List<Integer[]>> allFalsePos = edgeHashTable.getEdgePositions(edgeObject);
+							edgeHashTable.addEdge(edgeObject2, allFalsePos);
+							edgeHashTable.getEdgeTable().remove(edgeObject);
+						}
+					}
+				}
+			}
+		}
+		
+		
+		logSkeleton.setEdgeHashTable(edgeHashTable);
 	}
 
 	public static _GDPMLog setUpMapNodeType(_GDPMLog gdpmLog, List<String> listGroupActivities) {
@@ -435,14 +536,20 @@ public class LogSkeletonUtils {
 		return listIndirectedEdges;
 	}
 
-	public static List<EdgeObject> getListIndirectedEdgesFromLogSkeleton(LogSkeleton logSkeleton) {
+	public static LogSkeleton setupListIndirectedEdgesFromLogSkeleton(LogSkeleton logSkeleton) {
 		List<EdgeObject> listIndirectedEdges = new ArrayList<EdgeObject>();
 
 		for (TraceSkeleton trace : logSkeleton.getLog()) {
 			LogSkeletonUtils.addIndirectedEdgesFromTrace(trace, listIndirectedEdges);
 		}
 
-		return listIndirectedEdges;
+		for (EdgeObject edge : logSkeleton.getEdgeHashTable().getEdgeTable().keySet()) {
+			if (listIndirectedEdges.contains(edge)) {
+				edge.setIsIndirected(true);
+			}
+		}
+
+		return logSkeleton;
 	}
 
 	public static List<TraceSkeleton> getTracesFrom2ListPos(LogSkeleton logSkeleton, int traceNum,
@@ -521,21 +628,24 @@ public class LogSkeletonUtils {
 			EventSkeleton event = trace.getTrace().get(i);
 			if (event.getIsDisplayed()) {
 				if (isFound) {
-					node2 = event.getCurrentName();
-					if (!listIndirectedEdges.contains(new EdgeObject(node1, node2))) {
-						listIndirectedEdges.add(new EdgeObject(node1, node2));
+					node2 = event.getActivity().getCurrentName();
+					EdgeObject toAdd = new EdgeObject(new ActivitySkeleton(node1, node1),
+							new ActivitySkeleton(node2, node2));
+					if (!listIndirectedEdges.contains(toAdd)) {
+						listIndirectedEdges.add(toAdd);
 					}
 					isFound = false;
 				}
-				node1 = event.getCurrentName();
+				node1 = event.getActivity().getCurrentName();
 			} else {
 				isFound = true;
 			}
 
 		}
 		if (isFound) {
-			if (!listIndirectedEdges.contains(new EdgeObject(node1, "end"))) {
-				listIndirectedEdges.add(new EdgeObject(node1, "end"));
+			EdgeObject toAdd = new EdgeObject(new ActivitySkeleton(node1, node1), new ActivitySkeleton("end", "end"));
+			if (!listIndirectedEdges.contains(toAdd)) {
+				listIndirectedEdges.add(toAdd);
 			}
 		}
 	}

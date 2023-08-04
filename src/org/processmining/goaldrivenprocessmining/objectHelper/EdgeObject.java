@@ -4,31 +4,45 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class EdgeObject implements Serializable {
-	
-	private String node1;
-	private String node2;
-	public EdgeObject(String node1, String node2) {
+
+	private ActivitySkeleton node1;
+	private ActivitySkeleton node2;
+	private Boolean isIndirected;
+
+	public EdgeObject(ActivitySkeleton node1, ActivitySkeleton node2) {
 		this.node1 = node1;
 		this.node2 = node2;
+		this.isIndirected = false;
 	}
-	public String getNode1() {
+
+	public ActivitySkeleton getNode1() {
 		return node1;
 	}
-	public void setNode1(String node1) {
+
+	public void setNode1(ActivitySkeleton node1) {
 		this.node1 = node1;
 	}
-	public String getNode2() {
+
+	public ActivitySkeleton getNode2() {
 		return node2;
 	}
-	public void setNode2(String node2) {
+
+	public void setNode2(ActivitySkeleton node2) {
 		this.node2 = node2;
 	}
-	
-	
-	
+
+	public Boolean getIsIndirected() {
+		return isIndirected;
+	}
+
+	public void setIsIndirected(Boolean isIndirected) {
+		this.isIndirected = isIndirected;
+	}
+
 	public int hashCode() {
 		return Objects.hash(node1, node2);
 	}
+
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -39,10 +53,9 @@ public class EdgeObject implements Serializable {
 		EdgeObject other = (EdgeObject) obj;
 		return Objects.equals(node1, other.node1) && Objects.equals(node2, other.node2);
 	}
+
 	public String toString() {
-		return "EdgeObject [node1=" + node1 + ", node2=" + node2 + "]";
+		return "EdgeObject [node1=" + node1 + ", node2=" + node2 + ", isIndirected=" + isIndirected + "]";
 	}
-	
-	
-	
+
 }

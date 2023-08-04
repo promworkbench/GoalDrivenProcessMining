@@ -25,5 +25,8 @@
     	<!-- dependency conf="lib->default" org="org.reflections" name="reflections" rev="0.9.10" /-->
     	<!-- Third party library downloaded from ProM library. -->
     	<!-- dependency conf="lib->default" org="prom-libs" name="opencsv" rev="2.4-patched" transitive="false" /--> 
+   <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+		<dependency org="org.apache.commons" name="commons-lang3" rev="3.12.0"/>
+   
     </dependencies>
 </ivy-module>

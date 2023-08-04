@@ -24,6 +24,7 @@ public class StatUtils {
 		EdgeHashTable edgeHashTable = logSkeleton.getEdgeHashTable();
 		MapStatObject statObject = new MapStatObject();
 		HashMap<String, Long> mapNodeTotalTime = new HashMap<>();
+		HashMap<String, Integer> mapGroupNodeTotalOccurence = new HashMap<>();
 
 		// stat node
 		for (Map.Entry<String, Map<Integer, List<Integer>>> entry : activityHashTable.getActivityTable().entrySet()) {
@@ -33,14 +34,34 @@ public class StatUtils {
 			for (Map.Entry<Integer, List<Integer>> entry1 : value.entrySet()) {
 				total += entry1.getValue().size();
 			}
-			statObject.getMapStatNode().put(act,
-					new StatNodeObject(total, (float) total / (float) logSkeleton.getLog().size()));
+			Boolean isGroupNode = false;
+			String groupName = "";
+			for (Map.Entry<String, List<String>> entry2 : logSkeleton.getGroupConfig().entrySet()) {
+				if (entry2.getValue().contains(act)) {
+					isGroupNode = true;
+					groupName = entry2.getKey();
+					if (mapGroupNodeTotalOccurence.keySet().contains(groupName)) {
+						mapGroupNodeTotalOccurence.replace(groupName,
+								mapGroupNodeTotalOccurence.get(groupName) + total);
+					} else {
+						mapGroupNodeTotalOccurence.put(groupName, total);
+					}
+				}
+			}
+			if (!isGroupNode) {
+				statObject.getMapStatNode().put(act,
+						new StatNodeObject(total, (float) total / (float) logSkeleton.getLog().size()));
+			} else {
+				statObject.getMapStatNode().put(groupName, new StatNodeObject(mapGroupNodeTotalOccurence.get(groupName),
+						(float) mapGroupNodeTotalOccurence.get(groupName) / (float) logSkeleton.getLog().size()));
+			}
+
 		}
 		// stat edge
 		for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : edgeHashTable.getEdgeTable().entrySet()) {
 			EdgeObject edge = entry.getKey();
-			String source = edge.getNode1();
-			String target = edge.getNode2();
+			String source = edge.getNode1().getCurrentName();
+			String target = edge.getNode2().getCurrentName();
 			Map<Integer, List<Integer[]>> value = entry.getValue();
 			int total = 0;
 			for (Map.Entry<Integer, List<Integer[]>> entry1 : value.entrySet()) {
@@ -72,8 +93,8 @@ public class StatUtils {
 		}
 		for (Map.Entry<String, Long> entry : mapNodeTotalTime.entrySet()) {
 			StatNodeObject statNodeObject = statObject.getMapStatNode().get(entry.getKey());
-			statNodeObject.setAvgThroughputTime(StatUtils
-					.getDateString(entry.getValue() / statNodeObject.getTotalOccurences()));
+			statNodeObject.setAvgThroughputTime(
+					StatUtils.getDateString(entry.getValue() / statNodeObject.getTotalOccurences()));
 			statObject.getMapStatNode().replace(entry.getKey(), statNodeObject);
 		}
 		return statObject;
