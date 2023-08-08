@@ -26,7 +26,7 @@ public class GoalDrivenConstants {
 	// Color in border
 	public static final Color BORDER_COLOR = new Color(36,52,67);
 	// Border
-	public static final Border BETWEEN_PANEL_BORDER = BorderFactory.createLineBorder(GoalDrivenConstants.BORDER_COLOR,
+	public static final Border BETWEEN_PANEL_BORDER = BorderFactory.createLineBorder(GoalDrivenConstants.BORDER_COLOR, 
 			6, false);
 //	public static final Border BETWEEN_CARD_BORDER = BorderFactory.createLineBorder(GoalDrivenConstants.BORDER_COLOR,
 //			15, false);
