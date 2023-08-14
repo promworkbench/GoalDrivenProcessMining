@@ -29,8 +29,6 @@ public class GraphConstants {
 	public static final int NODE_FILL_COLOR = ColorLib.rgb(55, 0, 179);
 	public static final int SELECTED_NODE_FILL_COLOR = ColorLib.rgb(207, 102, 121);
 	public static final int NODE_STROKE_COLOR = ColorLib.rgb(255, 255, 255);
-	public static final Color[] GRADIENT_NODE_FILL_COLOR = new Color[] { new Color(185, 186, 239),
-			new Color(149, 146, 229), new Color(117, 105, 215), new Color(86, 63, 199), new Color(55, 0, 179) };
 	public static final Color NODE_FILL_DARK_COLOR = new Color(18,92,164);
 	public static final Color NODE_FILL_LIGHT_COLOR = new Color(190,216,236);
 	//color edge

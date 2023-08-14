@@ -1,5 +1,6 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -48,15 +49,31 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 				updatedConfig.setUnselectedActs(selectedActMap.get("Low"));
 				break;
 			case GROUP :
-				
 				switch (update.getUpdateAction()) {
 					case ADD :
 						GroupActObject groupActObject =  (GroupActObject) update.getUpdateObject();
 						updatedConfig.addGroup(groupActObject);
 						break;
 					case REMOVE :
-						List<GroupActObject> listGroupActObjects =  (List<GroupActObject>) update.getUpdateObject();
-						updatedConfig.removeGroup(listGroupActObjects);
+						Class<?> objClass = update.getUpdateObject().getClass();
+						if (objClass.isArray()) {
+							String[] array = (String[]) update.getUpdateObject();
+							for (GroupActObject group : updatedConfig.getListGroupActObjects()) {
+								if (group.getGroupName().equals(array[0])) {
+									group.getListAct().remove(array[1]);
+								}
+							}
+							
+						} else {
+							String groupName =  (String) update.getUpdateObject();
+							List<GroupActObject> newGroupActObjects = new ArrayList<>();
+							for (GroupActObject group : updatedConfig.getListGroupActObjects()) {
+								if (!group.getGroupName().equals(groupName)) {
+									newGroupActObjects.add(group);
+								}
+							}
+							updatedConfig.setListGroupActObjects(newGroupActObjects);
+						}
 						break;
 				}
 

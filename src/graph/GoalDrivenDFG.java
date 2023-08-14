@@ -33,6 +33,7 @@ import graph.controls.BorderNodeControl;
 import graph.controls.CustomPanControl;
 import graph.controls.DragMultipleNodesControl;
 import graph.controls.GraphObjectClickControl;
+import graph.controls.RightClickControl;
 import graph.controls.SelectMultipleNodesControl;
 import graph.controls.SquareSelectControl;
 import graph.utils.node.NodeRenderer;
@@ -76,6 +77,7 @@ public class GoalDrivenDFG extends Display {
 	private BorderNodeControl borderNodeControl;
 	private GraphObjectClickControl edgeClickControl;
 	private SquareSelectControl squareSelectControl;
+	private RightClickControl rightClickControl;
 	// action
 	private ColorAction nodeStrokeColorAction;
 	private ColorAction nodeFillColorAction;
@@ -260,10 +262,12 @@ public class GoalDrivenDFG extends Display {
 			addControlListener(backgroundDoubleClickControl);
 			/*************************/
 			/* drag multiple nodes */
-			dragMultipleNodesControl = new DragMultipleNodesControl();
+			dragMultipleNodesControl = new DragMultipleNodesControl(this);
 			addControlListener(dragMultipleNodesControl);
 			squareSelectControl = new SquareSelectControl(this.graph.getNodeTable(), this);
 			addControlListener(squareSelectControl);
+			rightClickControl = new RightClickControl(this);
+			addControlListener(rightClickControl);
 		}
 
 		/*********************/
@@ -285,8 +289,10 @@ public class GoalDrivenDFG extends Display {
 		addControlListener(wheelZoomControl);
 		focusControl = new FocusControl();
 		addControlListener(focusControl);
-		dragMultipleNodesControl = new DragMultipleNodesControl();
+		dragMultipleNodesControl = new DragMultipleNodesControl(this);
 		addControlListener(dragMultipleNodesControl);
+		rightClickControl = new RightClickControl(this);
+		addControlListener(rightClickControl);
 
 	}
 
@@ -500,11 +506,6 @@ public class GoalDrivenDFG extends Display {
 		EdgeHashTable edgeHashTable = this.log.getLogSkeleton().getEdgeHashTable();
 		
 		// add node
-		for (String name : allGroup.keySet()) {
-			Node node1 = null;
-			node1 = g.addNode();
-			this.configNode(node1, name, log.getMapNodeType());
-		}
 		for (String act: listActName) {
 			if (!this.log.getLogSkeleton().isInGroup(act)) {
 				Node node1 = null;

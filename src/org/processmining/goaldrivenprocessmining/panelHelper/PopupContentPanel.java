@@ -1,120 +1,202 @@
 package org.processmining.goaldrivenprocessmining.panelHelper;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
+
+import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenController;
 
 public class PopupContentPanel extends JPanel {
 	private JPanel mainPanel;
 	private PopupGroupPanel groupPanel;
 	private PopupCategoryPanel categoryPanel;
+	private CardLayout cardLayout;
+	private JButton groupButton;
+	private JButton categoryButton;
+	private JPopupMenu popupMenu;
+	private JButton doneButton;
+	private JButton cancelButton;
 
-	public PopupContentPanel() {
+	public PopupContentPanel(JPopupMenu popupMenu) {
 		setLayout(new BorderLayout());
 
-		// Create the main panel with "Group" and "Category" buttons
 		mainPanel = new JPanel(new FlowLayout());
-		JButton groupButton = new JButton("Group");
-		JButton categoryButton = new JButton("Category");
+		mainPanel.setPreferredSize(new Dimension(400, 50)); // Adjust height for visual purposes
+
+		groupButton = new JButton("Group");
+		groupButton.setSelected(true);
+		categoryButton = new JButton("Category");
+
+		mainPanel.add(groupButton);
+		mainPanel.add(categoryButton);
+
+		JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
+		separator.setPreferredSize(new Dimension(400, 200));
+		separator.setForeground(Color.BLACK);
+		mainPanel.add(separator, BorderLayout.CENTER);
+		add(mainPanel, BorderLayout.NORTH);
+
+		cardLayout = new CardLayout();
+		JPanel lowerPanel = new JPanel(cardLayout);
+
+		groupPanel = new PopupGroupPanel(this.popupMenu);
+
+		lowerPanel.add(groupPanel, "Group");
+
+		categoryPanel = new PopupCategoryPanel();
+
+		lowerPanel.add(categoryPanel, "Category");
+		lowerPanel.add(new JPanel(), "Default");
+		cardLayout.show(lowerPanel, "Group");
+		add(lowerPanel, BorderLayout.CENTER);
 
 		groupButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				showGroupPanel();
+				cardLayout.show(lowerPanel, "Group");
+				groupButton.setBackground(Color.GREEN);
+				categoryButton.setBackground(null);
 			}
 		});
 
 		categoryButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				showCategoryPanel();
+				cardLayout.show(lowerPanel, "Category");
+				categoryButton.setBackground(Color.GREEN);
+				groupButton.setBackground(null);
 			}
 		});
+
+		// Done and Cancel buttons
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		doneButton = new JButton("Done");
+		cancelButton = new JButton("Cancel");
+
+		buttonPanel.add(doneButton);
+		buttonPanel.add(cancelButton);
+
+		doneButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// Choose group
+				if (groupButton.isSelected()) {
+					if (groupPanel.getAddToGroupRadioButton().isSelected()) {
+
+					}
+					if (groupPanel.getCreateGroupRadioButton().isSelected()) {
+						GoalDrivenController.addGroupConfigObject(groupPanel.getNewGroupNameTextField().getText());
+						// Hide the PopupContentPanel
+						PopupContentPanel.this.setVisible(false);
+						popupMenu.setVisible(false);
+					}
+				}
+				// Choose category
+				if (categoryButton.isSelected()) {
+
+				}
+
+			}
+		});
+
+		cancelButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// Hide the PopupContentPanel
+				PopupContentPanel.this.setVisible(false);
+				popupMenu.setVisible(false);
+			}
+		});
+		groupButton.setBackground(Color.GREEN);
+		add(buttonPanel, BorderLayout.SOUTH);
+	}
+
+	public PopupContentPanel(Popup3DotsButton threeDotsButton) {
+		setLayout(new BorderLayout());
+
+		mainPanel = new JPanel(new FlowLayout());
+		mainPanel.setPreferredSize(new Dimension(400, 50)); // Adjust height for visual purposes
+
+		groupButton = new JButton("Group");
+		categoryButton = new JButton("Category");
 
 		mainPanel.add(groupButton);
 		mainPanel.add(categoryButton);
-		add(mainPanel, BorderLayout.CENTER);
+		add(mainPanel, BorderLayout.NORTH);
 
-		// Create the Group panel with "Back" button
-		groupPanel = new PopupGroupPanel(new ActionListener() {
+		JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
+		add(separator, BorderLayout.CENTER);
+
+		cardLayout = new CardLayout();
+		JPanel lowerPanel = new JPanel(cardLayout);
+
+		groupPanel = new PopupGroupPanel(this.popupMenu);
+		lowerPanel.add(groupPanel, "Group");
+
+		categoryPanel = new PopupCategoryPanel();
+		lowerPanel.add(categoryPanel, "Category");
+		cardLayout.show(lowerPanel, "Group");
+		add(lowerPanel, BorderLayout.CENTER);
+
+		groupButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				showMainPanel();
+				cardLayout.show(lowerPanel, "Group");
+				groupButton.setBackground(Color.GREEN);
+				categoryButton.setBackground(null);
 			}
-		}, new ActionListener() {
+		});
+
+		categoryButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// Handle "Done" action in GroupPanel
-			}
-		}, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// Handle "Cancel" action in GroupPanel
+				cardLayout.show(lowerPanel, "Category");
+				categoryButton.setBackground(Color.GREEN);
+				groupButton.setBackground(null);
 			}
 		});
 
-		groupPanel.setVisible(false);
-//		add(groupPanel, BorderLayout.CENTER);
+		// Done and Cancel buttons
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JButton doneButton = new JButton("Done");
+		JButton cancelButton = new JButton("Cancel");
 
-		// Create the Category panel with "Back" button
-		categoryPanel = new PopupCategoryPanel(new ActionListener() {
+		buttonPanel.add(doneButton);
+		buttonPanel.add(cancelButton);
+
+		doneButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				showMainPanel();
-			}
-		}, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// Handle "Done" action in CategoryPanel
-			}
-		}, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// Handle "Cancel" action in CategoryPanel
+				// Handle "Done" action here
 			}
 		});
-		categoryPanel.setVisible(false);
-//		add(categoryPanel, BorderLayout.CENTER);
-		
+
+		cancelButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// Hide the PopupContentPanel
+				PopupContentPanel.this.setVisible(false);
+				// Hide the 3dots button (assuming it's a field in the parent component)
+				threeDotsButton.setVisible(false);
+				popupMenu.setVisible(false);
+			}
+		});
+		groupButton.setBackground(Color.GREEN);
+		add(buttonPanel, BorderLayout.SOUTH);
 	}
 
-	private void showMainPanel() {
-		// Show the main panel with "Group" and "Category" buttons
-		removeAll();
-		mainPanel.setVisible(true);
-		add(mainPanel, BorderLayout.CENTER);
-		groupPanel.setVisible(false);
-		categoryPanel.setVisible(false);
-		revalidate();
-		repaint();
+	public void setPopupMenu(JPopupMenu popupMenu) {
+		this.popupMenu = popupMenu;
 	}
 
-	private void showGroupPanel() {
-		// Show the Group panel and hide other panels
-		removeAll();
-		groupPanel.setVisible(true);
-		add(groupPanel, BorderLayout.CENTER);
-		categoryPanel.setVisible(false);
-		mainPanel.setVisible(false);
-		revalidate();
-		repaint();
-	}
-
-	private void showCategoryPanel() {
-		// Show the Category panel and hide other panels
-		removeAll();
-		groupPanel.setVisible(false);
-		add(categoryPanel, BorderLayout.CENTER);
-		categoryPanel.setVisible(true);
-		mainPanel.setVisible(false);
-		revalidate();
-		repaint();
-	}
-
-	// Add any additional methods or functionality specific to your popup content panel
-	// For example, custom event handling, data manipulation, etc.
 }

@@ -26,7 +26,6 @@ import javax.swing.table.DefaultTableModel;
 import org.deckfour.xes.model.XLog;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.ProMCanceller;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.CONFIG_Update;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GUI_DisplayGroup;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
@@ -41,6 +40,7 @@ import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.Updat
 import org.processmining.goaldrivenprocessmining.objectHelper.ValueCategoryObject;
 import org.processmining.goaldrivenprocessmining.panelHelper.GroupActConfig;
 import org.processmining.goaldrivenprocessmining.panelHelper.NewCategoryPanel;
+import org.processmining.goaldrivenprocessmining.panelHelper.PopupPanel;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChain;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkGuiAbstract;
@@ -56,8 +56,8 @@ import prefuse.Visualization;
 import prefuse.visual.VisualItem;
 
 public class GoalDrivenController {
-	private final GoalDrivenPanel panel;
-	private final DataChain<GoalDrivenConfiguration> chain;
+	private static GoalDrivenPanel panel;
+	private static DataChain<GoalDrivenConfiguration> chain;
 	private final GUI_DisplayGroup gui_DisplayGroup;
 
 	public GoalDrivenController(final PluginContext context, final GoalDrivenConfiguration configuration,
@@ -80,6 +80,32 @@ public class GoalDrivenController {
 		this.chain.setFixedObject(IvMObject.input_log, log);
 	}
 
+	public static void ungroupGroupConfigObject(String groupName) {
+		UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.REMOVE, groupName);
+		chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
+	}
+
+	public static void removeActInGroupConfigObject(String groupName, String act) {
+		String[] updateObject = new String[] { groupName, act };
+		UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.REMOVE, updateObject);
+		chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
+	}
+
+	public static void addGroupConfigObject(String groupName) {
+		List<String> selectedNode = new ArrayList<>();
+		Visualization vis = panel.getHighDfgPanel().getVisualization();
+		List<VisualItem> allVisualItems = GraphNodeUtils.getAllNodes(vis);
+		for (VisualItem item : allVisualItems) {
+			if (item.getBoolean(GraphConstants.SELECT_FIELD)) {
+				selectedNode.add(item.getString(GraphConstants.LABEL_FIELD));
+			}
+		}
+		GroupActObject selectedNodeObject = new GroupActObject(groupName, selectedNode);
+		UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.ADD, selectedNodeObject);
+		chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
+
+	}
+
 	protected void initGui(final ProMCanceller canceller, final GoalDrivenConfiguration configuration) {
 
 		initGuiUniqueValue();
@@ -92,6 +118,7 @@ public class GoalDrivenController {
 
 		initGuiGraph();
 		initGuiGraph1();
+		initGuiPopup();
 
 	}
 
@@ -561,7 +588,7 @@ public class GoalDrivenController {
 				panel.getConfigCards().setVisible(false);
 			}
 		});
-		
+
 		// group config cancel button
 		panel.getConfigCards().getGroupConfigPanel().getCancelButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -569,8 +596,7 @@ public class GoalDrivenController {
 				panel.getConfigCards().setVisible(false);
 			}
 		});
-		
-		
+
 		// update all group in the group config panel
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
 
@@ -590,6 +616,7 @@ public class GoalDrivenController {
 			}
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				// update for config in control panel
 				Config config = inputs.get(GoalDrivenObject.config);
 				List<GroupActObject> allGroups = config.getListGroupActObjects();
 				panel.getConfigCards().getGroupConfigPanel().getTableModel().setRowCount(0);
@@ -597,63 +624,30 @@ public class GoalDrivenController {
 					panel.getConfigCards().getGroupConfigPanel().getTableModel()
 							.addRow(new Object[] { groupActObject });
 				}
-
+				// update for popup
+				PopupPanel.groupActObjects = allGroups;
 			}
 
 		});
 		// trigger action when clicking on a row of group config panel
-		panel.getConfigCards().getGroupConfigPanel().getGroupTable().getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                int selectedRow = panel.getConfigCards().getGroupConfigPanel().getGroupTable().getSelectedRow();
-                if (selectedRow >= 0 ) {
-                	panel.getConfigCards().getGroupConfigPanel().updateDisplayPanel(selectedRow);
-                }
-            }
-        });
+		panel.getConfigCards().getGroupConfigPanel().getGroupTable().getSelectionModel()
+				.addListSelectionListener(new ListSelectionListener() {
+					@Override
+					public void valueChanged(ListSelectionEvent e) {
+						int selectedRow = panel.getConfigCards().getGroupConfigPanel().getGroupTable().getSelectedRow();
+						if (selectedRow >= 0) {
+							panel.getConfigCards().getGroupConfigPanel().updateDisplayPanel(selectedRow);
+						}
+					}
+				});
+
+	}
+
+	protected void initGuiPopup() {
 
 	}
 
 	protected void initGuiSidePanel() {
-		// group nodes popup 
-		panel.getSidePanel().getBatchSelectionPopupPanel().getGroupNodeButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				List<String> selectedNode = new ArrayList<>();
-				Visualization vis = panel.getHighDfgPanel().getVisualization();
-				List<VisualItem> allVisualItems = GraphNodeUtils.getAllNodes(vis);
-				for (VisualItem item : allVisualItems) {
-					if (item.getBoolean(GraphConstants.SELECT_FIELD)) {
-						selectedNode.add(item.getString(GraphConstants.LABEL_FIELD));
-					}
-				}
-				GroupActObject selectedNodeObject = new GroupActObject(
-						panel.getSidePanel().getBatchSelectionPopupPanel().getGroupNameField().getText(), selectedNode);
-				UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.ADD, selectedNodeObject);
-				panel.getSidePanel().getBatchSelectionPopupPanel().getGroupNameField().setText("");
-				
-				chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
-			}
-
-		});
-		// ungroup nodes popup
-		panel.getSidePanel().getBatchSelectionPopupPanel().getUngroupNodeButton()
-				.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						// reset log
-						List<GroupActObject> listRemove = new ArrayList<GroupActObject>();
-						for (GroupActObject item : CONFIG_Update.currentConfig.getListGroupActObjects()) {
-							listRemove.add(item);
-						}
-						UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.REMOVE, listRemove);
-						chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
-						// delete all current opened group
-						int tabCount = panel.getSidePanel().getStatisticPanel().getStatPane().getTabCount();
-						for (int i = tabCount - 1; i > 0; i--) {
-							panel.getSidePanel().getStatisticPanel().getStatPane().removeTabAt(i);
-						}
-					}
-
-				});
 		//stat panel in side panel
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
 			public String getName() {

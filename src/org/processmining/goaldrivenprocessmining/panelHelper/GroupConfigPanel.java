@@ -16,6 +16,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenController;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
 
 public class GroupConfigPanel extends JPanel {
@@ -32,12 +33,12 @@ public class GroupConfigPanel extends JPanel {
 		setLayout(new BorderLayout());
 
 		// Set up the table
-		tableModel = new DefaultTableModel(){
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // Make all cells not editable
-            }
-        };
+		tableModel = new DefaultTableModel() {
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false; // Make all cells not editable
+			}
+		};
 		tableModel.setColumnIdentifiers(new String[] { "Groups" });
 		groupTable = new JTable(tableModel);
 		JScrollPane tableScrollPane = new JScrollPane(groupTable);
@@ -49,15 +50,16 @@ public class GroupConfigPanel extends JPanel {
 		// Add the "Remove Group" button to the display panel
 		removeGroupButton = new JButton("Remove Group");
 		removeGroupButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
-		//        removeGroupButton.addActionListener(new ActionListener() {
-		//            @Override
-		//            public void actionPerformed(ActionEvent e) {
-		//                int selectedRow = groupTable.getSelectedRow();
-		//                if (selectedRow >= 0 && selectedRow < groups.size()) {
-		//                    removeGroup(selectedRow);
-		//                }
-		//            }
-		//        });
+		removeGroupButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int selectedRow = groupTable.getSelectedRow();
+				GoalDrivenController.ungroupGroupConfigObject(((GroupActObject)tableModel.getValueAt(selectedRow, 0)).getGroupName());
+				displayPanel.removeAll();
+				revalidate();
+				repaint();
+			}
+		});
 		displayPanel.add(removeGroupButton);
 
 		// Add components to the main panel using JSplitPane
@@ -74,19 +76,19 @@ public class GroupConfigPanel extends JPanel {
 		add(bottomPanel, BorderLayout.SOUTH);
 	}
 
-//	public static void main(String[] args) {
-//		SwingUtilities.invokeLater(new Runnable() {
-//			@Override
-//			public void run() {
-//				JFrame frame = new JFrame("Group Table and Display Panel");
-//				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//				frame.setSize(800, 400);
-//				frame.add(new GroupConfigPanel());
-//				frame.setLocationRelativeTo(null);
-//				frame.setVisible(true);
-//			}
-//		});
-//	}
+	//	public static void main(String[] args) {
+	//		SwingUtilities.invokeLater(new Runnable() {
+	//			@Override
+	//			public void run() {
+	//				JFrame frame = new JFrame("Group Table and Display Panel");
+	//				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	//				frame.setSize(800, 400);
+	//				frame.add(new GroupConfigPanel());
+	//				frame.setLocationRelativeTo(null);
+	//				frame.setVisible(true);
+	//			}
+	//		});
+	//	}
 
 	public JTable getGroupTable() {
 		return groupTable;
@@ -134,6 +136,13 @@ public class GroupConfigPanel extends JPanel {
 			activityPanel.add(new JLabel(activity), BorderLayout.CENTER);
 			JButton removeActivityButton = new JButton("Remove");
 			removeActivityButton.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent e) {
+					GoalDrivenController.removeActInGroupConfigObject(group.getGroupName(), activity);
+				}
+				
+			});
+			removeActivityButton.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					removeActivity(selectedRow, activity);
@@ -149,13 +158,7 @@ public class GroupConfigPanel extends JPanel {
 		displayPanel.repaint();
 	}
 
-	//    private void removeGroup(int index) {
-	//        groups.remove(index);
-	//        activities.remove(index);
-	//        displayPanel.removeAll();
-	//        displayPanel.revalidate();
-	//        displayPanel.repaint();
-	//    }
+
 	//
 	private void removeActivity(int groupIndex, String activity) {
 		updateDisplayPanel(groupIndex);

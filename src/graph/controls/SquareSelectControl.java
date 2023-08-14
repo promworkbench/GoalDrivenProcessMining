@@ -76,9 +76,12 @@ public class SquareSelectControl extends ControlAdapter {
 			showPopup = true;
 		}
 		rectangle = null;
-		PopUpGraphic popUpGraphic = new PopUpGraphic();
-		display.addPaintListener(popUpGraphic);
+		display.revalidate();
 		display.repaint();
+		// TODO popup
+		if (showPopup) {
+			showPopup = false;
+		}
 	}
 
 	private Rectangle2D makeRectangle(Point startPoint, Point endPoint) {

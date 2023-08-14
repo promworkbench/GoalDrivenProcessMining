@@ -2,7 +2,6 @@ package org.processmining.goaldrivenprocessmining.algorithms.panel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -96,25 +95,10 @@ public class GoalDrivenPanel extends JPanel {
 			GDPMLogSkeleton log = null;
 
 			// Create and add the highDfgPanel to the default layer
-			JPanel panel = new JPanel();
 			highDfgPanel = new GoalDrivenDFG(log);
 			highDfgPanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 			highDfgPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
-			highDfgPanel.setSize(new Dimension(800, 400));
-			panel.add(highDfgPanel);
-			panel.setBounds(0, 0, highDfgPanel.getWidth(), highDfgPanel.getHeight());
-
-			JLayeredPane highDfgLayeredPane = new JLayeredPane();
-			highDfgLayeredPane.setBounds(highDfgPanel.getInsets().left * 2, highDfgPanel.getInsets().top * 2 + 20, 100,
-					50);
-			highDfgLayeredPane.setBorder(BorderFactory.createEtchedBorder(Color.RED, Color.WHITE));
-			// Create and add the popup3Dots button to the palette layer
-			JButton popup3Dots = new JButton("...");
-			popup3Dots.setBackground(Color.RED);
-			popup3Dots.setBounds(0, 0, 100, 50);
-			highDfgLayeredPane.add(popup3Dots, JLayeredPane.PALETTE_LAYER);
-
-			contentLeftPanel.add(highDfgLayeredPane, BorderLayout.CENTER);
+			contentLeftPanel.add(highDfgPanel, BorderLayout.CENTER);
 			contentLeftPanel.add(highDfgPanel);
 			GridBagConstraints gbcContentLeftPanel = createGridBagConstraints(0, 0, 0.37);
 			contentPanel.add(contentLeftPanel, gbcContentLeftPanel);

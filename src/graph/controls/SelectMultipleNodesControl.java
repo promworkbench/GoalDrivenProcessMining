@@ -6,7 +6,6 @@ import graph.GraphConstants;
 import prefuse.Display;
 import prefuse.controls.ControlAdapter;
 import prefuse.data.Table;
-import prefuse.util.ColorLib;
 import prefuse.visual.VisualItem;
 import prefuse.visual.expression.InGroupPredicate;
 
@@ -24,15 +23,14 @@ public class SelectMultipleNodesControl extends ControlAdapter {
 	}
 
 	public void itemPressed(VisualItem item, MouseEvent e) {
-		if (nodeFilter.getBoolean(item)) {
-			if (e.isControlDown()) {
+		if (e.isControlDown()) {
+			if (nodeFilter.getBoolean(item)) {
 				if (this.nodeTable.getBoolean(item.getRow(), GraphConstants.SELECT_FIELD)) {
 					this.nodeTable.set(item.getRow(), GraphConstants.SELECT_FIELD, false);
 					if (item.getBoolean("begin") || item.getBoolean("end")) {
 						item.setFillColor(GraphConstants.BEGIN_END_NODE_COLOR);
 					} else {
-						item.setFillColor(ColorLib.color(GraphConstants.GRADIENT_NODE_FILL_COLOR[item
-								.getInt(GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD)]));
+						item.setFillColor(item.getInt(GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD));
 					}
 				} else {
 					this.nodeTable.set(item.getRow(), GraphConstants.SELECT_FIELD, true);

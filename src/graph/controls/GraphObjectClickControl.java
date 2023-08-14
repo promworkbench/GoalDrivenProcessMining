@@ -1,5 +1,6 @@
 package graph.controls;
 
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
@@ -27,7 +28,7 @@ public class GraphObjectClickControl extends ControlAdapter {
 	}
 
 	public void itemClicked(VisualItem item, java.awt.event.MouseEvent e) {
-		if (!e.isControlDown()) {
+		if (!e.isControlDown() && e.getButton() != MouseEvent.BUTTON3) {
 			if (edgeFilter.getBoolean(item)) {
 				item.setStrokeColor(GraphConstants.CLICK_EDGE_STROKE_COLOR);
 				EdgeItem edge = (EdgeItem) item;
