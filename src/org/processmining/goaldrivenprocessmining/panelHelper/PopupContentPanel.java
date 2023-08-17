@@ -13,8 +13,11 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenController;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
 
 public class PopupContentPanel extends JPanel {
 	private JPanel mainPanel;
@@ -91,15 +94,17 @@ public class PopupContentPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				// Choose group
 				if (groupButton.isSelected()) {
+					String groupName = "";
 					if (groupPanel.getAddToGroupRadioButton().isSelected()) {
+						groupName = groupPanel.getGroupList().getSelectedValue().getGroupName();
+					} else {
+						groupName = groupPanel.getNewGroupNameTextField().getText();
 
 					}
-					if (groupPanel.getCreateGroupRadioButton().isSelected()) {
-						GoalDrivenController.addGroupConfigObject(groupPanel.getNewGroupNameTextField().getText());
-						// Hide the PopupContentPanel
-						PopupContentPanel.this.setVisible(false);
-						popupMenu.setVisible(false);
-					}
+					GoalDrivenController.addGroupConfigObject(groupName);
+					// Hide the PopupContentPanel
+					PopupContentPanel.this.setVisible(false);
+					popupMenu.setVisible(false);
 				}
 				// Choose category
 				if (categoryButton.isSelected()) {
@@ -115,6 +120,23 @@ public class PopupContentPanel extends JPanel {
 				// Hide the PopupContentPanel
 				PopupContentPanel.this.setVisible(false);
 				popupMenu.setVisible(false);
+			}
+		});
+
+		groupPanel.getNewGroupNameTextField().getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				updateButtonAndWarning();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				updateButtonAndWarning();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				// Style change, not used for plain text
 			}
 		});
 		groupButton.setBackground(Color.GREEN);
@@ -197,6 +219,23 @@ public class PopupContentPanel extends JPanel {
 
 	public void setPopupMenu(JPopupMenu popupMenu) {
 		this.popupMenu = popupMenu;
+	}
+
+	private void updateButtonAndWarning() {
+		String enteredGroupName = this.groupPanel.getNewGroupNameTextField().getText();
+		Boolean isExisted = false;
+		for (GroupActObject groupActObject : PopupPanel.groupActObjects) {
+			if (groupActObject.getGroupName().equals(enteredGroupName)) {
+				this.groupPanel.getWarningLabel().setVisible(true);
+				doneButton.setEnabled(false);
+				isExisted = true;
+				break;
+			}
+		}
+		if (!isExisted) {
+			this.groupPanel.getWarningLabel().setVisible(false);
+			doneButton.setEnabled(true);
+		}
 	}
 
 }

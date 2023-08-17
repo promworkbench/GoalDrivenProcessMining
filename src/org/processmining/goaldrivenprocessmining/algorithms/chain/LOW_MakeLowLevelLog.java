@@ -27,8 +27,7 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 
 	@Override
 	public IvMObject<?>[] createInputObjects() {
-		return new IvMObject<?>[] { GoalDrivenObject.full_log_skeleton, GoalDrivenObject.selected_source_target_node,
-				GoalDrivenObject.config };
+		return new IvMObject<?>[] { GoalDrivenObject.full_log_skeleton, GoalDrivenObject.selected_source_target_node};
 	}
 
 	@Override
@@ -44,7 +43,7 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 		String source = (String) passValues.get("source");
 		String target = (String) passValues.get("target");
 
-		Config config = inputs.get(GoalDrivenObject.config);
+		Config config = CONFIG_Update.currentConfig;
 		GDPMLogSkeleton fullLogSkeleton = inputs.get(GoalDrivenObject.full_log_skeleton);
 		GDPMLogSkeleton newGdpmLog = (GDPMLogSkeleton) fullLogSkeleton.clone();
 		

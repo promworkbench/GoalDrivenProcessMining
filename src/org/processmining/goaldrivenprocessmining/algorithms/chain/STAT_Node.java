@@ -23,7 +23,7 @@ public class STAT_Node<C> extends DataChainLinkComputationAbstract<C> {
 
 	public IvMObject<?>[] createInputObjects() {
 		// TODO Auto-generated method stub
-		return new IvMObject<?>[] {GoalDrivenObject.selected_node, GoalDrivenObject.config};
+		return new IvMObject<?>[] {GoalDrivenObject.selected_node};
 
 	}
 
@@ -36,9 +36,9 @@ public class STAT_Node<C> extends DataChainLinkComputationAbstract<C> {
 			throws Exception {
 		String selectedAct = inputs.get(GoalDrivenObject.selected_node);
 		GDPMLogSkeleton curLog;
-		if (Arrays.asList(inputs.get(GoalDrivenObject.config).getSelectedActs()).contains(selectedAct)) {
+		if (Arrays.asList(CONFIG_Update.currentConfig.getSelectedActs()).contains(selectedAct)) {
 			curLog = HIGH_MakeHighLevelLog.currentHighLogSkeleton;
-		} else if (Arrays.asList(inputs.get(GoalDrivenObject.config).getUnselectedActs()).contains(selectedAct)) {
+		} else if (Arrays.asList(CONFIG_Update.currentConfig.getUnselectedActs()).contains(selectedAct)) {
 			curLog = LOW_MakeLowLevelLog.currentLowLogSkeleton;
 		} else {
 			throw new IllegalArgumentException("No such activity");

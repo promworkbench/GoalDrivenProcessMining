@@ -11,6 +11,7 @@ import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfigurat
 import org.processmining.goaldrivenprocessmining.objectHelper.ActivityIndexMapper;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
+import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
@@ -38,7 +39,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 	public IvMObject<?>[] createOutputObjects() {
 		return new IvMObject<?>[] { GoalDrivenObject.full_xlog, GoalDrivenObject.all_unique_values,
 				GoalDrivenObject.selected_unique_values, GoalDrivenObject.unselected_unique_values,
-				GoalDrivenObject.config, GoalDrivenObject.full_log_skeleton };
+				GoalDrivenObject.config, GoalDrivenObject.update_config_object, GoalDrivenObject.full_log_skeleton };
 	}
 
 	@Override
@@ -68,6 +69,8 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		config.setUnselectedActs(values1);
 		CONFIG_Update.currentConfig = config;
 
+		UpdateConfig updateConfig = new UpdateConfig();
+
 		GDPMLogSkeleton gdpmLogSkeleton = new GDPMLogSkeleton(log);
 		ActivityIndexMapper activityIndexMapper = new ActivityIndexMapper();
 		activityIndexMapper.assignActivity(allAct);
@@ -76,8 +79,10 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 				s(GoalDrivenObject.full_xlog, log)
 				.s(GoalDrivenObject.unselected_unique_values, valuesDistribution.get(1))
 				.s(GoalDrivenObject.selected_unique_values, valuesDistribution.get(0)).// 
-				s(GoalDrivenObject.all_unique_values, valuesDistribution.get(2)).s(GoalDrivenObject.config, config)
-				.s(GoalDrivenObject.full_log_skeleton, gdpmLogSkeleton);
+				s(GoalDrivenObject.all_unique_values, valuesDistribution.get(2))
+				.s(GoalDrivenObject.config, config)
+				.s(GoalDrivenObject.full_log_skeleton, gdpmLogSkeleton)
+				.s(GoalDrivenObject.update_config_object, updateConfig);
 	}
 
 	private List<AttributeClassifier[]> getAllUniqueValues(XLog log, AttributeClassifier classifier) {

@@ -13,6 +13,9 @@ public class UpdateConfig {
 	private UpdateAction updateAction;
 	private Object updateObject;
 
+	public UpdateConfig() {
+	}
+
 	public UpdateConfig(UpdateType updateType, Object updateObject) {
 		this.updateType = updateType;
 		this.updateObject = updateObject;

@@ -2,8 +2,10 @@ package org.processmining.goaldrivenprocessmining.panelHelper;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
@@ -25,13 +27,14 @@ public class PopupGroupPanel extends JPanel {
 	// create new group panel
 	private JLabel newGroupNameLabel;
 	private JTextField newGroupNameTextField;
+	private JLabel warningLabel;
+	
 	// add to group panel
 	private JList<GroupActObject> groupList;
 	// group button
 	private JRadioButton addToGroupRadioButton;
 	private JRadioButton createGroupRadioButton;
 	// group data
-	
 
 	public PopupGroupPanel(JPopupMenu popupMenu) {
 		this.popupMenu = popupMenu;
@@ -59,9 +62,18 @@ public class PopupGroupPanel extends JPanel {
 			newGroupNameLabel = new JLabel("Group name:");
 			newGroupNameTextField = new JTextField(20);
 
-			createGroupPanel.setLayout(new FlowLayout());
+			createGroupPanel.setLayout(new GridLayout(0, 2)); // 0 rows, 2 columns
+
 			createGroupPanel.add(newGroupNameLabel);
 			createGroupPanel.add(newGroupNameTextField);
+
+			// Avoid typing existing group name
+			warningLabel = new JLabel("This group name already exists.");
+			warningLabel.setForeground(Color.RED);
+			warningLabel.setVisible(false);
+
+			createGroupPanel.add(warningLabel); // Adding the warningLabel as the third column
+			
 			lowerPanel.add(createGroupPanel, "CreateGroup");
 		}
 
@@ -135,7 +147,21 @@ public class PopupGroupPanel extends JPanel {
 		this.newGroupNameTextField = newGroupNameTextField;
 	}
 
+	public JLabel getWarningLabel() {
+		return warningLabel;
+	}
 
+	public void setWarningLabel(JLabel warningLabel) {
+		this.warningLabel = warningLabel;
+	}
 
+	public JList<GroupActObject> getGroupList() {
+		return groupList;
+	}
+
+	public void setGroupList(JList<GroupActObject> groupList) {
+		this.groupList = groupList;
+	}
 	
+
 }
