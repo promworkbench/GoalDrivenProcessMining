@@ -103,45 +103,78 @@ public class LogSkeletonUtils {
 		return newGdpmLog;
 	}
 
-	public static GDPMLogSkeleton restrictLogFrom2Activities(GDPMLogSkeleton gdpmLog, String source, String target)
-			throws Exception {
+	public static GDPMLogSkeleton restrictLogFrom2Activities(GDPMLogSkeleton gdpmLog, List<String> sources,
+			List<String> targets, List<String> blockedActivities) {
 		GDPMLogSkeleton newGdpmLog = new GDPMLogSkeleton();
-		
+		// block activities
+		Map<Integer, List<Integer>> blockedActivitiesPos = new HashMap<Integer, List<Integer>>();
 		// set same map node type
 		newGdpmLog.setMapNodeType(gdpmLog.getMapNodeType());
 		// set same group
 		newGdpmLog.getLogSkeleton().setGroupConfig(gdpmLog.getLogSkeleton().getGroupConfig());
-		
 		LogSkeleton logSkeleton = gdpmLog.getLogSkeleton();
-
-		Map<Integer, List<Integer>> allPosSource = logSkeleton.getActivityHashTable().getActivityPositions(source);
-		Map<Integer, List<Integer>> allPosTarget = logSkeleton.getActivityHashTable().getActivityPositions(target);
-		Set<Integer> result = new HashSet<Integer>();
-
-		if (allPosSource == null) {
-			if (allPosTarget == null) {
-				for (int i = 0; i < gdpmLog.getLogSkeleton().getLog().size(); i++) {
-					result.add(i);
+		// setup blocked act pos
+		for (String act : blockedActivities) {
+			for (Map.Entry<Integer, List<Integer>> entry : gdpmLog.getLogSkeleton().getActivityHashTable()
+					.getActivityPositions(act).entrySet()) {
+				if (blockedActivitiesPos.containsKey(entry.getKey())) {
+					blockedActivitiesPos.get(entry.getKey()).addAll(entry.getValue());
+				} else {
+					blockedActivitiesPos.put(entry.getKey(), entry.getValue());
 				}
-			} else {
-				result = allPosTarget.keySet();
-			}
-		} else {
-			if (allPosTarget == null) {
-				result = allPosSource.keySet();
-			} else {
-				result = allPosSource.keySet().stream().distinct().filter(allPosTarget.keySet()::contains)
-						.collect(Collectors.toSet());
 			}
 		}
 
-		for (Integer i : result) {
-			List<Integer> posSource = allPosSource == null ? Arrays.asList(-1) : allPosSource.get(i);
-			List<Integer> posTarget = allPosTarget == null ? Arrays.asList(-2) : allPosTarget.get(i);
-			List<TraceSkeleton> traces = LogSkeletonUtils.getTracesFrom2ListPos(logSkeleton, i, posSource, posTarget);
-			newGdpmLog.getLogSkeleton().getLog().addAll(traces);
-		}
+		for (String source : sources) {
+			for (String target : targets) {
+				Map<Integer, List<Integer>> allPosSource = logSkeleton.getActivityHashTable()
+						.getActivityPositions(source);
+				Map<Integer, List<Integer>> allPosTarget = logSkeleton.getActivityHashTable()
+						.getActivityPositions(target);
 
+				if (source.equals(target)) {
+					for (int traceNum : allPosSource.keySet()) {
+						List<Integer> posSource = allPosSource.get(traceNum);
+						List<TraceSkeleton> traces = LogSkeletonUtils.getTracesFrom1ListPosWithBlockedActivities(
+								logSkeleton, traceNum, posSource, blockedActivitiesPos.get(traceNum));
+						if (!traces.isEmpty()) {
+							newGdpmLog.getLogSkeleton().getLog().addAll(traces);
+						}
+					}
+				} else {
+					Set<Integer> result = new HashSet<Integer>();
+
+					if (allPosSource == null) {
+						if (allPosTarget == null) {
+							for (int i = 0; i < gdpmLog.getLogSkeleton().getLog().size(); i++) {
+								result.add(i);
+							}
+						} else {
+							result = allPosTarget.keySet();
+						}
+					} else {
+						if (allPosTarget == null) {
+							result = allPosSource.keySet();
+						} else {
+							result = allPosSource.keySet().stream().distinct().filter(allPosTarget.keySet()::contains)
+									.collect(Collectors.toSet());
+						}
+					}
+
+					for (Integer i : result) {
+						List<Integer> posSource = allPosSource == null ? Arrays.asList(-1) : allPosSource.get(i);
+						List<Integer> posTarget = allPosTarget == null ? Arrays.asList(-2) : allPosTarget.get(i);
+						List<TraceSkeleton> traces = LogSkeletonUtils.getTracesFrom2ListPosWithBlockedActivities(
+								logSkeleton, i, posSource, posTarget, blockedActivitiesPos.get(i));
+						if (!traces.isEmpty()) {
+							newGdpmLog.getLogSkeleton().getLog().addAll(traces);
+						}
+
+					}
+				}
+
+			}
+		}
 		newGdpmLog.setLogSkeleton(newGdpmLog.getLogSkeleton());
 		newGdpmLog.setStatObject(StatUtils.getStat(newGdpmLog.getLogSkeleton()));
 
@@ -398,6 +431,8 @@ public class LogSkeletonUtils {
 
 	public static EdgeHashTable getEdgeHashTableForDisplayedLogSkeleton(LogSkeleton logSkeleton) {
 		EdgeHashTable edgeHashTable = new EdgeHashTable();
+		List<EdgeObject> addedEdges = new ArrayList<EdgeObject>();
+
 		for (int traceNum = 0; traceNum < logSkeleton.getLog().size(); traceNum++) {
 			TraceSkeleton traceSkeleton = logSkeleton.getLog().get(traceNum);
 			ActivitySkeleton act1 = new ActivitySkeleton("begin", "begin");
@@ -411,8 +446,15 @@ public class LogSkeletonUtils {
 					EdgeObject edge = new EdgeObject(act1, act2);
 					if (act1Index != eventNum - 1) {
 						edge.setIsIndirected(true);
+						if (addedEdges.contains(edge)) {
+							Map<Integer, List<Integer[]>> allPos = edgeHashTable.getEdgePositions(edge);
+							edgeHashTable.getEdgeTable().remove(edge);
+							edgeHashTable.addEdge(edge, allPos);
+						}
 					}
 					edgeHashTable.addEdge(edge, traceNum, act1Index, act1Index + 1);
+					addedEdges.add(edge);
+
 					act1 = eventSkeleton.getActivity();
 					act1Index += 1;
 				}
@@ -421,36 +463,24 @@ public class LogSkeletonUtils {
 					EdgeObject edge = new EdgeObject(act1, act2);
 					if (act1Index != traceSkeleton.getTrace().size() - 1) {
 						edge.setIsIndirected(true);
-					}
-					edgeHashTable.addEdge(edge, traceNum, act1Index, -2);
-				}
-
-			}
-		}
-
-		Set<EdgeObject> allEdgeObjects = edgeHashTable.getEdgeTable().keySet();
-
-		for (EdgeObject edgeObject : allEdgeObjects) {
-			if (!edgeObject.getIsIndirected()) {
-				for (EdgeObject edgeObject2 : allEdgeObjects) {
-					if (edgeObject2.equals(edgeObject)) {
-						if (edgeObject2.getIsIndirected()) {
-							// move all pos from false -> true
-							Map<Integer, List<Integer[]>> allFalsePos = edgeHashTable.getEdgePositions(edgeObject);
-							edgeHashTable.addEdge(edgeObject2, allFalsePos);
-							edgeHashTable.getEdgeTable().remove(edgeObject);
+						if (addedEdges.contains(edge)) {
+							Map<Integer, List<Integer[]>> allPos = edgeHashTable.getEdgePositions(edge);
+							edgeHashTable.getEdgeTable().remove(edge);
+							edgeHashTable.addEdge(edge, allPos);
 						}
 					}
+					edgeHashTable.addEdge(edge, traceNum, act1Index, -2);
+					addedEdges.add(edge);
 				}
+
 			}
 		}
-
 		return edgeHashTable;
 	}
 
 	public static ActivityHashTable getActivityHashTable(LogSkeleton logSkeleton) {
 		ActivityHashTable activityHashTable = new ActivityHashTable();
-		
+
 		for (int traceNum = 0; traceNum < logSkeleton.getLog().size(); traceNum++) {
 			TraceSkeleton traceSkeleton = logSkeleton.getLog().get(traceNum);
 			for (int eventNum = 0; eventNum < traceSkeleton.getTrace().size(); eventNum++) {
@@ -458,11 +488,10 @@ public class LogSkeletonUtils {
 				activityHashTable.addActivity(eventSkeleton.getActivity().getOriginalName(), traceNum, eventNum);
 			}
 		}
-		
+
 		return activityHashTable;
 	}
 
-	
 	public static void setupEdgeHashTable(LogSkeleton logSkeleton) {
 		EdgeHashTable edgeHashTable = new EdgeHashTable();
 		for (int traceNum = 0; traceNum < logSkeleton.getLog().size(); traceNum++) {
@@ -594,56 +623,93 @@ public class LogSkeletonUtils {
 		return logSkeleton;
 	}
 
-	public static List<TraceSkeleton> getTracesFrom2ListPos(LogSkeleton logSkeleton, int traceNum,
-			List<Integer> posSource, List<Integer> posTarget) {
+	public static List<TraceSkeleton> getTracesFrom2ListPosWithBlockedActivities(LogSkeleton logSkeleton, int traceNum,
+			List<Integer> posSource, List<Integer> posTarget, List<Integer> posBlocked) {
+		Boolean hasBlockedAct = posBlocked != null;
 		List<TraceSkeleton> traces = new ArrayList<>();
 		TraceSkeleton trace = logSkeleton.getLog().get(traceNum);
 		Collections.sort(posSource);
 		Collections.sort(posTarget);
+		if (hasBlockedAct) {
+			Collections.sort(posBlocked);
+		}
+		int startIndex = 0;
+		int endIndex = -1; // not valid found
 
 		// source = begin node
 		if (posSource.get(0) == -1) {
-			int startIndex = 0;
-			int endIndex;
+			startIndex = 0;
 			if (posTarget.get(0) == -2) {
-				endIndex = trace.getTrace().size() - 1;
-
+				if (!hasBlockedAct) {
+					endIndex = trace.getTrace().size() - 1;
+				}
 			} else {
-				endIndex = posTarget.get(0);
+				if ((hasBlockedAct && posTarget.get(0) < posBlocked.get(0)) || !hasBlockedAct) {
+					endIndex = posTarget.get(0);
+				}
 			}
-			TraceSkeleton addTrace = new TraceSkeleton();
-			for (int k = startIndex; k <= endIndex; k++) {
-				addTrace.getTrace().add(trace.getTrace().get(k));
-			}
-			traces.add(addTrace);
-			return traces;
-		} else {
-			if (posTarget.get(0) == -2) {
-				int startIndex = posSource.get(posSource.size() - 1);
-				int endIndex = trace.getTrace().size() - 1;
+			if (endIndex != -1) {
 				TraceSkeleton addTrace = new TraceSkeleton();
 				for (int k = startIndex; k <= endIndex; k++) {
 					addTrace.getTrace().add(trace.getTrace().get(k));
 				}
 				traces.add(addTrace);
-				return traces;
+			}
+
+		} else {
+			if (posTarget.get(0) == -2) {
+				startIndex = posSource.get(posSource.size() - 1);
+
+				if ((hasBlockedAct && startIndex > posBlocked.get(posBlocked.size() - 1)) || !hasBlockedAct) {
+					endIndex = trace.getTrace().size() - 1;
+					TraceSkeleton addTrace = new TraceSkeleton();
+					for (int k = startIndex; k <= endIndex; k++) {
+						addTrace.getTrace().add(trace.getTrace().get(k));
+					}
+					traces.add(addTrace);
+					return traces;
+				}
+
 			} else {
 				for (int i = 0; i < posSource.size(); i++) {
-					int startIndex = posSource.get(i);
-					int endIndex = -1;
+					startIndex = posSource.get(i);
+					endIndex = -1; // not found
 					if (i + 1 < posSource.size()) {
 						int nextStartIndex = posSource.get(i + 1);
-
 						for (Integer j : posTarget) {
 							if (j > startIndex && j < nextStartIndex) {
-								endIndex = j;
+								Boolean isBlocked = false;
+								if (hasBlockedAct) {
+									for (Integer k : posBlocked) {
+										if (k > startIndex && k < j) {
+											isBlocked = true;
+											break;
+										}
+									}
+								}
+
+								if (!isBlocked) {
+									endIndex = j;
+								}
 								break;
+
 							}
 						}
 					} else {
 						for (Integer j : posTarget) {
 							if (j > startIndex) {
-								endIndex = j;
+								Boolean isBlocked = false;
+								if (hasBlockedAct) {
+									for (Integer k : posBlocked) {
+										if (k > startIndex && k < j) {
+											isBlocked = true;
+											break;
+										}
+									}
+								}
+								if (!isBlocked) {
+									endIndex = j;
+								}
 								break;
 							}
 						}
@@ -655,6 +721,47 @@ public class LogSkeletonUtils {
 						}
 						traces.add(addTrace);
 					}
+
+				}
+			}
+		}
+
+		return traces;
+	}
+
+	public static List<TraceSkeleton> getTracesFrom1ListPosWithBlockedActivities(LogSkeleton logSkeleton, int traceNum,
+			List<Integer> posSource, List<Integer> posBlocked) {
+		Boolean hasBlockedAct = posBlocked != null;
+		List<TraceSkeleton> traces = new ArrayList<>();
+		TraceSkeleton trace = logSkeleton.getLog().get(traceNum);
+		Collections.sort(posSource);
+		if (hasBlockedAct) {
+			Collections.sort(posBlocked);
+		}
+		int startIndex = 0;
+		int endIndex = -1; // not valid found
+		for (int i = 0; i < posSource.size(); i++) {
+			startIndex = posSource.get(i);
+			if (i + 1 < posSource.size()) {
+				int j = posSource.get(i + 1);
+				Boolean isBlocked = false;
+				if (hasBlockedAct) {
+					for (Integer k : posBlocked) {
+						if (k > startIndex && k < j) {
+							isBlocked = true;
+							break;
+						}
+					}
+				}
+				if (!isBlocked) {
+					endIndex = j;
+				}
+				if (endIndex != -1) {
+					TraceSkeleton addTrace = new TraceSkeleton();
+					for (int k = startIndex; k <= endIndex; k++) {
+						addTrace.getTrace().add(trace.getTrace().get(k));
+					}
+					traces.add(addTrace);
 				}
 			}
 		}
