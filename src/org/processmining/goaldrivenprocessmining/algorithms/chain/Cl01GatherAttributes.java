@@ -74,6 +74,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		GDPMLogSkeleton gdpmLogSkeleton = new GDPMLogSkeleton(log);
 		ActivityIndexMapper activityIndexMapper = new ActivityIndexMapper();
 		activityIndexMapper.assignActivity(allAct);
+		HIGH_MakeHighLevelLog.currentHighLogSkeleton = null;
 
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.full_xlog, log)

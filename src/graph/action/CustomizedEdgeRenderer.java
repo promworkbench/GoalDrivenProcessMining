@@ -79,11 +79,13 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 
 				// Create a composite shape with the original shape and the boundary shape
 				Area compositeShape = new Area();
-				BasicStroke boundaryStroke = new BasicStroke(0.1f);
+				BasicStroke boundaryStroke = new BasicStroke(1f);
+//				Shape boundaryShape = boundaryStroke.createStrokedShape(adjustedCurve);
 				Shape boundaryShape = boundaryStroke.createStrokedShape(adjustedCurve);
+				
 				compositeShape.add(new Area(boundaryShape));
 
-				return compositeShape;
+				return new Area(boundaryShape);
 			}
 
 		}

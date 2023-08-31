@@ -437,6 +437,7 @@ public class LogSkeletonUtils {
 			TraceSkeleton traceSkeleton = logSkeleton.getLog().get(traceNum);
 			ActivitySkeleton act1 = new ActivitySkeleton("begin", "begin");
 			int act1Index = -1;
+			int oldAct1Index = -1;
 			ActivitySkeleton act2 = new ActivitySkeleton("", "");
 
 			for (int eventNum = 0; eventNum < traceSkeleton.getTrace().size(); eventNum++) {
@@ -444,7 +445,7 @@ public class LogSkeletonUtils {
 				if (eventSkeleton.getIsDisplayed()) {
 					act2 = eventSkeleton.getActivity();
 					EdgeObject edge = new EdgeObject(act1, act2);
-					if (act1Index != eventNum - 1) {
+					if (oldAct1Index != eventNum - 1) {
 						edge.setIsIndirected(true);
 						if (addedEdges.contains(edge)) {
 							Map<Integer, List<Integer[]>> allPos = edgeHashTable.getEdgePositions(edge);
@@ -452,16 +453,23 @@ public class LogSkeletonUtils {
 							edgeHashTable.addEdge(edge, allPos);
 						}
 					}
+					
 					edgeHashTable.addEdge(edge, traceNum, act1Index, act1Index + 1);
 					addedEdges.add(edge);
 
 					act1 = eventSkeleton.getActivity();
+					if (oldAct1Index != eventNum - 1) {
+						oldAct1Index = eventNum;
+					} else {
+						oldAct1Index += 1;
+					}
 					act1Index += 1;
+					
 				}
 				if (eventNum == traceSkeleton.getTrace().size() - 1) {
 					act2 = new ActivitySkeleton("end", "end");
 					EdgeObject edge = new EdgeObject(act1, act2);
-					if (act1Index != traceSkeleton.getTrace().size() - 1) {
+					if (oldAct1Index != traceSkeleton.getTrace().size() - 1) {
 						edge.setIsIndirected(true);
 						if (addedEdges.contains(edge)) {
 							Map<Integer, List<Integer[]>> allPos = edgeHashTable.getEdgePositions(edge);

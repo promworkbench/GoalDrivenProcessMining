@@ -324,8 +324,8 @@ public class GoalDrivenDFG extends Display {
 	public void setDefaultRenderer() {
 		CustomizedEdgeRenderer edgeR = new CustomizedEdgeRenderer(prefuse.Constants.EDGE_TYPE_CURVE,
 				prefuse.Constants.EDGE_ARROW_FORWARD);
-		edgeR.setArrowHeadSize(20, 10);
-		edgeR.setArrowDoubleHeadSize(20, 10);
+		edgeR.setArrowHeadSize(GraphConstants.ARROW_HEAD_WIDTH, GraphConstants.ARROW_HEAD_HEIGHT);
+		edgeR.setArrowDoubleHeadSize(GraphConstants.ARROW_HEAD_WIDTH + 5, GraphConstants.ARROW_HEAD_HEIGHT);
 
 		LabelRenderer label = new NodeRenderer("label");
 		label.setRoundedCorner(8, 8);
@@ -388,8 +388,8 @@ public class GoalDrivenDFG extends Display {
 	public void setDefaultEdgeStrokeWidth(HashMap<EdgeObject, StatEdgeObject> frequencyEdge) {
 
 		HashMap<EdgeObject, Float> mapEdgeStrokeWidth = new HashMap<>();
-		float min = 0.25f;
-		float max = 5;
+		float min = GraphConstants.LOWER_BOUND_EDGE_STROKE_WIDTH;
+		float max = GraphConstants.UPPER_BOUND_EDGE_STROKE_WIDTH;
 		int minFreq = Integer.MAX_VALUE;
 		int maxFreq = 0;
 		for (EdgeObject edgeObject : frequencyEdge.keySet()) {
@@ -502,7 +502,6 @@ public class GoalDrivenDFG extends Display {
 			}
 		}
 		
-		HashMap<String, List<String>> allGroup = this.log.getLogSkeleton().getGroupConfig();
 		EdgeHashTable edgeHashTable = this.log.getLogSkeleton().getEdgeHashTable();
 		
 		// add node
