@@ -8,10 +8,12 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
+import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.ActivityIndexMapper;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
+import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateType;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
@@ -47,8 +49,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 			IvMCanceller canceller) throws Exception {
 		System.out.println("Cl01 - gather att");
 		XLog log = inputs.get(IvMObject.input_log);
-		AttributeClassifier classifier = new AttributeClassifier(
-				log.getClassifiers().get(0).getDefiningAttributeKeys()[0]);
+		AttributeClassifier classifier = new AttributeClassifier(LogSkeletonUtils.getLogClassifier(log));
 		List<AttributeClassifier[]> valuesDistribution = this.getAllUniqueValues(log, classifier);
 
 		// string
@@ -69,7 +70,10 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		config.setUnselectedActs(values1);
 		CONFIG_Update.currentConfig = config;
 
-		UpdateConfig updateConfig = new UpdateConfig();
+		HashMap<String, String[]> updateMap = new HashMap<String, String[]>();
+		updateMap.put("High", values);
+		updateMap.put("Low", values1);
+		UpdateConfig updateConfig = new UpdateConfig(UpdateType.SELECTED_ACT, updateMap);
 
 		GDPMLogSkeleton gdpmLogSkeleton = new GDPMLogSkeleton(log);
 		ActivityIndexMapper activityIndexMapper = new ActivityIndexMapper();

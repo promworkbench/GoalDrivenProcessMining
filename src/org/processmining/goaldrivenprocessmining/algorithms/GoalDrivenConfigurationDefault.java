@@ -1,29 +1,21 @@
 package org.processmining.goaldrivenprocessmining.algorithms;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.Executor;
 
 import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.CONFIG_Update;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl01GatherAttributes;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighLevelDFG;
+import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_UpdateCategoryHighLevelDFG;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_MakeLowLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_MakeLowLevelDFG;
+import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_MakeLowLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_UpdateCategoryLowLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.STAT_Node;
 import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
-import org.processmining.plugins.inductiveVisualMiner.alignment.AlignmentComputer;
-import org.processmining.plugins.inductiveVisualMiner.alignment.AlignmentComputerImpl;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChain;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainImplNonBlocking;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataState;
-import org.processmining.plugins.inductiveVisualMiner.export.IvMExporter;
-import org.processmining.plugins.inductiveVisualMiner.helperClasses.decoration.IvMDecoratorDefault;
-import org.processmining.plugins.inductiveVisualMiner.helperClasses.decoration.IvMDecoratorI;
 
 public class GoalDrivenConfigurationDefault extends GoalDrivenConfigurationAbstract {
 
@@ -33,14 +25,6 @@ public class GoalDrivenConfigurationDefault extends GoalDrivenConfigurationAbstr
 		super(canceller, executor);
 	}
 
-
-
-	@Override
-	protected List<IvMExporter> createExporters() {
-		return new ArrayList<>(Arrays.asList(new IvMExporter[] { //
-				
-		}));
-	}
 
 	@Override
 	protected GoalDrivenPanel createPanel(ProMCanceller canceller) {
@@ -70,13 +54,8 @@ public class GoalDrivenConfigurationDefault extends GoalDrivenConfigurationAbstr
 		return chain;
 	}
 
-	protected AlignmentComputer createAlignmentComputer() {
-		return new AlignmentComputerImpl();
-	}
 
-	protected IvMDecoratorI createDecorator() {
-		return new IvMDecoratorDefault();
-	}
+
 
 	
 }

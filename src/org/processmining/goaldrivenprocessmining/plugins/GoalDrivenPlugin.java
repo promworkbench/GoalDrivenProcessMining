@@ -14,7 +14,6 @@ import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfigurat
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenController;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenLauncher;
 import org.processmining.plugins.InductiveMiner.efficienttree.UnknownTreeNodeException;
-import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.DfgMiner;
 
 public class GoalDrivenPlugin {
 
@@ -35,9 +34,6 @@ public class GoalDrivenPlugin {
 		}
 
 		XLog log = launcher.xLog.get();
-		if (log == null) {
-			throw new RuntimeException("The log has been removed by garbage collection.");
-		}
 
 		//initialise configuration and controller
 		GoalDrivenConfigurationDefault configuration = new GoalDrivenConfigurationDefault(canceller, context.getExecutor());
@@ -55,7 +51,6 @@ public class GoalDrivenPlugin {
 	@UITopiaVariant(affiliation = "RWTH Aachen", author = "Hieu Le", email = "hieu.le@rwth-aachen.de")
 	public GoalDrivenLauncher mineGuiProcessTree(PluginContext context, XLog xLog) {
 		GoalDrivenLauncher launcher = GoalDrivenLauncher.launcher(xLog);
-		launcher.setMiner(new DfgMiner());
 		return launcher;
 	}
 }
