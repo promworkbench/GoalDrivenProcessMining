@@ -32,7 +32,6 @@ public class LOW_UpdateCategoryLowLevelDFG<C> extends DataChainLinkComputationAb
 
 	public IvMObjectValues execute(Object configuration, IvMObjectValues inputs, IvMCanceller canceller)
 			throws Exception {
-		System.out.println("--- LOW_Cl03UpdateCategoryLowLevelDFG");
 		GoalDrivenDFG dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.low_level_log_skeleton));
 		//		dfg.addControlListener(new EdgeClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 		dfg.repaintNodeStrokeColor(

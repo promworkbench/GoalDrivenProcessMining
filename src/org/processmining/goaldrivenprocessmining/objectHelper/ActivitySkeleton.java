@@ -45,7 +45,7 @@ public class ActivitySkeleton implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		ActivitySkeleton other = (ActivitySkeleton) obj;
-		return Objects.equals(currentName, other.currentName);
+		return Objects.equals(originalName, other.originalName);
 	}
 
 	public String toString() {

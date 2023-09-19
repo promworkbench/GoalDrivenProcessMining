@@ -22,9 +22,6 @@ public class BorderNodeControl extends ControlAdapter{
 			Rectangle2D border = item.getBounds();
 			Point2D p = new Point2D.Double();
 			((Display) e.getComponent()).getAbsoluteCoordinate(e.getPoint(), p);
-			if (isOnBorder(i, p.getX(), p.getY())) {
-				System.out.println("sdfa");
-			}
 		}
 		
     } 

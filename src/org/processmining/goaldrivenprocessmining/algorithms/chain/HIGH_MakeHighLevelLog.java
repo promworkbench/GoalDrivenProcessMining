@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
-import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
@@ -37,7 +37,7 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 
 	public IvMObjectValues execute(Object configuration, IvMObjectValues inputs, IvMCanceller canceller)
 			throws Exception {
-		System.out.println("--- HIGH_Cl01MakeHighLevelLog");
+		System.out.println("--- HIGH_MakeHighLevelLog");
 		//		Config config = inputs.get(GoalDrivenObject.config);
 		UpdateConfig update = CONFIG_Update.currentUpdateConfig;
 		GDPMLogSkeleton gdpmLog = currentHighLogSkeleton == null ? inputs.get(GoalDrivenObject.full_log_skeleton)
@@ -59,28 +59,29 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 					switch (update.getUpdateAction()) {
 						case ADD :
 
-							GroupActObject newGroupActObject = (GroupActObject) update.getUpdateObject();
+							GroupSkeleton newGroupActObject = (GroupSkeleton) update.getUpdateObject();
 
-							Boolean isNewGroup = true;
-							for (GroupActObject group : CONFIG_Update.currentConfig.getListGroupActObjects()) {
-								if (group.getGroupName().equals(newGroupActObject.getGroupName())) {
-									isNewGroup = false;
-									break;
-								}
-							}
-							if (isNewGroup) {
-								gdpmLog = LogSkeletonUtils.replaceSetActivitiesInLog(gdpmLog,
-										newGroupActObject.getListAct(), newGroupActObject.getGroupName());
-							} else {
-								for (GroupActObject group : CONFIG_Update.currentConfig.getListGroupActObjects()) {
-									if (group.getGroupName().equals(newGroupActObject.getGroupName())) {
-										gdpmLog = LogSkeletonUtils.replaceSetActivitiesInLog(gdpmLog,
-												group.getListAct(), group.getGroupName());
-										break;
-									}
-								}
-
-							}
+							//							Boolean isNewGroup = true;
+							//							for (GroupSkeleton group : CONFIG_Update.currentConfig.getListGroupSkeletons()) {
+							//								if (group.getGroupName().equals(newGroupActObject.getGroupName())) {
+							//									isNewGroup = false;
+							//									break;
+							//								}
+							//							}
+							//							if (isNewGroup) {
+							//								gdpmLog = LogSkeletonUtils.replaceSetActivitiesInLog(gdpmLog,
+							//										newGroupActObject.getListAct(), newGroupActObject.getGroupName());
+							//							} else {
+							//								for (GroupSkeleton group : CONFIG_Update.currentConfig.getListGroupSkeletons()) {
+							//									if (group.getGroupName().equals(newGroupActObject.getGroupName())) {
+							//										gdpmLog = LogSkeletonUtils.replaceSetActivitiesInLog(gdpmLog,
+							//												group.getListAct(), group.getGroupName());
+							//										break;
+							//									}
+							//								}
+							//
+							//							}
+							gdpmLog = LogSkeletonUtils.replaceSetActivitiesInLog(gdpmLog, newGroupActObject);
 
 							break;
 						case REMOVE :
@@ -93,7 +94,8 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 
 							} else {
 								String groupName = (String) update.getUpdateObject();
-								gdpmLog = LogSkeletonUtils.ungroupGroupInLog(gdpmLog, groupName);
+								gdpmLog = LogSkeletonUtils.ungroupGroupInLog(gdpmLog,
+										gdpmLog.getLogSkeleton().getGroupConfig().get(groupName));
 							}
 
 							break;

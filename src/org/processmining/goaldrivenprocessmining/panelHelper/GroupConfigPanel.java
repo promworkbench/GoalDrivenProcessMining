@@ -17,7 +17,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenController;
-import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 
 public class GroupConfigPanel extends JPanel {
 	private final JTable groupTable;
@@ -54,7 +54,7 @@ public class GroupConfigPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				int selectedRow = groupTable.getSelectedRow();
-				GoalDrivenController.ungroupGroupConfigObject(((GroupActObject)tableModel.getValueAt(selectedRow, 0)).getGroupName());
+				GoalDrivenController.ungroupGroupConfigObject(((GroupSkeleton)tableModel.getValueAt(selectedRow, 0)).getGroupName());
 				displayPanel.removeAll();
 				revalidate();
 				repaint();
@@ -126,7 +126,7 @@ public class GroupConfigPanel extends JPanel {
 		displayPanel.removeAll();
 		removeGroupButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		displayPanel.add(removeGroupButton);
-		GroupActObject group = (GroupActObject) tableModel.getValueAt(selectedRow, 0);
+		GroupSkeleton group = (GroupSkeleton) tableModel.getValueAt(selectedRow, 0);
 		JLabel groupNameLabel = new JLabel("Group Name: " + group.getGroupName());
 		displayPanel.add(groupNameLabel);
 

@@ -26,18 +26,21 @@ import javax.swing.table.DefaultTableModel;
 import org.deckfour.xes.model.XLog;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.ProMCanceller;
+import org.processmining.goaldrivenprocessmining.algorithms.chain.CONFIG_Update;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GUI_DisplayGroup;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
-import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateAction;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateType;
 import org.processmining.goaldrivenprocessmining.objectHelper.ValueCategoryObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
 import org.processmining.goaldrivenprocessmining.panelHelper.GroupActConfig;
 import org.processmining.goaldrivenprocessmining.panelHelper.NewCategoryPanel;
 import org.processmining.goaldrivenprocessmining.panelHelper.PopupPanel;
@@ -50,6 +53,7 @@ import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.VisualM
 import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.DfgMiner;
 import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.Miner;
 
+import graph.GoalDrivenDFG;
 import graph.GraphConstants;
 import graph.utils.node.GraphNodeUtils;
 import prefuse.Visualization;
@@ -92,16 +96,40 @@ public class GoalDrivenController {
 	}
 
 	public static void addGroupConfigObject(String groupName) {
-		List<String> selectedNode = new ArrayList<>();
-		Visualization vis = panel.getHighDfgPanel().getVisualization();
-		List<VisualItem> allVisualItems = GraphNodeUtils.getAllNodes(vis);
-		for (VisualItem item : allVisualItems) {
+		List<String> selectedAct = new ArrayList<>();
+		List<GroupSkeleton> selectedGroup = new ArrayList<>();
+		Visualization visHigh = panel.getHighDfgPanel().getVisualization();
+		Visualization visLow = panel.getLowDfgPanel().getVisualization();
+		
+		List<VisualItem> allVisualItemsHigh = GraphNodeUtils.getAllNodes(visHigh);
+		for (VisualItem item : allVisualItemsHigh) {
 			if (item.getBoolean(GraphConstants.SELECT_FIELD)) {
-				selectedNode.add(item.getString(GraphConstants.LABEL_FIELD));
+				if (item.get(GraphConstants.NODE_TYPE_FIELD) == NodeType.ACT_NODE) {
+					selectedAct.add(item.getString(GraphConstants.LABEL_FIELD));
+				} else {
+					if (CONFIG_Update.currentConfig != null) {
+						Config updateConfig = CONFIG_Update.currentConfig;
+						String itemName = item.getString(GraphConstants.LABEL_FIELD);
+						for (GroupSkeleton groupSkeleton : updateConfig.getListGroupSkeletons()) {
+							if (groupSkeleton.getGroupName().equals(itemName)) {
+								selectedGroup.add(groupSkeleton);
+								break;
+							}
+						}
+					}
+				}
+				
 			}
 		}
-		GroupActObject selectedNodeObject = new GroupActObject(groupName, selectedNode);
-		UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.ADD, selectedNodeObject);
+		List<VisualItem> allVisualItemsLow = GraphNodeUtils.getAllNodes(visLow);
+		for (VisualItem item : allVisualItemsLow) {
+			if (item.getBoolean(GraphConstants.SELECT_FIELD)) {
+				selectedAct.add(item.getString(GraphConstants.LABEL_FIELD));
+			}
+		}
+		GroupSkeleton newGroupSkeleton = new GroupSkeleton(groupName, selectedAct, selectedGroup);
+		
+		UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.ADD, newGroupSkeleton);
 		chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
 
 	}
@@ -145,7 +173,12 @@ public class GoalDrivenController {
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				if (inputs.has(GoalDrivenObject.high_level_dfg)) {
-					panel.getHighDfgPanel().updateDFG(inputs.get(GoalDrivenObject.high_level_dfg));
+					panel.getContentLeftPanel().remove(panel.getHighDfgPanel());
+					panel.setHighDfgPanel(inputs.get(GoalDrivenObject.high_level_dfg));
+					panel.getHighDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
+					panel.getHighDfgPanel().setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
+//					panel.getHighDfgPanel().updateDFG(inputs.get(GoalDrivenObject.high_level_dfg));
+					panel.getContentLeftPanel().add(panel.getHighDfgPanel(), BorderLayout.CENTER);
 					panel.revalidate();
 					panel.repaint();
 				}
@@ -172,19 +205,40 @@ public class GoalDrivenController {
 			}
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				Boolean isLowClear = false;
 				if (inputs.has(GoalDrivenObject.low_level_dfg)) {
-					panel.getLowDfgPanel().updateDFG(inputs.get(GoalDrivenObject.low_level_dfg));
+					if (!inputs.get(GoalDrivenObject.low_level_dfg).getLog().getLogSkeleton().getLog().isEmpty()) {
+						panel.getContentRightPanel().remove(panel.getLowDfgPanel());
+						panel.setLowDfgPanel(inputs.get(GoalDrivenObject.low_level_dfg));
+						panel.getLowDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
+						panel.getLowDfgPanel().setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
+						panel.getContentRightPanel().add(panel.getLowDfgPanel(), BorderLayout.CENTER);
+						isLowClear = false;
+						
+					} else {
+						panel.getContentRightPanel().remove(panel.getLowDfgPanel());
+						GDPMLogSkeleton log = null;
+						panel.setLowDfgPanel(new GoalDrivenDFG(log));
+						panel.getLowDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
+						panel.getLowDfgPanel().setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
+						panel.getContentRightPanel().add(panel.getLowDfgPanel(), BorderLayout.CENTER);
+						panel.getLowDfgTitle().setText("Low-level DFG:");
+						isLowClear = true;
+					}
 					panel.revalidate();
 					panel.repaint();
 				}
-				if (inputs.has(GoalDrivenObject.selected_source_target_node)) {
-					HashMap<String, Object> passValues = inputs.get(GoalDrivenObject.selected_source_target_node);
-					String source = (String) passValues.get("source");
-					String target = (String) passValues.get("target");
-					panel.getLowDfgTitle().setText("Low-level DFG: " + source + " --> " + target);
-					panel.revalidate();
-					panel.repaint();
+				if (!isLowClear) {
+					if (inputs.has(GoalDrivenObject.selected_source_target_node)) {
+						HashMap<String, Object> passValues = inputs.get(GoalDrivenObject.selected_source_target_node);
+						String source = (String) passValues.get("source");
+						String target = (String) passValues.get("target");
+						panel.getLowDfgTitle().setText("Low-level DFG: " + source + " --> " + target);
+						panel.revalidate();
+						panel.repaint();
+					}
 				}
+				
 			}
 
 			public void invalidate(GoalDrivenPanel panel) {
@@ -347,7 +401,10 @@ public class GoalDrivenController {
 				updateMap.put("High", attInclude);
 				updateMap.put("Low", attExclude);
 				UpdateConfig updateConfig = new UpdateConfig(UpdateType.SELECTED_ACT, updateMap);
+				
+				// update
 				chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
+//				panel.getLowDfgTitle().setText("");
 
 			}
 		});
@@ -618,9 +675,9 @@ public class GoalDrivenController {
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				// update for config in control panel
 				Config config = inputs.get(GoalDrivenObject.config);
-				List<GroupActObject> allGroups = config.getListGroupActObjects();
+				List<GroupSkeleton> allGroups = config.getListGroupSkeletons();
 				panel.getConfigCards().getGroupConfigPanel().getTableModel().setRowCount(0);
-				for (GroupActObject groupActObject : allGroups) {
+				for (GroupSkeleton groupActObject : allGroups) {
 					panel.getConfigCards().getGroupConfigPanel().getTableModel()
 							.addRow(new Object[] { groupActObject });
 				}

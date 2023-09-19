@@ -3,13 +3,10 @@ package graph;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
@@ -22,7 +19,6 @@ import org.processmining.goaldrivenprocessmining.objectHelper.TraceSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.ValueCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
-import org.processmining.plugins.inductiveVisualMiner.chain.DataChain;
 
 import graph.action.CustomColorNodeFillAction;
 import graph.action.CustomEdgeStrokeWidthAction;
@@ -61,7 +57,6 @@ import prefuse.visual.VisualItem;
 
 public class GoalDrivenDFG extends Display {
 	private GDPMLogSkeleton log;
-	private String eventClassifier;
 	private int beginNodeRow;
 	private int endNodeRow;
 	private Graph graph;
@@ -87,8 +82,6 @@ public class GoalDrivenDFG extends Display {
 	private ColorAction arrowFillColorAction;
 	private ColorAction textColorAction;
 
-	private DataChain<GoalDrivenConfiguration> chain;
-
 	public GoalDrivenDFG(GDPMLogSkeleton gdpmLogSkeleton) {
 		super(new Visualization());
 		this.log = gdpmLogSkeleton;
@@ -106,7 +99,7 @@ public class GoalDrivenDFG extends Display {
 		repaint.add(new RepaintAction());
 		m_vis.putAction("repaint", repaint);
 
-		if (this.log != null) {
+		if (this.log != null && !this.log.getLogSkeleton().getLog().isEmpty()) {
 			this.frequencyEdge = gdpmLogSkeleton.getStatObject().getMapStatEdge();
 			this.frequencyNode = gdpmLogSkeleton.getStatObject().getMapStatNode();
 			this.graph = this.makeGraph();
@@ -119,96 +112,78 @@ public class GoalDrivenDFG extends Display {
 			this.configDefaultGraph();
 			// center graph
 			this.centerGraph();
+
 		}
 
 	}
 
 	private void centerGraph() {
-		// Get the bounds of the graph items
-		//		Rectangle2D bounds = this.getParent().getBounds();
-
-		// Calculate the translation values to center the graph
-		//		double tx = (getWidth() - bounds.getWidth()) / 2 - bounds.getMinX();
-		//		double ty = (getHeight() - bounds.getHeight()) / 2 - bounds.getMinY();
-
-		// Apply the translation to all visual items
-		//		List<VisualItem> allVisualItems = GraphNodeUtils.getAllNodes(this.getVisualization());
-		//		for (VisualItem item: allVisualItems) {
-		//			double x = item.getX();
-		//			double y = item.getY();
-		//			item.setStartX(x);
-		//			item.setStartY(y);
-		//			item.setX(x + 10);
-		//			item.setY(y + 100);
-		//			item.setEndX(x + 10);
-		//			item.setEndY(y + 100);
-		//		}
-		Rectangle2D bounds = getVisualization().getBounds("graph");
-		double tx = (getWidth() - bounds.getWidth()) / 2.0 - bounds.getMinX();
-		double ty = (getHeight() - bounds.getHeight()) / 2.0 - bounds.getMinY();
-		this.pan(tx, ty);
+		double zoomWidth = this.getBounds().getWidth() / this.getVisualization().getBounds("graph").getWidth();
+		double zoomHeight = this.getBounds().getHeight() / this.getVisualization().getBounds("graph").getHeight();
+		double zoomRatio = zoomWidth < zoomHeight ? zoomWidth : zoomHeight;
+		
+		double x = this.getVisualization().getBounds("graph").getCenterX();
+		double y = this.getVisualization().getBounds("graph").getCenterY();
+		this.animatePanAndZoomTo(new Point2D.Double(x, y), zoomRatio, 1000);
 		this.revalidate();
 		this.repaint();
 	}
-
-	public static void main(String[] args) throws Exception {
-		//		File file = new File("C:\\D\\data\\receipt.xes");
-		//		File file2 = new File("C:\\D\\data\\my_log.xes");
-		//
-		//		// Create an input stream for the XES file
-		//		InputStream is = new FileInputStream(file);
-		//
-		//		// Create a parser for XES files
-		//		XesXmlParser parser = new XesXmlParser();
-		//
-		//		XLog log = parser.parse(is).get(0);
-		//
-		//		// Create an input stream for the XES file
-		//		InputStream is2 = new FileInputStream(file2);
-		//
-		//		// Create a parser for XES files
-		//		XesXmlParser parser2 = new XesXmlParser();
-		//
-		//		XLog log2 = parser2.parse(is2).get(0);
-		//
-		//		GoalDrivenDFG ex = new GoalDrivenDFG(null, new IndirectedEdgeCarrierObject(), new FrequencyEdgeObject(),
-		//				new FrequencyNodeObject());
-		//		GoalDrivenDFG ex2 = new GoalDrivenDFG(log, new IndirectedEdgeCarrierObject(), new FrequencyEdgeObject(),
-		//				new FrequencyNodeObject());
-		//		GoalDrivenDFG ex3 = new GoalDrivenDFG(log2, new IndirectedEdgeCarrierObject(), new FrequencyEdgeObject(),
-		//				new FrequencyNodeObject());
-		//		ex.updateDFG(ex3);
-		//		ex.updateDFG(ex3);
-		//		Action conditionalColorAction = new ColorAction(GraphConstants.NODE_GROUP, VisualItem.STROKECOLOR) {
-		//			public int getColor(VisualItem item) {
-		//				return ColorLib.color(Color.RED);
-		//			}
-		//		};
-		//		ex.getVisualization().removeAction("nodeStrokeColor");
-		//		ex.getVisualization().putAction("nodeStrokeColor", conditionalColorAction);
-		//		ex.getVisualization().run("nodeStrokeColor");
-		//
-		//		ex.validate();
-		//		ex.repaint();
-
-		//		Graph g2 = ex2.getGraph();
-		//		ex.getVisualization().removeGroup("graph");
-		//		ex.getVisualization().addGraph("graph", g2);
-		//		ex.setGraph(g2);
-		//		ex.configGraph();
-		//		ex.getVisualization().run("repaint");
-		//		ex.getVisualization().repaint();
-		//
-		//		JFrame frame = new JFrame("prefuse example");
-		//		JPanel p = new JPanel();
-		//		p.setBackground(Color.BLACK);
-		//		p.add(ex3);
-		//		ex3.setBackground(Color.BLACK);
-		//		frame.getContentPane().add(p);
-		//		frame.pack(); // layout components in window
-		//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//		frame.setVisible(true); // show the window
-	}
+	
+//	public static void main(String[] args) throws Exception {
+//				File file = new File("C:\\D\\data\\receipt.xes");
+//				File file2 = new File("C:\\D\\data\\complaint-handling.xes");
+//		
+//				// Create an input stream for the XES file
+//				InputStream is = new FileInputStream(file);
+//		
+//				// Create a parser for XES files
+//				XesXmlParser parser = new XesXmlParser();
+//		
+//				XLog log = parser.parse(is).get(0);
+//		
+//				// Create an input stream for the XES file
+//				InputStream is2 = new FileInputStream(file2);
+//		
+//				// Create a parser for XES files
+//				XesXmlParser parser2 = new XesXmlParser();
+//		
+//				XLog log2 = parser2.parse(is2).get(0);
+//		
+//				GoalDrivenDFG ex = new GoalDrivenDFG(null);
+//				GoalDrivenDFG ex2 = new GoalDrivenDFG(new GDPMLogSkeleton(log));
+//				GoalDrivenDFG ex3 = new GoalDrivenDFG(new GDPMLogSkeleton(log2));
+//				
+//				
+//			
+//				System.out.println(ex.getVisualization().getBounds("graph"));
+//				System.out.println(ex.getBounds());
+//				
+//
+//				
+//				double zoomWidth = ex.getBounds().getWidth() / ex.getVisualization().getBounds("graph").getWidth();
+//				double zoomHeight = ex.getBounds().getHeight() / ex.getVisualization().getBounds("graph").getHeight();
+//				double zoomRatio = zoomWidth < zoomHeight ? zoomWidth : zoomHeight;
+//				
+//				
+//				
+//				double x = 300;
+//				double y = -450;
+//				System.out.println(zoomRatio);
+//				ex.animatePanAndZoomTo(new Point2D.Double(x, y), zoomRatio, 1000);
+//				
+//				ex.validate();
+//				ex.repaint();
+//
+//				JFrame frame = new JFrame("prefuse example");
+//				JPanel p = new JPanel();
+//				p.setBackground(Color.BLACK);
+//				p.add(ex);
+//				ex.setBackground(Color.BLACK);
+//				frame.getContentPane().add(p);
+//				frame.pack(); // layout components in window
+//				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//				frame.setVisible(true); // show the window
+//	}
 
 	public Graph makeGraph() {
 
@@ -219,11 +194,16 @@ public class GoalDrivenDFG extends Display {
 		Table edgeTable = this.initEdgeTable();
 		// init graph
 		Graph g = new Graph(nodeTable, edgeTable, true);
-		// add begin and end node;
-		this.addBeginToTable(g);
-		// add activities in log to node table and add edges
-		this.addActToTable(g);
-		return g;
+		if (!this.log.getLogSkeleton().getLog().isEmpty()) {
+			// add begin and end node;
+			this.addBeginToTable(g);
+			// add activities in log to node table and add edges
+			this.addActToTable(g);
+			return g;
+		} else {
+			return new Graph();
+		}
+
 	}
 
 	public void configDefaultGraph() {
@@ -494,26 +474,31 @@ public class GoalDrivenDFG extends Display {
 
 	private void addActToTable(Graph g) {
 		List<String> listActName = new ArrayList<>();
-		for (TraceSkeleton traceSkeleton: this.log.getLogSkeleton().getLog()) {
-			for (EventSkeleton eventSkeleton: traceSkeleton.getTrace()) {
+		for (TraceSkeleton traceSkeleton : this.log.getLogSkeleton().getLog()) {
+			for (EventSkeleton eventSkeleton : traceSkeleton.getTrace()) {
 				if (!listActName.contains(eventSkeleton.getActivity().getCurrentName())) {
 					listActName.add(eventSkeleton.getActivity().getCurrentName());
 				}
 			}
 		}
-		
+
 		EdgeHashTable edgeHashTable = this.log.getLogSkeleton().getEdgeHashTable();
-		
+
 		// add node
-		for (String act: listActName) {
+		for (String act : listActName) {
 			if (!this.log.getLogSkeleton().isInGroup(act)) {
 				Node node1 = null;
 				node1 = g.addNode();
-				this.configNode(node1, act, log.getMapNodeType());
+				if (this.log.getLogSkeleton().getGroupConfig().containsKey(act)) {
+					this.configNode(node1, act, true);
+				} else {
+					this.configNode(node1, act, false);
+				}
+				
 			}
 		}
 		// add edge
-		for (EdgeObject edge: edgeHashTable.getEdgeTable().keySet()) {
+		for (EdgeObject edge : edgeHashTable.getEdgeTable().keySet()) {
 			String source = edge.getNode1().getCurrentName();
 			String target = edge.getNode2().getCurrentName();
 			Node node1;
@@ -535,7 +520,7 @@ public class GoalDrivenDFG extends Display {
 			Edge e = g.addEdge(node1, node2);
 			this.configEdge(e, edge);
 		}
-		
+
 	}
 
 	private Node getNodeByLabel(Graph g, String label) {
@@ -570,12 +555,12 @@ public class GoalDrivenDFG extends Display {
 		e.setString(GraphConstants.LABEL_FIELD, "(" + edgeObject.getNode1() + " ," + edgeObject.getNode2() + ")");
 	}
 
-	private void configNode(Node node, String label, Map<String, NodeType> mapNodeType) {
+	private void configNode(Node node, String label, Boolean isGroup) {
 		node.setString(GraphConstants.LABEL_FIELD, label);
 		node.setBoolean(GraphConstants.BEGIN_FIELD, false);
 		node.setBoolean(GraphConstants.END_FIELD, false);
-		if (mapNodeType.containsKey(label)) {
-			node.set(GraphConstants.NODE_TYPE_FIELD, mapNodeType.get(label));
+		if (isGroup) {
+			node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.GROUP_NODE);
 		} else {
 			node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
 		}
@@ -602,47 +587,6 @@ public class GoalDrivenDFG extends Display {
 		return edgeData;
 	}
 
-	public void updateDFG(GoalDrivenDFG dfg) {
-		this.log = dfg.getLog();
-		this.getVisualization().removeGroup("graph");
-		this.getVisualization().addGraph("graph", dfg.getGraph());
-		this.setGraph(dfg.getGraph());
-		// node stroke color
-		if (dfg.getNodeStrokeColorAction() != null) {
-			this.setNodeStrokeColorAction(dfg.getNodeStrokeColorAction());
-			m_vis.putAction(GraphConstants.NODE_STROKE_COLOR_ACTION, this.getNodeStrokeColorAction());
-			m_vis.run(GraphConstants.NODE_STROKE_COLOR_ACTION);
-		} else {
-			this.setDefaultNodeStrokeColor();
-		}
-		// node fill color
-		if (dfg.getNodeFillColorAction() != null) {
-			this.setNodeFillColorAction(dfg.getNodeFillColorAction());
-			m_vis.putAction(GraphConstants.NODE_FILL_COLOR_ACTION, this.getNodeFillColorAction());
-			m_vis.run(GraphConstants.NODE_FILL_COLOR_ACTION);
-		} else {
-			this.setDefaultNodeFillColor(dfg.getLog().getStatObject().getMapStatNode());
-		}
-
-		this.setDefaultArrowFillColor();
-		this.setDefaultEdgeStrokeColor();
-		this.setDefaultEdgeStrokeWidth(dfg.getLog().getStatObject().getMapStatEdge());
-		this.setDefaultNodeStrokeWidth();
-		this.setDefaultTextColor();
-		this.setDefaultNodeSize();
-		this.setDefaultRenderer();
-		this.resetControl();
-		this.getVisualization().removeAction(GraphConstants.LAYOUT_ACTION);
-		this.setDefaultLayout();
-		// edge click control
-		if (dfg.getEdgeClickControl() != null) {
-			this.setEdgeClickControl(dfg.getEdgeClickControl());
-			this.addControlListener(dfg.getEdgeClickControl());
-		}
-		this.centerGraph();
-		this.revalidate();
-		this.repaint();
-	}
 
 	public HashMap<String, Color> getNodeStrokeColorFromMapActCat(MapActivityCategoryObject mapActCategory,
 			CategoryObject selectedCategory) {

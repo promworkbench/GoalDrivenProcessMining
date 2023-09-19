@@ -17,7 +17,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenController;
-import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 
 public class PopupContentPanel extends JPanel {
 	private JPanel mainPanel;
@@ -224,7 +224,7 @@ public class PopupContentPanel extends JPanel {
 	private void updateButtonAndWarning() {
 		String enteredGroupName = this.groupPanel.getNewGroupNameTextField().getText();
 		Boolean isExisted = false;
-		for (GroupActObject groupActObject : PopupPanel.groupActObjects) {
+		for (GroupSkeleton groupActObject : PopupPanel.groupActObjects) {
 			if (groupActObject.getGroupName().equals(enteredGroupName)) {
 				this.groupPanel.getWarningLabel().setVisible(true);
 				doneButton.setEnabled(false);

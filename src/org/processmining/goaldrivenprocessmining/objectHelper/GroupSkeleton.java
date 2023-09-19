@@ -3,13 +3,17 @@ package org.processmining.goaldrivenprocessmining.objectHelper;
 import java.util.List;
 import java.util.Objects;
 
-public class GroupActObject {
+public class GroupSkeleton {
 	private String groupName;
 	private List<String> listAct;
+	private List<GroupSkeleton> listGroup;
 
-	public GroupActObject(String groupName, List<String> listNodeLabel) {
+	
+
+	public GroupSkeleton(String groupName, List<String> listAct, List<GroupSkeleton> listGroup) {
 		this.groupName = groupName;
-		this.listAct = listNodeLabel;
+		this.listAct = listAct;
+		this.listGroup = listGroup;
 	}
 
 	public String getGroupName() {
@@ -28,6 +32,14 @@ public class GroupActObject {
 		this.listAct = listNodeLabel;
 	}
 
+	public List<GroupSkeleton> getListGroup() {
+		return listGroup;
+	}
+
+	public void setListGroup(List<GroupSkeleton> listGroup) {
+		this.listGroup = listGroup;
+	}
+
 	public int hashCode() {
 		return Objects.hash(groupName, listAct);
 	}
@@ -39,7 +51,7 @@ public class GroupActObject {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		GroupActObject other = (GroupActObject) obj;
+		GroupSkeleton other = (GroupSkeleton) obj;
 		return Objects.equals(groupName, other.groupName) && Objects.equals(listAct, other.listAct);
 	}
 

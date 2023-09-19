@@ -130,14 +130,9 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 			// create the arrow head shape
 			AffineTransform at;
 			if (item1 == item2) {
-				//				Point2D fakeStart = new Point2D.Double(end.getX() + 20,
-				//						end.getY() + item1.getBounds().getHeight() / 2 + 10);
-				//				Point2D fakeEnd = new Point2D.Double(end.getX(), end.getY() + item1.getBounds().getHeight() / 2);
 				Point2D fakeStart = new Point2D.Double(493.7596435546875, 419.14544677734375);
 				Point2D fakeEnd = new Point2D.Double(473.7596435546875, 409.14544677734375);
 
-//				System.out.println("start: " + fakeStart);
-//				System.out.println("end: " + fakeEnd);
 				at = getArrowTrans(fakeStart, fakeEnd, m_curWidth);
 			} else {
 				at = getArrowTrans(start, end, m_curWidth);

@@ -9,7 +9,7 @@ public class LogSkeleton implements Serializable {
 	private ActivityHashTable activityHashTable;
 	private EdgeHashTable edgeHashTable;
 	private List<TraceSkeleton> log;
-	private HashMap<String, List<String>> groupConfig;
+	private HashMap<String, GroupSkeleton> groupConfig;
 	private List<EdgeObject> listIndirectedEdges;
 
 	public LogSkeleton() {
@@ -19,26 +19,32 @@ public class LogSkeleton implements Serializable {
 		this.edgeHashTable = new EdgeHashTable();
 	}
 
-	public void addGroup(String groupName, List<String> listActivities) {
-		List<String> newListActivies = new ArrayList<>();
-		for (String act : listActivities) {
-			if (this.groupConfig.keySet().contains(act)) {
-				newListActivies.addAll(this.groupConfig.get(act));
-				this.groupConfig.remove(act);
-			} else {
-				newListActivies.add(act);
-			}
+	public void addGroup(GroupSkeleton groupSkeleton) {
+		if (this.groupConfig.keySet().contains(groupSkeleton.getGroupName())) {
+			this.groupConfig.replace(groupSkeleton.getGroupName(), groupSkeleton);
+		} else {
+			this.groupConfig.put(groupSkeleton.getGroupName(), groupSkeleton);
 		}
-		this.groupConfig.put(groupName, newListActivies);
 	}
 
 	public Boolean isInGroup(String act) {
 		for (String key : this.groupConfig.keySet()) {
-			if ( this.groupConfig.get(key).contains(act)) {
+			if (this.groupConfig.get(key).getListAct().contains(act)) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	public List<String> getAllActivitiesInGroup(GroupSkeleton groupSkeleton) {
+		List<String> result = new ArrayList<>();
+		result.addAll(groupSkeleton.getListAct());
+		
+		for (GroupSkeleton group: groupSkeleton.getListGroup()) {
+			result.addAll(getAllActivitiesInGroup(group));
+		}
+		
+		return result;
 	}
 
 	public ActivityHashTable getActivityHashTable() {
@@ -65,11 +71,11 @@ public class LogSkeleton implements Serializable {
 		this.edgeHashTable = edgeHashTable;
 	}
 
-	public HashMap<String, List<String>> getGroupConfig() {
+	public HashMap<String, GroupSkeleton> getGroupConfig() {
 		return groupConfig;
 	}
 
-	public void setGroupConfig(HashMap<String, List<String>> groupConfig) {
+	public void setGroupConfig(HashMap<String, GroupSkeleton> groupConfig) {
 		this.groupConfig = groupConfig;
 	}
 
@@ -78,5 +84,4 @@ public class LogSkeleton implements Serializable {
 				+ log + ", groupConfig=" + groupConfig + "]";
 	}
 
-	
 }

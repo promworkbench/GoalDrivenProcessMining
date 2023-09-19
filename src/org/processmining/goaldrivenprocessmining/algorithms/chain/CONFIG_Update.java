@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
-import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
@@ -54,9 +54,9 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 					switch (update.getUpdateAction()) {
 						case ADD :
 
-							GroupActObject newGroupActObject = (GroupActObject) update.getUpdateObject();
+							GroupSkeleton newGroupActObject = (GroupSkeleton) update.getUpdateObject();
 							Boolean isNewGroup = true;
-							for (GroupActObject group : updatedConfig.getListGroupActObjects()) {
+							for (GroupSkeleton group : updatedConfig.getListGroupSkeletons()) {
 								if (group.getGroupName().equals(newGroupActObject.getGroupName())) {
 									isNewGroup = false;
 									break;
@@ -65,9 +65,10 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 							if (isNewGroup) {
 								updatedConfig.addGroup(newGroupActObject);
 							} else {
-								for (GroupActObject group : updatedConfig.getListGroupActObjects()) {
+								for (GroupSkeleton group : updatedConfig.getListGroupSkeletons()) {
 									if (group.getGroupName().equals(newGroupActObject.getGroupName())) {
 										group.getListAct().addAll(newGroupActObject.getListAct());
+										group.getListGroup().addAll(newGroupActObject.getListGroup());
 										break;
 									}
 								}
@@ -78,7 +79,7 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 							Class<?> objClass = update.getUpdateObject().getClass();
 							if (objClass.isArray()) {
 								String[] array = (String[]) update.getUpdateObject();
-								for (GroupActObject group : updatedConfig.getListGroupActObjects()) {
+								for (GroupSkeleton group : updatedConfig.getListGroupSkeletons()) {
 									if (group.getGroupName().equals(array[0])) {
 										group.getListAct().remove(array[1]);
 									}
@@ -86,13 +87,13 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 
 							} else {
 								String groupName = (String) update.getUpdateObject();
-								List<GroupActObject> newGroupActObjects = new ArrayList<>();
-								for (GroupActObject group : updatedConfig.getListGroupActObjects()) {
+								List<GroupSkeleton> newGroupActObjects = new ArrayList<>();
+								for (GroupSkeleton group : updatedConfig.getListGroupSkeletons()) {
 									if (!group.getGroupName().equals(groupName)) {
 										newGroupActObjects.add(group);
 									}
 								}
-								updatedConfig.setListGroupActObjects(newGroupActObjects);
+								updatedConfig.setListGroupSkeletons(newGroupActObjects);
 							}
 							break;
 					}

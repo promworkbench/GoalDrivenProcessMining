@@ -17,7 +17,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
-import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 
 public class PopupGroupPanel extends JPanel {
 	private JPanel lowerPanel;
@@ -30,7 +30,7 @@ public class PopupGroupPanel extends JPanel {
 	private JLabel warningLabel;
 	
 	// add to group panel
-	private JList<GroupActObject> groupList;
+	private JList<GroupSkeleton> groupList;
 	// group button
 	private JRadioButton addToGroupRadioButton;
 	private JRadioButton createGroupRadioButton;
@@ -87,8 +87,8 @@ public class PopupGroupPanel extends JPanel {
 
 			// Simulating the list of groups from the backend
 
-			DefaultListModel<GroupActObject> listModel = new DefaultListModel<>();
-			for (GroupActObject group : PopupPanel.groupActObjects) {
+			DefaultListModel<GroupSkeleton> listModel = new DefaultListModel<>();
+			for (GroupSkeleton group : PopupPanel.groupActObjects) {
 				listModel.addElement(group);
 			}
 
@@ -155,11 +155,11 @@ public class PopupGroupPanel extends JPanel {
 		this.warningLabel = warningLabel;
 	}
 
-	public JList<GroupActObject> getGroupList() {
+	public JList<GroupSkeleton> getGroupList() {
 		return groupList;
 	}
 
-	public void setGroupList(JList<GroupActObject> groupList) {
+	public void setGroupList(JList<GroupSkeleton> groupList) {
 		this.groupList = groupList;
 	}
 	

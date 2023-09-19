@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Config {
-	private List<GroupActObject> listGroupActObjects;
+	private List<GroupSkeleton> listGroupSkeletons;
 	private MapActivityCategoryObject mapActivityCategoryObject;
 	private double highActThreshold;
 	private double lowActThreshold;
@@ -13,7 +13,7 @@ public class Config {
 	private String[] unselectedActs;
 
 	public Config() {
-		this.listGroupActObjects = new ArrayList<GroupActObject>();
+		this.listGroupSkeletons = new ArrayList<GroupSkeleton>();
 		this.mapActivityCategoryObject = new MapActivityCategoryObject();
 		this.highActThreshold = 1d;
 		this.lowActThreshold = 1d;
@@ -26,29 +26,29 @@ public class Config {
 	
 	// Group action
 	
-	public void removeGroup(List<GroupActObject> groupActObjects) {
-		for (GroupActObject groupActObject : groupActObjects) {
+	public void removeGroup(List<GroupSkeleton> groupActObjects) {
+		for (GroupSkeleton groupActObject : groupActObjects) {
 			this.removeGroup(groupActObject);
 		}
 	}
-	public void removeGroup(GroupActObject groupActObject) {
-		if (this.listGroupActObjects.contains(groupActObject)) {
-			this.listGroupActObjects.remove(groupActObject);
+	public void removeGroup(GroupSkeleton groupActObject) {
+		if (this.listGroupSkeletons.contains(groupActObject)) {
+			this.listGroupSkeletons.remove(groupActObject);
 		}
 	}
 
-	public void addGroup(GroupActObject groupActObject) {
-		if (!this.listGroupActObjects.contains(groupActObject)) {
-			this.listGroupActObjects.add(groupActObject);
+	public void addGroup(GroupSkeleton groupActObject) {
+		if (!this.listGroupSkeletons.contains(groupActObject)) {
+			this.listGroupSkeletons.add(groupActObject);
 		}
 	}
 
-	public List<GroupActObject> getListGroupActObjects() {
-		return listGroupActObjects;
+	public List<GroupSkeleton> getListGroupSkeletons() {
+		return listGroupSkeletons;
 	}
 
-	public void setListGroupActObjects(List<GroupActObject> listGroupActObjects) {
-		this.listGroupActObjects = listGroupActObjects;
+	public void setListGroupSkeletons(List<GroupSkeleton> listGroupSkeletons) {
+		this.listGroupSkeletons = listGroupSkeletons;
 	}
 
 	public MapActivityCategoryObject getMapActivityCategoryObject() {
@@ -92,7 +92,7 @@ public class Config {
 	}
 
 	public String toString() {
-		return "LogConfig [listGroupActObjects=" + listGroupActObjects + ", mapActivityCategoryObject="
+		return "LogConfig [listGroupActObjects=" + listGroupSkeletons + ", mapActivityCategoryObject="
 				+ mapActivityCategoryObject + ", highActThreshold=" + highActThreshold + ", lowActThreshold="
 				+ lowActThreshold + ", selectedActs=" + Arrays.toString(selectedActs) + ", unselectedActs="
 				+ Arrays.toString(unselectedActs) + "]";

@@ -10,11 +10,11 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
-import org.processmining.goaldrivenprocessmining.objectHelper.GroupActObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 
 public class PopupPanel {
 
-	public static List<GroupActObject> groupActObjects = new ArrayList<>();
+	public static List<GroupSkeleton> groupActObjects = new ArrayList<>();
 
 	//	public static void main(String[] args) {
 	//		SwingUtilities.invokeLater(() -> {

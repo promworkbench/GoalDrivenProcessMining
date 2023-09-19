@@ -35,7 +35,7 @@ public class HIGH_MakeHighLevelDFG<C> extends DataChainLinkComputationAbstract<C
 
 	@Override
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
-		System.out.println("--- HIGH_Cl02MakeHighLevelDFG");
+		System.out.println("--- HIGH_MakeHighLevelDFG");
 		GDPMLogSkeleton logSkeleton = inputs.get(GoalDrivenObject.high_level_log_skeleton);
 		
 		GoalDrivenDFG dfg = new GoalDrivenDFG(LogSkeletonUtils.getDisplayedLogSkeleton(logSkeleton));

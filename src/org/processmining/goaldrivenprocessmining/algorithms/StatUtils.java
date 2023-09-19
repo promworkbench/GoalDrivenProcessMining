@@ -12,6 +12,7 @@ import java.util.Map;
 import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.LogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapStatObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatEdgeObject;
@@ -36,8 +37,8 @@ public class StatUtils {
 			}
 			Boolean isGroupNode = false;
 			String groupName = "";
-			for (Map.Entry<String, List<String>> entry2 : logSkeleton.getGroupConfig().entrySet()) {
-				if (entry2.getValue().contains(act)) {
+			for (Map.Entry<String, GroupSkeleton> entry2 : logSkeleton.getGroupConfig().entrySet()) {
+				if (entry2.getValue().getListAct().contains(act)) {
 					isGroupNode = true;
 					groupName = entry2.getKey();
 					if (mapGroupNodeTotalOccurence.keySet().contains(groupName)) {

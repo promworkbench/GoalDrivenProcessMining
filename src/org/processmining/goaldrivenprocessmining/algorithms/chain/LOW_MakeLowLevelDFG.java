@@ -24,7 +24,7 @@ public class LOW_MakeLowLevelDFG<C> extends DataChainLinkComputationAbstract<C> 
 
 	@Override
 	public IvMObject<?>[] createInputObjects() {
-		return new IvMObject<?>[] { GoalDrivenObject.low_level_log_skeleton, };
+		return new IvMObject<?>[] { GoalDrivenObject.low_level_log_skeleton };
 	}
 
 	@Override
@@ -34,7 +34,7 @@ public class LOW_MakeLowLevelDFG<C> extends DataChainLinkComputationAbstract<C> 
 
 	@Override
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
-		System.out.println("--- LOW_Cl02MakeLowLevelDFG");
+		System.out.println("--- LOW_MakeLowLevelDFG");
 		GoalDrivenDFG dfg = new GoalDrivenDFG(
 				LogSkeletonUtils.getDisplayedLogSkeleton(inputs.get(GoalDrivenObject.low_level_log_skeleton)));
 		dfg.addControlListener(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));

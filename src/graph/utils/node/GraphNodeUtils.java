@@ -14,12 +14,15 @@ public class GraphNodeUtils {
 
 	public static List<VisualItem> getAllNodes(Visualization vis) {
 		List<VisualItem> res = new ArrayList<>();
-		Iterator<Node> nodeIter = ((Graph) vis.getGroup("graph")).nodes();
-		while (nodeIter.hasNext()) {
-			Node node = nodeIter.next();
-			VisualItem visualItem = vis.getVisualItem("graph.nodes", node);
-			res.add(visualItem);
+		if (vis.getGroup("graph") != null) {
+			Iterator<Node> nodeIter = ((Graph) vis.getGroup("graph")).nodes();
+			while (nodeIter.hasNext()) {
+				Node node = nodeIter.next();
+				VisualItem visualItem = vis.getVisualItem("graph.nodes", node);
+				res.add(visualItem);
+			}
 		}
+
 		return res;
 
 	}

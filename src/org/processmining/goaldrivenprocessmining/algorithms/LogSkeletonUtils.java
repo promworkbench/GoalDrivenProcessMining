@@ -23,6 +23,7 @@ import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.EventSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.LogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.TraceSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper._GDPMLog;
@@ -98,7 +99,6 @@ public class LogSkeletonUtils {
 		newLogSkeleton.setActivityHashTable(LogSkeletonUtils.getActivityHashTable(newLogSkeleton));
 		newLogSkeleton.setGroupConfig(logSkeleton.getGroupConfig());
 		newGdpmLog.setLogSkeleton(newLogSkeleton);
-		newGdpmLog.setMapNodeType(gdpmLog.getMapNodeType());
 		newGdpmLog.setStatObject(StatUtils.getStat(newLogSkeleton));
 		return newGdpmLog;
 	}
@@ -108,8 +108,6 @@ public class LogSkeletonUtils {
 		GDPMLogSkeleton newGdpmLog = new GDPMLogSkeleton();
 		// block activities
 		Map<Integer, List<Integer>> blockedActivitiesPos = new HashMap<Integer, List<Integer>>();
-		// set same map node type
-		newGdpmLog.setMapNodeType(gdpmLog.getMapNodeType());
 		// set same group
 		newGdpmLog.getLogSkeleton().setGroupConfig(gdpmLog.getLogSkeleton().getGroupConfig());
 		LogSkeleton logSkeleton = gdpmLog.getLogSkeleton();
@@ -176,6 +174,10 @@ public class LogSkeletonUtils {
 			}
 		}
 		newGdpmLog.setLogSkeleton(newGdpmLog.getLogSkeleton());
+		newGdpmLog.getLogSkeleton()
+				.setActivityHashTable(LogSkeletonUtils.getActivityHashTable(newGdpmLog.getLogSkeleton()));
+		newGdpmLog.getLogSkeleton().setEdgeHashTable(
+				LogSkeletonUtils.getEdgeHashTableForDisplayedLogSkeleton(newGdpmLog.getLogSkeleton()));
 		newGdpmLog.setStatObject(StatUtils.getStat(newGdpmLog.getLogSkeleton()));
 
 		return newGdpmLog;
@@ -194,28 +196,6 @@ public class LogSkeletonUtils {
 		LogSkeleton logSkeleton = gdpmLog.getLogSkeleton();
 		logSkeleton = LogSkeletonUtils.changeLogSkeletonWithUnselection(logSkeleton, Arrays.asList(activities));
 		gdpmLog.setLogSkeleton(logSkeleton);
-
-		//		for (String act : activities) {
-		//			if (logSkeleton.getActivityHashTable().getActivityTable().keySet().contains(act)) {
-		//				Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable().getActivityPositions(act);
-		//				listIndirectedEdges = LogSkeletonUtils.getListIndirectedEdgesFromMap(allPos, logSkeleton);
-		//			} else if (logSkeleton.getGroupConfig().keySet().contains(act)) {
-		//				for (String selectedAct : logSkeleton.getGroupConfig().get(act)) {
-		//					Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable()
-		//							.getActivityPositions(selectedAct);
-		//					List<EdgeObject> listEdges = LogSkeletonUtils.getListIndirectedEdgesFromMap(allPos, logSkeleton);
-		//					for (EdgeObject edge : listEdges) {
-		//						if (!listIndirectedEdges.contains(edge)) {
-		//							listIndirectedEdges.add(edge);
-		//						}
-		//					}
-		//				}
-		//			} else {
-		//				throw new IllegalStateException("Invalid activity in log");
-		//			}
-		//
-		//		}
-
 		return gdpmLog;
 	}
 
@@ -238,83 +218,90 @@ public class LogSkeletonUtils {
 		return gdpmLog;
 	}
 
-	public static GDPMLogSkeleton replaceSetActivitiesInLog(GDPMLogSkeleton gdpmLog, List<String> activities,
-			String groupName) {
+	public static GDPMLogSkeleton replaceSetActivitiesInLog(GDPMLogSkeleton gdpmLog, GroupSkeleton groupSkeleton) {
 
 		LogSkeleton logSkeleton = gdpmLog.getLogSkeleton();
-		logSkeleton = LogSkeletonUtils.changeLogSkeletonWithGroup(logSkeleton, activities, groupName);
+		logSkeleton = LogSkeletonUtils.changeLogSkeletonWithGroup(logSkeleton, groupSkeleton);
 		gdpmLog.setLogSkeleton(logSkeleton);
 
-		// change list indirected edge
-		//		List<EdgeObject> listIndirectedEdges = new ArrayList<>();
-		//		for (EdgeObject edge : gdpmLog.getListIndirectedEdge()) {
-		//			ActivitySkeleton node1 = activities.contains(edge.getNode1()) ? new ActivitySkeleton(groupName, groupName)
-		//					: edge.getNode1();
-		//			ActivitySkeleton node2 = activities.contains(edge.getNode2()) ? new ActivitySkeleton(groupName, groupName)
-		//					: edge.getNode2();
-		//			listIndirectedEdges.add(new EdgeObject(node1, node2));
-		//		}
-		//		gdpmLog.setListIndirectedEdge(listIndirectedEdges);
 		return gdpmLog;
 	}
 
 	public static GDPMLogSkeleton removeActInGroup(GDPMLogSkeleton gdpmLog, String groupName, String act) {
 
 		LogSkeleton logSkeleton = gdpmLog.getLogSkeleton();
-		logSkeleton = LogSkeletonUtils.changeLogSkeletonWithUngroupForAct(logSkeleton, groupName, act);
+		logSkeleton = LogSkeletonUtils.changeLogSkeletonWithUngroupForGroupElement(logSkeleton, groupName, act);
 		gdpmLog.setLogSkeleton(logSkeleton);
 
 		return gdpmLog;
 	}
 
-	public static GDPMLogSkeleton ungroupGroupInLog(GDPMLogSkeleton gdpmLog, String groupName) {
+	public static GDPMLogSkeleton ungroupGroupInLog(GDPMLogSkeleton gdpmLog, GroupSkeleton groupSkeleton) {
 		LogSkeleton logSkeleton = gdpmLog.getLogSkeleton();
-		logSkeleton = LogSkeletonUtils.changeLogSkeletonWithUngroup(logSkeleton, groupName);
+		logSkeleton = LogSkeletonUtils.changeLogSkeletonWithUngroup(logSkeleton, groupSkeleton);
 		gdpmLog.setLogSkeleton(logSkeleton);
 		return gdpmLog;
 	}
 
-	public static LogSkeleton changeLogSkeletonWithUngroupForAct(LogSkeleton logSkeleton, String groupName,
+	public static LogSkeleton changeLogSkeletonWithUngroupForGroupElement(LogSkeleton logSkeleton, String groupName,
 			String act) {
+		if (logSkeleton.getActivityHashTable().getActivityTable().containsKey(act)) {
+			logSkeleton = changeLogSkeletonWithUngroup(logSkeleton, act);
+			// remove in group
+			logSkeleton.getGroupConfig().get(groupName).getListAct().remove(act);
+		} else if (logSkeleton.getGroupConfig().containsKey(act)) {
+			logSkeleton = changeLogSkeletonWithUngroup(logSkeleton, logSkeleton.getGroupConfig().get(act));
+			// remove group in group config and in log
+			logSkeleton.getGroupConfig().get(groupName).getListGroup().remove(logSkeleton.getGroupConfig().get(act));
+			logSkeleton.getGroupConfig().remove(act);
+		}
+
+		return logSkeleton;
+	}
+
+	public static LogSkeleton changeLogSkeletonWithUngroup(LogSkeleton logSkeleton, GroupSkeleton groupSkeleton) {
+		// change activity name
+		for (String affectedAct : groupSkeleton.getListAct()) {
+			logSkeleton = changeLogSkeletonWithUngroup(logSkeleton, affectedAct);
+		}
+		for (GroupSkeleton group : groupSkeleton.getListGroup()) {
+			changeLogSkeletonWithUngroup(logSkeleton, group);
+		}
+		// remove group in group config
+		logSkeleton.getGroupConfig().remove(groupSkeleton.getGroupName());
+		return logSkeleton;
+	}
+
+	private static LogSkeleton changeLogSkeletonWithUngroup(LogSkeleton logSkeleton, String act) {
 		Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable().getActivityPositions(act);
-		// change act name
 		for (Map.Entry<Integer, List<Integer>> entry : allPos.entrySet()) {
 			for (Integer pos : entry.getValue()) {
 				logSkeleton.getLog().get(entry.getKey()).getTrace().get(pos).getActivity().setCurrentName(
 						logSkeleton.getLog().get(entry.getKey()).getTrace().get(pos).getActivity().getOriginalName());
 			}
 		}
-		// remove in group
-		logSkeleton.getGroupConfig().get(groupName).remove(act);
 		return logSkeleton;
 	}
 
-	public static LogSkeleton changeLogSkeletonWithUngroup(LogSkeleton logSkeleton, String groupName) {
-		List<String> affectedActs = logSkeleton.getGroupConfig().get(groupName);
-		// change activity name
-		for (String affectedAct : affectedActs) {
-			Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable().getActivityPositions(affectedAct);
-			for (Map.Entry<Integer, List<Integer>> entry : allPos.entrySet()) {
-				for (Integer pos : entry.getValue()) {
-					logSkeleton.getLog().get(entry.getKey()).getTrace().get(pos).getActivity()
-							.setCurrentName(logSkeleton.getLog().get(entry.getKey()).getTrace().get(pos).getActivity()
-									.getOriginalName());
-				}
-			}
+	public static LogSkeleton changeLogSkeletonWithGroup(LogSkeleton logSkeleton, GroupSkeleton groupSkeleton) {
+
+		logSkeleton.addGroup(groupSkeleton);
+
+		for (String act : groupSkeleton.getListAct()) {
+			logSkeleton = changeLogSkeletonWithGroup(logSkeleton, act, groupSkeleton.getGroupName());
+
 		}
-		// remove group in group config
-		logSkeleton.getGroupConfig().remove(groupName);
+		for (GroupSkeleton affectedGroup : groupSkeleton.getListGroup()) {
+			logSkeleton = changeLogSkeletonWithGroup(logSkeleton, affectedGroup, groupSkeleton.getGroupName());
+		}
+
 		return logSkeleton;
+
 	}
 
-	public static LogSkeleton changeLogSkeletonWithGroup(LogSkeleton logSkeleton, List<String> listGroupActivities,
-			String groupName) {
-
-		logSkeleton.addGroup(groupName, listGroupActivities);
-
-		List<String> affectedActs = logSkeleton.getGroupConfig().get(groupName);
-		for (String act : affectedActs) {
-			Map<Integer, List<Integer>> allPositions = logSkeleton.getActivityHashTable().getActivityPositions(act);
+	private static LogSkeleton changeLogSkeletonWithGroup(LogSkeleton logSkeleton, String act, String groupName) {
+		Map<Integer, List<Integer>> allPositions = logSkeleton.getActivityHashTable().getActivityPositions(act);
+		if (allPositions != null) {
 			for (Map.Entry<Integer, List<Integer>> entry : allPositions.entrySet()) {
 				int traceNum = entry.getKey();
 				List<Integer> positions = entry.getValue();
@@ -323,64 +310,87 @@ public class LogSkeletonUtils {
 				}
 			}
 		}
-
 		return logSkeleton;
+	}
 
+	private static LogSkeleton changeLogSkeletonWithGroup(LogSkeleton logSkeleton, GroupSkeleton oldGroup,
+			String groupName) {
+		for (String act : oldGroup.getListAct()) {
+			logSkeleton = changeLogSkeletonWithGroup(logSkeleton, act, groupName);
+		}
+		for (GroupSkeleton group : oldGroup.getListGroup()) {
+			logSkeleton = changeLogSkeletonWithGroup(logSkeleton, group, groupName);
+		}
+		return logSkeleton;
 	}
 
 	public static LogSkeleton changeLogSkeletonWithUnselection(LogSkeleton logSkeleton,
 			List<String> unselectedActivities) {
 		for (String act : unselectedActivities) {
 			if (logSkeleton.getActivityHashTable().getActivityTable().keySet().contains(act)) {
-				Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable().getActivityPositions(act);
-				for (Map.Entry<Integer, List<Integer>> entry : allPos.entrySet()) {
-					for (Integer i : entry.getValue()) {
-						logSkeleton.getLog().get(entry.getKey()).getTrace().get(i).setIsDisplayed(false);
-					}
-
-				}
+				logSkeleton = changeLogSkeletonWithUnselection(logSkeleton, act);
 			} else if (logSkeleton.getGroupConfig().keySet().contains(act)) {
-				for (String selectedAct : logSkeleton.getGroupConfig().get(act)) {
-					Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable()
-							.getActivityPositions(selectedAct);
-					for (Map.Entry<Integer, List<Integer>> entry : allPos.entrySet()) {
-						for (Integer i : entry.getValue()) {
-							logSkeleton.getLog().get(entry.getKey()).getTrace().get(i).setIsDisplayed(false);
-						}
-					}
-				}
+				logSkeleton = changeLogSkeletonWithUnselection(logSkeleton, logSkeleton.getGroupConfig().get(act));
 			} else {
 				throw new IllegalStateException("Invalid activity in log");
 			}
 
 		}
-		// update indirected 
+		return logSkeleton;
+	}
+
+	private static LogSkeleton changeLogSkeletonWithUnselection(LogSkeleton logSkeleton, String act) {
+		Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable().getActivityPositions(act);
+		for (Map.Entry<Integer, List<Integer>> entry : allPos.entrySet()) {
+			for (Integer i : entry.getValue()) {
+				logSkeleton.getLog().get(entry.getKey()).getTrace().get(i).setIsDisplayed(false);
+			}
+
+		}
+		return logSkeleton;
+	}
+
+	private static LogSkeleton changeLogSkeletonWithUnselection(LogSkeleton logSkeleton, GroupSkeleton oldGroup) {
+		for (String act : oldGroup.getListAct()) {
+			logSkeleton = changeLogSkeletonWithUnselection(logSkeleton, act);
+		}
+		for (GroupSkeleton groupSkeleton : oldGroup.getListGroup()) {
+			logSkeleton = changeLogSkeletonWithUnselection(logSkeleton, groupSkeleton);
+		}
 		return logSkeleton;
 	}
 
 	public static LogSkeleton changeLogSkeletonWithSelection(LogSkeleton logSkeleton, List<String> selectedActivities) {
 		for (String act : selectedActivities) {
 			if (logSkeleton.getActivityHashTable().getActivityTable().keySet().contains(act)) {
-				Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable().getActivityPositions(act);
-				for (Map.Entry<Integer, List<Integer>> entry : allPos.entrySet()) {
-					for (Integer i : entry.getValue()) {
-						logSkeleton.getLog().get(entry.getKey()).getTrace().get(i).setIsDisplayed(true);
-					}
-				}
+				logSkeleton = changeLogSkeletonWithSelection(logSkeleton, act);
 			} else if (logSkeleton.getGroupConfig().keySet().contains(act)) {
-				for (String selectedAct : logSkeleton.getGroupConfig().get(act)) {
-					Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable()
-							.getActivityPositions(selectedAct);
-					for (Map.Entry<Integer, List<Integer>> entry : allPos.entrySet()) {
-						for (Integer i : entry.getValue()) {
-							logSkeleton.getLog().get(entry.getKey()).getTrace().get(i).setIsDisplayed(true);
-						}
-					}
-				}
+				logSkeleton = changeLogSkeletonWithSelection(logSkeleton, logSkeleton.getGroupConfig().get(act));
 			} else if (!act.equals("begin") && !act.equals("end")) {
 				throw new IllegalStateException("Invalid activity in log");
 			}
 
+		}
+		return logSkeleton;
+	}
+
+	private static LogSkeleton changeLogSkeletonWithSelection(LogSkeleton logSkeleton, String act) {
+		Map<Integer, List<Integer>> allPos = logSkeleton.getActivityHashTable().getActivityPositions(act);
+		for (Map.Entry<Integer, List<Integer>> entry : allPos.entrySet()) {
+			for (Integer i : entry.getValue()) {
+				logSkeleton.getLog().get(entry.getKey()).getTrace().get(i).setIsDisplayed(true);
+			}
+
+		}
+		return logSkeleton;
+	}
+
+	private static LogSkeleton changeLogSkeletonWithSelection(LogSkeleton logSkeleton, GroupSkeleton oldGroup) {
+		for (String act : oldGroup.getListAct()) {
+			logSkeleton = changeLogSkeletonWithUnselection(logSkeleton, act);
+		}
+		for (GroupSkeleton groupSkeleton : oldGroup.getListGroup()) {
+			logSkeleton = changeLogSkeletonWithUnselection(logSkeleton, groupSkeleton);
 		}
 		return logSkeleton;
 	}
@@ -453,9 +463,10 @@ public class LogSkeletonUtils {
 							edgeHashTable.addEdge(edge, allPos);
 						}
 					}
-					
+
 					edgeHashTable.addEdge(edge, traceNum, act1Index, act1Index + 1);
 					addedEdges.add(edge);
+					addedEdges = addedEdges.stream().distinct().collect(Collectors.toList());
 
 					act1 = eventSkeleton.getActivity();
 					if (oldAct1Index != eventNum - 1) {
@@ -464,7 +475,7 @@ public class LogSkeletonUtils {
 						oldAct1Index += 1;
 					}
 					act1Index += 1;
-					
+
 				}
 				if (eventNum == traceSkeleton.getTrace().size() - 1) {
 					act2 = new ActivitySkeleton("end", "end");
@@ -479,6 +490,7 @@ public class LogSkeletonUtils {
 					}
 					edgeHashTable.addEdge(edge, traceNum, act1Index, -2);
 					addedEdges.add(edge);
+					addedEdges = addedEdges.stream().distinct().collect(Collectors.toList());
 				}
 
 			}
