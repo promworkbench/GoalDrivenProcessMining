@@ -46,7 +46,7 @@ public class LOW_UpdateLowLevelLogUsingConfig<C> extends DataChainLinkComputatio
 				switch (update.getUpdateType()) {
 					case SELECTED_ACT :
 						// clear low level panel
-						LOW_MakeLowLevelLog.currentLowLogSkeleton = null;
+
 						return new IvMObjectValues().//
 								s(GoalDrivenObject.low_level_log_skeleton, new GDPMLogSkeleton());
 					case GROUP :
@@ -75,7 +75,7 @@ public class LOW_UpdateLowLevelLogUsingConfig<C> extends DataChainLinkComputatio
 								//								}
 								//
 								//							}
-								gdpmLog = LogSkeletonUtils.replaceSetActivitiesInLog(gdpmLog, newGroupActObject);
+								gdpmLog = LogSkeletonUtils.groupActivitiesInLog(gdpmLog, newGroupActObject);
 
 								break;
 							case REMOVE :

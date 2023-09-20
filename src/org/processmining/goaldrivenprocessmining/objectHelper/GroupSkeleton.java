@@ -8,8 +8,6 @@ public class GroupSkeleton {
 	private List<String> listAct;
 	private List<GroupSkeleton> listGroup;
 
-	
-
 	public GroupSkeleton(String groupName, List<String> listAct, List<GroupSkeleton> listGroup) {
 		this.groupName = groupName;
 		this.listAct = listAct;
@@ -52,7 +50,8 @@ public class GroupSkeleton {
 		if (getClass() != obj.getClass())
 			return false;
 		GroupSkeleton other = (GroupSkeleton) obj;
-		return Objects.equals(groupName, other.groupName) && Objects.equals(listAct, other.listAct);
+		return Objects.equals(groupName, other.groupName) && Objects.equals(listAct, other.listAct)
+				&& Objects.equals(listGroup, other.listGroup);
 	}
 
 	public String toString() {

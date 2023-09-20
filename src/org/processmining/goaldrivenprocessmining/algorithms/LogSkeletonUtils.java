@@ -218,7 +218,7 @@ public class LogSkeletonUtils {
 		return gdpmLog;
 	}
 
-	public static GDPMLogSkeleton replaceSetActivitiesInLog(GDPMLogSkeleton gdpmLog, GroupSkeleton groupSkeleton) {
+	public static GDPMLogSkeleton groupActivitiesInLog(GDPMLogSkeleton gdpmLog, GroupSkeleton groupSkeleton) {
 
 		LogSkeleton logSkeleton = gdpmLog.getLogSkeleton();
 		logSkeleton = LogSkeletonUtils.changeLogSkeletonWithGroup(logSkeleton, groupSkeleton);

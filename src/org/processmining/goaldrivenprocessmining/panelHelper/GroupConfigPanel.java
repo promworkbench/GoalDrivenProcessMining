@@ -126,19 +126,19 @@ public class GroupConfigPanel extends JPanel {
 		displayPanel.removeAll();
 		removeGroupButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		displayPanel.add(removeGroupButton);
-		GroupSkeleton group = (GroupSkeleton) tableModel.getValueAt(selectedRow, 0);
-		JLabel groupNameLabel = new JLabel("Group Name: " + group.getGroupName());
+		GroupSkeleton groupSkeleton = (GroupSkeleton) tableModel.getValueAt(selectedRow, 0);
+		JLabel groupNameLabel = new JLabel("Group Name: " + groupSkeleton.getGroupName());
 		displayPanel.add(groupNameLabel);
 
-		List<String> groupActivities = group.getListAct();
-		for (String activity : groupActivities) {
+		List<String> acts = groupSkeleton.getListAct();
+		for (String activity : acts) {
 			JPanel activityPanel = new JPanel(new BorderLayout());
 			activityPanel.add(new JLabel(activity), BorderLayout.CENTER);
 			JButton removeActivityButton = new JButton("Remove");
 			removeActivityButton.addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent e) {
-					GoalDrivenController.removeActInGroupConfigObject(group.getGroupName(), activity);
+					GoalDrivenController.removeActInGroupConfigObject(groupSkeleton.getGroupName(), activity);
 				}
 				
 			});
@@ -146,6 +146,27 @@ public class GroupConfigPanel extends JPanel {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					removeActivity(selectedRow, activity);
+				}
+			});
+			activityPanel.add(removeActivityButton, BorderLayout.EAST);
+			displayPanel.add(activityPanel);
+		}
+		List<GroupSkeleton> groups = groupSkeleton.getListGroup();
+		for (GroupSkeleton group : groups) {
+			JPanel activityPanel = new JPanel(new BorderLayout());
+			activityPanel.add(new JLabel(group.getGroupName()), BorderLayout.CENTER);
+			JButton removeActivityButton = new JButton("Remove");
+			removeActivityButton.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent e) {
+					GoalDrivenController.removeActInGroupConfigObject(groupSkeleton.getGroupName(), group.getGroupName());
+				}
+				
+			});
+			removeActivityButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					removeActivity(selectedRow, group.getGroupName());
 				}
 			});
 			activityPanel.add(removeActivityButton, BorderLayout.EAST);

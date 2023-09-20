@@ -30,7 +30,7 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 
 	@Override
 	public IvMObject<?>[] createInputObjects() {
-		return new IvMObject<?>[] { GoalDrivenObject.update_config_object };
+		return new IvMObject<?>[] {  };
 	}
 
 	@Override
@@ -76,25 +76,43 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 
 							break;
 						case REMOVE :
-							Class<?> objClass = update.getUpdateObject().getClass();
-							if (objClass.isArray()) {
-								String[] array = (String[]) update.getUpdateObject();
-								for (GroupSkeleton group : updatedConfig.getListGroupSkeletons()) {
-									if (group.getGroupName().equals(array[0])) {
-										group.getListAct().remove(array[1]);
-									}
-								}
-
-							} else {
-								String groupName = (String) update.getUpdateObject();
-								List<GroupSkeleton> newGroupActObjects = new ArrayList<>();
-								for (GroupSkeleton group : updatedConfig.getListGroupSkeletons()) {
-									if (!group.getGroupName().equals(groupName)) {
-										newGroupActObjects.add(group);
-									}
-								}
-								updatedConfig.setListGroupSkeletons(newGroupActObjects);
-							}
+//							Class<?> objClass = update.getUpdateObject().getClass();
+//							if (objClass.isArray()) {
+//								String[] array = (String[]) update.getUpdateObject();
+//								GroupSkeleton selectedGroup = null;
+//								outerloop: for (GroupSkeleton group : updatedConfig.getListGroupSkeletons()) {
+//									if (group.getGroupName().equals(array[0])) {
+//										if (group.getListAct().contains(array[1])) {
+//											group.getListAct().remove(array[1]);
+//										} else {
+//											for (GroupSkeleton groupItem : group.getListGroup()) {
+//												if (groupItem.getGroupName().equals(array[1])) {
+//													selectedGroup = groupItem;
+//													break outerloop;
+//												}
+//											}
+//
+//										}
+//
+//									}
+//								}
+//								if (selectedGroup != null) {
+//									updatedConfig.setListGroupSkeletons(updateGroupConfigWithRemovingGroup(
+//											selectedGroup, updatedConfig.getListGroupSkeletons()));
+//								}
+//
+//							} else {
+//								String groupName = (String) update.getUpdateObject();
+//								GroupSkeleton selectedGroup = null;
+//								for (GroupSkeleton group : updatedConfig.getListGroupSkeletons()) {
+//									if (group.getGroupName().equals(groupName)) {
+//										selectedGroup = group;
+//										break;
+//									}
+//								}
+//								updatedConfig.setListGroupSkeletons(updateGroupConfigWithRemovingGroup(
+//										selectedGroup, updatedConfig.getListGroupSkeletons()));
+//							}
 							break;
 					}
 
@@ -116,6 +134,26 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 		currentUpdateConfig = update;
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.config, updatedConfig);
+	}
+
+	private List<GroupSkeleton> updateGroupConfigWithRemovingGroup(GroupSkeleton removingGroup,
+			List<GroupSkeleton> allGroups) {
+		// update all groups
+		for (GroupSkeleton group : allGroups) {
+			if (group.getListGroup().contains(removingGroup)) {
+				group.getListAct().addAll(removingGroup.getListAct());
+				group.getListGroup().addAll(removingGroup.getListGroup());
+				group.getListGroup().remove(removingGroup);
+			}
+		}
+		List<GroupSkeleton> result = new ArrayList<>();
+		for (GroupSkeleton group : allGroups) {
+			if (!group.equals(removingGroup)) {
+				result.add(group);
+			}
+		}
+
+		return result;
 	}
 
 }

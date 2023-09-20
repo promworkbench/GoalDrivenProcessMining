@@ -683,6 +683,10 @@ public class GoalDrivenController {
 				}
 				// update for popup
 				PopupPanel.groupActObjects = allGroups;
+				// clear right panel
+				panel.getConfigCards().getGroupConfigPanel().getDisplayPanel().removeAll();
+				panel.revalidate();
+				panel.repaint();
 			}
 
 		});
