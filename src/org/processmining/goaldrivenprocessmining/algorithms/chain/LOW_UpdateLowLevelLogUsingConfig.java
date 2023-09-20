@@ -23,7 +23,7 @@ public class LOW_UpdateLowLevelLogUsingConfig<C> extends DataChainLinkComputatio
 
 	public IvMObject<?>[] createInputObjects() {
 		// TODO Auto-generated method stub
-		return new IvMObject<?>[] { GoalDrivenObject.config };
+		return new IvMObject<?>[] { GoalDrivenObject.update_config_object };
 	}
 
 	public IvMObject<?>[] createOutputObjects() {
@@ -39,7 +39,7 @@ public class LOW_UpdateLowLevelLogUsingConfig<C> extends DataChainLinkComputatio
 			return new IvMObjectValues().//
 					s(GoalDrivenObject.low_level_log_skeleton, gdpmLog);
 		} else {
-			UpdateConfig update = CONFIG_Update.currentUpdateConfig;
+			UpdateConfig update = inputs.get(GoalDrivenObject.update_config_object);
 			gdpmLog = LOW_MakeLowLevelLog.currentLowLogSkeleton;
 
 			if (update.getUpdateType() != null) {
@@ -52,31 +52,8 @@ public class LOW_UpdateLowLevelLogUsingConfig<C> extends DataChainLinkComputatio
 					case GROUP :
 						switch (update.getUpdateAction()) {
 							case ADD :
-
 								GroupSkeleton newGroupActObject = (GroupSkeleton) update.getUpdateObject();
-
-								//							Boolean isNewGroup = true;
-								//							for (GroupSkeleton group : CONFIG_Update.currentConfig.getListGroupSkeletons()) {
-								//								if (group.getGroupName().equals(newGroupActObject.getGroupName())) {
-								//									isNewGroup = false;
-								//									break;
-								//								}
-								//							}
-								//							if (isNewGroup) {
-								//								gdpmLog = LogSkeletonUtils.replaceSetActivitiesInLog(gdpmLog,
-								//										newGroupActObject.getListAct(), newGroupActObject.getGroupName());
-								//							} else {
-								//								for (GroupSkeleton group : CONFIG_Update.currentConfig.getListGroupSkeletons()) {
-								//									if (group.getGroupName().equals(newGroupActObject.getGroupName())) {
-								//										gdpmLog = LogSkeletonUtils.replaceSetActivitiesInLog(gdpmLog,
-								//												group.getListAct(), group.getGroupName());
-								//										break;
-								//									}
-								//								}
-								//
-								//							}
 								gdpmLog = LogSkeletonUtils.groupActivitiesInLog(gdpmLog, newGroupActObject);
-
 								break;
 							case REMOVE :
 								Class<?> objClass = update.getUpdateObject().getClass();

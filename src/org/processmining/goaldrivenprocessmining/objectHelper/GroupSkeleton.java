@@ -1,9 +1,10 @@
 package org.processmining.goaldrivenprocessmining.objectHelper;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-public class GroupSkeleton {
+public class GroupSkeleton implements Serializable {
 	private String groupName;
 	private List<String> listAct;
 	private List<GroupSkeleton> listGroup;

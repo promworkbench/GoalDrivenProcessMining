@@ -74,7 +74,7 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 		displayedActs.addAll(targets);
 		List<String> undisplayedActs = new ArrayList<String>();
 		for (String act : config.getSelectedActs()) {
-			if (!act.equals(source) && !act.equals(target)) {
+			if (!sources.contains(act) && !targets.contains(act)) {
 				undisplayedActs.add(act);
 			}
 		}
