@@ -115,7 +115,7 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 				start = m_tmpPoints[forward ? 0 : 1];
 				start.setLocation(start.getX() + item1.getBounds().getWidth() / 2, start.getY());
 				end = m_tmpPoints[forward ? 1 : 0];
-				end.setLocation(end.getX() + item1.getBounds().getWidth() / 2 + 20, end.getY() - 10);
+				end.setLocation(end.getX() + item1.getBounds().getWidth() / 2 , end.getY());
 			} else {
 				start = m_tmpPoints[forward ? 0 : 1];
 				end = m_tmpPoints[forward ? 1 : 0];
@@ -130,14 +130,12 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 			// create the arrow head shape
 			AffineTransform at;
 			if (item1 == item2) {
-				Point2D fakeStart = new Point2D.Double(493.7596435546875, 419.14544677734375);
-				Point2D fakeEnd = new Point2D.Double(473.7596435546875, 409.14544677734375);
-
+				Point2D fakeStart = new Point2D.Double(end.getX() + 450, end.getY() + 500);
+				Point2D fakeEnd = new Point2D.Double(end.getX(), end.getY() +20);
 				at = getArrowTrans(fakeStart, fakeEnd, m_curWidth);
 			} else {
 				at = getArrowTrans(start, end, m_curWidth);
 			}
-
 			if (item.getBoolean(GraphConstants.IS_INDIRECTED_EDGE_FIELD)) {
 				m_curArrow = at.createTransformedShape(m_arrowDoubleHead);
 			} else {
