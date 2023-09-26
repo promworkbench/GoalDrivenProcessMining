@@ -9,6 +9,14 @@ public class EdgeObject implements Serializable {
 	private ActivitySkeleton node2;
 	private Boolean isIndirected;
 
+	
+
+	public EdgeObject(ActivitySkeleton node1, ActivitySkeleton node2, Boolean isIndirected) {
+		this.node1 = node1;
+		this.node2 = node2;
+		this.isIndirected = isIndirected;
+	}
+
 	public EdgeObject(ActivitySkeleton node1, ActivitySkeleton node2) {
 		this.node1 = node1;
 		this.node2 = node2;

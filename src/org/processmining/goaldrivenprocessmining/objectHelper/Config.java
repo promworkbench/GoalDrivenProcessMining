@@ -1,10 +1,11 @@
 package org.processmining.goaldrivenprocessmining.objectHelper;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Config {
+public class Config implements Serializable {
 	private List<GroupSkeleton> listGroupSkeletons;
 	private MapActivityCategoryObject mapActivityCategoryObject;
 	private double highActThreshold;
@@ -17,20 +18,21 @@ public class Config {
 		this.mapActivityCategoryObject = new MapActivityCategoryObject();
 		this.highActThreshold = 1d;
 		this.lowActThreshold = 1d;
-		this.selectedActs = new String[] {  };
-		this.unselectedActs = new String[] {  };
+		this.selectedActs = new String[] {};
+		this.unselectedActs = new String[] {};
 
 	}
-	
+
 	// Selected act
-	
+
 	// Group action
-	
+
 	public void removeGroup(List<GroupSkeleton> groupActObjects) {
 		for (GroupSkeleton groupActObject : groupActObjects) {
 			this.removeGroup(groupActObject);
 		}
 	}
+
 	public void removeGroup(GroupSkeleton groupActObject) {
 		if (this.listGroupSkeletons.contains(groupActObject)) {
 			this.listGroupSkeletons.remove(groupActObject);

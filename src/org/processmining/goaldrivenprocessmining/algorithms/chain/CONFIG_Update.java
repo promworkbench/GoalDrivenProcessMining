@@ -1,8 +1,6 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
@@ -53,7 +51,6 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 				case GROUP :
 					switch (update.getUpdateAction()) {
 						case ADD :
-
 							GroupSkeleton newGroupActObject = (GroupSkeleton) update.getUpdateObject();
 							Boolean isNewGroup = true;
 							for (GroupSkeleton group : updatedConfig.getListGroupSkeletons()) {
@@ -136,24 +133,5 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 				s(GoalDrivenObject.config, updatedConfig);
 	}
 
-	private List<GroupSkeleton> updateGroupConfigWithRemovingGroup(GroupSkeleton removingGroup,
-			List<GroupSkeleton> allGroups) {
-		// update all groups
-		for (GroupSkeleton group : allGroups) {
-			if (group.getListGroup().contains(removingGroup)) {
-				group.getListAct().addAll(removingGroup.getListAct());
-				group.getListGroup().addAll(removingGroup.getListGroup());
-				group.getListGroup().remove(removingGroup);
-			}
-		}
-		List<GroupSkeleton> result = new ArrayList<>();
-		for (GroupSkeleton group : allGroups) {
-			if (!group.equals(removingGroup)) {
-				result.add(group);
-			}
-		}
-
-		return result;
-	}
 
 }

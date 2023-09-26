@@ -15,7 +15,6 @@ import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.LogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapStatObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.StatEdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
 
 public class StatUtils {
@@ -37,10 +36,10 @@ public class StatUtils {
 			}
 			Boolean isGroupNode = false;
 			String groupName = "";
-			for (Map.Entry<String, GroupSkeleton> entry2 : logSkeleton.getGroupConfig().entrySet()) {
-				if (entry2.getValue().getListAct().contains(act)) {
+			for (GroupSkeleton group : logSkeleton.getConfig().getListGroupSkeletons()) {
+				if (group.getListAct().contains(act)) {
 					isGroupNode = true;
-					groupName = entry2.getKey();
+					groupName = group.getGroupName();
 					if (mapGroupNodeTotalOccurence.keySet().contains(groupName)) {
 						mapGroupNodeTotalOccurence.replace(groupName,
 								mapGroupNodeTotalOccurence.get(groupName) + total);
@@ -87,10 +86,7 @@ public class StatUtils {
 				}
 			}
 
-			if (!mapNodeTotalTime.keySet().contains(source)) {
-
-			}
-			statObject.getMapStatEdge().put(edge, new StatEdgeObject(total));
+//			statObject.getMapStatEdge().put(edge, new StatEdgeObject(total));
 		}
 		for (Map.Entry<String, Long> entry : mapNodeTotalTime.entrySet()) {
 			StatNodeObject statNodeObject = statObject.getMapStatNode().get(entry.getKey());

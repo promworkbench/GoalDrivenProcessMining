@@ -5,7 +5,6 @@ import java.io.Serializable;
 import org.apache.commons.lang3.SerializationUtils;
 import org.deckfour.xes.model.XLog;
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
-import org.processmining.goaldrivenprocessmining.algorithms.StatUtils;
 
 public class GDPMLogSkeleton implements Serializable {
 
@@ -20,7 +19,7 @@ public class GDPMLogSkeleton implements Serializable {
 
 	public GDPMLogSkeleton(XLog log) {
 		this.logSkeleton = LogSkeletonUtils.getLogSkeleton(log);
-		this.statObject = StatUtils.getStat(logSkeleton);
+//		this.statObject = StatUtils.getStat(logSkeleton);
 	}
 
 	@Override

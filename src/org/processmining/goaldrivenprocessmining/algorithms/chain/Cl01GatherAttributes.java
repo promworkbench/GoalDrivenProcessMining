@@ -11,6 +11,7 @@ import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfigurat
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.ActivityIndexMapper;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
+import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateType;
@@ -22,6 +23,8 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalDrivenConfiguration> {
 
+	public static EdgeHashTable originalEdgeHashTable;
+	
 	@Override
 	public String getName() {
 		return "gather attributes";
@@ -76,6 +79,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		UpdateConfig updateConfig = new UpdateConfig(UpdateType.SELECTED_ACT, updateMap);
 
 		GDPMLogSkeleton gdpmLogSkeleton = new GDPMLogSkeleton(log);
+		originalEdgeHashTable = gdpmLogSkeleton.getLogSkeleton().getEdgeHashTable();
 		ActivityIndexMapper activityIndexMapper = new ActivityIndexMapper();
 		activityIndexMapper.assignActivity(allAct);
 		HIGH_MakeHighLevelLog.currentHighLogSkeleton = null;

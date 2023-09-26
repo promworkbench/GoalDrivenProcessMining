@@ -66,7 +66,7 @@ public class LOW_UpdateLowLevelLogUsingConfig<C> extends DataChainLinkComputatio
 								} else {
 									String groupName = (String) update.getUpdateObject();
 									gdpmLog = LogSkeletonUtils.ungroupGroupInLog(gdpmLog,
-											gdpmLog.getLogSkeleton().getGroupConfig().get(groupName));
+											gdpmLog.getLogSkeleton().getGroupSkeletonByGroupName(groupName));
 								}
 
 								break;

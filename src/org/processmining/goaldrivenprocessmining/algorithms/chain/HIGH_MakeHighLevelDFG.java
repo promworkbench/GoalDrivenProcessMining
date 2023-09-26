@@ -1,7 +1,6 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
-import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
@@ -36,9 +35,10 @@ public class HIGH_MakeHighLevelDFG<C> extends DataChainLinkComputationAbstract<C
 	@Override
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
 		System.out.println("--- HIGH_MakeHighLevelDFG");
-		GDPMLogSkeleton logSkeleton = inputs.get(GoalDrivenObject.high_level_log_skeleton);
+		GDPMLogSkeleton gdpmLogSkeleton = inputs.get(GoalDrivenObject.high_level_log_skeleton);
 		
-		GoalDrivenDFG dfg = new GoalDrivenDFG(LogSkeletonUtils.getDisplayedLogSkeleton(logSkeleton));
+//		GoalDrivenDFG dfg = new GoalDrivenDFG(LogSkeletonUtils.getDisplayedLogSkeleton(gdpmLogSkeleton));
+		GoalDrivenDFG dfg = new GoalDrivenDFG(gdpmLogSkeleton, true);
 		dfg.setEdgeClickControl(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 		dfg.addControlListener(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 		return new IvMObjectValues().//

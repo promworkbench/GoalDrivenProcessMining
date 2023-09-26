@@ -2,40 +2,68 @@ package org.processmining.goaldrivenprocessmining.objectHelper;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class LogSkeleton implements Serializable {
 	private ActivityHashTable activityHashTable;
 	private EdgeHashTable edgeHashTable;
 	private List<TraceSkeleton> log;
-	private HashMap<String, GroupSkeleton> groupConfig;
 	private List<EdgeObject> listIndirectedEdges;
+	private Config config;
 
 	public LogSkeleton() {
 		this.log = new ArrayList<>();
-		this.groupConfig = new HashMap<>();
+//		this.groupConfig = new HashMap<>();
 		this.activityHashTable = new ActivityHashTable();
 		this.edgeHashTable = new EdgeHashTable();
+		this.config = new Config();
 	}
 
 	public void addGroup(GroupSkeleton groupSkeleton) {
-		if (this.groupConfig.keySet().contains(groupSkeleton.getGroupName())) {
-			this.groupConfig.replace(groupSkeleton.getGroupName(), groupSkeleton);
-		} else {
-			this.groupConfig.put(groupSkeleton.getGroupName(), groupSkeleton);
+		List<GroupSkeleton> newGroupSkeletons = new ArrayList<GroupSkeleton>();
+		Boolean isAdded = false;
+		for (GroupSkeleton group: this.config.getListGroupSkeletons()) {
+			if (group.getGroupName().equals(groupSkeleton.getGroupName())) {
+				newGroupSkeletons.add(groupSkeleton);
+				isAdded = true;
+			} else {
+				newGroupSkeletons.add(group);
+			}
 		}
+		if (!isAdded) {
+			newGroupSkeletons.add(groupSkeleton);
+		}
+		this.config.setListGroupSkeletons(newGroupSkeletons);
+		
 	}
-
+	
 	public Boolean isInGroup(String act) {
-		for (String key : this.groupConfig.keySet()) {
-			if (this.groupConfig.get(key).getListAct().contains(act)) {
+		for (GroupSkeleton group: this.config.getListGroupSkeletons()) {
+			if (group.getListAct().contains(act)) {
 				return true;
 			}
 		}
 		return false;
 	}
-
+	
+	public GroupSkeleton getGroupSkeletonByGroupName(String act) {
+		for (GroupSkeleton group: this.config.getListGroupSkeletons()) {
+			if (group.getGroupName().equals(act)) {
+				return group;
+			}
+		}
+		return null;
+	}
+	
+	public Boolean isAGroupSkeleton(String act) {
+		for (GroupSkeleton group: this.config.getListGroupSkeletons()) {
+			if (group.getGroupName().equals(act)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public List<String> getAllActivitiesInGroup(GroupSkeleton groupSkeleton) {
 		List<String> result = new ArrayList<>();
 		result.addAll(groupSkeleton.getListAct());
@@ -70,18 +98,32 @@ public class LogSkeleton implements Serializable {
 	public void setEdgeHashTable(EdgeHashTable edgeHashTable) {
 		this.edgeHashTable = edgeHashTable;
 	}
+	
+	
 
-	public HashMap<String, GroupSkeleton> getGroupConfig() {
-		return groupConfig;
+	public Config getConfig() {
+		return config;
 	}
 
-	public void setGroupConfig(HashMap<String, GroupSkeleton> groupConfig) {
-		this.groupConfig = groupConfig;
+	public void setConfig(Config config) {
+		this.config = config;
 	}
 
 	public String toString() {
 		return "LogSkeleton [activityHashTable=" + activityHashTable + ", edgeHashTable=" + edgeHashTable + ", log="
-				+ log + ", groupConfig=" + groupConfig + "]";
+				+ log + ", listIndirectedEdges=" + listIndirectedEdges + ", config=" + config + "]";
 	}
+
+//	public HashMap<String, GroupSkeleton> getGroupConfig() {
+//		return groupConfig;
+//	}
+//
+//	public void setGroupConfig(HashMap<String, GroupSkeleton> groupConfig) {
+//		this.groupConfig = groupConfig;
+//	}
+
+	
+
+	
 
 }

@@ -95,7 +95,7 @@ public class GoalDrivenPanel extends JPanel {
 			GDPMLogSkeleton log = null;
 
 			// Create and add the highDfgPanel to the default layer
-			highDfgPanel = new GoalDrivenDFG(log);
+			highDfgPanel = new GoalDrivenDFG(log, true);
 			highDfgPanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 			highDfgPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 			contentLeftPanel.add(highDfgPanel, BorderLayout.CENTER);
@@ -114,7 +114,7 @@ public class GoalDrivenPanel extends JPanel {
 			lowDfgTitle.setFont(GoalDrivenConstants.BOLD_BIG_FONT);
 			contentRightPanel.add(lowDfgTitle, BorderLayout.NORTH);
 			GDPMLogSkeleton log = null;
-			lowDfgPanel = new GoalDrivenDFG(log);
+			lowDfgPanel = new GoalDrivenDFG(log, false);
 			lowDfgPanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 			lowDfgPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 			contentRightPanel.add(lowDfgPanel, BorderLayout.CENTER);

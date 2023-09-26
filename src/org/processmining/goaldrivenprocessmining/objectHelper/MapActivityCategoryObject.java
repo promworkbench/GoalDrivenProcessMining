@@ -1,11 +1,12 @@
 package org.processmining.goaldrivenprocessmining.objectHelper;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 
-public class MapActivityCategoryObject {
+public class MapActivityCategoryObject implements Serializable {
 	private HashMap<AttributeClassifier, List<ValueCategoryObject>> mapActivityCategory;
 	
 	public MapActivityCategoryObject() {

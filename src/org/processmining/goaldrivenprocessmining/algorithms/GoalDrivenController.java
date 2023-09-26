@@ -218,7 +218,7 @@ public class GoalDrivenController {
 					} else {
 						panel.getContentRightPanel().remove(panel.getLowDfgPanel());
 						GDPMLogSkeleton log = null;
-						panel.setLowDfgPanel(new GoalDrivenDFG(log));
+						panel.setLowDfgPanel(new GoalDrivenDFG(log, false));
 						panel.getLowDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 						panel.getLowDfgPanel().setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 						panel.getContentRightPanel().add(panel.getLowDfgPanel(), BorderLayout.CENTER);

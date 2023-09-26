@@ -4,18 +4,18 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
+import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.EventSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.StatEdgeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.TraceSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.ValueCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
@@ -60,8 +60,8 @@ public class GoalDrivenDFG extends Display {
 	private int beginNodeRow;
 	private int endNodeRow;
 	private Graph graph;
-	private HashMap<EdgeObject, StatEdgeObject> frequencyEdge;
-	private HashMap<String, StatNodeObject> frequencyNode;
+	//	private HashMap<EdgeObject, StatEdgeObject> frequencyEdge;
+	//	private HashMap<String, StatNodeObject> frequencyNode;
 	// control 
 	private SelectMultipleNodesControl selectMultipleNodesControl;
 	private BackgroundDoubleClickControl backgroundDoubleClickControl;
@@ -82,7 +82,7 @@ public class GoalDrivenDFG extends Display {
 	private ColorAction arrowFillColorAction;
 	private ColorAction textColorAction;
 
-	public GoalDrivenDFG(GDPMLogSkeleton gdpmLogSkeleton) {
+	public GoalDrivenDFG(GDPMLogSkeleton gdpmLogSkeleton, Boolean isHighLevel) {
 		super(new Visualization());
 		this.log = gdpmLogSkeleton;
 
@@ -100,9 +100,9 @@ public class GoalDrivenDFG extends Display {
 		m_vis.putAction("repaint", repaint);
 
 		if (this.log != null && !this.log.getLogSkeleton().getLog().isEmpty()) {
-			this.frequencyEdge = gdpmLogSkeleton.getStatObject().getMapStatEdge();
-			this.frequencyNode = gdpmLogSkeleton.getStatObject().getMapStatNode();
-			this.graph = this.makeGraph();
+			//			this.frequencyEdge = gdpmLogSkeleton.getStatObject().getMapStatEdge();
+			//			this.frequencyNode = gdpmLogSkeleton.getStatObject().getMapStatNode();
+			this.graph = this.makeGraph(isHighLevel);
 			m_vis.addGraph("graph", graph);
 			// control
 			this.setDefaultControl();
@@ -121,71 +121,71 @@ public class GoalDrivenDFG extends Display {
 		double zoomWidth = this.getBounds().getWidth() / this.getVisualization().getBounds("graph").getWidth();
 		double zoomHeight = this.getBounds().getHeight() / this.getVisualization().getBounds("graph").getHeight();
 		double zoomRatio = zoomWidth < zoomHeight ? zoomWidth : zoomHeight;
-		
+
 		double x = this.getVisualization().getBounds("graph").getCenterX();
 		double y = this.getVisualization().getBounds("graph").getCenterY();
 		this.animatePanAndZoomTo(new Point2D.Double(x, y), zoomRatio, 1000);
 		this.revalidate();
 		this.repaint();
 	}
-	
-//	public static void main(String[] args) throws Exception {
-//				File file = new File("C:\\D\\data\\receipt.xes");
-//				File file2 = new File("C:\\D\\data\\complaint-handling.xes");
-//		
-//				// Create an input stream for the XES file
-//				InputStream is = new FileInputStream(file);
-//		
-//				// Create a parser for XES files
-//				XesXmlParser parser = new XesXmlParser();
-//		
-//				XLog log = parser.parse(is).get(0);
-//		
-//				// Create an input stream for the XES file
-//				InputStream is2 = new FileInputStream(file2);
-//		
-//				// Create a parser for XES files
-//				XesXmlParser parser2 = new XesXmlParser();
-//		
-//				XLog log2 = parser2.parse(is2).get(0);
-//		
-//				GoalDrivenDFG ex = new GoalDrivenDFG(null);
-//				GoalDrivenDFG ex2 = new GoalDrivenDFG(new GDPMLogSkeleton(log));
-//				GoalDrivenDFG ex3 = new GoalDrivenDFG(new GDPMLogSkeleton(log2));
-//				
-//				
-//			
-//				System.out.println(ex.getVisualization().getBounds("graph"));
-//				System.out.println(ex.getBounds());
-//				
-//
-//				
-//				double zoomWidth = ex.getBounds().getWidth() / ex.getVisualization().getBounds("graph").getWidth();
-//				double zoomHeight = ex.getBounds().getHeight() / ex.getVisualization().getBounds("graph").getHeight();
-//				double zoomRatio = zoomWidth < zoomHeight ? zoomWidth : zoomHeight;
-//				
-//				
-//				
-//				double x = 300;
-//				double y = -450;
-//				System.out.println(zoomRatio);
-//				ex.animatePanAndZoomTo(new Point2D.Double(x, y), zoomRatio, 1000);
-//				
-//				ex.validate();
-//				ex.repaint();
-//
-//				JFrame frame = new JFrame("prefuse example");
-//				JPanel p = new JPanel();
-//				p.setBackground(Color.BLACK);
-//				p.add(ex);
-//				ex.setBackground(Color.BLACK);
-//				frame.getContentPane().add(p);
-//				frame.pack(); // layout components in window
-//				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//				frame.setVisible(true); // show the window
-//	}
 
-	public Graph makeGraph() {
+	//	public static void main(String[] args) throws Exception {
+	//				File file = new File("C:\\D\\data\\receipt.xes");
+	//				File file2 = new File("C:\\D\\data\\complaint-handling.xes");
+	//		
+	//				// Create an input stream for the XES file
+	//				InputStream is = new FileInputStream(file);
+	//		
+	//				// Create a parser for XES files
+	//				XesXmlParser parser = new XesXmlParser();
+	//		
+	//				XLog log = parser.parse(is).get(0);
+	//		
+	//				// Create an input stream for the XES file
+	//				InputStream is2 = new FileInputStream(file2);
+	//		
+	//				// Create a parser for XES files
+	//				XesXmlParser parser2 = new XesXmlParser();
+	//		
+	//				XLog log2 = parser2.parse(is2).get(0);
+	//		
+	//				GoalDrivenDFG ex = new GoalDrivenDFG(null);
+	//				GoalDrivenDFG ex2 = new GoalDrivenDFG(new GDPMLogSkeleton(log));
+	//				GoalDrivenDFG ex3 = new GoalDrivenDFG(new GDPMLogSkeleton(log2));
+	//				
+	//				
+	//			
+	//				System.out.println(ex.getVisualization().getBounds("graph"));
+	//				System.out.println(ex.getBounds());
+	//				
+	//
+	//				
+	//				double zoomWidth = ex.getBounds().getWidth() / ex.getVisualization().getBounds("graph").getWidth();
+	//				double zoomHeight = ex.getBounds().getHeight() / ex.getVisualization().getBounds("graph").getHeight();
+	//				double zoomRatio = zoomWidth < zoomHeight ? zoomWidth : zoomHeight;
+	//				
+	//				
+	//				
+	//				double x = 300;
+	//				double y = -450;
+	//				System.out.println(zoomRatio);
+	//				ex.animatePanAndZoomTo(new Point2D.Double(x, y), zoomRatio, 1000);
+	//				
+	//				ex.validate();
+	//				ex.repaint();
+	//
+	//				JFrame frame = new JFrame("prefuse example");
+	//				JPanel p = new JPanel();
+	//				p.setBackground(Color.BLACK);
+	//				p.add(ex);
+	//				ex.setBackground(Color.BLACK);
+	//				frame.getContentPane().add(p);
+	//				frame.pack(); // layout components in window
+	//				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	//				frame.setVisible(true); // show the window
+	//	}
+
+	public Graph makeGraph(Boolean isHighLevel) {
 
 		// Create tables for node and edge data, and configure their columns.
 		// init node table
@@ -198,7 +198,7 @@ public class GoalDrivenDFG extends Display {
 			// add begin and end node;
 			this.addBeginToTable(g);
 			// add activities in log to node table and add edges
-			this.addActToTable(g);
+			this.addActToTable(g, isHighLevel);
 			return g;
 		} else {
 			return new Graph();
@@ -210,9 +210,9 @@ public class GoalDrivenDFG extends Display {
 
 		this.setDefaultArrowFillColor();
 		this.setDefaultEdgeStrokeColor();
-		this.setDefaultEdgeStrokeWidth(frequencyEdge);
+		this.setDefaultEdgeStrokeWidth();
 		this.setDefaultNodeStrokeWidth();
-		this.setDefaultNodeFillColor(frequencyNode);
+		this.setDefaultNodeFillColor();
 		this.setDefaultNodeStrokeColor();
 		this.setDefaultTextColor();
 		this.setDefaultNodeSize();
@@ -365,19 +365,32 @@ public class GoalDrivenDFG extends Display {
 		m_vis.run(GraphConstants.NODE_STROKE_WIDTH_ACTION);
 	}
 
-	public void setDefaultEdgeStrokeWidth(HashMap<EdgeObject, StatEdgeObject> frequencyEdge) {
+	public void setDefaultEdgeStrokeWidth() {
 
+		HashMap<EdgeObject, Integer> frequencyEdge = new HashMap<EdgeObject, Integer>();
+		// calculate frequency edge
+		for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : this.getLog().getLogSkeleton()
+				.getEdgeHashTable().getEdgeTable().entrySet()) {
+			EdgeObject edge = entry.getKey();
+			Map<Integer, List<Integer[]>> allPos = entry.getValue();
+			int total = 0;
+			for (List<Integer[]> pos : allPos.values()) {
+				total += pos.size();
+			}
+			frequencyEdge.put(edge, total);
+		}
+		// transform frequency to color
 		HashMap<EdgeObject, Float> mapEdgeStrokeWidth = new HashMap<>();
 		float min = GraphConstants.LOWER_BOUND_EDGE_STROKE_WIDTH;
 		float max = GraphConstants.UPPER_BOUND_EDGE_STROKE_WIDTH;
 		int minFreq = Integer.MAX_VALUE;
 		int maxFreq = 0;
 		for (EdgeObject edgeObject : frequencyEdge.keySet()) {
-			if (frequencyEdge.get(edgeObject).getTotalOccurrences() >= maxFreq) {
-				maxFreq = frequencyEdge.get(edgeObject).getTotalOccurrences();
+			if (frequencyEdge.get(edgeObject) >= maxFreq) {
+				maxFreq = frequencyEdge.get(edgeObject);
 			}
-			if (frequencyEdge.get(edgeObject).getTotalOccurrences() <= minFreq) {
-				minFreq = frequencyEdge.get(edgeObject).getTotalOccurrences();
+			if (frequencyEdge.get(edgeObject) <= minFreq) {
+				minFreq = frequencyEdge.get(edgeObject);
 			}
 		}
 		if (maxFreq == minFreq) {
@@ -391,7 +404,7 @@ public class GoalDrivenDFG extends Display {
 			float ratio = range / dataRange;
 
 			for (EdgeObject edge : frequencyEdge.keySet()) {
-				int value = frequencyEdge.get(edge).getTotalOccurrences();
+				int value = frequencyEdge.get(edge);
 				float assignedValue = min + ((value - minFreq) * ratio);
 				mapEdgeStrokeWidth.put(edge, assignedValue);
 			}
@@ -416,16 +429,29 @@ public class GoalDrivenDFG extends Display {
 		m_vis.run(GraphConstants.NODE_STROKE_COLOR_ACTION);
 	}
 
-	public void setDefaultNodeFillColor(HashMap<String, StatNodeObject> frequencyNode) {
+	public void setDefaultNodeFillColor() {
+		HashMap<String, Integer> frequencyNode = new HashMap<String, Integer>();
+		// calculate frequency node
+		for (Map.Entry<String, Map<Integer, List<Integer>>> entry : this.log.getLogSkeleton().getActivityHashTable()
+				.getActivityTable().entrySet()) {
+			String act = LogSkeletonUtils.getTrueActivityLabel(this.getLog(), entry.getKey());
+			Map<Integer, List<Integer>> allPos = entry.getValue();
+			int total = 0;
+			for (List<Integer> pos : allPos.values()) {
+				total += pos.size();
+			}
+			frequencyNode.put(act, total);
+		}
+
 		// Find the minimum and maximum values in the data array
 		int minFreq = Integer.MAX_VALUE;
 		int maxFreq = 0;
 		for (String act : frequencyNode.keySet()) {
-			if (frequencyNode.get(act).getTotalOccurences() >= maxFreq) {
-				maxFreq = frequencyNode.get(act).getTotalOccurences();
+			if (frequencyNode.get(act) >= maxFreq) {
+				maxFreq = frequencyNode.get(act);
 			}
-			if (frequencyNode.get(act).getTotalOccurences() <= minFreq) {
-				minFreq = frequencyNode.get(act).getTotalOccurences();
+			if (frequencyNode.get(act) <= minFreq) {
+				minFreq = frequencyNode.get(act);
 			}
 		}
 		HashMap<String, Color> mapActColor = new HashMap<String, Color>();
@@ -440,7 +466,7 @@ public class GoalDrivenDFG extends Display {
 			Color lightColor = GraphConstants.NODE_FILL_LIGHT_COLOR;
 
 			for (String act : frequencyNode.keySet()) {
-				int value = frequencyNode.get(act).getTotalOccurences();
+				int value = frequencyNode.get(act);
 				double normalizedValue = (value - minFreq) / valueRange;
 
 				// Interpolate the color based on the normalized value
@@ -472,29 +498,25 @@ public class GoalDrivenDFG extends Display {
 		this.configEndNode(endNode);
 	}
 
-	private void addActToTable(Graph g) {
-		List<String> listActName = new ArrayList<>();
-		for (TraceSkeleton traceSkeleton : this.log.getLogSkeleton().getLog()) {
-			for (EventSkeleton eventSkeleton : traceSkeleton.getTrace()) {
-				if (!listActName.contains(eventSkeleton.getActivity().getCurrentName())) {
-					listActName.add(eventSkeleton.getActivity().getCurrentName());
-				}
-			}
-		}
-
+	private void addActToTable(Graph g, Boolean isHighLevel) {
+		ActivityHashTable activityHashTable = this.log.getLogSkeleton().getActivityHashTable();
 		EdgeHashTable edgeHashTable = this.log.getLogSkeleton().getEdgeHashTable();
+		List<String> addedNodes = new ArrayList<String>();
 
 		// add node
-		for (String act : listActName) {
-			if (!this.log.getLogSkeleton().isInGroup(act)) {
-				Node node1 = null;
-				node1 = g.addNode();
-				if (this.log.getLogSkeleton().getGroupConfig().containsKey(act)) {
-					this.configNode(node1, act, true);
-				} else {
-					this.configNode(node1, act, false);
+		for (String act : activityHashTable.getActivityTable().keySet()) {
+			if (Arrays.asList(this.getLog().getLogSkeleton().getConfig().getSelectedActs()).contains(act)) {
+				String trueActLabel = LogSkeletonUtils.getTrueActivityLabel(this.log, act);
+				if (!addedNodes.contains(trueActLabel)) {
+					Node node1 = null;
+					node1 = g.addNode();
+					if (this.log.getLogSkeleton().isAGroupSkeleton(trueActLabel)) {
+						this.configNode(node1, trueActLabel, true);
+					} else {
+						this.configNode(node1, trueActLabel, false);
+					}
+					addedNodes.add(trueActLabel);
 				}
-				
 			}
 		}
 		// add edge
@@ -586,7 +608,6 @@ public class GoalDrivenDFG extends Display {
 		edgeData.addColumn(GraphConstants.IS_INDIRECTED_EDGE_FIELD, boolean.class);
 		return edgeData;
 	}
-
 
 	public HashMap<String, Color> getNodeStrokeColorFromMapActCat(MapActivityCategoryObject mapActCategory,
 			CategoryObject selectedCategory) {

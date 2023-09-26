@@ -1,8 +1,6 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
@@ -60,33 +58,18 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 					// for config 
 					updatedConfig.setSelectedActs(selectedActMap.get("High"));
 					updatedConfig.setUnselectedActs(selectedActMap.get("Low"));
+					gdpmLog.getLogSkeleton().setConfig(updatedConfig);
+					gdpmLog = LogSkeletonUtils.setupEdgeHashTableForHighLevelAfterChangingDisplayedActs(gdpmLog,
+							Cl01GatherAttributes.originalEdgeHashTable);
+
 					break;
 				case GROUP :
 					switch (update.getUpdateAction()) {
 						case ADD :
-
 							GroupSkeleton newGroupActObject = (GroupSkeleton) update.getUpdateObject();
 							gdpmLog = LogSkeletonUtils.groupActivitiesInLog(gdpmLog, newGroupActObject);
 
-							// for config
-							Boolean isNewGroup = true;
-							for (GroupSkeleton group : updatedConfig.getListGroupSkeletons()) {
-								if (group.getGroupName().equals(newGroupActObject.getGroupName())) {
-									isNewGroup = false;
-									break;
-								}
-							}
-							if (isNewGroup) {
-								updatedConfig.addGroup(newGroupActObject);
-							} else {
-								for (GroupSkeleton group : updatedConfig.getListGroupSkeletons()) {
-									if (group.getGroupName().equals(newGroupActObject.getGroupName())) {
-										group.getListAct().addAll(newGroupActObject.getListAct());
-										group.getListGroup().addAll(newGroupActObject.getListGroup());
-										break;
-									}
-								}
-							}
+							gdpmLog.getLogSkeleton().setConfig(updatedConfig);
 
 							break;
 						case REMOVE :
@@ -94,18 +77,15 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 							if (objClass.isArray()) {
 								String[] array = (String[]) update.getUpdateObject();
 								GroupSkeleton selectedGroup = null;
-								outerloop: for (String groupName : gdpmLog.getLogSkeleton().getGroupConfig().keySet()) {
-									if (groupName.equals(array[0])) {
-										GroupSkeleton group = gdpmLog.getLogSkeleton().getGroupConfig().get(array[0]);
+								for (GroupSkeleton group : gdpmLog.getLogSkeleton().getConfig()
+										.getListGroupSkeletons()) {
+									if (group.getGroupName().equals(array[0])) {
 										if (group.getListAct().contains(array[1])) {
-											gdpmLog = LogSkeletonUtils.removeActInGroup(gdpmLog, groupName, array[1]);
+											gdpmLog = LogSkeletonUtils.removeActInGroup(gdpmLog, group.getGroupName(),
+													array[1]);
 										} else {
-											for (GroupSkeleton groupItem : group.getListGroup()) {
-												if (groupItem.getGroupName().equals(array[1])) {
-													selectedGroup = groupItem;
-													break outerloop;
-												}
-											}
+											selectedGroup = gdpmLog.getLogSkeleton()
+													.getGroupSkeletonByGroupName(array[1]);
 
 										}
 
@@ -114,19 +94,17 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 								if (selectedGroup != null) {
 									gdpmLog = LogSkeletonUtils.ungroupGroupInLog(gdpmLog, selectedGroup);
 									gdpmLog = updateLogWithRemovingGroup(gdpmLog, selectedGroup);
-									
-									// for config 
-									List<GroupSkeleton> groups = new ArrayList<GroupSkeleton>();
-									for (GroupSkeleton group : gdpmLog.getLogSkeleton().getGroupConfig().values()) {
-										groups.add(group);
-									}
-									updatedConfig.setListGroupSkeletons(groups);
+
+//									// for config 
+//									updatedConfig.setListGroupSkeletons(
+//											gdpmLog.getLogSkeleton().getConfig().getListGroupSkeletons());
 								}
 
 							} else {
 								String groupName = (String) update.getUpdateObject();
 								GroupSkeleton selectedGroup = null;
-								for (GroupSkeleton group : gdpmLog.getLogSkeleton().getGroupConfig().values()) {
+								for (GroupSkeleton group : gdpmLog.getLogSkeleton().getConfig()
+										.getListGroupSkeletons()) {
 									if (group.getGroupName().equals(groupName)) {
 										selectedGroup = group;
 										break;
@@ -134,14 +112,18 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 								}
 								gdpmLog = LogSkeletonUtils.ungroupGroupInLog(gdpmLog, selectedGroup);
 								gdpmLog = updateLogWithRemovingGroup(gdpmLog, selectedGroup);
-								
-								// for config 
-								List<GroupSkeleton> groups = new ArrayList<GroupSkeleton>();
-								for (GroupSkeleton group : gdpmLog.getLogSkeleton().getGroupConfig().values()) {
-									groups.add(group);
-								}
-								updatedConfig.setListGroupSkeletons(groups);
+
+//								// for config 
+//								List<GroupSkeleton> groups = new ArrayList<GroupSkeleton>();
+//								for (GroupSkeleton group : gdpmLog.getLogSkeleton().getConfig()
+//										.getListGroupSkeletons()) {
+//									groups.add(group);
+//								}
+//								updatedConfig.setListGroupSkeletons(groups);
 							}
+//							gdpmLog.getLogSkeleton().setConfig(updatedConfig);
+							gdpmLog = LogSkeletonUtils.setupEdgeHashTableForHighLevelAfterChangingDisplayedActs(gdpmLog,
+									Cl01GatherAttributes.originalEdgeHashTable);
 							break;
 					}
 					break;
@@ -158,7 +140,7 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 
 			}
 		}
-
+		gdpmLog = LogSkeletonUtils.setupEdgeHashTableAfterChangingGroup(gdpmLog);
 		currentHighLogSkeleton = gdpmLog;
 		CONFIG_Update.currentConfig = updatedConfig;
 		return new IvMObjectValues().//
@@ -167,7 +149,7 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 
 	private GDPMLogSkeleton updateLogWithRemovingGroup(GDPMLogSkeleton gdpmLogSkeleton, GroupSkeleton removingGroup) {
 		// update all groups
-		for (GroupSkeleton group : gdpmLogSkeleton.getLogSkeleton().getGroupConfig().values()) {
+		for (GroupSkeleton group : gdpmLogSkeleton.getLogSkeleton().getConfig().getListGroupSkeletons()) {
 			if (group.getListGroup().contains(removingGroup)) {
 				group.getListAct().addAll(removingGroup.getListAct());
 				group.getListGroup().addAll(removingGroup.getListGroup());

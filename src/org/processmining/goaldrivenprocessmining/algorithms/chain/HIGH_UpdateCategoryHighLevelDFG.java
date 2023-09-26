@@ -36,7 +36,7 @@ public class HIGH_UpdateCategoryHighLevelDFG<C> extends DataChainLinkComputation
 	public IvMObjectValues execute(Object configuration, IvMObjectValues inputs, IvMCanceller canceller)
 			throws Exception {
 		System.out.println("--- HIGH_Cl03UpdateCategoryHighLevelDFG");
-		GoalDrivenDFG  dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.high_level_log_skeleton));
+		GoalDrivenDFG  dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.high_level_log_skeleton), true);
 //		dfg.addControlListener(new EdgeClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 //		dfg.repaintNodeStrokeColor(dfg.getNodeStrokeColorFromMapActCat(inputs.get(GoalDrivenObject.map_activity_category),
 //				inputs.get(GoalDrivenObject.selected_mode_category)));
