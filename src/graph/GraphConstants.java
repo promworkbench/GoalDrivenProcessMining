@@ -45,6 +45,7 @@ public class GraphConstants {
 	public static final String EDGE_STROKE_WIDTH_ACTION = "edgeStrokeWidth";
 	public static final String ARROW_FILL_COLOR_ACTION = "arrowFillColor";
 	public static final String TEXT_COLOR_ACTION = "textColor";
+	public static final String FONT_ACTION = "fontSize";
 	public static final String LAYOUT_ACTION = "layout";
 	public static final String NODE_SIZE_ACTION = "nodeSize";
 	

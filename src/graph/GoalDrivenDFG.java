@@ -2,6 +2,7 @@ package graph;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +40,7 @@ import prefuse.Visualization;
 import prefuse.action.ActionList;
 import prefuse.action.RepaintAction;
 import prefuse.action.assignment.ColorAction;
+import prefuse.action.assignment.FontAction;
 import prefuse.action.assignment.ShapeAction;
 import prefuse.action.assignment.StrokeAction;
 import prefuse.action.layout.graph.NodeLinkTreeLayout;
@@ -214,7 +216,7 @@ public class GoalDrivenDFG extends Display {
 		this.setDefaultNodeStrokeWidth();
 		this.setDefaultNodeFillColor();
 		this.setDefaultNodeStrokeColor();
-		this.setDefaultTextColor();
+		this.setDefaultTextColorAndSize();
 		this.setDefaultNodeSize();
 		this.setDefaultRenderer();
 	}
@@ -311,7 +313,6 @@ public class GoalDrivenDFG extends Display {
 		label.setRoundedCorner(8, 8);
 		label.setHorizontalPadding(10);
 		label.setVerticalPadding(10);
-
 		DefaultRendererFactory drf = new DefaultRendererFactory();
 		drf.setDefaultRenderer(label);
 
@@ -337,17 +338,21 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	public void setDefaultLayout() {
-		NodeLinkTreeLayout treeLayout = new NodeLinkTreeLayout("graph", Constants.ORIENT_TOP_BOTTOM, 400, 220, 300);
+		NodeLinkTreeLayout treeLayout = new NodeLinkTreeLayout("graph", Constants.ORIENT_TOP_BOTTOM, 300, 220, 300);
 		m_vis.putAction(GraphConstants.LAYOUT_ACTION, treeLayout);
 		treeLayout.setLayoutAnchor(new Point2D.Double(500, 100));
 		m_vis.run(GraphConstants.LAYOUT_ACTION);
 	}
 
-	public void setDefaultTextColor() {
+	public void setDefaultTextColorAndSize() {
 		this.textColorAction = new ColorAction(GraphConstants.NODE_GROUP, VisualItem.TEXTCOLOR,
 				GraphConstants.TEXT_COLOR);
 		m_vis.putAction(GraphConstants.TEXT_COLOR_ACTION, this.textColorAction);
 		m_vis.run(GraphConstants.TEXT_COLOR_ACTION);
+		
+		FontAction fontAction = new FontAction(GraphConstants.NODE_GROUP, new Font("Arial", Font.BOLD, 14));
+		m_vis.putAction(GraphConstants.FONT_ACTION, fontAction);
+		m_vis.run(GraphConstants.FONT_ACTION);
 	}
 
 	public void setDefaultArrowFillColor() {
@@ -586,7 +591,6 @@ public class GoalDrivenDFG extends Display {
 		} else {
 			node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
 		}
-
 	}
 
 	private Table initNodeTable() {

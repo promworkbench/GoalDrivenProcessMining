@@ -14,6 +14,7 @@ public class ConfigCards extends JPanel {
 	private final FilterConfigPanel filterConfigPanel;
 	private final ActConfigPanel actConfigPanel;
 	private final GroupConfigPanel groupConfigPanel;
+	private final LegendPanel legendPanel;
 	private final CardLayout layoutCard;
 	private final double sWidth;
 
@@ -40,6 +41,9 @@ public class ConfigCards extends JPanel {
 		// group config panel
 		groupConfigPanel = new GroupConfigPanel();
 		add(groupConfigPanel, "5");
+		// legend panel
+		legendPanel = new LegendPanel();
+		add(legendPanel, "6");
 
 		setBorder(BorderFactory.createLineBorder(Color.blue));
 		setVisible(false);
@@ -67,6 +71,10 @@ public class ConfigCards extends JPanel {
 
 	public GroupConfigPanel getGroupConfigPanel() {
 		return groupConfigPanel;
+	}
+
+	public LegendPanel getLegendPanel() {
+		return legendPanel;
 	}
 
 	public double getsWidth() {

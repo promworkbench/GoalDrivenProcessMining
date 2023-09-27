@@ -100,7 +100,7 @@ public class GoalDrivenController {
 		List<GroupSkeleton> selectedGroup = new ArrayList<>();
 		Visualization visHigh = panel.getHighDfgPanel().getVisualization();
 		Visualization visLow = panel.getLowDfgPanel().getVisualization();
-		
+
 		List<VisualItem> allVisualItemsHigh = GraphNodeUtils.getAllNodes(visHigh);
 		for (VisualItem item : allVisualItemsHigh) {
 			if (item.getBoolean(GraphConstants.SELECT_FIELD)) {
@@ -118,7 +118,7 @@ public class GoalDrivenController {
 						}
 					}
 				}
-				
+
 			}
 		}
 		List<VisualItem> allVisualItemsLow = GraphNodeUtils.getAllNodes(visLow);
@@ -128,7 +128,7 @@ public class GoalDrivenController {
 			}
 		}
 		GroupSkeleton newGroupSkeleton = new GroupSkeleton(groupName, selectedAct, selectedGroup);
-		
+
 		UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.ADD, newGroupSkeleton);
 		chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
 
@@ -177,7 +177,7 @@ public class GoalDrivenController {
 					panel.setHighDfgPanel(inputs.get(GoalDrivenObject.high_level_dfg));
 					panel.getHighDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 					panel.getHighDfgPanel().setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
-//					panel.getHighDfgPanel().updateDFG(inputs.get(GoalDrivenObject.high_level_dfg));
+					//					panel.getHighDfgPanel().updateDFG(inputs.get(GoalDrivenObject.high_level_dfg));
 					panel.getContentLeftPanel().add(panel.getHighDfgPanel(), BorderLayout.CENTER);
 					panel.revalidate();
 					panel.repaint();
@@ -214,7 +214,7 @@ public class GoalDrivenController {
 						panel.getLowDfgPanel().setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 						panel.getContentRightPanel().add(panel.getLowDfgPanel(), BorderLayout.CENTER);
 						isLowClear = false;
-						
+
 					} else {
 						panel.getContentRightPanel().remove(panel.getLowDfgPanel());
 						GDPMLogSkeleton log = null;
@@ -238,7 +238,7 @@ public class GoalDrivenController {
 						panel.repaint();
 					}
 				}
-				
+
 			}
 
 			public void invalidate(GoalDrivenPanel panel) {
@@ -401,10 +401,10 @@ public class GoalDrivenController {
 				updateMap.put("High", attInclude);
 				updateMap.put("Low", attExclude);
 				UpdateConfig updateConfig = new UpdateConfig(UpdateType.SELECTED_ACT, updateMap);
-				
+
 				// update
 				chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
-//				panel.getLowDfgTitle().setText("");
+				//				panel.getLowDfgTitle().setText("");
 
 			}
 		});
@@ -701,6 +701,27 @@ public class GoalDrivenController {
 						}
 					}
 				});
+		// legend button
+		panel.getControlBar().getLegendButton().addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setVisible(true);
+				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "6");
+			}
+		});
+		// legend done button
+		panel.getConfigCards().getLegendPanel().getDoneButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setVisible(false);
+			}
+		});
+
+		// legend cancel button
+		panel.getConfigCards().getLegendPanel().getCancelButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setVisible(false);
+			}
+		});
 
 	}
 

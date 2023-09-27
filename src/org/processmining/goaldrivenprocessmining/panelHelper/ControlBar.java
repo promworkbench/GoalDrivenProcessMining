@@ -14,7 +14,7 @@ import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
 import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
 
-public class ControlBar extends JPanel{
+public class ControlBar extends JPanel {
 	private final JPanel configPanel;
 	private final JButton modeButton;
 	private final JButton filterButton;
@@ -23,15 +23,15 @@ public class ControlBar extends JPanel{
 	private final JButton groupButton;
 	private final JPanel expandPanel;
 	private final JButton expandButton;
-	
-	
+	private final JButton legendButton;
+
 	public ControlBar() {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		double sWidth = screenSize.getWidth();
 		double controllerBarSize[][] = { { 0.9 * sWidth, 0.1 * sWidth },
 				{ TableLayoutConstants.MINIMUM, TableLayoutConstants.FILL } };
 		setLayout(new TableLayout(controllerBarSize));
-		
+
 		//config panel: filter, activity, case buttons
 		configPanel = new JPanel();
 		configPanel.setBackground(GoalDrivenConstants.CONTROL_BAR_BACKGROUND_COLOR);
@@ -43,12 +43,14 @@ public class ControlBar extends JPanel{
 			actButton = this.drawButton("Activity Display");
 			actConfigButton = this.drawButton("Activity Configuration");
 			groupButton = this.drawButton("Group");
-			
+			legendButton = this.drawButton("Legend");
+
 			configPanel.add(modeButton);
 			configPanel.add(filterButton);
 			configPanel.add(actButton);
 			configPanel.add(actConfigButton);
 			configPanel.add(groupButton);
+			configPanel.add(legendButton);
 
 		}
 		expandPanel = new JPanel();
@@ -59,24 +61,24 @@ public class ControlBar extends JPanel{
 			expandPanel.add(expandButton);
 		}
 	}
-	
+
 	public JButton drawButton(String name) {
 		JButton button = new JButton(name);
 		button.setBackground(GoalDrivenConstants.BUTTON_BACKGROUND_COLOR);
 		button.setForeground(GoalDrivenConstants.BUTTON_FOREGROUND_COLOR);
-		
-		button.addMouseListener(new MouseAdapter() {
-		    @Override
-		    public void mouseEntered(MouseEvent e) {
-		        button.setBackground(GoalDrivenConstants.BUTTON_HOVER_BACKGROUND_COLOR); // Change background color when mouse enters the button
-		        button.setForeground(GoalDrivenConstants.BUTTON_HOVER_FOREGROUND_COLOR); // Change text color when mouse enters the button
-		    }
 
-		    @Override
-		    public void mouseExited(MouseEvent e) {
-		        button.setBackground(GoalDrivenConstants.BUTTON_BACKGROUND_COLOR); // Restore original background color when mouse exits the button
-		        button.setForeground(GoalDrivenConstants.BUTTON_FOREGROUND_COLOR); // Restore original text color when mouse exits the button
-		    }
+		button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				button.setBackground(GoalDrivenConstants.BUTTON_HOVER_BACKGROUND_COLOR); // Change background color when mouse enters the button
+				button.setForeground(GoalDrivenConstants.BUTTON_HOVER_FOREGROUND_COLOR); // Change text color when mouse enters the button
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				button.setBackground(GoalDrivenConstants.BUTTON_BACKGROUND_COLOR); // Restore original background color when mouse exits the button
+				button.setForeground(GoalDrivenConstants.BUTTON_FOREGROUND_COLOR); // Restore original text color when mouse exits the button
+			}
 		});
 		return button;
 	}
@@ -112,5 +114,9 @@ public class ControlBar extends JPanel{
 	public JButton getModeButton() {
 		return modeButton;
 	}
-	
+
+	public JButton getLegendButton() {
+		return legendButton;
+	}
+
 }
