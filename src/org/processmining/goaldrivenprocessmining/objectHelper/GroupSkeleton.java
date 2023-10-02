@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Objects;
 
 public class GroupSkeleton implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3141362801968131142L;
 	private String groupName;
 	private List<String> listAct;
 	private List<GroupSkeleton> listGroup;

@@ -10,6 +10,10 @@ import org.apache.commons.lang3.SerializationUtils;
 
 
 public class ActivityHashTable implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1830613519325919243L;
 	private Map<String, Map<Integer, List<Integer>>> activityTable;
 
     public ActivityHashTable() {

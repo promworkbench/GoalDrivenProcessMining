@@ -20,22 +20,23 @@ public class CustomColorNodeFillAction extends ColorAction {
 
 	public int getColor(VisualItem item) {
 		if (item instanceof Node) {
-			Table table = (Table) item.getVisualization().getSourceData(this.m_group);
-			int rowIndex = item.getRow();
-			if (rowIndex == 0 || rowIndex == 1) {
-				table.set(rowIndex, GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD,
-						GraphConstants.BEGIN_END_NODE_COLOR);
-				return GraphConstants.BEGIN_END_NODE_COLOR;
+			if (!item.getBoolean(GraphConstants.IS_INVISIBLE)) {
+				Table table = (Table) item.getVisualization().getSourceData(this.m_group);
+				int rowIndex = item.getRow();
+				if (rowIndex == 0 || rowIndex == 1) {
+					table.set(rowIndex, GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD,
+							GraphConstants.BEGIN_END_NODE_COLOR);
+					return GraphConstants.BEGIN_END_NODE_COLOR;
+				} else {
+					String label = table.getString(rowIndex, GraphConstants.LABEL_FIELD);
+					table.set(rowIndex, GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD,
+							ColorLib.color(mapActColor.get(label)));
+					return ColorLib.color(mapActColor.get(label));
+				}
 			} else {
-				String label = table.getString(rowIndex, GraphConstants.LABEL_FIELD);
-				table.set(rowIndex, GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD,
-						ColorLib.color(mapActColor.get(label)));
-				return ColorLib.color(mapActColor.get(label));
+				return super.getColor(item);
 			}
 
-			// Get the color based on the label index
-
-			//            return ColorLib.color(Color.CYAN);
 		} else {
 			return super.getColor(item);
 		}

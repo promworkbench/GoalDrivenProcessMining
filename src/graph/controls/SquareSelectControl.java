@@ -68,7 +68,7 @@ public class SquareSelectControl extends ControlAdapter {
 		List<VisualItem> allVisualItems = GraphNodeUtils.getAllNodes(vis);
 		if (rectangle != null) {
 			for (VisualItem item : allVisualItems) {
-				if (isInsideRectangle(item, rectangle)) {
+				if (isInsideRectangle(item, rectangle)&& !item.getBoolean(GraphConstants.IS_INVISIBLE)) {
 					nodeTable.set(item.getRow(), GraphConstants.SELECT_FIELD, true);
 					item.setFillColor(GraphConstants.SELECTED_NODE_FILL_COLOR);
 				}

@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class ActivitySkeleton implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3078117451196558784L;
 	private String originalName;
 	private String currentName;
 
@@ -45,7 +49,7 @@ public class ActivitySkeleton implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		ActivitySkeleton other = (ActivitySkeleton) obj;
-		return Objects.equals(originalName, other.originalName);
+		return Objects.equals(currentName, other.currentName);
 	}
 
 	public String toString() {

@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TraceSkeleton implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2008570674600305009L;
 	private List<EventSkeleton> trace;
 	
 

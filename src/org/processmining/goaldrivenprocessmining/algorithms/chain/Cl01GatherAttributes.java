@@ -9,7 +9,6 @@ import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
-import org.processmining.goaldrivenprocessmining.objectHelper.ActivityIndexMapper;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
@@ -80,8 +79,6 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 
 		GDPMLogSkeleton gdpmLogSkeleton = new GDPMLogSkeleton(log);
 		originalEdgeHashTable = gdpmLogSkeleton.getLogSkeleton().getEdgeHashTable();
-		ActivityIndexMapper activityIndexMapper = new ActivityIndexMapper();
-		activityIndexMapper.assignActivity(allAct);
 		HIGH_MakeHighLevelLog.currentHighLogSkeleton = null;
 
 		return new IvMObjectValues().//

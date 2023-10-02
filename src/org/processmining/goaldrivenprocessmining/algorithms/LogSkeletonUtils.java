@@ -27,8 +27,6 @@ import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.LogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.TraceSkeleton;
-import org.processmining.goaldrivenprocessmining.objectHelper._GDPMLog;
-import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
 
 public class LogSkeletonUtils {
 
@@ -91,8 +89,8 @@ public class LogSkeletonUtils {
 		for (EdgeObject edgeObject : gdpmLogSkeleton.getLogSkeleton().getEdgeHashTable().getEdgeTable().keySet()) {
 			String node1TrueLabel = getTrueActivityLabel(gdpmLogSkeleton, edgeObject.getNode1().getOriginalName());
 			String node2TrueLabel = getTrueActivityLabel(gdpmLogSkeleton, edgeObject.getNode2().getOriginalName());
-			ActivitySkeleton newNode1 = new ActivitySkeleton(node1TrueLabel, node1TrueLabel);
-			ActivitySkeleton newNode2 = new ActivitySkeleton(node2TrueLabel, node2TrueLabel);
+			ActivitySkeleton newNode1 = new ActivitySkeleton(edgeObject.getNode1().getOriginalName(), node1TrueLabel);
+			ActivitySkeleton newNode2 = new ActivitySkeleton(edgeObject.getNode2().getOriginalName(), node2TrueLabel);
 
 			EdgeObject newEdge = new EdgeObject(newNode1, newNode2);
 			if (newEdgeHashTable.getEdgeTable().containsKey(newEdge)) {
@@ -218,7 +216,7 @@ public class LogSkeletonUtils {
 			if (newEdgeHashTable.getEdgeTable().keySet().contains(edge)) {
 				edge.setIsIndirected(true);
 				newEdgeHashTable.addEdge(edge, affectedEdges.getEdgePositions(edge));
-				Map<Integer, List<Integer[]>> allPos =  newEdgeHashTable.getEdgePositions(edge);
+				Map<Integer, List<Integer[]>> allPos = newEdgeHashTable.getEdgePositions(edge);
 				newEdgeHashTable.getEdgeTable().remove(edge);
 				newEdgeHashTable.getEdgeTable().put(edge, allPos);
 			} else {
@@ -332,7 +330,7 @@ public class LogSkeletonUtils {
 		newGdpmLog.getLogSkeleton().setEdgeHashTable(
 				LogSkeletonUtils.getEdgeHashTableForDisplayedLogSkeleton(newGdpmLog.getLogSkeleton()));
 		//		newGdpmLog.setStatObject(StatUtils.getStat(newGdpmLog.getLogSkeleton()));
-
+		newGdpmLog = LogSkeletonUtils.setupEdgeHashTableAfterChangingGroup(newGdpmLog);
 		return newGdpmLog;
 	}
 
@@ -399,14 +397,14 @@ public class LogSkeletonUtils {
 	public static LogSkeleton changeLogSkeletonWithUngroupForGroupElement(LogSkeleton logSkeleton, String groupName,
 			String act) {
 		if (logSkeleton.getActivityHashTable().getActivityTable().containsKey(act)) {
-//			logSkeleton = changeLogSkeletonWithUngroup(logSkeleton, act);
+			//			logSkeleton = changeLogSkeletonWithUngroup(logSkeleton, act);
 			// remove in group
 			if (logSkeleton.getGroupSkeletonByGroupName(groupName) != null) {
 				logSkeleton.getGroupSkeletonByGroupName(groupName).getListAct().remove(act);
 			}
 
 		} else if (logSkeleton.isAGroupSkeleton(act)) {
-//			logSkeleton = changeLogSkeletonWithUngroup(logSkeleton, logSkeleton.getGroupSkeletonByGroupName(act));
+			//			logSkeleton = changeLogSkeletonWithUngroup(logSkeleton, logSkeleton.getGroupSkeletonByGroupName(act));
 			// remove group in group config and in log
 			//			logSkeleton.getGroupConfig().get(groupName).getListGroup().remove(logSkeleton.getGroupConfig().get(act));
 			//			logSkeleton.getGroupConfig().remove(act);
@@ -420,9 +418,9 @@ public class LogSkeletonUtils {
 
 	public static LogSkeleton changeLogSkeletonWithUngroup(LogSkeleton logSkeleton, GroupSkeleton groupSkeleton) {
 		// change activity name
-//		for (String affectedAct : groupSkeleton.getListAct()) {
-//			logSkeleton = changeLogSkeletonWithUngroup(logSkeleton, affectedAct);
-//		}
+		//		for (String affectedAct : groupSkeleton.getListAct()) {
+		//			logSkeleton = changeLogSkeletonWithUngroup(logSkeleton, affectedAct);
+		//		}
 		for (GroupSkeleton group : groupSkeleton.getListGroup()) {
 			changeLogSkeletonWithUngroup(logSkeleton, group);
 		}
@@ -446,13 +444,13 @@ public class LogSkeletonUtils {
 	public static LogSkeleton changeLogSkeletonWithGroup(LogSkeleton logSkeleton, GroupSkeleton groupSkeleton) {
 
 		logSkeleton.addGroup(groupSkeleton);
-//		for (String act : groupSkeleton.getListAct()) {
-//			logSkeleton = changeLogSkeletonWithGroup(logSkeleton, act, groupSkeleton.getGroupName());
-//
-//		}
-//		for (GroupSkeleton affectedGroup : groupSkeleton.getListGroup()) {
-//			logSkeleton = changeLogSkeletonWithGroup(logSkeleton, affectedGroup, groupSkeleton.getGroupName());
-//		}
+		//		for (String act : groupSkeleton.getListAct()) {
+		//			logSkeleton = changeLogSkeletonWithGroup(logSkeleton, act, groupSkeleton.getGroupName());
+		//
+		//		}
+		//		for (GroupSkeleton affectedGroup : groupSkeleton.getListGroup()) {
+		//			logSkeleton = changeLogSkeletonWithGroup(logSkeleton, affectedGroup, groupSkeleton.getGroupName());
+		//		}
 
 		return logSkeleton;
 
@@ -474,9 +472,9 @@ public class LogSkeletonUtils {
 
 	private static LogSkeleton changeLogSkeletonWithGroup(LogSkeleton logSkeleton, GroupSkeleton oldGroup,
 			String groupName) {
-//		for (String act : oldGroup.getListAct()) {
-//			logSkeleton = changeLogSkeletonWithGroup(logSkeleton, act, groupName);
-//		}
+		//		for (String act : oldGroup.getListAct()) {
+		//			logSkeleton = changeLogSkeletonWithGroup(logSkeleton, act, groupName);
+		//		}
 		for (GroupSkeleton group : oldGroup.getListGroup()) {
 			logSkeleton = changeLogSkeletonWithGroup(logSkeleton, group, groupName);
 		}
@@ -674,90 +672,6 @@ public class LogSkeletonUtils {
 		return activityHashTable;
 	}
 
-	public static void setupEdgeHashTable(LogSkeleton logSkeleton) {
-		EdgeHashTable edgeHashTable = new EdgeHashTable();
-		for (int traceNum = 0; traceNum < logSkeleton.getLog().size(); traceNum++) {
-			TraceSkeleton traceSkeleton = logSkeleton.getLog().get(traceNum);
-			ActivitySkeleton act1 = new ActivitySkeleton("begin", "begin");
-			int act1Index = -1;
-			ActivitySkeleton act2 = new ActivitySkeleton("", "");
-
-			for (int eventNum = 0; eventNum < traceSkeleton.getTrace().size(); eventNum++) {
-				EventSkeleton eventSkeleton = traceSkeleton.getTrace().get(eventNum);
-				if (eventSkeleton.getIsDisplayed()) {
-					act2 = eventSkeleton.getActivity();
-					EdgeObject edge = new EdgeObject(act1, act2);
-					if (act1Index != eventNum - 1) {
-						edge.setIsIndirected(true);
-					}
-					edgeHashTable.addEdge(edge, traceNum, act1Index, eventNum);
-					act1 = eventSkeleton.getActivity();
-					act1Index = eventNum;
-				}
-				if (eventNum == traceSkeleton.getTrace().size() - 1) {
-					act2 = new ActivitySkeleton("end", "end");
-					EdgeObject edge = new EdgeObject(act1, act2);
-					if (act1Index != traceSkeleton.getTrace().size() - 1) {
-						edge.setIsIndirected(true);
-					}
-					edgeHashTable.addEdge(edge, traceNum, act1Index, -2);
-				}
-
-			}
-		}
-
-		Set<EdgeObject> allEdgeObjects = edgeHashTable.getEdgeTable().keySet();
-
-		for (EdgeObject edgeObject : allEdgeObjects) {
-			if (!edgeObject.getIsIndirected()) {
-				for (EdgeObject edgeObject2 : allEdgeObjects) {
-					if (edgeObject2.equals(edgeObject)) {
-						if (edgeObject2.getIsIndirected()) {
-							// move all pos from false -> true
-							Map<Integer, List<Integer[]>> allFalsePos = edgeHashTable.getEdgePositions(edgeObject);
-							edgeHashTable.addEdge(edgeObject2, allFalsePos);
-							edgeHashTable.getEdgeTable().remove(edgeObject);
-						}
-					}
-				}
-			}
-		}
-
-		logSkeleton.setEdgeHashTable(edgeHashTable);
-	}
-
-	public static _GDPMLog setUpMapNodeType(_GDPMLog gdpmLog, List<String> listGroupActivities) {
-		Map<String, NodeType> mapNodeType = new HashMap<>();
-		XLog log = gdpmLog.getLog();
-		List<String> allActivities = getAllUniqueActivities(log);
-		if (!listGroupActivities.isEmpty()) {
-			for (String act : allActivities) {
-				if (listGroupActivities.contains(act)) {
-					mapNodeType.put(act, NodeType.GROUP_NODE);
-				} else {
-					mapNodeType.put(act, NodeType.ACT_NODE);
-				}
-			}
-		} else {
-			for (String act : allActivities) {
-				mapNodeType.put(act, NodeType.ACT_NODE);
-			}
-		}
-		if (gdpmLog.getMapNodeType() == null) {
-			gdpmLog.setMapNodeType(mapNodeType);
-		} else {
-			for (String key : mapNodeType.keySet()) {
-				if (gdpmLog.getMapNodeType().keySet().contains(key)) {
-					gdpmLog.getMapNodeType().replace(key, mapNodeType.get(key));
-				} else {
-					gdpmLog.getMapNodeType().put(key, mapNodeType.get(key));
-				}
-			}
-		}
-
-		return gdpmLog;
-	}
-
 	public static List<List<Integer>> groupConsecutiveNumbers(List<Integer> numbers) {
 		List<List<Integer>> result = new ArrayList<>();
 		List<Integer> currentGroup = new ArrayList<>();
@@ -777,16 +691,6 @@ public class LogSkeletonUtils {
 		}
 
 		return result;
-	}
-
-	public static List<EdgeObject> getListIndirectedEdgesFromMap(Map<Integer, List<Integer>> allPos,
-			LogSkeleton logSkeleton) {
-		List<EdgeObject> listIndirectedEdges = new ArrayList<EdgeObject>();
-		for (Map.Entry<Integer, List<Integer>> entry : allPos.entrySet()) {
-			TraceSkeleton trace = logSkeleton.getLog().get(entry.getKey());
-			LogSkeletonUtils.addIndirectedEdgesFromTrace(trace, listIndirectedEdges);
-		}
-		return listIndirectedEdges;
 	}
 
 	public static LogSkeleton setupListIndirectedEdgesFromLogSkeleton(LogSkeleton logSkeleton) {
@@ -981,17 +885,4 @@ public class LogSkeletonUtils {
 		}
 	}
 
-	public static List<String> getAllUniqueActivities(XLog log) {
-		List<String> res = new ArrayList<>();
-		String classifier = log.getClassifiers().get(0).getDefiningAttributeKeys()[0].toString();
-		for (XTrace trace : log) {
-			for (XEvent event : trace) {
-				String value = event.getAttributes().get(classifier).toString();
-				if (!res.contains(value)) {
-					res.add(value);
-				}
-			}
-		}
-		return res;
-	}
 }

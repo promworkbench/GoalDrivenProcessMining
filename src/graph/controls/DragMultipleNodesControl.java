@@ -3,7 +3,10 @@ package graph.controls;
 import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
@@ -26,12 +29,40 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 	private boolean fixOnMouseOver = true;
 	protected boolean repaint = true;
 	final InGroupPredicate nodeFilter = new InGroupPredicate(GraphConstants.NODE_GROUP);
-	
+
 	private Display display;
+
+	public static Map<VisualItem, VisualItem> mapInvisibleNodes = new HashMap<>();
+	public static Map<VisualItem, List<VisualItem>> mapAffectedNodes = new HashMap<>();
 
 	public DragMultipleNodesControl(Display display) {
 		this.display = display;
-		
+	}
+
+	public void initInvisibleNodes() {
+		List<VisualItem> allNodes = GraphNodeUtils.getAllNodes(this.display.getVisualization());
+		for (VisualItem invisibleNode : allNodes) {
+			if (invisibleNode.getBoolean(GraphConstants.IS_INVISIBLE)) {
+				for (VisualItem item2 : allNodes) {
+					if (invisibleNode.getString(GraphConstants.LABEL_FIELD)
+							.equals(item2.getString(GraphConstants.LABEL_FIELD))) {
+						invisibleNode.setX(item2.getX());
+						invisibleNode.setY(item2.getY());
+						mapInvisibleNodes.put(item2, invisibleNode);
+						if (mapAffectedNodes.containsKey(invisibleNode)) {
+							List<VisualItem> vItems = mapAffectedNodes.get(invisibleNode);
+							vItems.add(item2);
+							mapAffectedNodes.replace(invisibleNode, vItems);
+						} else {
+							List<VisualItem> vItems = new ArrayList<>();
+							vItems.add(item2);
+							mapAffectedNodes.put(invisibleNode, vItems);
+						}
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	public void setFixPositionOnMouseOver(boolean s) {
@@ -100,7 +131,7 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 			if (resetItem)
 				item.setFixed(wasFixed);
 			dragged = false;
-			
+
 		}
 	}
 
@@ -113,32 +144,49 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 		double dx = temp.getX() - down.getX();
 		double dy = temp.getY() - down.getY();
 		if (nodeFilter.getBoolean(item)) {
-			if (item.getTable().getBoolean(item.getRow(), GraphConstants.SELECT_FIELD)) {
+			if (item.getBoolean(GraphConstants.SELECT_FIELD)) {
 				List<VisualItem> listSelectedNodes = GraphNodeUtils
 						.getSelectedNodes(((Display) e.getComponent()).getVisualization(), item.getTable());
 				for (VisualItem selectedItem : listSelectedNodes) {
-					double xSelected = selectedItem.getX();
-					double ySelected = selectedItem.getY();
-					selectedItem.setStartX(xSelected);
-					selectedItem.setStartY(ySelected);
-					selectedItem.setX(xSelected + dx);
-					selectedItem.setY(ySelected + dy);
-					selectedItem.setEndX(xSelected + dx);
-					selectedItem.setEndY(ySelected + dy);
+					this.updatePosNode(selectedItem, dx, dy);
+					if (this.mapInvisibleNodes.containsKey(selectedItem)) {
+						VisualItem inviNode = this.mapInvisibleNodes.get(selectedItem);
+						this.updatePosNode(inviNode, dx, dy);
+					}
 				}
 
-			} else {
-				double x = item.getX();
-				double y = item.getY();
-				item.setStartX(x);
-				item.setStartY(y);
-				item.setX(x + dx);
-				item.setY(y + dy);
-				item.setEndX(x + dx);
-				item.setEndY(y + dy);
+			} else if (item.getBoolean(GraphConstants.IS_INVISIBLE)) {
+				List<VisualItem> vItems = DragMultipleNodesControl.mapAffectedNodes.get(item);
+				for (VisualItem vItem : vItems) {
+					if (vItem.getBoolean(GraphConstants.SELECT_FIELD)) {
+						List<VisualItem> listSelectedNodes = GraphNodeUtils
+								.getSelectedNodes(((Display) e.getComponent()).getVisualization(), item.getTable());
+						for (VisualItem selectedItem : listSelectedNodes) {
+							this.updatePosNode(selectedItem, dx, dy);
+							if (this.mapInvisibleNodes.containsKey(selectedItem)) {
+								VisualItem inviNode = this.mapInvisibleNodes.get(selectedItem);
+								this.updatePosNode(inviNode, dx, dy);
+							}
+						}
+					} else {
+						this.updatePosNode(item, dx, dy);
+						this.updatePosNode(vItem, dx, dy);
+					}
+				}
+				
+			}
+
+			else {
+				this.updatePosNode(item, dx, dy);
+				if (this.mapAffectedNodes.containsKey(item)) {
+					List<VisualItem> vItems = this.mapAffectedNodes.get(item);
+					for (VisualItem vItem : vItems) {
+						this.updatePosNode(vItem, dx, dy);
+					}
+				}
 			}
 		}
-		
+
 		if (repaint)
 			item.getVisualization().repaint();
 
@@ -146,6 +194,17 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 		if (action != null)
 			d.getVisualization().run(action);
 
+	}
+
+	private void updatePosNode(VisualItem item, double dx, double dy) {
+		double x = item.getX();
+		double y = item.getY();
+		item.setStartX(x);
+		item.setStartY(y);
+		item.setX(x + dx);
+		item.setY(y + dy);
+		item.setEndX(x + dx);
+		item.setEndY(y + dy);
 	}
 
 	public void tableChanged(Table t, int start, int end, int col, int type) {

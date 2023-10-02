@@ -6,6 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Config implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -9013552664319417538L;
 	private List<GroupSkeleton> listGroupSkeletons;
 	private MapActivityCategoryObject mapActivityCategoryObject;
 	private double highActThreshold;

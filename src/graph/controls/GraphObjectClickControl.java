@@ -4,7 +4,6 @@ import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.GUI_DisplayGroup;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChain;
 
@@ -32,34 +31,28 @@ public class GraphObjectClickControl extends ControlAdapter {
 			if (edgeFilter.getBoolean(item)) {
 				item.setStrokeColor(GraphConstants.CLICK_EDGE_STROKE_COLOR);
 				EdgeItem edge = (EdgeItem) item;
-				String sourceNode = 
-						edge.getSourceItem().getString(GraphConstants.LABEL_FIELD).equals(GraphConstants.BEGIN_NODE_NAME)
+				String sourceNode = edge.getSourceItem().getString(GraphConstants.LABEL_FIELD)
+						.equals(GraphConstants.BEGIN_NODE_NAME)
 								? "begin"
-								: edge.getSourceItem().getString(GraphConstants.LABEL_FIELD).equals(GraphConstants.END_NODE_NAME) 
-									? "end"
-									: edge.getSourceItem().getString(GraphConstants.LABEL_FIELD);
-				String targetNode = edge.getTargetItem().getString(GraphConstants.LABEL_FIELD).equals(GraphConstants.BEGIN_NODE_NAME)
+								: edge.getSourceItem().getString(GraphConstants.LABEL_FIELD)
+										.equals(GraphConstants.END_NODE_NAME) ? "end"
+												: edge.getSourceItem().getString(GraphConstants.LABEL_FIELD);
+				String targetNode = edge.getTargetItem().getString(GraphConstants.LABEL_FIELD)
+						.equals(GraphConstants.BEGIN_NODE_NAME)
 								? "begin"
-								: edge.getTargetItem().getString(GraphConstants.LABEL_FIELD).equals(GraphConstants.END_NODE_NAME) 
-									? "end"
-									: edge.getTargetItem().getString(GraphConstants.LABEL_FIELD);
+								: edge.getTargetItem().getString(GraphConstants.LABEL_FIELD)
+										.equals(GraphConstants.END_NODE_NAME) ? "end"
+												: edge.getTargetItem().getString(GraphConstants.LABEL_FIELD);
 				HashMap<String, Object> passValues = new HashMap<String, Object>();
 				passValues.put("source", sourceNode);
 				passValues.put("target", targetNode);
 				if (this.chain != null) {
 					this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
 				}
-			}
-			if (nodeFilter.getBoolean(item)) {
+			} else if (nodeFilter.getBoolean(item)) {
 				if (item.getString(GraphConstants.NODE_TYPE_FIELD).equals("ACT_NODE")) {
 					if (this.chain != null) {
 						this.chain.setObject(GoalDrivenObject.selected_node,
-								item.getString(GraphConstants.LABEL_FIELD));
-					}
-				} else if (item.getString(GraphConstants.NODE_TYPE_FIELD).equals("GROUP_NODE")) {
-					if (this.chain != null) {
-						GUI_DisplayGroup.isSelected = true;
-						this.chain.setObject(GoalDrivenObject.selected_group,
 								item.getString(GraphConstants.LABEL_FIELD));
 					}
 				}

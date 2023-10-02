@@ -27,7 +27,6 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.CONFIG_Update;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.GUI_DisplayGroup;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
@@ -35,6 +34,7 @@ import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.SelectedGroup;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateAction;
@@ -62,14 +62,12 @@ import prefuse.visual.VisualItem;
 public class GoalDrivenController {
 	private static GoalDrivenPanel panel;
 	private static DataChain<GoalDrivenConfiguration> chain;
-	private final GUI_DisplayGroup gui_DisplayGroup;
 
 	public GoalDrivenController(final PluginContext context, final GoalDrivenConfiguration configuration,
 			final XLog log, final ProMCanceller canceller) {
 
 		this.panel = configuration.getPanel();
 		this.chain = configuration.getChain();
-		this.gui_DisplayGroup = new GUI_DisplayGroup(this.chain);
 
 		//initialise gui handlers
 		initGui(canceller, configuration);
@@ -82,6 +80,11 @@ public class GoalDrivenController {
 		});
 		//start the chain
 		this.chain.setFixedObject(IvMObject.input_log, log);
+	}
+
+	public static void displaySelectedGroup(GroupSkeleton groupSkeleton, Boolean isHighLevel) {
+		SelectedGroup selectedGroup = new SelectedGroup(groupSkeleton, isHighLevel);
+		chain.setObject(GoalDrivenObject.selected_group, selectedGroup);
 	}
 
 	public static void ungroupGroupConfigObject(String groupName) {
@@ -135,19 +138,13 @@ public class GoalDrivenController {
 	}
 
 	protected void initGui(final ProMCanceller canceller, final GoalDrivenConfiguration configuration) {
-
 		initGuiUniqueValue();
-
 		initGuiControlBar();
-
 		initGuiSidePanel();
-
 		initGuiMiner();
-
-		initGuiGraph();
-		initGuiGraph1();
-		initGuiPopup();
-
+		initHighLevelGraph();
+		initLowLevelGraph();
+		initGroupGraph();
 	}
 
 	protected void initGuiMiner() {
@@ -160,7 +157,7 @@ public class GoalDrivenController {
 
 	}
 
-	protected void initGuiGraph() {
+	protected void initHighLevelGraph() {
 		//update layout
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
 			public String getName() {
@@ -188,15 +185,13 @@ public class GoalDrivenController {
 			}
 		});
 
-		chain.register(this.gui_DisplayGroup);
-
 	}
 
-	protected void initGuiGraph1() {
+	protected void initLowLevelGraph() {
 		//update layout
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
 			public String getName() {
-				return "edge dfg model dot";
+				return "low level graph update to panel";
 			}
 
 			public IvMObject<?>[] createInputObjects() {
@@ -252,6 +247,32 @@ public class GoalDrivenController {
 
 		//mode switch
 
+	}
+
+	protected void initGroupGraph() {
+		//update layout
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+			public String getName() {
+				return "update the graph of selected group to panel";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.low_level_dfg,
+						GoalDrivenObject.selected_source_target_node };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//here, we could put the graph on blank, but that is annoying
+				//				Dot dot = new Dot();
+				//				DotNode dotNode = dot.addNode("...");
+				//				dotNode.setOption("shape", "plaintext");
+				//				panel.getGraph().changeDot(dot, true);
+			}
+		});
 	}
 
 	protected void initGuiControlBar() {
@@ -722,10 +743,6 @@ public class GoalDrivenController {
 				panel.getConfigCards().setVisible(false);
 			}
 		});
-
-	}
-
-	protected void initGuiPopup() {
 
 	}
 

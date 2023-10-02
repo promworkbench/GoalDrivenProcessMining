@@ -19,7 +19,7 @@ import javax.swing.event.DocumentListener;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenController;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 
-public class PopupContentPanel extends JPanel {
+public class PopupGroupContentPanel extends JPanel {
 	private JPanel mainPanel;
 	private PopupGroupPanel groupPanel;
 	private PopupCategoryPanel categoryPanel;
@@ -30,7 +30,7 @@ public class PopupContentPanel extends JPanel {
 	private JButton doneButton;
 	private JButton cancelButton;
 
-	public PopupContentPanel(JPopupMenu popupMenu) {
+	public PopupGroupContentPanel(JPopupMenu popupMenu) {
 		setLayout(new BorderLayout());
 
 		mainPanel = new JPanel(new FlowLayout());
@@ -103,7 +103,7 @@ public class PopupContentPanel extends JPanel {
 					}
 					GoalDrivenController.addGroupConfigObject(groupName);
 					// Hide the PopupContentPanel
-					PopupContentPanel.this.setVisible(false);
+					PopupGroupContentPanel.this.setVisible(false);
 					popupMenu.setVisible(false);
 				}
 				// Choose category
@@ -118,7 +118,7 @@ public class PopupContentPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// Hide the PopupContentPanel
-				PopupContentPanel.this.setVisible(false);
+				PopupGroupContentPanel.this.setVisible(false);
 				popupMenu.setVisible(false);
 			}
 		});
@@ -137,80 +137,6 @@ public class PopupContentPanel extends JPanel {
 			@Override
 			public void changedUpdate(DocumentEvent e) {
 				// Style change, not used for plain text
-			}
-		});
-		groupButton.setBackground(Color.GREEN);
-		add(buttonPanel, BorderLayout.SOUTH);
-	}
-
-	public PopupContentPanel(Popup3DotsButton threeDotsButton) {
-		setLayout(new BorderLayout());
-
-		mainPanel = new JPanel(new FlowLayout());
-		mainPanel.setPreferredSize(new Dimension(400, 50)); // Adjust height for visual purposes
-
-		groupButton = new JButton("Group");
-		categoryButton = new JButton("Category");
-
-		mainPanel.add(groupButton);
-		mainPanel.add(categoryButton);
-		add(mainPanel, BorderLayout.NORTH);
-
-		JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
-		add(separator, BorderLayout.CENTER);
-
-		cardLayout = new CardLayout();
-		JPanel lowerPanel = new JPanel(cardLayout);
-
-		groupPanel = new PopupGroupPanel(this.popupMenu);
-		lowerPanel.add(groupPanel, "Group");
-
-		categoryPanel = new PopupCategoryPanel();
-		lowerPanel.add(categoryPanel, "Category");
-		cardLayout.show(lowerPanel, "Group");
-		add(lowerPanel, BorderLayout.CENTER);
-
-		groupButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				cardLayout.show(lowerPanel, "Group");
-				groupButton.setBackground(Color.GREEN);
-				categoryButton.setBackground(null);
-			}
-		});
-
-		categoryButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				cardLayout.show(lowerPanel, "Category");
-				categoryButton.setBackground(Color.GREEN);
-				groupButton.setBackground(null);
-			}
-		});
-
-		// Done and Cancel buttons
-		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		JButton doneButton = new JButton("Done");
-		JButton cancelButton = new JButton("Cancel");
-
-		buttonPanel.add(doneButton);
-		buttonPanel.add(cancelButton);
-
-		doneButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// Handle "Done" action here
-			}
-		});
-
-		cancelButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// Hide the PopupContentPanel
-				PopupContentPanel.this.setVisible(false);
-				// Hide the 3dots button (assuming it's a field in the parent component)
-				threeDotsButton.setVisible(false);
-				popupMenu.setVisible(false);
 			}
 		});
 		groupButton.setBackground(Color.GREEN);

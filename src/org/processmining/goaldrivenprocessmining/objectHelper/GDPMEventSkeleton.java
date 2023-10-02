@@ -3,7 +3,11 @@ package org.processmining.goaldrivenprocessmining.objectHelper;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class GDPMEventSkeleton implements Serializable{
+public class GDPMEventSkeleton implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -994739494852095272L;
 	private int position;
 	private int activityIndex;
 
@@ -36,7 +40,6 @@ public class GDPMEventSkeleton implements Serializable{
 		}
 	}
 
-	
 	public int hashCode() {
 		return Objects.hash(activityIndex, position);
 	}

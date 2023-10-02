@@ -5,11 +5,13 @@ import java.util.Objects;
 
 public class EdgeObject implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8507054403422044697L;
 	private ActivitySkeleton node1;
 	private ActivitySkeleton node2;
 	private Boolean isIndirected;
-
-	
 
 	public EdgeObject(ActivitySkeleton node1, ActivitySkeleton node2, Boolean isIndirected) {
 		this.node1 = node1;

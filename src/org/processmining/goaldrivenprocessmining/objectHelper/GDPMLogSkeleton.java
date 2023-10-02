@@ -8,6 +8,10 @@ import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 
 public class GDPMLogSkeleton implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3886005288110230296L;
 	private LogSkeleton logSkeleton;
 	// stat object
 	private MapStatObject statObject;
@@ -19,7 +23,7 @@ public class GDPMLogSkeleton implements Serializable {
 
 	public GDPMLogSkeleton(XLog log) {
 		this.logSkeleton = LogSkeletonUtils.getLogSkeleton(log);
-//		this.statObject = StatUtils.getStat(logSkeleton);
+		//		this.statObject = StatUtils.getStat(logSkeleton);
 	}
 
 	@Override
@@ -35,8 +39,6 @@ public class GDPMLogSkeleton implements Serializable {
 		this.logSkeleton = logSkeleton;
 	}
 
-
-
 	public MapStatObject getStatObject() {
 		return statObject;
 	}
@@ -46,8 +48,7 @@ public class GDPMLogSkeleton implements Serializable {
 	}
 
 	public String toString() {
-		return "GDPMLogSkeleton [logSkeleton=" + logSkeleton + ", statObject="
-				+ statObject + "]";
+		return "GDPMLogSkeleton [logSkeleton=" + logSkeleton + ", statObject=" + statObject + "]";
 	}
 
 }

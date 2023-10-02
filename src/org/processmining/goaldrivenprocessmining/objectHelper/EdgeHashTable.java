@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 public class EdgeHashTable implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7131839169691770596L;
 	private Map<EdgeObject, Map<Integer, List<Integer[]>>> edgeTable;
 
 	public EdgeHashTable() {

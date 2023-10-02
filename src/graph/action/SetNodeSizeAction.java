@@ -2,6 +2,9 @@ package graph.action;
 
 import java.util.Iterator;
 
+import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
+
+import graph.GraphConstants;
 import prefuse.action.Action;
 import prefuse.data.tuple.TupleSet;
 import prefuse.visual.VisualItem;
@@ -18,7 +21,13 @@ public class SetNodeSizeAction extends Action {
 		TupleSet nodes = m_vis.getVisualGroup("graph.nodes");
 		for (Iterator<VisualItem> iter = nodes.tuples(); iter.hasNext();) {
 			VisualItem node = (VisualItem) iter.next();
-			node.setSize(this.size);
+			if (node.get(GraphConstants.NODE_TYPE_FIELD).equals(NodeType.GROUP_NODE)) {
+//				node.setEndSize(10);
+				node.setBounds(0, 0, 1000000, 1000000);
+			} else {
+				node.setSize(this.size);
+			}
+			
 		}
 	}
 

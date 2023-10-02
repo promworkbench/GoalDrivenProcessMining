@@ -3,6 +3,10 @@ package org.processmining.goaldrivenprocessmining.objectHelper;
 import java.io.Serializable;
 
 public class EventSkeleton implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3889100038468173203L;
 	private ActivitySkeleton activity;
 	private String time;
 	private Boolean isDisplayed;
@@ -47,5 +51,4 @@ public class EventSkeleton implements Serializable {
 		return "EventSkeleton [activity=" + activity + ", time=" + time + ", isDisplayed=" + isDisplayed + "]";
 	}
 
-	
 }

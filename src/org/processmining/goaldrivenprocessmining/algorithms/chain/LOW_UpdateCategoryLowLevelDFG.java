@@ -34,9 +34,9 @@ public class LOW_UpdateCategoryLowLevelDFG<C> extends DataChainLinkComputationAb
 			throws Exception {
 		GoalDrivenDFG dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.low_level_log_skeleton), false);
 		//		dfg.addControlListener(new EdgeClickControl(((GoalDrivenConfiguration) configuration).getChain()));
-		dfg.repaintNodeStrokeColor(
-				dfg.getNodeStrokeColorFromMapActCat(inputs.get(GoalDrivenObject.map_activity_category),
-						inputs.get(GoalDrivenObject.selected_mode_category)));
+//		dfg.repaintNodeStrokeColor(
+//				dfg.getNodeStrokeColorFromMapActCat(inputs.get(GoalDrivenObject.map_activity_category),
+//						inputs.get(GoalDrivenObject.selected_mode_category)));
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.low_level_dfg, dfg);//
 	}

@@ -7,6 +7,10 @@ import java.util.List;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 
 public class MapActivityCategoryObject implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3353960649338953044L;
 	private HashMap<AttributeClassifier, List<ValueCategoryObject>> mapActivityCategory;
 	
 	public MapActivityCategoryObject() {

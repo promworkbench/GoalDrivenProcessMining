@@ -53,15 +53,20 @@ import prefuse.data.Table;
 import prefuse.data.expression.Predicate;
 import prefuse.data.expression.parser.ExpressionParser;
 import prefuse.render.DefaultRendererFactory;
-import prefuse.render.LabelRenderer;
 import prefuse.util.ColorLib;
+import prefuse.util.PrefuseLib;
 import prefuse.visual.VisualItem;
 
 public class GoalDrivenDFG extends Display {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -701413385694384404L;
 	private GDPMLogSkeleton log;
 	private int beginNodeRow;
 	private int endNodeRow;
 	private Graph graph;
+	private Boolean isHighLevel;
 	//	private HashMap<EdgeObject, StatEdgeObject> frequencyEdge;
 	//	private HashMap<String, StatNodeObject> frequencyNode;
 	// control 
@@ -87,6 +92,7 @@ public class GoalDrivenDFG extends Display {
 	public GoalDrivenDFG(GDPMLogSkeleton gdpmLogSkeleton, Boolean isHighLevel) {
 		super(new Visualization());
 		this.log = gdpmLogSkeleton;
+		this.isHighLevel = isHighLevel;
 
 		// action
 		this.nodeStrokeColorAction = null;
@@ -106,6 +112,7 @@ public class GoalDrivenDFG extends Display {
 			//			this.frequencyNode = gdpmLogSkeleton.getStatObject().getMapStatNode();
 			this.graph = this.makeGraph(isHighLevel);
 			m_vis.addGraph("graph", graph);
+
 			// control
 			this.setDefaultControl();
 			// layout
@@ -114,6 +121,8 @@ public class GoalDrivenDFG extends Display {
 			this.configDefaultGraph();
 			// center graph
 			this.centerGraph();
+			this.test();
+			this.dragMultipleNodesControl.initInvisibleNodes();
 
 		}
 
@@ -309,7 +318,7 @@ public class GoalDrivenDFG extends Display {
 		edgeR.setArrowHeadSize(GraphConstants.ARROW_HEAD_WIDTH, GraphConstants.ARROW_HEAD_HEIGHT);
 		edgeR.setArrowDoubleHeadSize(GraphConstants.ARROW_HEAD_WIDTH + 5, GraphConstants.ARROW_HEAD_HEIGHT);
 
-		LabelRenderer label = new NodeRenderer("label");
+		NodeRenderer label = new NodeRenderer("label");
 		label.setRoundedCorner(8, 8);
 		label.setHorizontalPadding(10);
 		label.setVerticalPadding(10);
@@ -349,7 +358,7 @@ public class GoalDrivenDFG extends Display {
 				GraphConstants.TEXT_COLOR);
 		m_vis.putAction(GraphConstants.TEXT_COLOR_ACTION, this.textColorAction);
 		m_vis.run(GraphConstants.TEXT_COLOR_ACTION);
-		
+
 		FontAction fontAction = new FontAction(GraphConstants.NODE_GROUP, new Font("Arial", Font.BOLD, 14));
 		m_vis.putAction(GraphConstants.FONT_ACTION, fontAction);
 		m_vis.run(GraphConstants.FONT_ACTION);
@@ -513,10 +522,19 @@ public class GoalDrivenDFG extends Display {
 			if (Arrays.asList(this.getLog().getLogSkeleton().getConfig().getSelectedActs()).contains(act)) {
 				String trueActLabel = LogSkeletonUtils.getTrueActivityLabel(this.log, act);
 				if (!addedNodes.contains(trueActLabel)) {
+					//					if (this.log.getLogSkeleton().isAGroupSkeleton(trueActLabel)) {
+					//						Node node2 = null;
+					//						node2 = g.addNode();
+					//						this.configInvisibleNode(node2, trueActLabel);
+					//					} 
+
 					Node node1 = null;
 					node1 = g.addNode();
 					if (this.log.getLogSkeleton().isAGroupSkeleton(trueActLabel)) {
 						this.configNode(node1, trueActLabel, true);
+						Node node2 = null;
+						node2 = g.addNode();
+						this.configInvisibleNode(node2, trueActLabel);
 					} else {
 						this.configNode(node1, trueActLabel, false);
 					}
@@ -552,7 +570,8 @@ public class GoalDrivenDFG extends Display {
 
 	private Node getNodeByLabel(Graph g, String label) {
 		for (int i = 0; i < g.getNodeCount(); i++) {
-			if (g.getNode(i).getString(GraphConstants.LABEL_FIELD).equals(label)) {
+			if (g.getNode(i).getString(GraphConstants.LABEL_FIELD).equals(label)
+					&& !g.getNode(i).getBoolean(GraphConstants.IS_INVISIBLE)) {
 				return g.getNode(i);
 			}
 		}
@@ -564,6 +583,8 @@ public class GoalDrivenDFG extends Display {
 		node.setBoolean(GraphConstants.BEGIN_FIELD, true);
 		node.setBoolean(GraphConstants.END_FIELD, false);
 		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
+		node.setBoolean(GraphConstants.IS_INVISIBLE, false);
+		node.setBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED, false);
 	}
 
 	private void configEndNode(Node node) {
@@ -571,15 +592,17 @@ public class GoalDrivenDFG extends Display {
 		node.setBoolean(GraphConstants.BEGIN_FIELD, false);
 		node.setBoolean(GraphConstants.END_FIELD, true);
 		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
+		node.setBoolean(GraphConstants.IS_INVISIBLE, false);
+		node.setBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED, false);
 	}
 
-	private void configEdge(Edge e, EdgeObject edgeObject) {
-		if (edgeObject.getIsIndirected()) {
-			e.setBoolean(GraphConstants.IS_INDIRECTED_EDGE_FIELD, true);
-		} else {
-			e.setBoolean(GraphConstants.IS_INDIRECTED_EDGE_FIELD, false);
-		}
-		e.setString(GraphConstants.LABEL_FIELD, "(" + edgeObject.getNode1() + " ," + edgeObject.getNode2() + ")");
+	private void configInvisibleNode(Node node, String label) {
+		node.setString(GraphConstants.LABEL_FIELD, label);
+		node.setBoolean(GraphConstants.BEGIN_FIELD, false);
+		node.setBoolean(GraphConstants.END_FIELD, false);
+		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
+		node.setBoolean(GraphConstants.IS_INVISIBLE, true);
+		node.setBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED, true);
 	}
 
 	private void configNode(Node node, String label, Boolean isGroup) {
@@ -591,6 +614,17 @@ public class GoalDrivenDFG extends Display {
 		} else {
 			node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
 		}
+		node.setBoolean(GraphConstants.IS_INVISIBLE, false);
+		node.setBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED, false);
+	}
+
+	private void configEdge(Edge e, EdgeObject edgeObject) {
+		if (edgeObject.getIsIndirected()) {
+			e.setBoolean(GraphConstants.IS_INDIRECTED_EDGE_FIELD, true);
+		} else {
+			e.setBoolean(GraphConstants.IS_INDIRECTED_EDGE_FIELD, false);
+		}
+		e.setString(GraphConstants.LABEL_FIELD, "(" + edgeObject.getNode1() + " ," + edgeObject.getNode2() + ")");
 	}
 
 	private Table initNodeTable() {
@@ -601,6 +635,8 @@ public class GoalDrivenDFG extends Display {
 		nodeData.addColumn(GraphConstants.SELECT_FIELD, boolean.class);
 		nodeData.addColumn(GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD, int.class);
 		nodeData.addColumn(GraphConstants.NODE_TYPE_FIELD, NodeType.class);
+		nodeData.addColumn(GraphConstants.IS_INVISIBLE, boolean.class);
+		nodeData.addColumn(GraphConstants.IS_INVISIBLE_COLLAPSED, boolean.class);
 		return nodeData;
 	}
 
@@ -620,6 +656,7 @@ public class GoalDrivenDFG extends Display {
 		Table nodeTable = this.getGraph().getNodeTable();
 		for (int i = 0; i < nodeTable.getRowCount(); i++) {
 			VisualItem node = this.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, nodeTable.getTuple(i));
+			PrefuseLib.setX(node, null, 10);
 			if (!nodeTable.get(i, GraphConstants.LABEL_FIELD).equals("")) {
 				String actName = nodeTable.getString(i, GraphConstants.LABEL_FIELD);
 				Boolean isDefault = true;
@@ -646,6 +683,29 @@ public class GoalDrivenDFG extends Display {
 			}
 		}
 		return res;
+	}
+
+	public void test() {
+		Table nodeTable = this.getGraph().getNodeTable();
+		double hor = 0;
+		for (int i = 0; i < nodeTable.getRowCount(); i++) {
+			VisualItem node = this.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, nodeTable.getTuple(i));
+			if (node.getString(GraphConstants.LABEL_FIELD).equals("a")) {
+				hor = node.getY();
+				break;
+			}
+		}
+		for (int i = 0; i < nodeTable.getRowCount(); i++) {
+			VisualItem node = this.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, nodeTable.getTuple(i));
+			if (node.getString(GraphConstants.LABEL_FIELD).equals("a")
+					|| node.getString(GraphConstants.LABEL_FIELD).equals("b")
+					|| node.getString(GraphConstants.LABEL_FIELD).equals("c")) {
+				PrefuseLib.setY(node, null, hor);
+			}
+			//			System.out.println("Node: " + node.getString(GraphConstants.LABEL_FIELD));
+			//			System.out.println("X: " + node.getX());
+			//			System.out.println("Y: " + node.getY());
+		}
 	}
 
 	public void repaintNodeStrokeColor(final HashMap<String, Color> map) {
@@ -752,6 +812,10 @@ public class GoalDrivenDFG extends Display {
 
 	public void setEdgeClickControl(GraphObjectClickControl edgeClickControl) {
 		this.edgeClickControl = edgeClickControl;
+	}
+
+	public Boolean getIsHighLevel() {
+		return isHighLevel;
 	}
 
 }
