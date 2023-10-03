@@ -12,10 +12,12 @@ import java.util.Map;
 
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
+import org.processmining.goaldrivenprocessmining.objectHelper.ActivitySkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.ValueCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
@@ -88,6 +90,11 @@ public class GoalDrivenDFG extends Display {
 	private StrokeAction nodeStrokeWidthAction;
 	private ColorAction arrowFillColorAction;
 	private ColorAction textColorAction;
+	// frequency
+	private HashMap<String, Integer> frequencyNode = new HashMap<String, Integer>();
+	private HashMap<String, Integer> currentFrequencyNode = new HashMap<String, Integer>();
+	HashMap<EdgeObject, Integer> frequencyEdge = new HashMap<EdgeObject, Integer>();
+	HashMap<EdgeObject, Integer> currentFrequencyEdge = new HashMap<EdgeObject, Integer>();
 
 	public GoalDrivenDFG(GDPMLogSkeleton gdpmLogSkeleton, Boolean isHighLevel) {
 		super(new Visualization());
@@ -380,8 +387,63 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	public void setDefaultEdgeStrokeWidth() {
+		this.getFrequencyEdge();
+		HashMap<EdgeObject, Integer> newFrequencyEdge = new HashMap<EdgeObject, Integer>();
+		for (EdgeObject edge : this.frequencyEdge.keySet()) {
+			String trueSourceLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(),
+					this.getLog().getLogSkeleton().getConfig().getListGroupSkeletons(),
+					edge.getNode1().getOriginalName());
+			String trueTargeLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(),
+					this.getLog().getLogSkeleton().getConfig().getListGroupSkeletons(),
+					edge.getNode2().getOriginalName());
+			EdgeObject newEdge = new EdgeObject(
+					new ActivitySkeleton(edge.getNode1().getOriginalName(), trueSourceLabel),
+					new ActivitySkeleton(edge.getNode2().getOriginalName(), trueTargeLabel));
+			if (newFrequencyEdge.containsKey(newEdge)) {
+				newFrequencyEdge.replace(newEdge, this.frequencyEdge.get(edge) + newFrequencyEdge.get(newEdge));
+			} else {
+				newFrequencyEdge.put(newEdge, this.frequencyEdge.get(edge));
+			}
+		}
+		this.currentFrequencyEdge = newFrequencyEdge;
+		this.runCustomEdgeStrokeWidthAction();
+	}
 
-		HashMap<EdgeObject, Integer> frequencyEdge = new HashMap<EdgeObject, Integer>();
+	public void setEdgeStrokeWidthWithExpandedGroup(GroupSkeleton groupSkeleton) {
+		List<GroupSkeleton> collapsedGroups = new ArrayList<GroupSkeleton>();
+		for (GroupSkeleton group : this.log.getLogSkeleton().getConfig().getListGroupSkeletons()) {
+			if (!group.equals(groupSkeleton)) {
+				collapsedGroups.add(group);
+			}
+		}
+		HashMap<EdgeObject, Integer> newFrequencyEdge = this.currentFrequencyEdge;
+		for (EdgeObject edge : this.frequencyEdge.keySet()) {
+			String trueSourceLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(), collapsedGroups,
+					edge.getNode1().getOriginalName());
+			String trueTargeLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(), collapsedGroups,
+					edge.getNode2().getOriginalName());
+			String oldSourceLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(),
+					this.getLog().getLogSkeleton().getConfig().getListGroupSkeletons(),
+					edge.getNode1().getOriginalName());
+			String oldTargeLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(),
+					this.getLog().getLogSkeleton().getConfig().getListGroupSkeletons(),
+					edge.getNode2().getOriginalName());
+			EdgeObject newEdge = new EdgeObject(
+					new ActivitySkeleton(edge.getNode1().getOriginalName(), trueSourceLabel),
+					new ActivitySkeleton(edge.getNode2().getOriginalName(), trueTargeLabel));
+			EdgeObject oldEdge = new EdgeObject(new ActivitySkeleton(edge.getNode1().getOriginalName(), oldSourceLabel),
+					new ActivitySkeleton(edge.getNode2().getOriginalName(), oldTargeLabel));
+			newFrequencyEdge.put(newEdge, this.frequencyEdge.get(edge));
+			if (newFrequencyEdge.containsKey(oldEdge) && !oldEdge.equals(newEdge)) {
+				newFrequencyEdge.remove(oldEdge);
+			}
+		}
+		this.currentFrequencyEdge = newFrequencyEdge;
+		this.runCustomEdgeStrokeWidthAction();
+
+	}
+
+	public void getFrequencyEdge() {
 		// calculate frequency edge
 		for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : this.getLog().getLogSkeleton()
 				.getEdgeHashTable().getEdgeTable().entrySet()) {
@@ -391,24 +453,27 @@ public class GoalDrivenDFG extends Display {
 			for (List<Integer[]> pos : allPos.values()) {
 				total += pos.size();
 			}
-			frequencyEdge.put(edge, total);
+			this.frequencyEdge.put(edge, total);
 		}
+	}
+
+	public void runCustomEdgeStrokeWidthAction() {
 		// transform frequency to color
 		HashMap<EdgeObject, Float> mapEdgeStrokeWidth = new HashMap<>();
 		float min = GraphConstants.LOWER_BOUND_EDGE_STROKE_WIDTH;
 		float max = GraphConstants.UPPER_BOUND_EDGE_STROKE_WIDTH;
 		int minFreq = Integer.MAX_VALUE;
 		int maxFreq = 0;
-		for (EdgeObject edgeObject : frequencyEdge.keySet()) {
-			if (frequencyEdge.get(edgeObject) >= maxFreq) {
-				maxFreq = frequencyEdge.get(edgeObject);
+		for (EdgeObject edgeObject : this.currentFrequencyEdge.keySet()) {
+			if (this.currentFrequencyEdge.get(edgeObject) >= maxFreq) {
+				maxFreq = this.currentFrequencyEdge.get(edgeObject);
 			}
-			if (frequencyEdge.get(edgeObject) <= minFreq) {
-				minFreq = frequencyEdge.get(edgeObject);
+			if (this.currentFrequencyEdge.get(edgeObject) <= minFreq) {
+				minFreq = this.currentFrequencyEdge.get(edgeObject);
 			}
 		}
 		if (maxFreq == minFreq) {
-			for (EdgeObject edge : frequencyEdge.keySet()) {
+			for (EdgeObject edge : this.currentFrequencyEdge.keySet()) {
 				mapEdgeStrokeWidth.put(edge, 3f);
 			}
 		} else {
@@ -417,8 +482,8 @@ public class GoalDrivenDFG extends Display {
 			int dataRange = maxFreq - minFreq;
 			float ratio = range / dataRange;
 
-			for (EdgeObject edge : frequencyEdge.keySet()) {
-				int value = frequencyEdge.get(edge);
+			for (EdgeObject edge : this.currentFrequencyEdge.keySet()) {
+				int value = this.currentFrequencyEdge.get(edge);
 				float assignedValue = min + ((value - minFreq) * ratio);
 				mapEdgeStrokeWidth.put(edge, assignedValue);
 			}
@@ -444,33 +509,56 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	public void setDefaultNodeFillColor() {
-		HashMap<String, Integer> frequencyNode = new HashMap<String, Integer>();
-		// calculate frequency node
-		for (Map.Entry<String, Map<Integer, List<Integer>>> entry : this.log.getLogSkeleton().getActivityHashTable()
-				.getActivityTable().entrySet()) {
-			String act = LogSkeletonUtils.getTrueActivityLabel(this.getLog(), entry.getKey());
-			Map<Integer, List<Integer>> allPos = entry.getValue();
-			int total = 0;
-			for (List<Integer> pos : allPos.values()) {
-				total += pos.size();
-			}
-			frequencyNode.put(act, total);
-		}
 
+		this.getFrequencyNode();
+		HashMap<String, Integer> newFrequencyNode = new HashMap<String, Integer>();
+		for (String act : this.frequencyNode.keySet()) {
+			String trueLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(),
+					this.getLog().getLogSkeleton().getConfig().getListGroupSkeletons(), act);
+			if (newFrequencyNode.containsKey(trueLabel)) {
+				newFrequencyNode.put(trueLabel, this.frequencyNode.get(act) + newFrequencyNode.get(trueLabel));
+			} else {
+				newFrequencyNode.put(trueLabel, this.frequencyNode.get(act));
+			}
+
+		}
+		this.currentFrequencyNode = newFrequencyNode;
+		this.runCustomColorNodeFillAction();
+	}
+
+	public void setNodeFillColorWithExpandedGroup(GroupSkeleton groupSkeleton) {
+		List<GroupSkeleton> collapsedGroups = new ArrayList<GroupSkeleton>();
+		for (GroupSkeleton group : this.log.getLogSkeleton().getConfig().getListGroupSkeletons()) {
+			if (!group.equals(groupSkeleton)) {
+				collapsedGroups.add(group);
+			}
+		}
+		HashMap<String, Integer> newFrequencyNode = this.currentFrequencyNode;
+		for (String act : this.frequencyNode.keySet()) {
+			String trueLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(), collapsedGroups, act);
+			newFrequencyNode.put(trueLabel, this.frequencyNode.get(act));
+		}
+		// remove node with label group name
+		newFrequencyNode.remove(groupSkeleton.getGroupName());
+		this.currentFrequencyNode = newFrequencyNode;
+		this.runCustomColorNodeFillAction();
+	}
+
+	public void runCustomColorNodeFillAction() {
 		// Find the minimum and maximum values in the data array
 		int minFreq = Integer.MAX_VALUE;
 		int maxFreq = 0;
-		for (String act : frequencyNode.keySet()) {
-			if (frequencyNode.get(act) >= maxFreq) {
-				maxFreq = frequencyNode.get(act);
+		for (String act : this.currentFrequencyNode.keySet()) {
+			if (this.currentFrequencyNode.get(act) >= maxFreq) {
+				maxFreq = this.currentFrequencyNode.get(act);
 			}
-			if (frequencyNode.get(act) <= minFreq) {
-				minFreq = frequencyNode.get(act);
+			if (this.currentFrequencyNode.get(act) <= minFreq) {
+				minFreq = this.currentFrequencyNode.get(act);
 			}
 		}
 		HashMap<String, Color> mapActColor = new HashMap<String, Color>();
 		if (maxFreq == minFreq) {
-			for (String act : frequencyNode.keySet()) {
+			for (String act : this.currentFrequencyNode.keySet()) {
 				mapActColor.put(act, GraphConstants.NODE_FILL_DARK_COLOR);
 			}
 		} else {
@@ -479,8 +567,8 @@ public class GoalDrivenDFG extends Display {
 			Color darkColor = GraphConstants.NODE_FILL_DARK_COLOR;
 			Color lightColor = GraphConstants.NODE_FILL_LIGHT_COLOR;
 
-			for (String act : frequencyNode.keySet()) {
-				int value = frequencyNode.get(act);
+			for (String act : this.currentFrequencyNode.keySet()) {
+				int value = this.currentFrequencyNode.get(act);
 				double normalizedValue = (value - minFreq) / valueRange;
 
 				// Interpolate the color based on the normalized value
@@ -496,6 +584,19 @@ public class GoalDrivenDFG extends Display {
 				mapActColor);
 		m_vis.putAction(GraphConstants.NODE_FILL_COLOR_ACTION, customFillByLabel);
 		m_vis.run(GraphConstants.NODE_FILL_COLOR_ACTION);
+	}
+
+	public void getFrequencyNode() {
+		for (Map.Entry<String, Map<Integer, List<Integer>>> entry : this.log.getLogSkeleton().getActivityHashTable()
+				.getActivityTable().entrySet()) {
+			String act = entry.getKey();
+			Map<Integer, List<Integer>> allPos = entry.getValue();
+			int total = 0;
+			for (List<Integer> pos : allPos.values()) {
+				total += pos.size();
+			}
+			this.frequencyNode.put(act, total);
+		}
 	}
 
 	private int interpolate(int start, int end, double t) {
@@ -520,7 +621,8 @@ public class GoalDrivenDFG extends Display {
 		// add node
 		for (String act : activityHashTable.getActivityTable().keySet()) {
 			if (Arrays.asList(this.getLog().getLogSkeleton().getConfig().getSelectedActs()).contains(act)) {
-				String trueActLabel = LogSkeletonUtils.getTrueActivityLabel(this.log, act);
+				String trueActLabel = LogSkeletonUtils.getTrueActivityLabel(this.log,
+						this.log.getLogSkeleton().getConfig().getListGroupSkeletons(), act);
 				if (!addedNodes.contains(trueActLabel)) {
 					//					if (this.log.getLogSkeleton().isAGroupSkeleton(trueActLabel)) {
 					//						Node node2 = null;
@@ -568,7 +670,7 @@ public class GoalDrivenDFG extends Display {
 
 	}
 
-	private Node getNodeByLabel(Graph g, String label) {
+	public Node getNodeByLabel(Graph g, String label) {
 		for (int i = 0; i < g.getNodeCount(); i++) {
 			if (g.getNode(i).getString(GraphConstants.LABEL_FIELD).equals(label)
 					&& !g.getNode(i).getBoolean(GraphConstants.IS_INVISIBLE)) {
@@ -596,7 +698,7 @@ public class GoalDrivenDFG extends Display {
 		node.setBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED, false);
 	}
 
-	private void configInvisibleNode(Node node, String label) {
+	public void configInvisibleNode(Node node, String label) {
 		node.setString(GraphConstants.LABEL_FIELD, label);
 		node.setBoolean(GraphConstants.BEGIN_FIELD, false);
 		node.setBoolean(GraphConstants.END_FIELD, false);
@@ -605,7 +707,7 @@ public class GoalDrivenDFG extends Display {
 		node.setBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED, true);
 	}
 
-	private void configNode(Node node, String label, Boolean isGroup) {
+	public void configNode(Node node, String label, Boolean isGroup) {
 		node.setString(GraphConstants.LABEL_FIELD, label);
 		node.setBoolean(GraphConstants.BEGIN_FIELD, false);
 		node.setBoolean(GraphConstants.END_FIELD, false);
@@ -618,7 +720,7 @@ public class GoalDrivenDFG extends Display {
 		node.setBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED, false);
 	}
 
-	private void configEdge(Edge e, EdgeObject edgeObject) {
+	public void configEdge(Edge e, EdgeObject edgeObject) {
 		if (edgeObject.getIsIndirected()) {
 			e.setBoolean(GraphConstants.IS_INDIRECTED_EDGE_FIELD, true);
 		} else {
@@ -816,6 +918,14 @@ public class GoalDrivenDFG extends Display {
 
 	public Boolean getIsHighLevel() {
 		return isHighLevel;
+	}
+
+	public int getBeginNodeRow() {
+		return beginNodeRow;
+	}
+
+	public int getEndNodeRow() {
+		return endNodeRow;
 	}
 
 }

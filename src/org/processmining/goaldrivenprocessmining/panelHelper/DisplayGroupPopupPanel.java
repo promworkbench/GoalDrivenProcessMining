@@ -27,7 +27,6 @@ public class DisplayGroupPopupPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				GoalDrivenController.displaySelectedGroup(groupSkeleton, isHighLevel);
 			}
-
 		});
 		JButton ungroupButton = new JButton("Ungroup");
 		ungroupButton.addActionListener(new ActionListener() {

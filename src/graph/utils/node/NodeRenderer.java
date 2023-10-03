@@ -49,7 +49,7 @@ public class NodeRenderer extends LabelRenderer {
         float y = (float) bounds.getY();
         float width = (float) bounds.getWidth();
         float height = (float) bounds.getHeight();
-        return new Rectangle2D.Float(x - 50, y - 50, width + 100, height + 100);
+        return new Rectangle2D.Float(x -100, y - 100, width + 200, height + 200);
 	}
 
 	protected Shape getRawShape(VisualItem item) {

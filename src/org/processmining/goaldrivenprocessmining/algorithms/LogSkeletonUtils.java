@@ -87,8 +87,12 @@ public class LogSkeletonUtils {
 	public static GDPMLogSkeleton setupEdgeHashTableAfterChangingGroup(GDPMLogSkeleton gdpmLogSkeleton) {
 		EdgeHashTable newEdgeHashTable = new EdgeHashTable();
 		for (EdgeObject edgeObject : gdpmLogSkeleton.getLogSkeleton().getEdgeHashTable().getEdgeTable().keySet()) {
-			String node1TrueLabel = getTrueActivityLabel(gdpmLogSkeleton, edgeObject.getNode1().getOriginalName());
-			String node2TrueLabel = getTrueActivityLabel(gdpmLogSkeleton, edgeObject.getNode2().getOriginalName());
+			String node1TrueLabel = getTrueActivityLabel(gdpmLogSkeleton,
+					gdpmLogSkeleton.getLogSkeleton().getConfig().getListGroupSkeletons(),
+					edgeObject.getNode1().getOriginalName());
+			String node2TrueLabel = getTrueActivityLabel(gdpmLogSkeleton,
+					gdpmLogSkeleton.getLogSkeleton().getConfig().getListGroupSkeletons(),
+					edgeObject.getNode2().getOriginalName());
 			ActivitySkeleton newNode1 = new ActivitySkeleton(edgeObject.getNode1().getOriginalName(), node1TrueLabel);
 			ActivitySkeleton newNode2 = new ActivitySkeleton(edgeObject.getNode2().getOriginalName(), node2TrueLabel);
 
@@ -114,18 +118,19 @@ public class LogSkeletonUtils {
 		return gdpmLogSkeleton;
 	}
 
-	public static String getTrueActivityLabel(GDPMLogSkeleton gdpmLogSkeleton, String act) {
+	public static String getTrueActivityLabel(GDPMLogSkeleton gdpmLogSkeleton, List<GroupSkeleton> listGroups,
+			String act) {
 		if (gdpmLogSkeleton.getLogSkeleton().isAGroupSkeleton(act)) {
 			GroupSkeleton group = gdpmLogSkeleton.getLogSkeleton().getGroupSkeletonByGroupName(act);
-			for (GroupSkeleton groupSkeleton : gdpmLogSkeleton.getLogSkeleton().getConfig().getListGroupSkeletons()) {
+			for (GroupSkeleton groupSkeleton : listGroups) {
 				if (groupSkeleton.getListGroup().contains(group)) {
-					return getTrueGroupLabel(gdpmLogSkeleton, groupSkeleton).getGroupName();
+					return getTrueGroupLabel(listGroups, groupSkeleton).getGroupName();
 				}
 			}
 		} else {
-			for (GroupSkeleton groupSkeleton : gdpmLogSkeleton.getLogSkeleton().getConfig().getListGroupSkeletons()) {
+			for (GroupSkeleton groupSkeleton : listGroups) {
 				if (groupSkeleton.getListAct().contains(act)) {
-					return getTrueGroupLabel(gdpmLogSkeleton, groupSkeleton).getGroupName();
+					return getTrueGroupLabel(listGroups, groupSkeleton).getGroupName();
 				}
 			}
 
@@ -133,10 +138,10 @@ public class LogSkeletonUtils {
 		return act;
 	}
 
-	public static GroupSkeleton getTrueGroupLabel(GDPMLogSkeleton gdpmLogSkeleton, GroupSkeleton groupSkeleton) {
-		for (GroupSkeleton group : gdpmLogSkeleton.getLogSkeleton().getConfig().getListGroupSkeletons()) {
+	public static GroupSkeleton getTrueGroupLabel(List<GroupSkeleton> listGroups, GroupSkeleton groupSkeleton) {
+		for (GroupSkeleton group : listGroups) {
 			if (group.getListGroup().contains(groupSkeleton)) {
-				return getTrueGroupLabel(gdpmLogSkeleton, group);
+				return getTrueGroupLabel(listGroups, group);
 			}
 		}
 		return groupSkeleton;

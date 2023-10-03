@@ -65,6 +65,32 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 		}
 	}
 
+	public void addInvisibleNode(String invisibleNodeName, List<String> affectedNodes, double[] midPos) {
+		List<VisualItem> allNodes = GraphNodeUtils.getAllNodes(this.display.getVisualization());
+		for (VisualItem invisibleNode : allNodes) {
+			if (invisibleNode.getBoolean(GraphConstants.IS_INVISIBLE)
+					&& invisibleNode.getString(GraphConstants.LABEL_FIELD).equals(invisibleNodeName)) {
+				for (VisualItem node : allNodes) {
+					if (affectedNodes.contains(node.getString(GraphConstants.LABEL_FIELD))) {
+						mapInvisibleNodes.put(node, invisibleNode);
+						if (mapAffectedNodes.containsKey(invisibleNode)) {
+							List<VisualItem> vItems = mapAffectedNodes.get(invisibleNode);
+							vItems.add(node);
+							mapAffectedNodes.replace(invisibleNode, vItems);
+						} else {
+							List<VisualItem> vItems = new ArrayList<>();
+							vItems.add(node);
+							mapAffectedNodes.put(invisibleNode, vItems);
+						}
+					}
+				}
+				invisibleNode.setX(midPos[0]);
+				invisibleNode.setY(midPos[1]);
+				break;
+			}
+		}
+	}
+
 	public void setFixPositionOnMouseOver(boolean s) {
 		fixOnMouseOver = s;
 	}
@@ -169,11 +195,11 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 							}
 						}
 					} else {
-						this.updatePosNode(item, dx, dy);
 						this.updatePosNode(vItem, dx, dy);
 					}
 				}
-				
+				this.updatePosNode(item, dx, dy);
+
 			}
 
 			else {

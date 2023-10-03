@@ -83,7 +83,7 @@ public class GoalDrivenController {
 	}
 
 	public static void displaySelectedGroup(GroupSkeleton groupSkeleton, Boolean isHighLevel) {
-		SelectedGroup selectedGroup = new SelectedGroup(groupSkeleton, isHighLevel);
+		SelectedGroup selectedGroup = new SelectedGroup(groupSkeleton, isHighLevel, true);
 		chain.setObject(GoalDrivenObject.selected_group, selectedGroup);
 	}
 

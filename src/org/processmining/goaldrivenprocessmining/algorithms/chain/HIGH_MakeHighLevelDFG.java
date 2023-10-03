@@ -11,7 +11,9 @@ import graph.GoalDrivenDFG;
 import graph.controls.GraphObjectClickControl;
 
 public class HIGH_MakeHighLevelDFG<C> extends DataChainLinkComputationAbstract<C> {
-
+	
+	public static GoalDrivenDFG currentHighLevelDfg;
+	
 	@Override
 	public String getName() {
 		return "Mine high-level dfg";
@@ -41,6 +43,7 @@ public class HIGH_MakeHighLevelDFG<C> extends DataChainLinkComputationAbstract<C
 		GoalDrivenDFG dfg = new GoalDrivenDFG(gdpmLogSkeleton, true);
 		dfg.setEdgeClickControl(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 		dfg.addControlListener(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
+		currentHighLevelDfg = dfg;
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.high_level_dfg, dfg)
 				;

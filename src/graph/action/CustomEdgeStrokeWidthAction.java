@@ -41,36 +41,14 @@ public class CustomEdgeStrokeWidthAction extends StrokeAction {
 			for (EdgeObject edgeObject : this.mapEdgeStrokeWidth.keySet()) {
 				if (edgeObject.getNode1().getCurrentName().equals(source)
 						&& edgeObject.getNode2().getCurrentName().equals(target)) {
-					return  new BasicStroke(this.mapEdgeStrokeWidth
-							.get(edgeObject));
+					return new BasicStroke(this.mapEdgeStrokeWidth.get(edgeObject));
 				}
 			}
 			return new BasicStroke(0);
-			
+
 		} else {
 			return super.getStroke(item);
 		}
 
 	}
-	//	public static void main(String[] args) throws Exception {
-	//		File file = new File("C:\\D\\data\\receipt.xes");
-	//
-	//		// Create an input stream for the XES file
-	//		InputStream is = new FileInputStream(file);
-	//
-	//		// Create a parser for XES files
-	//		XesXmlParser parser = new XesXmlParser();
-	//
-	//		XLog log = parser.parse(is).get(0);
-	//		
-	//		for (int i = 0; i < log.size(); i++) {
-	//			XTrace trace = log.get(i);
-	//			XEvent event = trace.get(trace.size()-1);
-	//			if (event.getAttributes().get("concept:name").toString().equals("Confirmation of receipt")) {
-	//			}
-	//		}
-	//
-	//
-	//
-	//	}
 }
