@@ -82,8 +82,12 @@ public class GoalDrivenController {
 		this.chain.setFixedObject(IvMObject.input_log, log);
 	}
 
-	public static void displaySelectedGroup(GroupSkeleton groupSkeleton, Boolean isHighLevel) {
+	public static void expandSelectedGroup(GroupSkeleton groupSkeleton, Boolean isHighLevel) {
 		SelectedGroup selectedGroup = new SelectedGroup(groupSkeleton, isHighLevel, true);
+		chain.setObject(GoalDrivenObject.selected_group, selectedGroup);
+	}
+	public static void collapseSelectedGroup(GroupSkeleton groupSkeleton, Boolean isHighLevel) {
+		SelectedGroup selectedGroup = new SelectedGroup(groupSkeleton, isHighLevel, false);
 		chain.setObject(GoalDrivenObject.selected_group, selectedGroup);
 	}
 

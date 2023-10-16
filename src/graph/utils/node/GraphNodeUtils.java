@@ -8,6 +8,7 @@ import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 
 import graph.GoalDrivenDFG;
 import graph.GraphConstants;
+import graph.controls.DragMultipleNodesControl;
 import prefuse.Visualization;
 import prefuse.data.Edge;
 import prefuse.data.Graph;
@@ -95,11 +96,37 @@ public class GraphNodeUtils {
 		return null;
 	}
 
-	public static void addNewEdges(GoalDrivenDFG goalDrivenDFG, List<EdgeObject> listEdges) {
+	public static void addNewEdgesWithOriginalName(GoalDrivenDFG goalDrivenDFG, List<EdgeObject> listEdges) {
 		Graph g = goalDrivenDFG.getGraph();
 		for (EdgeObject edge : listEdges) {
 			String source = edge.getNode1().getOriginalName();
 			String target = edge.getNode2().getOriginalName();
+			Node node1;
+			Node node2;
+			if (source.equals("begin")) {
+				node1 = g.getNode(goalDrivenDFG.getBeginNodeRow());
+			} else if (source.equals("end")) {
+				node1 = g.getNode(goalDrivenDFG.getEndNodeRow());
+			} else {
+				node1 = goalDrivenDFG.getNodeByLabel(g, source);
+			}
+			if (target.equals("begin")) {
+				node2 = g.getNode(goalDrivenDFG.getBeginNodeRow());
+			} else if (target.equals("end")) {
+				node2 = g.getNode(goalDrivenDFG.getEndNodeRow());
+			} else {
+				node2 = goalDrivenDFG.getNodeByLabel(g, target);
+			}
+			Edge e = g.addEdge(node1, node2);
+			goalDrivenDFG.configEdge(e, edge);
+		}
+	}
+
+	public static void addNewEdgesWithCurrentName(GoalDrivenDFG goalDrivenDFG, List<EdgeObject> listEdges) {
+		Graph g = goalDrivenDFG.getGraph();
+		for (EdgeObject edge : listEdges) {
+			String source = edge.getNode1().getCurrentName();
+			String target = edge.getNode2().getCurrentName();
 			Node node1;
 			Node node2;
 			if (source.equals("begin")) {
@@ -137,24 +164,27 @@ public class GraphNodeUtils {
 		}
 	}
 
-	public static void removeNodeByLabel(Graph graph, String label) {
+	public static void removeNodeByLabel(GoalDrivenDFG goalDrivenDFG, String label) {
+		Graph graph = goalDrivenDFG.getGraph();
 		// Get the node edge table from the graph
 		Table nodeTable = graph.getNodeTable();
 		Table edgeTable = graph.getEdgeTable();
 
 		// Find the node with the specified label
 		List<Node> listNodeToRemove = new ArrayList<>();
-		for (int i = 0; i < nodeTable.getRowCount(); i++) {
-			Node node = graph.getNode(i);
-			if (node.getString(GraphConstants.LABEL_FIELD).equals(label)) {
-				listNodeToRemove.add(node);
+		for (int i = 0; i < nodeTable.getMaximumRow(); i++) {
+			if (nodeTable.isValidRow(i)) {
+				Node node = graph.getNode(i);
+				if (node.getString(GraphConstants.LABEL_FIELD).equals(label)) {
+					listNodeToRemove.add(node);
+				}
 			}
 		}
 		// If the node is found, remove it along with its associated edges
 		for (Node nodeToRemove : listNodeToRemove) {
 			// Remove associated edges
 			int nodeIdToRemove = nodeToRemove.getRow();
-			for (int i = 0; i < graph.getEdgeCount(); i++) {
+			for (int i = 0; i < edgeTable.getMaximumRow(); i++) {
 				if (edgeTable.isValidRow(i)) {
 					int sourceId = graph.getEdge(i).getSourceNode().getRow();
 					int targetId = graph.getEdge(i).getTargetNode().getRow();
@@ -164,6 +194,21 @@ public class GraphNodeUtils {
 					}
 				}
 			}
+			// Remove node from map invi node
+			VisualItem visualItem = GraphNodeUtils.getVisualItemByLabel(goalDrivenDFG.getVisualization(), label);
+			if (DragMultipleNodesControl.mapInvisibleNodes.containsKey(visualItem)
+					|| DragMultipleNodesControl.mapInvisibleNodes.containsValue(visualItem)) {
+				DragMultipleNodesControl.mapInvisibleNodes.remove(visualItem);
+			}
+			if (DragMultipleNodesControl.mapAffectedNodes.containsKey(visualItem)) {
+				DragMultipleNodesControl.mapAffectedNodes.remove(visualItem);
+			}
+			for (VisualItem vItem : DragMultipleNodesControl.mapAffectedNodes.keySet()) {
+				if (DragMultipleNodesControl.mapAffectedNodes.get(vItem).contains(visualItem)) {
+					DragMultipleNodesControl.mapAffectedNodes.remove(vItem);
+				}
+			}
+
 			// Remove the node from the node table
 			nodeTable.removeRow(nodeIdToRemove);
 		}

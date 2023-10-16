@@ -44,9 +44,9 @@ public class RightClickControl extends ControlAdapter {
 					GroupSkeleton selectedGroup = this.display.getLog().getLogSkeleton().getGroupSkeletonByGroupName(
 							item.getTable().getString(item.getRow(), GraphConstants.LABEL_FIELD));
 					PopupPanel.showDisplayGroupPopupPanel(this.display, e.getPoint(), selectedGroup,
-							this.display.getIsHighLevel());
+							this.display.getIsHighLevel(), item.getBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED));
 				}
-			} 
+			}
 		}
 	}
 }

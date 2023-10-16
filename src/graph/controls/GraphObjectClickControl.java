@@ -63,15 +63,15 @@ public class GraphObjectClickControl extends ControlAdapter {
 
 	public void itemEntered(VisualItem item, java.awt.event.MouseEvent e) {
 		if (edgeFilter.getBoolean(item)) {
-			item.setStrokeColor(GraphConstants.CLICK_EDGE_STROKE_COLOR);
-			item.getVisualization().repaint();
+//			item.setStrokeColor(GraphConstants.CLICK_EDGE_STROKE_COLOR);
+//			item.getVisualization().repaint();
 		}
 	}
 
 	public void itemExited(VisualItem item, java.awt.event.MouseEvent e) {
 		if (edgeFilter.getBoolean(item)) {
-			item.setStrokeColor(GraphConstants.EDGE_STROKE_COLOR);
-			item.getVisualization().repaint();
+//			item.setStrokeColor(GraphConstants.EDGE_STROKE_COLOR);
+//			item.getVisualization().repaint();
 		}
 	}
 

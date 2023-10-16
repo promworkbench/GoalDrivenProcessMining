@@ -29,6 +29,7 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 	private boolean fixOnMouseOver = true;
 	protected boolean repaint = true;
 	final InGroupPredicate nodeFilter = new InGroupPredicate(GraphConstants.NODE_GROUP);
+	final InGroupPredicate nodeFilter1 = new InGroupPredicate("inviGraph.nodes");
 
 	private Display display;
 
@@ -75,8 +76,10 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 						mapInvisibleNodes.put(node, invisibleNode);
 						if (mapAffectedNodes.containsKey(invisibleNode)) {
 							List<VisualItem> vItems = mapAffectedNodes.get(invisibleNode);
-							vItems.add(node);
-							mapAffectedNodes.replace(invisibleNode, vItems);
+							if (!vItems.contains(node)) {
+								vItems.add(node);
+								mapAffectedNodes.replace(invisibleNode, vItems);
+							}
 						} else {
 							List<VisualItem> vItems = new ArrayList<>();
 							vItems.add(node);
@@ -100,15 +103,19 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 	 *      java.awt.event.MouseEvent)
 	 */
 	public void itemEntered(VisualItem item, MouseEvent e) {
-		Display d = (Display) e.getSource();
-		d.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		activeItem = item;
-		if (fixOnMouseOver) {
-			wasFixed = item.isFixed();
-			resetItem = true;
-			item.setFixed(true);
-			item.getTable().addTableListener(this);
+		InGroupPredicate nodeFilter = new InGroupPredicate(GraphConstants.NODE_GROUP);
+		if (nodeFilter.getBoolean(item)) {
+			Display d = (Display) e.getSource();
+			d.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			activeItem = item;
+			if (fixOnMouseOver) {
+				wasFixed = item.isFixed();
+				resetItem = true;
+				item.setFixed(true);
+				item.getTable().addTableListener(this);
+			}
 		}
+
 	}
 
 	/**
@@ -162,6 +169,32 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 	}
 
 	public void itemDragged(VisualItem item, MouseEvent e) {
+		if (nodeFilter1.getBoolean(item)) {
+			if (!SwingUtilities.isLeftMouseButton(e))
+				return;
+			dragged = true;
+			Display d = (Display) e.getComponent();
+			d.getAbsoluteCoordinate(e.getPoint(), temp);
+			double dx = temp.getX() - down.getX();
+			double dy = temp.getY() - down.getY();
+			double x = item.getX();
+			double y = item.getY();
+
+			item.setStartX(x);
+			item.setStartY(y);
+			item.setX(x + dx);
+			item.setY(y + dy);
+			item.setEndX(x + dx);
+			item.setEndY(y + dy);
+
+			if (repaint)
+				item.getVisualization().repaint();
+
+			down.setLocation(temp);
+			if (action != null)
+				d.getVisualization().run(action);
+		}
+
 		if (!SwingUtilities.isLeftMouseButton(e))
 			return;
 		dragged = true;

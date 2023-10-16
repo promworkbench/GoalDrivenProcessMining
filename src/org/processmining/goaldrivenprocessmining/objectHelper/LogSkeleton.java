@@ -12,7 +12,6 @@ public class LogSkeleton implements Serializable {
 	private ActivityHashTable activityHashTable;
 	private EdgeHashTable edgeHashTable;
 	private List<TraceSkeleton> log;
-	private List<EdgeObject> listIndirectedEdges;
 	private Config config;
 
 	public LogSkeleton() {
@@ -113,7 +112,7 @@ public class LogSkeleton implements Serializable {
 
 	public String toString() {
 		return "LogSkeleton [activityHashTable=" + activityHashTable + ", edgeHashTable=" + edgeHashTable + ", log="
-				+ log + ", listIndirectedEdges=" + listIndirectedEdges + ", config=" + config + "]";
+				+ log + ", config=" + config + "]";
 	}
 
 	//	public HashMap<String, GroupSkeleton> getGroupConfig() {

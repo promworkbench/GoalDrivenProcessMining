@@ -82,12 +82,12 @@ public class PopupPanel {
 
 		popupMenu.show(parent, popupX, popupY);
 	}
-	public static void showDisplayGroupPopupPanel(Component parent, Point mousePosition, GroupSkeleton groupSkeleton, Boolean isHighLevel) {
+	public static void showDisplayGroupPopupPanel(Component parent, Point mousePosition, GroupSkeleton groupSkeleton, Boolean isHighLevel, Boolean isCollapsed) {
 		JPopupMenu popupMenu = new JPopupMenu();
 		popupMenu.setBorder(new LineBorder(Color.WHITE, 5));
 		popupMenu.setBorderPainted(true);
 
-		DisplayGroupPopupPanel popupContent = new DisplayGroupPopupPanel(popupMenu, mousePosition, groupSkeleton, isHighLevel);
+		DisplayGroupPopupPanel popupContent = new DisplayGroupPopupPanel(popupMenu, mousePosition, groupSkeleton, isHighLevel, isCollapsed);
 
 		// Create a temporary container to hold the popupPanel
 		JPanel container = new JPanel();

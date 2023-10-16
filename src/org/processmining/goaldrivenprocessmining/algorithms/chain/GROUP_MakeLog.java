@@ -95,7 +95,7 @@ public class GROUP_MakeLog<C> extends DataChainLinkComputationAbstract<C> {
 			}
 
 		}
-		GraphNodeUtils.addNewEdges(goalDrivenDFG, newEdges);
+		GraphNodeUtils.addNewEdgesWithOriginalName(goalDrivenDFG, newEdges);
 		// save the removed node
 		VisualItem removingNode = GraphNodeUtils.getVisualItemByLabel(goalDrivenDFG.getVisualization(),
 				selectedGroupSkeleton.getGroupName());
@@ -103,7 +103,7 @@ public class GROUP_MakeLog<C> extends DataChainLinkComputationAbstract<C> {
 		double removingNodeY = removingNode.getY();
 
 		// remove all nodes
-		GraphNodeUtils.removeNodeByLabel(goalDrivenDFG.getGraph(), selectedGroupSkeleton.getGroupName());
+		GraphNodeUtils.removeNodeByLabel(goalDrivenDFG, selectedGroupSkeleton.getGroupName());
 
 		// reposition newly added nodes
 		List<VisualItem> newAddedNodes = new ArrayList<VisualItem>();
@@ -156,58 +156,51 @@ public class GROUP_MakeLog<C> extends DataChainLinkComputationAbstract<C> {
 		List<String> groupNames = affectedGroups.stream().map(GroupSkeleton::getGroupName).collect(Collectors.toList());
 		List<String> combinedList = new ArrayList<String>(affectedActs);
 		combinedList.addAll(groupNames);
+
+		// remove all nodes
+		GraphNodeUtils.removeNodeByLabel(goalDrivenDFG, selectedGroupSkeleton.getGroupName());
+		for (String act : combinedList) {
+			GraphNodeUtils.removeNodeByLabel(goalDrivenDFG, act);
+		}
+
 		// add new nodes
 		GraphNodeUtils.addNewActNodes(goalDrivenDFG, Arrays.asList(selectedGroupSkeleton.getGroupName()));
 		// add new edges
 		List<EdgeObject> newEdges = new ArrayList<EdgeObject>();
-		List<GroupSkeleton> newGroups = new ArrayList<GroupSkeleton>();
-		for (GroupSkeleton group : newGroups) {
-			if (!group.equals(selectedGroupSkeleton)) {
-				newGroups.add(group);
-			}
-		}
+		List<GroupSkeleton> newGroups = gdpmLogSkeleton.getLogSkeleton().getConfig().getListGroupSkeletons();
 		for (EdgeObject edge : edgeHashTable.getEdgeTable().keySet()) {
 			String trueSourceLabel = LogSkeletonUtils.getTrueActivityLabel(gdpmLogSkeleton, newGroups,
 					edge.getNode1().getOriginalName());
 			String trueTargeLabel = LogSkeletonUtils.getTrueActivityLabel(gdpmLogSkeleton, newGroups,
 					edge.getNode2().getOriginalName());
-			if (affectedActs.contains(trueSourceLabel) || affectedActs.contains(trueTargeLabel)
-					|| groupNames.contains(trueSourceLabel) || groupNames.contains(trueTargeLabel)) {
+			if (trueSourceLabel.equals(selectedGroupSkeleton.getGroupName())
+					|| trueTargeLabel.equals(selectedGroupSkeleton.getGroupName())) {
 				newEdges.add(edge);
 			}
+			//			if (edge.getNode1().getCurrentName().equals(selectedGroupSkeleton.getGroupName())
+			//					|| edge.getNode2().getCurrentName().equals(selectedGroupSkeleton.getGroupName())) {
+			//				newEdges.add(edge);
+			//			}
 
 		}
-		GraphNodeUtils.addNewEdges(goalDrivenDFG, newEdges);
+		GraphNodeUtils.addNewEdgesWithCurrentName(goalDrivenDFG, newEdges);
 		// save the removed node
 		VisualItem removingNode = GraphNodeUtils.getVisualItemByLabel(goalDrivenDFG.getVisualization(),
-				selectedGroupSkeleton.getGroupName());
+				selectedGroupSkeleton.getListAct().get(0));
 		double removingNodeX = removingNode.getX();
 		double removingNodeY = removingNode.getY();
 
-		// remove all nodes
-		GraphNodeUtils.removeNodeByLabel(goalDrivenDFG.getGraph(), selectedGroupSkeleton.getGroupName());
-
 		// reposition newly added nodes
 		List<VisualItem> newAddedNodes = new ArrayList<VisualItem>();
-		for (String act : affectedActs) {
-			VisualItem vItem = GraphNodeUtils.getVisualItemByLabel(goalDrivenDFG.getVisualization(), act);
-			if (vItem != null) {
-				newAddedNodes.add(vItem);
-			}
-		}
-		for (String act : groupNames) {
-			VisualItem vItem = GraphNodeUtils.getVisualItemByLabel(goalDrivenDFG.getVisualization(), act);
-			if (vItem != null) {
-				newAddedNodes.add(vItem);
-			}
-		}
+		newAddedNodes.add(GraphNodeUtils.getVisualItemByLabel(goalDrivenDFG.getVisualization(),
+				selectedGroupSkeleton.getGroupName()));
 		double[] midPos = GraphNodeUtils.repositionNodes(newAddedNodes, goalDrivenDFG.getVisualization(), removingNodeX,
 				removingNodeY);
 		// create invisible node
 		Node inviNode = null;
 		inviNode = goalDrivenDFG.getGraph().addNode();
 		goalDrivenDFG.configInvisibleNode(inviNode, selectedGroupSkeleton.getGroupName());
-		inviNode.setBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED, false);
+		inviNode.setBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED, true);
 
 		// reposition the invisible node
 		goalDrivenDFG.getDragMultipleNodesControl().addInvisibleNode(selectedGroupSkeleton.getGroupName(), combinedList,
@@ -216,11 +209,11 @@ public class GROUP_MakeLog<C> extends DataChainLinkComputationAbstract<C> {
 		// assign 
 
 		// run the renderer for color
-		goalDrivenDFG.setNodeFillColorWithExpandedGroup(selectedGroupSkeleton);
+		goalDrivenDFG.setNodeFillColorWithExpandedGroup(null);
 		goalDrivenDFG.setDefaultNodeStrokeWidth();
 		goalDrivenDFG.setDefaultTextColorAndSize();
 		goalDrivenDFG.setDefaultNodeStrokeColor();
-		goalDrivenDFG.setEdgeStrokeWidthWithExpandedGroup(selectedGroupSkeleton);
+		goalDrivenDFG.setEdgeStrokeWidthWithExpandedGroup(null);
 		goalDrivenDFG.setDefaultArrowFillColor();
 		goalDrivenDFG.setDefaultEdgeStrokeColor();
 		goalDrivenDFG.setDefaultNodeSize();

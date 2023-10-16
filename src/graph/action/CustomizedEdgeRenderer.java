@@ -26,10 +26,13 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 
 	@Override
 	public Shape getShape(VisualItem item) {
-		if (item instanceof EdgeItem) {
+		if (item instanceof EdgeItem && item.isValid()) {
 			EdgeItem edge = (EdgeItem) item;
 			VisualItem item1 = edge.getSourceItem();
 			VisualItem item2 = edge.getTargetItem();
+			if(!item1.getString(GraphConstants.LABEL_FIELD).equals("a")) {
+			
+			}
 
 			CubicCurve2D curve = (CubicCurve2D) getRawShape(item);
 			if (item1 == item2) {

@@ -117,9 +117,20 @@ public class GoalDrivenDFG extends Display {
 		if (this.log != null && !this.log.getLogSkeleton().getLog().isEmpty()) {
 			//			this.frequencyEdge = gdpmLogSkeleton.getStatObject().getMapStatEdge();
 			//			this.frequencyNode = gdpmLogSkeleton.getStatObject().getMapStatNode();
-			this.graph = this.makeGraph(isHighLevel);
+			this.graph = this.makeGraph();
 			m_vis.addGraph("graph", graph);
-
+			
+			/*-------------------*/
+			Graph inviGraph = this.makeInviGraph();
+			
+			Node node1 = null;
+			node1 = inviGraph.addNode();
+			node1.setString(GraphConstants.LABEL_FIELD, "test invi node");
+			node1.setBoolean(GraphConstants.IS_INVISIBLE, false);
+			node1.setBoolean(GraphConstants.BEGIN_FIELD, false);
+			node1.setBoolean(GraphConstants.END_FIELD, false);
+			m_vis.addGraph("inviGraph", inviGraph);
+			/*-------------------*/
 			// control
 			this.setDefaultControl();
 			// layout
@@ -128,7 +139,7 @@ public class GoalDrivenDFG extends Display {
 			this.configDefaultGraph();
 			// center graph
 			this.centerGraph();
-			this.test();
+//			this.test();
 			this.dragMultipleNodesControl.initInvisibleNodes();
 
 		}
@@ -203,7 +214,7 @@ public class GoalDrivenDFG extends Display {
 	//				frame.setVisible(true); // show the window
 	//	}
 
-	public Graph makeGraph(Boolean isHighLevel) {
+	public Graph makeGraph() {
 
 		// Create tables for node and edge data, and configure their columns.
 		// init node table
@@ -216,7 +227,7 @@ public class GoalDrivenDFG extends Display {
 			// add begin and end node;
 			this.addBeginToTable(g);
 			// add activities in log to node table and add edges
-			this.addActToTable(g, isHighLevel);
+			this.addActToTable(g, this.isHighLevel);
 			return g;
 		} else {
 			return new Graph();
@@ -224,17 +235,31 @@ public class GoalDrivenDFG extends Display {
 
 	}
 
+	public Graph makeInviGraph() {
+		// Create tables for node and edge data, and configure their columns.
+		// init node table
+		Table nodeTable = new Table(0, 1);
+		nodeTable.addColumn(GraphConstants.LABEL_FIELD, String.class);
+		nodeTable.addColumn(GraphConstants.IS_INVISIBLE, boolean.class);
+		nodeTable.addColumn(GraphConstants.BEGIN_FIELD, boolean.class);
+		nodeTable.addColumn(GraphConstants.END_FIELD, boolean.class);
+		Graph g = new Graph(nodeTable, true);
+		return g;
+	}
+
 	public void configDefaultGraph() {
 
-		this.setDefaultArrowFillColor();
 		this.setDefaultEdgeStrokeColor();
 		this.setDefaultEdgeStrokeWidth();
+		
 		this.setDefaultNodeStrokeWidth();
 		this.setDefaultNodeFillColor();
 		this.setDefaultNodeStrokeColor();
 		this.setDefaultTextColorAndSize();
 		this.setDefaultNodeSize();
+		
 		this.setDefaultRenderer();
+		this.testInviNode();
 	}
 
 	public void setDefaultControl() {
@@ -335,9 +360,11 @@ public class GoalDrivenDFG extends Display {
 		/* begin end shape */
 		Predicate beginPredicate = (Predicate) ExpressionParser.parse("begin = true");
 		ShapeAction shapeAction = new ShapeAction("graph.nodes", Constants.SHAPE_RECTANGLE);
+		ShapeAction shapeAction1 = new ShapeAction("inviGraph.nodes", Constants.SHAPE_RECTANGLE);
 		shapeAction.add(beginPredicate, Constants.SHAPE_TRIANGLE_RIGHT);
 		ActionList shape = new ActionList();
 		shape.add(shapeAction);
+		shape.add(shapeAction1);
 		m_vis.putAction("shape", shape);
 		m_vis.run("shape");
 		/******************/
@@ -495,10 +522,20 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	public void setDefaultEdgeStrokeColor() {
-		this.edgeStrokeColorAction = new ColorAction("graph.edges", VisualItem.STROKECOLOR,
+		//		this.edgeStrokeColorAction = new ColorAction("graph.edges", VisualItem.STROKECOLOR,
+		//				GraphConstants.EDGE_STROKE_COLOR);
+		Predicate testPredicate = (Predicate) ExpressionParser.parse(Graph.DEFAULT_SOURCE_KEY + " = 2");
+		this.edgeStrokeColorAction = new ColorAction("graph.edges", testPredicate, VisualItem.STROKECOLOR,
 				GraphConstants.EDGE_STROKE_COLOR);
 		m_vis.putAction(GraphConstants.EDGE_STROKE_COLOR_ACTION, this.edgeStrokeColorAction);
 		m_vis.run(GraphConstants.EDGE_STROKE_COLOR_ACTION);
+		//		this.arrowFillColorAction = new ColorAction("graph.edges", VisualItem.FILLCOLOR,
+		//				GraphConstants.EDGE_STROKE_COLOR);
+		this.arrowFillColorAction = new ColorAction("graph.edges", testPredicate, VisualItem.FILLCOLOR,
+				GraphConstants.EDGE_STROKE_COLOR);
+		m_vis.putAction(GraphConstants.ARROW_FILL_COLOR_ACTION, this.arrowFillColorAction);
+		m_vis.run(GraphConstants.ARROW_FILL_COLOR_ACTION);
+
 	}
 
 	public void setDefaultNodeStrokeColor() {
@@ -506,6 +543,7 @@ public class GoalDrivenDFG extends Display {
 		this.nodeStrokeColorAction.setDefaultColor(GraphConstants.NODE_STROKE_COLOR);
 		m_vis.putAction(GraphConstants.NODE_STROKE_COLOR_ACTION, this.nodeStrokeColorAction);
 		m_vis.run(GraphConstants.NODE_STROKE_COLOR_ACTION);
+
 	}
 
 	public void setDefaultNodeFillColor() {
@@ -525,6 +563,31 @@ public class GoalDrivenDFG extends Display {
 		this.currentFrequencyNode = newFrequencyNode;
 		this.runCustomColorNodeFillAction();
 	}
+	
+	public void testInviNode() {
+		// stroke color
+		ColorAction testC = new ColorAction("inviGraph.nodes", VisualItem.STROKECOLOR);
+		testC.setDefaultColor(ColorLib.color(Color.WHITE));
+		
+		float[] dashPattern = { 2.0f, 2.0f }; // 2-pixel dash, 2-pixel gap
+		// Create a BasicStroke with the specified dash pattern
+		BasicStroke dashedStroke = new BasicStroke(2.0f, // Width of the stroke
+				BasicStroke.CAP_BUTT, // End cap style
+				BasicStroke.JOIN_MITER, // Join style
+				10.0f, // Miter limit
+				dashPattern, // Dash pattern
+				0.0f // Dash phase (offset into the dash pattern)
+		);
+		StrokeAction testStroke = new StrokeAction("inviGraph.nodes", dashedStroke);
+		ColorAction testColor = new ColorAction("inviGraph.nodes", VisualItem.FILLCOLOR);
+		testColor.setDefaultColor(ColorLib.color(Color.RED));
+		ActionList test = new ActionList();
+		test.add(testC);
+		test.add(testStroke);
+		test.add(testColor);
+		m_vis.putAction("test", test);
+		m_vis.run("test");
+	}
 
 	public void setNodeFillColorWithExpandedGroup(GroupSkeleton groupSkeleton) {
 		List<GroupSkeleton> collapsedGroups = new ArrayList<GroupSkeleton>();
@@ -538,8 +601,10 @@ public class GoalDrivenDFG extends Display {
 			String trueLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(), collapsedGroups, act);
 			newFrequencyNode.put(trueLabel, this.frequencyNode.get(act));
 		}
-		// remove node with label group name
-		newFrequencyNode.remove(groupSkeleton.getGroupName());
+		if (groupSkeleton != null) {
+			// remove node with label group name
+			newFrequencyNode.remove(groupSkeleton.getGroupName());
+		}
 		this.currentFrequencyNode = newFrequencyNode;
 		this.runCustomColorNodeFillAction();
 	}
