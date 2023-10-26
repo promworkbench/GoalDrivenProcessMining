@@ -11,25 +11,14 @@ public class Config implements Serializable {
 	 */
 	private static final long serialVersionUID = -9013552664319417538L;
 	private List<GroupSkeleton> listGroupSkeletons;
-	private MapActivityCategoryObject mapActivityCategoryObject;
-	private double highActThreshold;
-	private double lowActThreshold;
 	private String[] selectedActs;
 	private String[] unselectedActs;
 
 	public Config() {
 		this.listGroupSkeletons = new ArrayList<GroupSkeleton>();
-		this.mapActivityCategoryObject = new MapActivityCategoryObject();
-		this.highActThreshold = 1d;
-		this.lowActThreshold = 1d;
 		this.selectedActs = new String[] {};
 		this.unselectedActs = new String[] {};
-
 	}
-
-	// Selected act
-
-	// Group action
 
 	public void removeGroup(List<GroupSkeleton> groupActObjects) {
 		for (GroupSkeleton groupActObject : groupActObjects) {
@@ -57,30 +46,6 @@ public class Config implements Serializable {
 		this.listGroupSkeletons = listGroupSkeletons;
 	}
 
-	public MapActivityCategoryObject getMapActivityCategoryObject() {
-		return mapActivityCategoryObject;
-	}
-
-	public void setMapActivityCategoryObject(MapActivityCategoryObject mapActivityCategoryObject) {
-		this.mapActivityCategoryObject = mapActivityCategoryObject;
-	}
-
-	public double getHighActThreshold() {
-		return highActThreshold;
-	}
-
-	public void setHighActThreshold(double highActThreshold) {
-		this.highActThreshold = highActThreshold;
-	}
-
-	public double getLowActThreshold() {
-		return lowActThreshold;
-	}
-
-	public void setLowActThreshold(double lowActThreshold) {
-		this.lowActThreshold = lowActThreshold;
-	}
-
 	public String[] getSelectedActs() {
 		return selectedActs;
 	}
@@ -97,10 +62,27 @@ public class Config implements Serializable {
 		this.unselectedActs = unselectedActs;
 	}
 
-	public String toString() {
-		return "LogConfig [listGroupActObjects=" + listGroupSkeletons + ", mapActivityCategoryObject="
-				+ mapActivityCategoryObject + ", highActThreshold=" + highActThreshold + ", lowActThreshold="
-				+ lowActThreshold + ", selectedActs=" + Arrays.toString(selectedActs) + ", unselectedActs="
-				+ Arrays.toString(unselectedActs) + "]";
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(unselectedActs);
+		return result;
 	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Config other = (Config) obj;
+		return Arrays.equals(unselectedActs, other.unselectedActs);
+	}
+
+	public String toString() {
+		return "Config [listGroupSkeletons=" + listGroupSkeletons + ", selectedActs=" + Arrays.toString(selectedActs)
+				+ ", unselectedActs=" + Arrays.toString(unselectedActs) + "]";
+	}
+
 }

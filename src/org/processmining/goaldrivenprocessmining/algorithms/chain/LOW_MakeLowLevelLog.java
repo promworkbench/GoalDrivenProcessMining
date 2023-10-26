@@ -55,17 +55,17 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 		List<String> sources = new ArrayList<String>();
 		List<String> targets = new ArrayList<String>();
 
-		if (fullLogSkeleton.getLogSkeleton().isAGroupSkeleton(source)) {
-			sources.addAll(fullLogSkeleton.getLogSkeleton()
-					.getAllActivitiesInGroup(fullLogSkeleton.getLogSkeleton().getGroupSkeletonByGroupName(source)));
+		if (fullLogSkeleton.isAGroupSkeleton(source)) {
+			sources.addAll(fullLogSkeleton
+					.getAllActivitiesInGroup(fullLogSkeleton.getGroupSkeletonByGroupName(source)));
 		}
 		if (sources.isEmpty()) {
 			sources.add(source);
 		}
 
-		if (fullLogSkeleton.getLogSkeleton().isAGroupSkeleton(target)) {
-			targets.addAll(fullLogSkeleton.getLogSkeleton()
-					.getAllActivitiesInGroup(fullLogSkeleton.getLogSkeleton().getGroupSkeletonByGroupName(target)));
+		if (fullLogSkeleton.isAGroupSkeleton(target)) {
+			targets.addAll(fullLogSkeleton
+					.getAllActivitiesInGroup(fullLogSkeleton.getGroupSkeletonByGroupName(target)));
 		}
 		if (targets.isEmpty()) {
 			targets.add(target);
@@ -83,8 +83,8 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 		newGdpmLog = LogSkeletonUtils.removeActivitiesInLog(newGdpmLog, undisplayedActs);
 		newGdpmLog = LogSkeletonUtils.restrictLogFrom2Activities(newGdpmLog, sources, targets, undisplayedActs);
 
-		newGdpmLog.getLogSkeleton().getConfig().setSelectedActs(displayedActs.toArray(new String[0]));
-		newGdpmLog.getLogSkeleton().getConfig().setUnselectedActs(undisplayedActs.toArray(new String[0]));
+		newGdpmLog.getConfig().setSelectedActs(displayedActs.toArray(new String[0]));
+		newGdpmLog.getConfig().setUnselectedActs(undisplayedActs.toArray(new String[0]));
 		
 		currentLowLogSkeleton = newGdpmLog;
 

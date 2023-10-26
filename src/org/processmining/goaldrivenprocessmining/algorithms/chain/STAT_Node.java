@@ -1,9 +1,5 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
-import java.util.Arrays;
-
-import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
-import org.processmining.goaldrivenprocessmining.objectHelper.MapStatObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
@@ -34,19 +30,19 @@ public class STAT_Node<C> extends DataChainLinkComputationAbstract<C> {
 
 	public IvMObjectValues execute(Object configuration, IvMObjectValues inputs, IvMCanceller canceller)
 			throws Exception {
-		String selectedAct = inputs.get(GoalDrivenObject.selected_node);
-		GDPMLogSkeleton curLog;
-		if (Arrays.asList(CONFIG_Update.currentConfig.getSelectedActs()).contains(selectedAct)) {
-			curLog = HIGH_MakeHighLevelLog.currentHighLogSkeleton;
-		} else if (Arrays.asList(CONFIG_Update.currentConfig.getUnselectedActs()).contains(selectedAct)) {
-			curLog = LOW_MakeLowLevelLog.currentLowLogSkeleton;
-		} else {
-			throw new IllegalArgumentException("No such activity");
-		}
-		MapStatObject mapStatObject = curLog.getStatObject();
-		StatNodeObject statNodeObject = mapStatObject.getMapStatNode().get(selectedAct);
+//		String selectedAct = inputs.get(GoalDrivenObject.selected_node);
+//		GDPMLogSkeleton curLog;
+//		if (Arrays.asList(CONFIG_Update.currentConfig.getSelectedActs()).contains(selectedAct)) {
+//			curLog = HIGH_MakeHighLevelLog.currentHighLogSkeleton;
+//		} else if (Arrays.asList(CONFIG_Update.currentConfig.getUnselectedActs()).contains(selectedAct)) {
+//			curLog = LOW_MakeLowLevelLog.currentLowLogSkeleton;
+//		} else {
+//			throw new IllegalArgumentException("No such activity");
+//		}
+//		MapStatObject mapStatObject = curLog.getStatObject();
+//		StatNodeObject statNodeObject = mapStatObject.getMapStatNode().get(selectedAct);
 		
 		return new IvMObjectValues().//
-				s(GoalDrivenObject.stat_selected_node, statNodeObject);//
+				s(GoalDrivenObject.stat_selected_node, new StatNodeObject());//
 	}
 }

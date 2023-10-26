@@ -9,10 +9,8 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
-import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
-
 import graph.GraphConstants;
-import graph.utils.node.GraphNodeUtils;
+import graph.utils.node.GoalDrivenDFGUtils;
 import prefuse.Display;
 import prefuse.Visualization;
 import prefuse.controls.ControlAdapter;
@@ -30,7 +28,7 @@ public class SquareSelectControl extends ControlAdapter {
 	private Display display;
 
 	private boolean isFirstPressed;
-	
+
 	private boolean showPopup = false;
 
 	private Rectangle2D rectangle;
@@ -65,11 +63,11 @@ public class SquareSelectControl extends ControlAdapter {
 	public void mouseReleased(MouseEvent e) {
 		// get all vItem in the rectangle
 		Visualization vis = display.getVisualization();
-		List<VisualItem> allVisualItems = GraphNodeUtils.getAllNodes(vis);
+		List<VisualItem> allVisualItems = GoalDrivenDFGUtils.getAllNodes(vis);
 		if (rectangle != null) {
 			for (VisualItem item : allVisualItems) {
-				if (isInsideRectangle(item, rectangle)&& !item.getBoolean(GraphConstants.IS_INVISIBLE)) {
-					nodeTable.set(item.getRow(), GraphConstants.SELECT_FIELD, true);
+				if (isInsideRectangle(item, rectangle)) {
+					nodeTable.set(item.getRow(), GraphConstants.IS_SELECTED, true);
 					item.setFillColor(GraphConstants.SELECTED_NODE_FILL_COLOR);
 				}
 			}
@@ -109,6 +107,7 @@ public class SquareSelectControl extends ControlAdapter {
 	private class SquareSelectGraphic implements PaintListener {
 		public void prePaint(Display d, Graphics2D g) {
 		}
+
 		public void postPaint(Display d, Graphics2D g) {
 			if (!isFirstPressed) {
 				Graphics2D g2d = (Graphics2D) g.create();
@@ -119,19 +118,5 @@ public class SquareSelectControl extends ControlAdapter {
 			}
 		}
 	}
-	
-	private class PopUpGraphic implements PaintListener {
-		public void prePaint(Display d, Graphics2D g) {
-		}
-		public void postPaint(Display d, Graphics2D g) {
-			if (showPopup) {
-				GoalDrivenPanel gdpPanel = (GoalDrivenPanel) display.getParent().getParent().getParent().getParent();
-				if (gdpPanel.getControlBar().getExpandButton().getText().split(" ")[0].equals("Expand")) {
-					gdpPanel.getControlBar().getExpandButton().doClick();
-				}
-				showPopup = false;
-			}
-		}
-		
-	}
+
 }

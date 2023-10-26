@@ -19,8 +19,8 @@ public class BackgroundDoubleClickControl extends ControlAdapter {
 		if (e.getClickCount() == 2 && e.isConsumed() == false) {
 			Display display = (Display) e.getComponent();
 			for (int i = 0; i < nodeTable.getRowCount(); i++) {
-				if (nodeTable.getBoolean(i, GraphConstants.SELECT_FIELD)) {
-					nodeTable.setBoolean(i, GraphConstants.SELECT_FIELD, false);
+				if (nodeTable.getBoolean(i, GraphConstants.IS_SELECTED)) {
+					nodeTable.setBoolean(i, GraphConstants.IS_SELECTED, false);
 					VisualItem item = display.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
 							this.nodeTable.getTuple(i));
 					if (item.getBoolean(GraphConstants.BEGIN_FIELD) || item.getBoolean(GraphConstants.END_FIELD)) {

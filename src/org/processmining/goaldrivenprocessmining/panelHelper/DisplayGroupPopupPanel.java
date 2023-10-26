@@ -43,7 +43,7 @@ public class DisplayGroupPopupPanel extends JPanel {
 		ungroupButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				GoalDrivenController.ungroupGroupConfigObject(groupSkeleton.getGroupName());
+				GoalDrivenController.removeGroupFromGraph(groupSkeleton.getGroupName());
 				DisplayGroupPopupPanel.this.setVisible(false);
 				popupMenu.setVisible(false);
 				revalidate();
@@ -68,7 +68,7 @@ public class DisplayGroupPopupPanel extends JPanel {
 		ungroupButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				GoalDrivenController.ungroupGroupConfigObject(groupSkeleton.getGroupName());
+				GoalDrivenController.removeGroupFromGraph(groupSkeleton.getGroupName());
 				DisplayGroupPopupPanel.this.setVisible(false);
 				popupMenu.setVisible(false);
 				revalidate();

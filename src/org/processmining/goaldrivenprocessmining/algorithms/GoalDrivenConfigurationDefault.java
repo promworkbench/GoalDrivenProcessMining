@@ -4,7 +4,6 @@ import java.util.concurrent.Executor;
 
 import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl01GatherAttributes;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.GROUP_MakeLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_UpdateCategoryHighLevelDFG;
@@ -49,7 +48,6 @@ public class GoalDrivenConfigurationDefault extends GoalDrivenConfigurationAbstr
 		chain.register(new LOW_MakeLowLevelDFG<GoalDrivenConfiguration>());
 		chain.register(new LOW_UpdateCategoryLowLevelDFG<GoalDrivenConfiguration>());
 		chain.register(new LOW_UpdateLowLevelLogUsingConfig<GoalDrivenConfiguration>());
-		chain.register(new GROUP_MakeLog<GoalDrivenConfiguration>());
 		return chain;
 	}
 

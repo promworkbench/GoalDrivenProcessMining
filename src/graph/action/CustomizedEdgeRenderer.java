@@ -1,6 +1,7 @@
 package graph.action;
 
 import java.awt.BasicStroke;
+import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -24,16 +25,19 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 
 	protected Polygon m_arrowDoubleHead = updateArrowDoubleHead(m_arrowWidth, m_arrowHeight);
 
+	public void render(Graphics2D g, VisualItem item) {
+		if (item.getBoolean(GraphConstants.IS_DISPLAY)) {
+			// render the edge line
+			super.render(g, item);
+		}
+	}
+
 	@Override
 	public Shape getShape(VisualItem item) {
 		if (item instanceof EdgeItem && item.isValid()) {
 			EdgeItem edge = (EdgeItem) item;
 			VisualItem item1 = edge.getSourceItem();
 			VisualItem item2 = edge.getTargetItem();
-			if(!item1.getString(GraphConstants.LABEL_FIELD).equals("a")) {
-			
-			}
-
 			CubicCurve2D curve = (CubicCurve2D) getRawShape(item);
 			if (item1 == item2) {
 				return curve;
@@ -83,9 +87,9 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 				// Create a composite shape with the original shape and the boundary shape
 				Area compositeShape = new Area();
 				BasicStroke boundaryStroke = new BasicStroke(1f);
-//				Shape boundaryShape = boundaryStroke.createStrokedShape(adjustedCurve);
+				//				Shape boundaryShape = boundaryStroke.createStrokedShape(adjustedCurve);
 				Shape boundaryShape = boundaryStroke.createStrokedShape(adjustedCurve);
-				
+
 				compositeShape.add(new Area(boundaryShape));
 
 				return new Area(boundaryShape);
@@ -118,7 +122,7 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 				start = m_tmpPoints[forward ? 0 : 1];
 				start.setLocation(start.getX() + item1.getBounds().getWidth() / 2, start.getY());
 				end = m_tmpPoints[forward ? 1 : 0];
-				end.setLocation(end.getX() + item1.getBounds().getWidth() / 2 , end.getY());
+				end.setLocation(end.getX() + item1.getBounds().getWidth() / 2, end.getY());
 			} else {
 				start = m_tmpPoints[forward ? 0 : 1];
 				end = m_tmpPoints[forward ? 1 : 0];
@@ -134,7 +138,7 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 			AffineTransform at;
 			if (item1 == item2) {
 				Point2D fakeStart = new Point2D.Double(end.getX() + 450, end.getY() + 500);
-				Point2D fakeEnd = new Point2D.Double(end.getX(), end.getY() +20);
+				Point2D fakeEnd = new Point2D.Double(end.getX(), end.getY() + 20);
 				at = getArrowTrans(fakeStart, fakeEnd, m_curWidth);
 			} else {
 				at = getArrowTrans(start, end, m_curWidth);

@@ -78,7 +78,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		UpdateConfig updateConfig = new UpdateConfig(UpdateType.SELECTED_ACT, updateMap);
 
 		GDPMLogSkeleton gdpmLogSkeleton = new GDPMLogSkeleton(log);
-		originalEdgeHashTable = gdpmLogSkeleton.getLogSkeleton().getEdgeHashTable();
+		originalEdgeHashTable = gdpmLogSkeleton.getEdgeHashTable();
 		HIGH_MakeHighLevelLog.currentHighLogSkeleton = null;
 
 		return new IvMObjectValues().//

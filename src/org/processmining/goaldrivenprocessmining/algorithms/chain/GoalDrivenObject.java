@@ -62,6 +62,7 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	public static final IvMObject<GoalDrivenDFG> selected_group_dfg = c("DFG of the selected group", GoalDrivenDFG.class);
 	// selected group
 	public static final IvMObject<SelectedGroup> selected_group = c("Selected group from UI", SelectedGroup.class);
+	// 
 	public GoalDrivenObject(String name, Class<C> clazz) {
 		super(name, clazz);
 	}

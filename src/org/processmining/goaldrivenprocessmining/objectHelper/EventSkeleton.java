@@ -7,11 +7,11 @@ public class EventSkeleton implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -3889100038468173203L;
-	private ActivitySkeleton activity;
+	private String activity;
 	private String time;
 	private Boolean isDisplayed;
 
-	public EventSkeleton(ActivitySkeleton activity, String time, Boolean isDisplayed) {
+	public EventSkeleton(String activity, String time, Boolean isDisplayed) {
 		this.activity = activity;
 		this.time = time;
 		this.isDisplayed = isDisplayed;
@@ -23,11 +23,11 @@ public class EventSkeleton implements Serializable {
 		this.isDisplayed = eventSkeleton.getIsDisplayed();
 	}
 
-	public ActivitySkeleton getActivity() {
+	public String getActivity() {
 		return activity;
 	}
 
-	public void setActivity(ActivitySkeleton activity) {
+	public void setActivity(String activity) {
 		this.activity = activity;
 	}
 

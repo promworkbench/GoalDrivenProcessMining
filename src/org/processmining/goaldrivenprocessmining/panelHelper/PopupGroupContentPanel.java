@@ -30,7 +30,7 @@ public class PopupGroupContentPanel extends JPanel {
 	private JButton doneButton;
 	private JButton cancelButton;
 
-	public PopupGroupContentPanel(JPopupMenu popupMenu) {
+	public PopupGroupContentPanel(JPopupMenu popupMenu, Boolean isHighLevel) {
 		setLayout(new BorderLayout());
 
 		mainPanel = new JPanel(new FlowLayout());
@@ -101,7 +101,7 @@ public class PopupGroupContentPanel extends JPanel {
 						groupName = groupPanel.getNewGroupNameTextField().getText();
 
 					}
-					GoalDrivenController.addGroupConfigObject(groupName);
+					GoalDrivenController.addGroupConfigObject(groupName, isHighLevel);
 					// Hide the PopupContentPanel
 					PopupGroupContentPanel.this.setVisible(false);
 					popupMenu.setVisible(false);

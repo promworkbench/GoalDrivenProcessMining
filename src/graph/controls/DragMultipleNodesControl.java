@@ -11,7 +11,7 @@ import java.util.Map;
 import javax.swing.SwingUtilities;
 
 import graph.GraphConstants;
-import graph.utils.node.GraphNodeUtils;
+import graph.utils.node.GoalDrivenDFGUtils;
 import prefuse.Display;
 import prefuse.controls.ControlAdapter;
 import prefuse.data.Table;
@@ -41,33 +41,33 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 	}
 
 	public void initInvisibleNodes() {
-		List<VisualItem> allNodes = GraphNodeUtils.getAllNodes(this.display.getVisualization());
-		for (VisualItem invisibleNode : allNodes) {
-			if (invisibleNode.getBoolean(GraphConstants.IS_INVISIBLE)) {
-				for (VisualItem item2 : allNodes) {
-					if (invisibleNode.getString(GraphConstants.LABEL_FIELD)
-							.equals(item2.getString(GraphConstants.LABEL_FIELD))) {
-						invisibleNode.setX(item2.getX());
-						invisibleNode.setY(item2.getY());
-						mapInvisibleNodes.put(item2, invisibleNode);
-						if (mapAffectedNodes.containsKey(invisibleNode)) {
-							List<VisualItem> vItems = mapAffectedNodes.get(invisibleNode);
-							vItems.add(item2);
-							mapAffectedNodes.replace(invisibleNode, vItems);
-						} else {
-							List<VisualItem> vItems = new ArrayList<>();
-							vItems.add(item2);
-							mapAffectedNodes.put(invisibleNode, vItems);
-						}
-						break;
-					}
-				}
-			}
-		}
+//		List<VisualItem> allNodes = GraphNodeUtils.getAllNodes(this.display.getVisualization());
+//		for (VisualItem invisibleNode : allNodes) {
+//			if (invisibleNode.getBoolean(GraphConstants.IS_INVISIBLE)) {
+//				for (VisualItem item2 : allNodes) {
+//					if (invisibleNode.getString(GraphConstants.LABEL_FIELD)
+//							.equals(item2.getString(GraphConstants.LABEL_FIELD))) {
+//						invisibleNode.setX(item2.getX());
+//						invisibleNode.setY(item2.getY());
+//						mapInvisibleNodes.put(item2, invisibleNode);
+//						if (mapAffectedNodes.containsKey(invisibleNode)) {
+//							List<VisualItem> vItems = mapAffectedNodes.get(invisibleNode);
+//							vItems.add(item2);
+//							mapAffectedNodes.replace(invisibleNode, vItems);
+//						} else {
+//							List<VisualItem> vItems = new ArrayList<>();
+//							vItems.add(item2);
+//							mapAffectedNodes.put(invisibleNode, vItems);
+//						}
+//						break;
+//					}
+//				}
+//			}
+//		}
 	}
 
 	public void addInvisibleNode(String invisibleNodeName, List<String> affectedNodes, double[] midPos) {
-		List<VisualItem> allNodes = GraphNodeUtils.getAllNodes(this.display.getVisualization());
+		List<VisualItem> allNodes = GoalDrivenDFGUtils.getAllNodes(this.display.getVisualization());
 		for (VisualItem invisibleNode : allNodes) {
 			if (invisibleNode.getBoolean(GraphConstants.IS_INVISIBLE)
 					&& invisibleNode.getString(GraphConstants.LABEL_FIELD).equals(invisibleNodeName)) {
@@ -203,8 +203,8 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 		double dx = temp.getX() - down.getX();
 		double dy = temp.getY() - down.getY();
 		if (nodeFilter.getBoolean(item)) {
-			if (item.getBoolean(GraphConstants.SELECT_FIELD)) {
-				List<VisualItem> listSelectedNodes = GraphNodeUtils
+			if (item.getBoolean(GraphConstants.IS_SELECTED)) {
+				List<VisualItem> listSelectedNodes = GoalDrivenDFGUtils
 						.getSelectedNodes(((Display) e.getComponent()).getVisualization(), item.getTable());
 				for (VisualItem selectedItem : listSelectedNodes) {
 					this.updatePosNode(selectedItem, dx, dy);
@@ -214,26 +214,27 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 					}
 				}
 
-			} else if (item.getBoolean(GraphConstants.IS_INVISIBLE)) {
-				List<VisualItem> vItems = DragMultipleNodesControl.mapAffectedNodes.get(item);
-				for (VisualItem vItem : vItems) {
-					if (vItem.getBoolean(GraphConstants.SELECT_FIELD)) {
-						List<VisualItem> listSelectedNodes = GraphNodeUtils
-								.getSelectedNodes(((Display) e.getComponent()).getVisualization(), item.getTable());
-						for (VisualItem selectedItem : listSelectedNodes) {
-							this.updatePosNode(selectedItem, dx, dy);
-							if (this.mapInvisibleNodes.containsKey(selectedItem)) {
-								VisualItem inviNode = this.mapInvisibleNodes.get(selectedItem);
-								this.updatePosNode(inviNode, dx, dy);
-							}
-						}
-					} else {
-						this.updatePosNode(vItem, dx, dy);
-					}
-				}
-				this.updatePosNode(item, dx, dy);
-
-			}
+			} 
+			//			else if (item.getBoolean(GraphConstants.IS_INVISIBLE)) {
+			//				List<VisualItem> vItems = DragMultipleNodesControl.mapAffectedNodes.get(item);
+			//				for (VisualItem vItem : vItems) {
+			//					if (vItem.getBoolean(GraphConstants.SELECT_FIELD)) {
+			//						List<VisualItem> listSelectedNodes = GraphNodeUtils
+			//								.getSelectedNodes(((Display) e.getComponent()).getVisualization(), item.getTable());
+			//						for (VisualItem selectedItem : listSelectedNodes) {
+			//							this.updatePosNode(selectedItem, dx, dy);
+			//							if (this.mapInvisibleNodes.containsKey(selectedItem)) {
+			//								VisualItem inviNode = this.mapInvisibleNodes.get(selectedItem);
+			//								this.updatePosNode(inviNode, dx, dy);
+			//							}
+			//						}
+			//					} else {
+			//						this.updatePosNode(vItem, dx, dy);
+			//					}
+			//				}
+			//				this.updatePosNode(item, dx, dy);
+			//
+			//			}
 
 			else {
 				this.updatePosNode(item, dx, dy);

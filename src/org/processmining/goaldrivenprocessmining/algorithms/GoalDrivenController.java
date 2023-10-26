@@ -55,7 +55,7 @@ import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.
 
 import graph.GoalDrivenDFG;
 import graph.GraphConstants;
-import graph.utils.node.GraphNodeUtils;
+import graph.utils.node.GoalDrivenDFGUtils;
 import prefuse.Visualization;
 import prefuse.visual.VisualItem;
 
@@ -86,14 +86,37 @@ public class GoalDrivenController {
 		SelectedGroup selectedGroup = new SelectedGroup(groupSkeleton, isHighLevel, true);
 		chain.setObject(GoalDrivenObject.selected_group, selectedGroup);
 	}
+
 	public static void collapseSelectedGroup(GroupSkeleton groupSkeleton, Boolean isHighLevel) {
 		SelectedGroup selectedGroup = new SelectedGroup(groupSkeleton, isHighLevel, false);
 		chain.setObject(GoalDrivenObject.selected_group, selectedGroup);
 	}
 
-	public static void ungroupGroupConfigObject(String groupName) {
-		UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.REMOVE, groupName);
-		chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
+	public static void removeGroupFromGraph(String groupName) {
+		Config currentConfig = CONFIG_Update.currentConfig == null ? new Config() : CONFIG_Update.currentConfig;
+		GroupSkeleton selectedGroup = null;
+		GroupSkeleton parentGroup = null;
+		List<GroupSkeleton> newGroupSkeletons = new ArrayList<GroupSkeleton>();
+		for (GroupSkeleton groupSkeleton : currentConfig.getListGroupSkeletons()) {
+			if (!groupSkeleton.getGroupName().equals(groupName)) {
+				newGroupSkeletons.add(groupSkeleton);
+			} else {
+				selectedGroup = groupSkeleton;
+			}
+		}
+		if (selectedGroup != null) {
+			for (GroupSkeleton groupSkeleton : currentConfig.getListGroupSkeletons()) {
+				if (groupSkeleton.getListGroup().contains(selectedGroup)) {
+					parentGroup = groupSkeleton;
+					break;
+				}
+			}
+			GoalDrivenDFGUtils.removeGroupState(panel.getHighDfgPanel(), selectedGroup, parentGroup);
+			GoalDrivenDFGUtils.updateDfg(panel.getHighDfgPanel());
+		}
+
+		CONFIG_Update.currentConfig.setListGroupSkeletons(newGroupSkeletons);
+		chain.setObject(GoalDrivenObject.config, CONFIG_Update.currentConfig);
 	}
 
 	public static void removeActInGroupConfigObject(String groupName, String act) {
@@ -102,15 +125,17 @@ public class GoalDrivenController {
 		chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
 	}
 
-	public static void addGroupConfigObject(String groupName) {
+	public static void addGroupConfigObject(String groupName, Boolean isHighLevel) {
 		List<String> selectedAct = new ArrayList<>();
 		List<GroupSkeleton> selectedGroup = new ArrayList<>();
 		Visualization visHigh = panel.getHighDfgPanel().getVisualization();
 		Visualization visLow = panel.getLowDfgPanel().getVisualization();
 
-		List<VisualItem> allVisualItemsHigh = GraphNodeUtils.getAllNodes(visHigh);
+		Visualization vis = isHighLevel ? visHigh : visLow;
+
+		List<VisualItem> allVisualItemsHigh = GoalDrivenDFGUtils.getAllNodes(vis);
 		for (VisualItem item : allVisualItemsHigh) {
-			if (item.getBoolean(GraphConstants.SELECT_FIELD)) {
+			if (item.getBoolean(GraphConstants.IS_SELECTED)) {
 				if (item.get(GraphConstants.NODE_TYPE_FIELD) == NodeType.ACT_NODE) {
 					selectedAct.add(item.getString(GraphConstants.LABEL_FIELD));
 				} else {
@@ -128,16 +153,20 @@ public class GoalDrivenController {
 
 			}
 		}
-		List<VisualItem> allVisualItemsLow = GraphNodeUtils.getAllNodes(visLow);
-		for (VisualItem item : allVisualItemsLow) {
-			if (item.getBoolean(GraphConstants.SELECT_FIELD)) {
-				selectedAct.add(item.getString(GraphConstants.LABEL_FIELD));
-			}
-		}
 		GroupSkeleton newGroupSkeleton = new GroupSkeleton(groupName, selectedAct, selectedGroup);
-
-		UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.ADD, newGroupSkeleton);
-		chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
+		//		if (isHighLevel) {
+		//			GoalDrivenDFGUtils.addGroupToDFG(panel.getHighDfgPanel(), newGroupSkeleton);
+		//
+		//		} else {
+		//			GoalDrivenDFGUtils.addGroupToDFG(panel.getLowDfgPanel(), newGroupSkeleton);
+		//		}
+		GoalDrivenDFGUtils.addGroupState(newGroupSkeleton);
+		GoalDrivenDFGUtils.updateDfg(panel.getHighDfgPanel());
+		// update config
+		Config updatedConfig = CONFIG_Update.currentConfig == null ? new Config() : CONFIG_Update.currentConfig;
+		updatedConfig.addGroup(newGroupSkeleton);
+		CONFIG_Update.currentConfig = updatedConfig;
+		chain.setObject(GoalDrivenObject.config, updatedConfig);
 
 	}
 
@@ -206,7 +235,7 @@ public class GoalDrivenController {
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				Boolean isLowClear = false;
 				if (inputs.has(GoalDrivenObject.low_level_dfg)) {
-					if (!inputs.get(GoalDrivenObject.low_level_dfg).getLog().getLogSkeleton().getLog().isEmpty()) {
+					if (!inputs.get(GoalDrivenObject.low_level_dfg).getLog().getLog().isEmpty()) {
 						panel.getContentRightPanel().remove(panel.getLowDfgPanel());
 						panel.setLowDfgPanel(inputs.get(GoalDrivenObject.low_level_dfg));
 						panel.getLowDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);

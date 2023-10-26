@@ -54,7 +54,7 @@ public class GroupConfigPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				int selectedRow = groupTable.getSelectedRow();
-				GoalDrivenController.ungroupGroupConfigObject(((GroupSkeleton)tableModel.getValueAt(selectedRow, 0)).getGroupName());
+				GoalDrivenController.removeGroupFromGraph(((GroupSkeleton)tableModel.getValueAt(selectedRow, 0)).getGroupName());
 				displayPanel.removeAll();
 				revalidate();
 				repaint();

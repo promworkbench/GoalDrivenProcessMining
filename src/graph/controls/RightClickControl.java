@@ -24,16 +24,16 @@ public class RightClickControl extends ControlAdapter {
 	@Override
 	public void itemClicked(VisualItem item, MouseEvent e) {
 		if (e.getButton() == MouseEvent.BUTTON3 && item != null) {
-			boolean isSelected = item.getTable().getBoolean(item.getRow(), GraphConstants.SELECT_FIELD);
+			boolean isSelected = item.getTable().getBoolean(item.getRow(), GraphConstants.IS_SELECTED);
 			if (isSelected
 					&& item.getTable().get(item.getRow(), GraphConstants.NODE_TYPE_FIELD).equals(NodeType.ACT_NODE)) {
 
 				PopupPanel.showGroupPopupPanel(this.display, e.getPoint());
-			} else if (item.getBoolean(GraphConstants.IS_INVISIBLE)) {
+			} else {
 				List<VisualItem> vItems = DragMultipleNodesControl.mapAffectedNodes.get(item);
 				Boolean hasSelect = false;
 				for (VisualItem vItem : vItems) {
-					if (vItem.getBoolean(GraphConstants.SELECT_FIELD)) {
+					if (vItem.getBoolean(GraphConstants.IS_SELECTED)) {
 						hasSelect = true;
 						break;
 					}
@@ -41,7 +41,7 @@ public class RightClickControl extends ControlAdapter {
 				if (hasSelect) {
 					PopupPanel.showGroupPopupPanel(this.display, e.getPoint());
 				} else {
-					GroupSkeleton selectedGroup = this.display.getLog().getLogSkeleton().getGroupSkeletonByGroupName(
+					GroupSkeleton selectedGroup = this.display.getLog().getGroupSkeletonByGroupName(
 							item.getTable().getString(item.getRow(), GraphConstants.LABEL_FIELD));
 					PopupPanel.showDisplayGroupPopupPanel(this.display, e.getPoint(), selectedGroup,
 							this.display.getIsHighLevel(), item.getBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED));

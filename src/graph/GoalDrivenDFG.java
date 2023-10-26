@@ -5,27 +5,22 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
-import org.processmining.goaldrivenprocessmining.objectHelper.ActivitySkeleton;
-import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
-import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.ValueCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
-import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 
 import graph.action.CustomColorNodeFillAction;
 import graph.action.CustomEdgeStrokeWidthAction;
 import graph.action.CustomizedEdgeRenderer;
+import graph.action.NodeRenderer;
 import graph.action.SetNodeSizeAction;
 import graph.controls.BackgroundDoubleClickControl;
 import graph.controls.BorderNodeControl;
@@ -35,7 +30,6 @@ import graph.controls.GraphObjectClickControl;
 import graph.controls.RightClickControl;
 import graph.controls.SelectMultipleNodesControl;
 import graph.controls.SquareSelectControl;
-import graph.utils.node.NodeRenderer;
 import prefuse.Constants;
 import prefuse.Display;
 import prefuse.Visualization;
@@ -54,9 +48,9 @@ import prefuse.data.Node;
 import prefuse.data.Table;
 import prefuse.data.expression.Predicate;
 import prefuse.data.expression.parser.ExpressionParser;
+import prefuse.data.util.TableIterator;
 import prefuse.render.DefaultRendererFactory;
 import prefuse.util.ColorLib;
-import prefuse.util.PrefuseLib;
 import prefuse.visual.VisualItem;
 
 public class GoalDrivenDFG extends Display {
@@ -68,9 +62,8 @@ public class GoalDrivenDFG extends Display {
 	private int beginNodeRow;
 	private int endNodeRow;
 	private Graph graph;
+	private Graph inviGraph;
 	private Boolean isHighLevel;
-	//	private HashMap<EdgeObject, StatEdgeObject> frequencyEdge;
-	//	private HashMap<String, StatNodeObject> frequencyNode;
 	// control 
 	private SelectMultipleNodesControl selectMultipleNodesControl;
 	private BackgroundDoubleClickControl backgroundDoubleClickControl;
@@ -84,17 +77,17 @@ public class GoalDrivenDFG extends Display {
 	private RightClickControl rightClickControl;
 	// action
 	private ColorAction nodeStrokeColorAction;
-	private ColorAction nodeFillColorAction;
 	private ColorAction edgeStrokeColorAction;
-	private StrokeAction edgeStrokeWidthAction;
 	private StrokeAction nodeStrokeWidthAction;
 	private ColorAction arrowFillColorAction;
 	private ColorAction textColorAction;
 	// frequency
 	private HashMap<String, Integer> frequencyNode = new HashMap<String, Integer>();
 	private HashMap<String, Integer> currentFrequencyNode = new HashMap<String, Integer>();
-	HashMap<EdgeObject, Integer> frequencyEdge = new HashMap<EdgeObject, Integer>();
-	HashMap<EdgeObject, Integer> currentFrequencyEdge = new HashMap<EdgeObject, Integer>();
+	private HashMap<EdgeObject, Integer> frequencyEdge = new HashMap<EdgeObject, Integer>();
+	private HashMap<EdgeObject, Integer> currentFrequencyEdge = new HashMap<EdgeObject, Integer>();
+	// group
+	private HashMap<String, HashMap<Graph, Node>> mapGroupNode;
 
 	public GoalDrivenDFG(GDPMLogSkeleton gdpmLogSkeleton, Boolean isHighLevel) {
 		super(new Visualization());
@@ -103,34 +96,26 @@ public class GoalDrivenDFG extends Display {
 
 		// action
 		this.nodeStrokeColorAction = null;
-		this.nodeFillColorAction = null;
 		this.edgeStrokeColorAction = null;
-		this.edgeStrokeWidthAction = null;
 		this.arrowFillColorAction = null;
 		this.textColorAction = null;
+
+		// group
+		this.mapGroupNode = new HashMap<>();
 
 		// repaint
 		ActionList repaint = new ActionList();
 		repaint.add(new RepaintAction());
 		m_vis.putAction("repaint", repaint);
 
-		if (this.log != null && !this.log.getLogSkeleton().getLog().isEmpty()) {
+		if (this.log != null && !this.log.getLog().isEmpty()) {
 			//			this.frequencyEdge = gdpmLogSkeleton.getStatObject().getMapStatEdge();
 			//			this.frequencyNode = gdpmLogSkeleton.getStatObject().getMapStatNode();
-			this.graph = this.makeGraph();
-			m_vis.addGraph("graph", graph);
-			
-			/*-------------------*/
-			Graph inviGraph = this.makeInviGraph();
-			
-			Node node1 = null;
-			node1 = inviGraph.addNode();
-			node1.setString(GraphConstants.LABEL_FIELD, "test invi node");
-			node1.setBoolean(GraphConstants.IS_INVISIBLE, false);
-			node1.setBoolean(GraphConstants.BEGIN_FIELD, false);
-			node1.setBoolean(GraphConstants.END_FIELD, false);
+			this.makeInviGraph();
+			this.makeGraph();
+			m_vis.addGraph("graph", this.graph);
 			m_vis.addGraph("inviGraph", inviGraph);
-			/*-------------------*/
+
 			// control
 			this.setDefaultControl();
 			// layout
@@ -139,8 +124,8 @@ public class GoalDrivenDFG extends Display {
 			this.configDefaultGraph();
 			// center graph
 			this.centerGraph();
-//			this.test();
-			this.dragMultipleNodesControl.initInvisibleNodes();
+			this.test();
+			//			this.dragMultipleNodesControl.initInvisibleNodes();
 
 		}
 
@@ -214,7 +199,7 @@ public class GoalDrivenDFG extends Display {
 	//				frame.setVisible(true); // show the window
 	//	}
 
-	public Graph makeGraph() {
+	private void makeGraph() {
 
 		// Create tables for node and edge data, and configure their columns.
 		// init node table
@@ -222,20 +207,19 @@ public class GoalDrivenDFG extends Display {
 		// init edge table
 		Table edgeTable = this.initEdgeTable();
 		// init graph
-		Graph g = new Graph(nodeTable, edgeTable, true);
-		if (!this.log.getLogSkeleton().getLog().isEmpty()) {
+		this.graph = new Graph(nodeTable, edgeTable, true);
+		if (!this.log.getLog().isEmpty()) {
 			// add begin and end node;
-			this.addBeginToTable(g);
+			this.addBeginToTable(this.graph);
 			// add activities in log to node table and add edges
-			this.addActToTable(g, this.isHighLevel);
-			return g;
+			this.addActToTable();
 		} else {
-			return new Graph();
+			this.graph = new Graph();
 		}
 
 	}
 
-	public Graph makeInviGraph() {
+	private void makeInviGraph() {
 		// Create tables for node and edge data, and configure their columns.
 		// init node table
 		Table nodeTable = new Table(0, 1);
@@ -243,26 +227,28 @@ public class GoalDrivenDFG extends Display {
 		nodeTable.addColumn(GraphConstants.IS_INVISIBLE, boolean.class);
 		nodeTable.addColumn(GraphConstants.BEGIN_FIELD, boolean.class);
 		nodeTable.addColumn(GraphConstants.END_FIELD, boolean.class);
-		Graph g = new Graph(nodeTable, true);
-		return g;
+		nodeTable.addColumn(GraphConstants.IS_DISPLAY, boolean.class);
+		nodeTable.addColumn(GraphConstants.IS_SELECTED, boolean.class);
+		nodeTable.addColumn(GraphConstants.NODE_TYPE_FIELD, NodeType.class);
+		this.inviGraph = new Graph(nodeTable, true);
 	}
 
-	public void configDefaultGraph() {
+	private void configDefaultGraph() {
 
 		this.setDefaultEdgeStrokeColor();
 		this.setDefaultEdgeStrokeWidth();
-		
+
 		this.setDefaultNodeStrokeWidth();
 		this.setDefaultNodeFillColor();
 		this.setDefaultNodeStrokeColor();
 		this.setDefaultTextColorAndSize();
 		this.setDefaultNodeSize();
-		
+
 		this.setDefaultRenderer();
 		this.testInviNode();
 	}
 
-	public void setDefaultControl() {
+	private void setDefaultControl() {
 		setSize(300, 500); // set display size
 		//		pan(150, 250);
 		setHighQuality(true);
@@ -319,7 +305,7 @@ public class GoalDrivenDFG extends Display {
 
 	}
 
-	public void removeAllControls() {
+	private void removeAllControls() {
 		this.removeControlListener(this.focusControl);
 		this.removeControlListener(this.customPanControl);
 		this.removeControlListener(this.backgroundDoubleClickControl);
@@ -331,20 +317,7 @@ public class GoalDrivenDFG extends Display {
 		this.removeControlListener(this.squareSelectControl);
 	}
 
-	public void resetControl() {
-		this.removeControlListener(this.focusControl);
-		this.removeControlListener(this.customPanControl);
-		this.removeControlListener(this.backgroundDoubleClickControl);
-		this.removeControlListener(this.borderNodeControl);
-		this.removeControlListener(this.dragMultipleNodesControl);
-		this.removeControlListener(this.selectMultipleNodesControl);
-		this.removeControlListener(this.wheelZoomControl);
-		this.removeControlListener(this.edgeClickControl);
-		this.removeControlListener(this.squareSelectControl);
-		this.setDefaultControl();
-	}
-
-	public void setDefaultRenderer() {
+	private void setDefaultRenderer() {
 		CustomizedEdgeRenderer edgeR = new CustomizedEdgeRenderer(prefuse.Constants.EDGE_TYPE_CURVE,
 				prefuse.Constants.EDGE_ARROW_FORWARD);
 		edgeR.setArrowHeadSize(GraphConstants.ARROW_HEAD_WIDTH, GraphConstants.ARROW_HEAD_HEIGHT);
@@ -380,7 +353,7 @@ public class GoalDrivenDFG extends Display {
 		m_vis.run(GraphConstants.NODE_SIZE_ACTION);
 	}
 
-	public void setDefaultLayout() {
+	private void setDefaultLayout() {
 		NodeLinkTreeLayout treeLayout = new NodeLinkTreeLayout("graph", Constants.ORIENT_TOP_BOTTOM, 300, 220, 300);
 		m_vis.putAction(GraphConstants.LAYOUT_ACTION, treeLayout);
 		treeLayout.setLayoutAnchor(new Point2D.Double(500, 100));
@@ -413,32 +386,15 @@ public class GoalDrivenDFG extends Display {
 		m_vis.run(GraphConstants.NODE_STROKE_WIDTH_ACTION);
 	}
 
-	public void setDefaultEdgeStrokeWidth() {
-		this.getFrequencyEdge();
-		HashMap<EdgeObject, Integer> newFrequencyEdge = new HashMap<EdgeObject, Integer>();
-		for (EdgeObject edge : this.frequencyEdge.keySet()) {
-			String trueSourceLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(),
-					this.getLog().getLogSkeleton().getConfig().getListGroupSkeletons(),
-					edge.getNode1().getOriginalName());
-			String trueTargeLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(),
-					this.getLog().getLogSkeleton().getConfig().getListGroupSkeletons(),
-					edge.getNode2().getOriginalName());
-			EdgeObject newEdge = new EdgeObject(
-					new ActivitySkeleton(edge.getNode1().getOriginalName(), trueSourceLabel),
-					new ActivitySkeleton(edge.getNode2().getOriginalName(), trueTargeLabel));
-			if (newFrequencyEdge.containsKey(newEdge)) {
-				newFrequencyEdge.replace(newEdge, this.frequencyEdge.get(edge) + newFrequencyEdge.get(newEdge));
-			} else {
-				newFrequencyEdge.put(newEdge, this.frequencyEdge.get(edge));
-			}
-		}
-		this.currentFrequencyEdge = newFrequencyEdge;
+	private void setDefaultEdgeStrokeWidth() {
+		this.calculateFrequencyEdge();
+		this.currentFrequencyEdge = this.frequencyEdge;
 		this.runCustomEdgeStrokeWidthAction();
 	}
 
-	public void setEdgeStrokeWidthWithExpandedGroup(GroupSkeleton groupSkeleton) {
+	public void setEdgeStrokeWidthWithGroup(GroupSkeleton groupSkeleton) {
 		List<GroupSkeleton> collapsedGroups = new ArrayList<GroupSkeleton>();
-		for (GroupSkeleton group : this.log.getLogSkeleton().getConfig().getListGroupSkeletons()) {
+		for (GroupSkeleton group : this.log.getConfig().getListGroupSkeletons()) {
 			if (!group.equals(groupSkeleton)) {
 				collapsedGroups.add(group);
 			}
@@ -446,20 +402,15 @@ public class GoalDrivenDFG extends Display {
 		HashMap<EdgeObject, Integer> newFrequencyEdge = this.currentFrequencyEdge;
 		for (EdgeObject edge : this.frequencyEdge.keySet()) {
 			String trueSourceLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(), collapsedGroups,
-					edge.getNode1().getOriginalName());
+					edge.getNode1());
 			String trueTargeLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(), collapsedGroups,
-					edge.getNode2().getOriginalName());
+					edge.getNode2());
 			String oldSourceLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(),
-					this.getLog().getLogSkeleton().getConfig().getListGroupSkeletons(),
-					edge.getNode1().getOriginalName());
+					this.getLog().getConfig().getListGroupSkeletons(), edge.getNode1());
 			String oldTargeLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(),
-					this.getLog().getLogSkeleton().getConfig().getListGroupSkeletons(),
-					edge.getNode2().getOriginalName());
-			EdgeObject newEdge = new EdgeObject(
-					new ActivitySkeleton(edge.getNode1().getOriginalName(), trueSourceLabel),
-					new ActivitySkeleton(edge.getNode2().getOriginalName(), trueTargeLabel));
-			EdgeObject oldEdge = new EdgeObject(new ActivitySkeleton(edge.getNode1().getOriginalName(), oldSourceLabel),
-					new ActivitySkeleton(edge.getNode2().getOriginalName(), oldTargeLabel));
+					this.getLog().getConfig().getListGroupSkeletons(), edge.getNode2());
+			EdgeObject newEdge = new EdgeObject(trueSourceLabel, trueTargeLabel);
+			EdgeObject oldEdge = new EdgeObject(oldSourceLabel, oldTargeLabel);
 			newFrequencyEdge.put(newEdge, this.frequencyEdge.get(edge));
 			if (newFrequencyEdge.containsKey(oldEdge) && !oldEdge.equals(newEdge)) {
 				newFrequencyEdge.remove(oldEdge);
@@ -470,10 +421,10 @@ public class GoalDrivenDFG extends Display {
 
 	}
 
-	public void getFrequencyEdge() {
+	private void calculateFrequencyEdge() {
 		// calculate frequency edge
-		for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : this.getLog().getLogSkeleton()
-				.getEdgeHashTable().getEdgeTable().entrySet()) {
+		for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : this.getLog().getEdgeHashTable()
+				.getEdgeTable().entrySet()) {
 			EdgeObject edge = entry.getKey();
 			Map<Integer, List<Integer[]>> allPos = entry.getValue();
 			int total = 0;
@@ -522,16 +473,11 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	public void setDefaultEdgeStrokeColor() {
-		//		this.edgeStrokeColorAction = new ColorAction("graph.edges", VisualItem.STROKECOLOR,
-		//				GraphConstants.EDGE_STROKE_COLOR);
-		Predicate testPredicate = (Predicate) ExpressionParser.parse(Graph.DEFAULT_SOURCE_KEY + " = 2");
-		this.edgeStrokeColorAction = new ColorAction("graph.edges", testPredicate, VisualItem.STROKECOLOR,
+		this.edgeStrokeColorAction = new ColorAction("graph.edges", VisualItem.STROKECOLOR,
 				GraphConstants.EDGE_STROKE_COLOR);
 		m_vis.putAction(GraphConstants.EDGE_STROKE_COLOR_ACTION, this.edgeStrokeColorAction);
 		m_vis.run(GraphConstants.EDGE_STROKE_COLOR_ACTION);
-		//		this.arrowFillColorAction = new ColorAction("graph.edges", VisualItem.FILLCOLOR,
-		//				GraphConstants.EDGE_STROKE_COLOR);
-		this.arrowFillColorAction = new ColorAction("graph.edges", testPredicate, VisualItem.FILLCOLOR,
+		this.arrowFillColorAction = new ColorAction("graph.edges", VisualItem.FILLCOLOR,
 				GraphConstants.EDGE_STROKE_COLOR);
 		m_vis.putAction(GraphConstants.ARROW_FILL_COLOR_ACTION, this.arrowFillColorAction);
 		m_vis.run(GraphConstants.ARROW_FILL_COLOR_ACTION);
@@ -546,13 +492,12 @@ public class GoalDrivenDFG extends Display {
 
 	}
 
-	public void setDefaultNodeFillColor() {
-
-		this.getFrequencyNode();
+	private void setDefaultNodeFillColor() {
+		this.calculateFrequencyNode();
 		HashMap<String, Integer> newFrequencyNode = new HashMap<String, Integer>();
 		for (String act : this.frequencyNode.keySet()) {
 			String trueLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(),
-					this.getLog().getLogSkeleton().getConfig().getListGroupSkeletons(), act);
+					this.getLog().getConfig().getListGroupSkeletons(), act);
 			if (newFrequencyNode.containsKey(trueLabel)) {
 				newFrequencyNode.put(trueLabel, this.frequencyNode.get(act) + newFrequencyNode.get(trueLabel));
 			} else {
@@ -563,12 +508,12 @@ public class GoalDrivenDFG extends Display {
 		this.currentFrequencyNode = newFrequencyNode;
 		this.runCustomColorNodeFillAction();
 	}
-	
+
 	public void testInviNode() {
 		// stroke color
 		ColorAction testC = new ColorAction("inviGraph.nodes", VisualItem.STROKECOLOR);
 		testC.setDefaultColor(ColorLib.color(Color.WHITE));
-		
+
 		float[] dashPattern = { 2.0f, 2.0f }; // 2-pixel dash, 2-pixel gap
 		// Create a BasicStroke with the specified dash pattern
 		BasicStroke dashedStroke = new BasicStroke(2.0f, // Width of the stroke
@@ -589,22 +534,22 @@ public class GoalDrivenDFG extends Display {
 		m_vis.run("test");
 	}
 
-	public void setNodeFillColorWithExpandedGroup(GroupSkeleton groupSkeleton) {
-		List<GroupSkeleton> collapsedGroups = new ArrayList<GroupSkeleton>();
-		for (GroupSkeleton group : this.log.getLogSkeleton().getConfig().getListGroupSkeletons()) {
-			if (!group.equals(groupSkeleton)) {
-				collapsedGroups.add(group);
+	public void setNodeFillColorWithGroup(GroupSkeleton groupSkeleton) {
+		HashMap<String, Integer> newFrequencyNode = this.currentFrequencyNode;
+
+		List<String> acts = groupSkeleton.getListAct();
+		List<GroupSkeleton> groups = groupSkeleton.getListGroup();
+
+		int newFreq = 0;
+		for (String act : acts) {
+			newFreq += this.frequencyNode.get(act);
+		}
+		for (GroupSkeleton group : groups) {
+			if (newFrequencyNode.containsKey(group.getGroupName())) {
+				newFreq += newFrequencyNode.get(group.getGroupName());
 			}
 		}
-		HashMap<String, Integer> newFrequencyNode = this.currentFrequencyNode;
-		for (String act : this.frequencyNode.keySet()) {
-			String trueLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(), collapsedGroups, act);
-			newFrequencyNode.put(trueLabel, this.frequencyNode.get(act));
-		}
-		if (groupSkeleton != null) {
-			// remove node with label group name
-			newFrequencyNode.remove(groupSkeleton.getGroupName());
-		}
+		newFrequencyNode.put(groupSkeleton.getGroupName(), newFreq);
 		this.currentFrequencyNode = newFrequencyNode;
 		this.runCustomColorNodeFillAction();
 	}
@@ -651,9 +596,9 @@ public class GoalDrivenDFG extends Display {
 		m_vis.run(GraphConstants.NODE_FILL_COLOR_ACTION);
 	}
 
-	public void getFrequencyNode() {
-		for (Map.Entry<String, Map<Integer, List<Integer>>> entry : this.log.getLogSkeleton().getActivityHashTable()
-				.getActivityTable().entrySet()) {
+	private void calculateFrequencyNode() {
+		for (Map.Entry<String, Map<Integer, List<Integer>>> entry : this.log.getActivityHashTable().getActivityTable()
+				.entrySet()) {
 			String act = entry.getKey();
 			Map<Integer, List<Integer>> allPos = entry.getValue();
 			int total = 0;
@@ -678,68 +623,152 @@ public class GoalDrivenDFG extends Display {
 		this.configEndNode(endNode);
 	}
 
-	private void addActToTable(Graph g, Boolean isHighLevel) {
-		ActivityHashTable activityHashTable = this.log.getLogSkeleton().getActivityHashTable();
-		EdgeHashTable edgeHashTable = this.log.getLogSkeleton().getEdgeHashTable();
-		List<String> addedNodes = new ArrayList<String>();
-
-		// add node
+	private void addActToTable() {
+		ActivityHashTable activityHashTable = this.log.getActivityHashTable();
+		EdgeHashTable edgeHashTable = this.log.getEdgeHashTable();
+		// add all node, set display true
 		for (String act : activityHashTable.getActivityTable().keySet()) {
-			if (Arrays.asList(this.getLog().getLogSkeleton().getConfig().getSelectedActs()).contains(act)) {
-				String trueActLabel = LogSkeletonUtils.getTrueActivityLabel(this.log,
-						this.log.getLogSkeleton().getConfig().getListGroupSkeletons(), act);
-				if (!addedNodes.contains(trueActLabel)) {
-					//					if (this.log.getLogSkeleton().isAGroupSkeleton(trueActLabel)) {
-					//						Node node2 = null;
-					//						node2 = g.addNode();
-					//						this.configInvisibleNode(node2, trueActLabel);
-					//					} 
-
-					Node node1 = null;
-					node1 = g.addNode();
-					if (this.log.getLogSkeleton().isAGroupSkeleton(trueActLabel)) {
-						this.configNode(node1, trueActLabel, true);
-						Node node2 = null;
-						node2 = g.addNode();
-						this.configInvisibleNode(node2, trueActLabel);
-					} else {
-						this.configNode(node1, trueActLabel, false);
-					}
-					addedNodes.add(trueActLabel);
-				}
-			}
+			Node node1 = null;
+			node1 = this.graph.addNode();
+			this.configNode(node1, act, false);
 		}
+
 		// add edge
 		for (EdgeObject edge : edgeHashTable.getEdgeTable().keySet()) {
-			String source = edge.getNode1().getCurrentName();
-			String target = edge.getNode2().getCurrentName();
-			Node node1;
-			Node node2;
-			if (source.equals("begin")) {
-				node1 = g.getNode(this.beginNodeRow);
-			} else if (source.equals("end")) {
-				node1 = g.getNode(this.endNodeRow);
-			} else {
-				node1 = this.getNodeByLabel(g, edge.getNode1().getCurrentName());
-			}
-			if (target.equals("begin")) {
-				node2 = g.getNode(this.beginNodeRow);
-			} else if (target.equals("end")) {
-				node2 = g.getNode(this.endNodeRow);
-			} else {
-				node2 = this.getNodeByLabel(g, edge.getNode2().getCurrentName());
-			}
-			Edge e = g.addEdge(node1, node2);
+			Node node1 = this.getNodeByLabelInGraph(this.graph, edge.getNode1());
+			Node node2 = this.getNodeByLabelInGraph(this.graph, edge.getNode2());
+			Edge e = this.graph.addEdge(node1, node2);
 			this.configEdge(e, edge);
 		}
 
 	}
 
-	public Node getNodeByLabel(Graph g, String label) {
-		for (int i = 0; i < g.getNodeCount(); i++) {
-			if (g.getNode(i).getString(GraphConstants.LABEL_FIELD).equals(label)
-					&& !g.getNode(i).getBoolean(GraphConstants.IS_INVISIBLE)) {
-				return g.getNode(i);
+	public void hideNode(Graph graph, Node node) {
+		Table edgeTable = graph.getEdgeTable();
+		int nodeRow = node.getRow();
+		// make it false in the table
+		graph.getNodeTable().setBoolean(node.getRow(), GraphConstants.IS_DISPLAY, false);
+		graph.getNodeTable().setBoolean(node.getRow(), GraphConstants.IS_SELECTED, false);
+		// make the regarding edges hidden
+		TableIterator edges = edgeTable.iterator();
+		List<Integer> affectedRows = new ArrayList<Integer>();
+		while (edges.hasNext()) {
+			int row = edges.nextInt();
+			if (graph.getEdgeTable().isValidRow(nodeRow)) {
+				int source = graph.getEdgeTable().getTuple(row).getInt(Graph.DEFAULT_SOURCE_KEY);
+				int target = graph.getEdgeTable().getTuple(row).getInt(Graph.DEFAULT_TARGET_KEY);
+				if (source == nodeRow || target == nodeRow) {
+					affectedRows.add(row);
+
+				}
+			}
+		}
+		for (Integer row : affectedRows) {
+			graph.getEdgeTable().setBoolean(row, GraphConstants.IS_DISPLAY, false);
+		}
+
+	}
+
+	public void displayNode(Graph graph, Node node) {
+		int row = node.getRow();
+		// make it true in the table
+		graph.getNodeTable().setBoolean(node.getRow(), GraphConstants.IS_DISPLAY, true);
+		graph.getNodeTable().setBoolean(node.getRow(), GraphConstants.IS_SELECTED, false);
+		// make the regarding edges shown
+		for (int i = 0; i < graph.getEdgeTable().getMaximumRow(); i++) {
+			if (graph.getEdgeTable().isValidRow(i)) {
+				int source = graph.getEdgeTable().getTuple(i).getInt(Graph.DEFAULT_SOURCE_KEY);
+				int target = graph.getEdgeTable().getTuple(i).getInt(Graph.DEFAULT_TARGET_KEY);
+				// if the node is the source
+				if (source == row) {
+					// check if the target is displaying
+					if (graph.getNodeTable().getBoolean(target, GraphConstants.IS_DISPLAY)) {
+						graph.getEdgeTable().setBoolean(i, GraphConstants.IS_DISPLAY, true);
+					}
+				} else if (target == row) {
+					if (graph.getNodeTable().getBoolean(source, GraphConstants.IS_DISPLAY)) {
+						graph.getEdgeTable().setBoolean(i, GraphConstants.IS_DISPLAY, true);
+					}
+				}
+			}
+		}
+	}
+
+	public void removeNode(Graph graph, Node nodeToRemove) {
+		Table nodeTable = graph.getNodeTable();
+		Table edgeTable = graph.getEdgeTable();
+		List<Integer> removingEdgeIndex = new ArrayList<Integer>();
+		// remove node
+		if (nodeToRemove != null) {
+			// remove associated edges
+			int nodeIdToRemove = nodeToRemove.getRow();
+			TableIterator edges = edgeTable.iterator();
+			while (edges.hasNext()) {
+				int row = edges.nextInt();
+				Edge edge = graph.getEdge(row);
+				int sourceId = edge.getSourceNode().getRow();
+				int targetId = edge.getTargetNode().getRow();
+				if (sourceId == nodeIdToRemove || targetId == nodeIdToRemove) {
+					// store the index
+					removingEdgeIndex.add(row);
+				}
+			}
+			for (Integer i : removingEdgeIndex) {
+				edgeTable.removeRow(i);
+			}
+			// remove node
+			nodeTable.removeRow(nodeIdToRemove);
+		}
+	}
+
+	public void removeNode(String label) {
+		Table nodeTable = this.graph.getNodeTable();
+		Table inviNodeTable = this.inviGraph.getNodeTable();
+		// get the remove node 
+		Node nodeToRemove = null;
+		TableIterator nodes = nodeTable.iterator();
+		while (nodes.hasNext()) {
+			int row = nodes.nextInt();
+			if (nodeTable.isValidRow(row)) {
+				Node node = this.graph.getNode(row);
+				if (node.getString(GraphConstants.LABEL_FIELD).equals(label)) {
+					nodeToRemove = node;
+					break;
+				}
+			}
+		}
+		// remove node in graph
+		this.removeNode(this.graph, nodeToRemove);
+		// get the invi node
+		nodes = inviNodeTable.iterator();
+		while (nodes.hasNext()) {
+			int row = nodes.nextInt();
+			if (inviNodeTable.isValidRow(row)) {
+				Node node = this.inviGraph.getNode(row);
+				if (node.getString(GraphConstants.LABEL_FIELD).equals(label)) {
+					nodeToRemove = node;
+					break;
+				}
+			}
+		}
+		// remove invi node
+		this.removeNode(this.inviGraph, nodeToRemove);
+	}
+
+	public Node getNodeByLabelInGraph(Graph g, String label) {
+		if (label.equals("begin")) {
+			return this.graph.getNode(this.beginNodeRow);
+		} else if (label.equals("end")) {
+			return this.graph.getNode(this.endNodeRow);
+		} else {
+			TableIterator nodes = g.getNodeTable().iterator();
+			while (nodes.hasNext()) {
+				int row = nodes.nextInt();
+				if (g.getNodeTable().isValidRow(row)) {
+					if (g.getNode(row).getString(GraphConstants.LABEL_FIELD).equals(label)) {
+						return g.getNode(row);
+					}
+				}
 			}
 		}
 		return null;
@@ -750,8 +779,6 @@ public class GoalDrivenDFG extends Display {
 		node.setBoolean(GraphConstants.BEGIN_FIELD, true);
 		node.setBoolean(GraphConstants.END_FIELD, false);
 		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
-		node.setBoolean(GraphConstants.IS_INVISIBLE, false);
-		node.setBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED, false);
 	}
 
 	private void configEndNode(Node node) {
@@ -759,20 +786,28 @@ public class GoalDrivenDFG extends Display {
 		node.setBoolean(GraphConstants.BEGIN_FIELD, false);
 		node.setBoolean(GraphConstants.END_FIELD, true);
 		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
-		node.setBoolean(GraphConstants.IS_INVISIBLE, false);
-		node.setBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED, false);
 	}
 
 	public void configInvisibleNode(Node node, String label) {
 		node.setString(GraphConstants.LABEL_FIELD, label);
 		node.setBoolean(GraphConstants.BEGIN_FIELD, false);
 		node.setBoolean(GraphConstants.END_FIELD, false);
-		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
+		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.GROUP_NODE);
 		node.setBoolean(GraphConstants.IS_INVISIBLE, true);
-		node.setBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED, true);
+		node.setBoolean(GraphConstants.IS_DISPLAY, true);
+		node.setBoolean(GraphConstants.IS_SELECTED, false);
 	}
 
-	public void configNode(Node node, String label, Boolean isGroup) {
+	public void configGroupNode(Node node, String label) {
+		node.setString(GraphConstants.LABEL_FIELD, label);
+		node.setBoolean(GraphConstants.BEGIN_FIELD, false);
+		node.setBoolean(GraphConstants.END_FIELD, false);
+		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.GROUP_NODE);
+		node.setBoolean(GraphConstants.IS_DISPLAY, true);
+		node.setBoolean(GraphConstants.IS_SELECTED, false);
+	}
+
+	private void configNode(Node node, String label, Boolean isGroup) {
 		node.setString(GraphConstants.LABEL_FIELD, label);
 		node.setBoolean(GraphConstants.BEGIN_FIELD, false);
 		node.setBoolean(GraphConstants.END_FIELD, false);
@@ -781,8 +816,7 @@ public class GoalDrivenDFG extends Display {
 		} else {
 			node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
 		}
-		node.setBoolean(GraphConstants.IS_INVISIBLE, false);
-		node.setBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED, false);
+		node.setBoolean(GraphConstants.IS_DISPLAY, true);
 	}
 
 	public void configEdge(Edge e, EdgeObject edgeObject) {
@@ -792,6 +826,7 @@ public class GoalDrivenDFG extends Display {
 			e.setBoolean(GraphConstants.IS_INDIRECTED_EDGE_FIELD, false);
 		}
 		e.setString(GraphConstants.LABEL_FIELD, "(" + edgeObject.getNode1() + " ," + edgeObject.getNode2() + ")");
+		e.setBoolean(GraphConstants.IS_DISPLAY, true);
 	}
 
 	private Table initNodeTable() {
@@ -799,11 +834,10 @@ public class GoalDrivenDFG extends Display {
 		nodeData.addColumn(GraphConstants.LABEL_FIELD, String.class);
 		nodeData.addColumn(GraphConstants.BEGIN_FIELD, boolean.class);
 		nodeData.addColumn(GraphConstants.END_FIELD, boolean.class);
-		nodeData.addColumn(GraphConstants.SELECT_FIELD, boolean.class);
+		nodeData.addColumn(GraphConstants.IS_SELECTED, boolean.class);
 		nodeData.addColumn(GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD, int.class);
 		nodeData.addColumn(GraphConstants.NODE_TYPE_FIELD, NodeType.class);
-		nodeData.addColumn(GraphConstants.IS_INVISIBLE, boolean.class);
-		nodeData.addColumn(GraphConstants.IS_INVISIBLE_COLLAPSED, boolean.class);
+		nodeData.addColumn(GraphConstants.IS_DISPLAY, boolean.class);
 		return nodeData;
 	}
 
@@ -813,88 +847,29 @@ public class GoalDrivenDFG extends Display {
 		edgeData.addColumn(Graph.DEFAULT_TARGET_KEY, int.class);
 		edgeData.addColumn(GraphConstants.LABEL_FIELD, String.class);
 		edgeData.addColumn(GraphConstants.IS_INDIRECTED_EDGE_FIELD, boolean.class);
+		edgeData.addColumn(GraphConstants.IS_DISPLAY, boolean.class);
 		return edgeData;
 	}
 
-	public HashMap<String, Color> getNodeStrokeColorFromMapActCat(MapActivityCategoryObject mapActCategory,
-			CategoryObject selectedCategory) {
-		HashMap<String, Color> res = new HashMap<>();
-
-		Table nodeTable = this.getGraph().getNodeTable();
-		for (int i = 0; i < nodeTable.getRowCount(); i++) {
-			VisualItem node = this.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, nodeTable.getTuple(i));
-			PrefuseLib.setX(node, null, 10);
-			if (!nodeTable.get(i, GraphConstants.LABEL_FIELD).equals("")) {
-				String actName = nodeTable.getString(i, GraphConstants.LABEL_FIELD);
-				Boolean isDefault = true;
-				// Check if the act is assigned to any category
-				for (AttributeClassifier att : mapActCategory.getMapActivityCategory().keySet()) {
-					if (att.toString().equals(actName)) {
-						// Check if the assignment is in the current selected mode view
-						for (ValueCategoryObject vCO : mapActCategory.getMapActivityCategory().get(att)) {
-							if (vCO.getCategory().equals(selectedCategory.getName())) {
-								// Change the border color of the act
-								Color color = vCO.getValueColor();
-								res.put(node.getString(GraphConstants.LABEL_FIELD), color);
-								isDefault = false;
-								break;
-							}
-						}
-					}
-				}
-				if (isDefault) {
-					res.put(node.getString(GraphConstants.LABEL_FIELD), Color.WHITE);
-				}
-			} else {
-				res.put(node.getString(GraphConstants.LABEL_FIELD), new Color(10, 10, 50));
-			}
-		}
-		return res;
-	}
-
 	public void test() {
-		Table nodeTable = this.getGraph().getNodeTable();
-		double hor = 0;
-		for (int i = 0; i < nodeTable.getRowCount(); i++) {
-			VisualItem node = this.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, nodeTable.getTuple(i));
-			if (node.getString(GraphConstants.LABEL_FIELD).equals("a")) {
-				hor = node.getY();
-				break;
-			}
-		}
-		for (int i = 0; i < nodeTable.getRowCount(); i++) {
-			VisualItem node = this.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, nodeTable.getTuple(i));
-			if (node.getString(GraphConstants.LABEL_FIELD).equals("a")
-					|| node.getString(GraphConstants.LABEL_FIELD).equals("b")
-					|| node.getString(GraphConstants.LABEL_FIELD).equals("c")) {
-				PrefuseLib.setY(node, null, hor);
-			}
-			//			System.out.println("Node: " + node.getString(GraphConstants.LABEL_FIELD));
-			//			System.out.println("X: " + node.getX());
-			//			System.out.println("Y: " + node.getY());
-		}
+		//		Node n1 = this.getNodeByLabelInGraph(this.graph, "a");
+		//		this.hideNode(n1);
 	}
 
-	public void repaintNodeStrokeColor(final HashMap<String, Color> map) {
-		this.getVisualization().removeAction(GraphConstants.NODE_STROKE_COLOR_ACTION);
-		ColorAction conditionalColorAction = new ColorAction(GraphConstants.NODE_GROUP, VisualItem.STROKECOLOR) {
-			public int getColor(VisualItem item) {
-				if (item.getBoolean(GraphConstants.BEGIN_FIELD) || item.getBoolean(GraphConstants.END_FIELD)) {
-					return ColorLib.color(Color.WHITE);
-				} else {
-					int color = GraphConstants.NODE_STROKE_COLOR;
-					for (String label : map.keySet()) {
-						if (item.getString(GraphConstants.LABEL_FIELD).equals(label)) {
-							color = ColorLib.color(map.get(label));
-							break;
-						}
-					}
-					return color;
-				}
+	public HashMap<String, Integer> getFrequencyNode() {
+		return frequencyNode;
+	}
 
-			}
-		};
-		this.setNodeStrokeColorAction(conditionalColorAction);
+	public void setFrequencyNode(HashMap<String, Integer> frequencyNode) {
+		this.frequencyNode = frequencyNode;
+	}
+
+	public HashMap<EdgeObject, Integer> getFrequencyEdge() {
+		return frequencyEdge;
+	}
+
+	public void setFrequencyEdge(HashMap<EdgeObject, Integer> frequencyEdge) {
+		this.frequencyEdge = frequencyEdge;
 	}
 
 	public Graph getGraph() {
@@ -909,68 +884,8 @@ public class GoalDrivenDFG extends Display {
 		return log;
 	}
 
-	public SelectMultipleNodesControl getSelectMultipleNodesControl() {
-		return selectMultipleNodesControl;
-	}
-
-	public BackgroundDoubleClickControl getBackgroundDoubleClickControl() {
-		return backgroundDoubleClickControl;
-	}
-
-	public CustomPanControl getCustomPanControl() {
-		return customPanControl;
-	}
-
-	public FocusControl getFocusControl() {
-		return focusControl;
-	}
-
-	public DragMultipleNodesControl getDragMultipleNodesControl() {
-		return dragMultipleNodesControl;
-	}
-
-	public BorderNodeControl getBorderNodeControl() {
-		return borderNodeControl;
-	}
-
-	public ColorAction getNodeStrokeColorAction() {
-		return nodeStrokeColorAction;
-	}
-
 	public void setNodeStrokeColorAction(ColorAction nodeStrokeColorAction) {
 		this.nodeStrokeColorAction = nodeStrokeColorAction;
-	}
-
-	public ColorAction getNodeFillColorAction() {
-		return nodeFillColorAction;
-	}
-
-	public void setNodeFillColorAction(ColorAction nodeFillColorAction) {
-		this.nodeFillColorAction = nodeFillColorAction;
-	}
-
-	public ColorAction getEdgeStrokeColorAction() {
-		return edgeStrokeColorAction;
-	}
-
-	public void setEdgeStrokeColorAction(ColorAction edgeStrokeColorAction) {
-		this.edgeStrokeColorAction = edgeStrokeColorAction;
-	}
-
-	public StrokeAction getEdgeStrokeWidthAction() {
-		return edgeStrokeWidthAction;
-	}
-
-	public void setEdgeStrokeWidthAction(StrokeAction edgeStrokeWidthAction) {
-		this.edgeStrokeWidthAction = edgeStrokeWidthAction;
-	}
-
-	public ColorAction getTextColorAction() {
-		return textColorAction;
-	}
-
-	public void setTextColorAction(ColorAction textColorAction) {
-		this.textColorAction = textColorAction;
 	}
 
 	public GraphObjectClickControl getEdgeClickControl() {
@@ -993,4 +908,35 @@ public class GoalDrivenDFG extends Display {
 		return endNodeRow;
 	}
 
+	public Graph getInviGraph() {
+		return inviGraph;
+	}
+
+	public void setInviGraph(Graph inviGraph) {
+		this.inviGraph = inviGraph;
+	}
+
+	public HashMap<String, HashMap<Graph, Node>> getMapGroupNode() {
+		return mapGroupNode;
+	}
+
+	public void setMapGroupNode(HashMap<String, HashMap<Graph, Node>> mapGroupNode) {
+		this.mapGroupNode = mapGroupNode;
+	}
+
+	public HashMap<String, Integer> getCurrentFrequencyNode() {
+		return currentFrequencyNode;
+	}
+
+	public void setCurrentFrequencyNode(HashMap<String, Integer> currentFrequencyNode) {
+		this.currentFrequencyNode = currentFrequencyNode;
+	}
+
+	public HashMap<EdgeObject, Integer> getCurrentFrequencyEdge() {
+		return currentFrequencyEdge;
+	}
+
+	public void setCurrentFrequencyEdge(HashMap<EdgeObject, Integer> currentFrequencyEdge) {
+		this.currentFrequencyEdge = currentFrequencyEdge;
+	}
 }

@@ -14,13 +14,15 @@ public class GraphConstants {
 	public static final String LABEL_FIELD = "label";
 	public static final String BEGIN_FIELD = "begin";
 	public static final String END_FIELD = "end";
-	public static final String SELECT_FIELD = "select";
+	public static final String IS_SELECTED = "select";
 	public static final String IS_INDIRECTED_EDGE_FIELD = "isDirectedEdge";
 	public static final String STROKE_WIDTH_EDGE_FIELD = "strokeWidth";
 	public static final String FREQUENCY_FILL_COLOR_NODE_FIELD = "freqFillColorNode";
 	public static final String NODE_TYPE_FIELD = "nodeType";
 	public static final String IS_INVISIBLE = "isInvisible";
 	public static final String IS_INVISIBLE_COLLAPSED = "isInvisibleCollapsed";
+	public static final String IS_DISPLAY = "isDisplay";
+	
 	public static final String NODE_GROUP = "graph.nodes";
 	public static final String EDGE_GROUP = "graph.edges";
 

@@ -13,40 +13,18 @@ import javax.swing.border.LineBorder;
 
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 
+import graph.GoalDrivenDFG;
+
 public class PopupPanel {
 
 	public static List<GroupSkeleton> groupActObjects = new ArrayList<>();
 
-	//	public static void main(String[] args) {
-	//		SwingUtilities.invokeLater(() -> {
-	//			JFrame frame = new JFrame("Custom Popup Panel Example");
-	//			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	//
-	//			JPanel mainPanel = new JPanel();
-	//			mainPanel.setPreferredSize(new Dimension(800, 600));
-	//
-	//			// The object that triggers the popup
-	//			mainPanel.addMouseListener(new MouseAdapter() {
-	//				@Override
-	//				public void mouseClicked(MouseEvent e) {
-	//					Point mousePosition = e.getPoint();
-	//
-	//					showPopupPanel(mainPanel, mousePosition);
-	//				}
-	//			});
-	//			frame.add(mainPanel);
-	//			frame.pack();
-	//			frame.setLocationRelativeTo(null);
-	//			frame.setVisible(true);
-	//		});
-	//	}
-
-	public static void showGroupPopupPanel(Component parent, Point mousePosition) {
+	public static void showGroupPopupPanel(GoalDrivenDFG parent, Point mousePosition) {
 		JPopupMenu popupMenu = new JPopupMenu();
 		popupMenu.setBorderPainted(true);
 		popupMenu.setForeground(Color.BLACK);
 
-		PopupGroupContentPanel popupContent = new PopupGroupContentPanel(popupMenu);
+		PopupGroupContentPanel popupContent = new PopupGroupContentPanel(popupMenu, parent.getIsHighLevel());
 
 		// Create a temporary container to hold the popupPanel
 		JPanel container = new JPanel();
@@ -82,12 +60,15 @@ public class PopupPanel {
 
 		popupMenu.show(parent, popupX, popupY);
 	}
-	public static void showDisplayGroupPopupPanel(Component parent, Point mousePosition, GroupSkeleton groupSkeleton, Boolean isHighLevel, Boolean isCollapsed) {
+
+	public static void showDisplayGroupPopupPanel(Component parent, Point mousePosition, GroupSkeleton groupSkeleton,
+			Boolean isHighLevel, Boolean isCollapsed) {
 		JPopupMenu popupMenu = new JPopupMenu();
 		popupMenu.setBorder(new LineBorder(Color.WHITE, 5));
 		popupMenu.setBorderPainted(true);
 
-		DisplayGroupPopupPanel popupContent = new DisplayGroupPopupPanel(popupMenu, mousePosition, groupSkeleton, isHighLevel, isCollapsed);
+		DisplayGroupPopupPanel popupContent = new DisplayGroupPopupPanel(popupMenu, mousePosition, groupSkeleton,
+				isHighLevel, isCollapsed);
 
 		// Create a temporary container to hold the popupPanel
 		JPanel container = new JPanel();

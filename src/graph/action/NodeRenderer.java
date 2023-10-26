@@ -1,4 +1,4 @@
-package graph.utils.node;
+package graph.action;
 
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
@@ -10,7 +10,6 @@ import java.awt.geom.Rectangle2D;
 import graph.GraphConstants;
 import prefuse.Constants;
 import prefuse.render.LabelRenderer;
-import prefuse.util.GraphicsLib;
 import prefuse.visual.VisualItem;
 
 public class NodeRenderer extends LabelRenderer {
@@ -35,31 +34,34 @@ public class NodeRenderer extends LabelRenderer {
 			Shape shape = getRawShapeNode(item);
 			if (shape != null)
 				drawShape(g, item, shape);
-		} else if (item.getBoolean(GraphConstants.IS_INVISIBLE)) {
-			Shape shape = getRawShape(item);
-			GraphicsLib.paint(g, item, shape, dashedStroke, RENDER_TYPE_DRAW);
-		} else {
+		}
+		//		else if (item.getBoolean(GraphConstants.IS_INVISIBLE)) {
+		//			Shape shape = getRawShape(item);
+		//			GraphicsLib.paint(g, item, shape, dashedStroke, RENDER_TYPE_DRAW);
+		//		} 
+		else if (item.getBoolean(GraphConstants.IS_DISPLAY)) {
 			super.render(g, item);
 		}
 	}
-	
+
 	protected Shape getDashedRectangle(VisualItem item) {
 		Rectangle2D bounds = super.getRawShape(item).getBounds2D();
-        float x = (float) bounds.getX();
-        float y = (float) bounds.getY();
-        float width = (float) bounds.getWidth();
-        float height = (float) bounds.getHeight();
-        return new Rectangle2D.Float(x -100, y - 100, width + 200, height + 200);
+		float x = (float) bounds.getX();
+		float y = (float) bounds.getY();
+		float width = (float) bounds.getWidth();
+		float height = (float) bounds.getHeight();
+		return new Rectangle2D.Float(x - 100, y - 100, width + 200, height + 200);
 	}
 
 	protected Shape getRawShape(VisualItem item) {
-		if (!item.getBoolean(GraphConstants.IS_INVISIBLE)) {
-			return super.getRawShape(item);
-		} else {
-			return this.getDashedRectangle(item);
-		}
+		//		if (!item.getBoolean(GraphConstants.IS_INVISIBLE)) {
+		//			
+		//		} else {
+		//			return this.getDashedRectangle(item);
+		//		}
+		return super.getRawShape(item);
 	}
-	
+
 	protected Shape getRawShapeNode(VisualItem item) {
 
 		int stype = item.getShape();

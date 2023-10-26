@@ -44,7 +44,7 @@ public class GroupSkeleton implements Serializable {
 	}
 
 	public int hashCode() {
-		return Objects.hash(groupName, listAct);
+		return Objects.hash(groupName, listAct, listGroup);
 	}
 
 	public boolean equals(Object obj) {

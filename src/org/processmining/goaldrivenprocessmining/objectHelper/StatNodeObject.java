@@ -11,6 +11,9 @@ public class StatNodeObject implements Serializable {
 	
 	
 
+	public StatNodeObject() {
+	}
+
 	public StatNodeObject(int totalOccurences, float avgOccurences) {
 		this.totalOccurences = totalOccurences;
 		this.avgOccurences = avgOccurences;

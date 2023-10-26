@@ -39,8 +39,8 @@ public class CustomEdgeStrokeWidthAction extends StrokeAction {
 				target = edge.getTargetNode().getString(GraphConstants.LABEL_FIELD);
 			}
 			for (EdgeObject edgeObject : this.mapEdgeStrokeWidth.keySet()) {
-				if (edgeObject.getNode1().getCurrentName().equals(source)
-						&& edgeObject.getNode2().getCurrentName().equals(target)) {
+				if (edgeObject.getNode1().equals(source)
+						&& edgeObject.getNode2().equals(target)) {
 					return new BasicStroke(this.mapEdgeStrokeWidth.get(edgeObject));
 				}
 			}

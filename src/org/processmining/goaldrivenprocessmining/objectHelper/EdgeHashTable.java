@@ -12,11 +12,9 @@ public class EdgeHashTable implements Serializable {
 	 */
 	private static final long serialVersionUID = -7131839169691770596L;
 	private Map<EdgeObject, Map<Integer, List<Integer[]>>> edgeTable;
-	private Map<EdgeObject, Map<EdgeObject, Map<Integer, List<EdgeObject>>>> eventualFollowsMap;
 
 	public EdgeHashTable() {
 		this.edgeTable = new HashMap<>();
-		this.eventualFollowsMap = new HashMap<>();
 	}
 
 	public void addEdge(EdgeObject edge, Map<Integer, List<Integer[]>> edgeTable) {
@@ -55,15 +53,6 @@ public class EdgeHashTable implements Serializable {
 
 	public void setEdgeTable(Map<EdgeObject, Map<Integer, List<Integer[]>>> edgeTable) {
 		this.edgeTable = edgeTable;
-	}
-
-	public Map<EdgeObject, Map<EdgeObject, Map<Integer, List<EdgeObject>>>> getEventualFollowsMap() {
-		return eventualFollowsMap;
-	}
-
-	public void setEventualFollowsMap(
-			Map<EdgeObject, Map<EdgeObject, Map<Integer, List<EdgeObject>>>> eventualFollowsMap) {
-		this.eventualFollowsMap = eventualFollowsMap;
 	}
 
 	public String toString() {
