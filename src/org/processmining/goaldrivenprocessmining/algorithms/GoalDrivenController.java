@@ -37,7 +37,6 @@ import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategor
 import org.processmining.goaldrivenprocessmining.objectHelper.SelectedGroup;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
-import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateAction;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateType;
 import org.processmining.goaldrivenprocessmining.objectHelper.ValueCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
@@ -120,9 +119,53 @@ public class GoalDrivenController {
 	}
 
 	public static void removeActInGroupConfigObject(String groupName, String act) {
-		String[] updateObject = new String[] { groupName, act };
-		UpdateConfig updateConfig = new UpdateConfig(UpdateType.GROUP, UpdateAction.REMOVE, updateObject);
-		chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
+		Config currentConfig = CONFIG_Update.currentConfig == null ? new Config() : CONFIG_Update.currentConfig;
+		GroupSkeleton selectedGroup = null;
+		GroupSkeleton changedGroup = null;
+		for (GroupSkeleton groupSkeleton: currentConfig.getListGroupSkeletons()) {
+			if (groupSkeleton.getGroupName().equals(act)) {
+				changedGroup = groupSkeleton;
+			}
+			if (groupSkeleton.getGroupName().equals(groupName)) {
+				selectedGroup = groupSkeleton;
+			}
+		}
+		
+		if (changedGroup == null) {
+			// change the selected group
+			List<String> newChildAct = new ArrayList<String>();
+			for (String childAct: selectedGroup.getListAct()) {
+				if (!childAct.equals(act)) {
+					newChildAct.add(childAct);
+				}
+			}
+			selectedGroup.setListAct(newChildAct);
+		} else {
+			List<GroupSkeleton> newChildGroups = new ArrayList<GroupSkeleton>();
+			for (GroupSkeleton groupSkeleton: selectedGroup.getListGroup()) {
+				if (!groupSkeleton.getGroupName().equals(act)) {
+					newChildGroups.add(groupSkeleton);
+				}
+			}
+			selectedGroup.setListGroup(newChildGroups);
+			// reset group in graph
+			GoalDrivenDFGUtils.removeGroupStateFromGroup(panel.getHighDfgPanel(), changedGroup, selectedGroup);
+//			GoalDrivenDFGUtils.addGroupState(changedGroup);
+		}
+		// update dfg
+		GoalDrivenDFGUtils.editGroupState(panel.getHighDfgPanel(), selectedGroup);
+		GoalDrivenDFGUtils.updateDfg(panel.getHighDfgPanel());
+		// for config 
+		List<GroupSkeleton> newGroupSkeletons = new ArrayList<GroupSkeleton>();
+		for (GroupSkeleton groupSkeleton: currentConfig.getListGroupSkeletons()) {
+			if (groupSkeleton.getGroupName().equals(groupName)) {
+				newGroupSkeletons.add(selectedGroup);
+			} else {
+				newGroupSkeletons.add(groupSkeleton);
+			}
+		}
+		CONFIG_Update.currentConfig.setListGroupSkeletons(newGroupSkeletons);
+		chain.setObject(GoalDrivenObject.config, CONFIG_Update.currentConfig);
 	}
 
 	public static void addGroupConfigObject(String groupName, Boolean isHighLevel) {

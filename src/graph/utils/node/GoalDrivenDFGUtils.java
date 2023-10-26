@@ -145,72 +145,22 @@ public class GoalDrivenDFGUtils {
 	}
 
 	/* Edit group */
-	public static void editGroupState(GoalDrivenDFG goalDrivenDFG, GroupSkeleton groupSkeleton,
-			List<String> changedActs, List<String> changedGroups, String action) {
-		GroupState groupStateInGraph = null;
+	public static void editGroupState(GoalDrivenDFG goalDrivenDFG, GroupSkeleton groupSkeleton) {
+		List<GroupState> newGroupStates = new ArrayList<GroupState>();
 		for (GroupState groupState : groupStates) {
-			if (groupState.getGroupSkeleton().equals(groupSkeleton)) {
-				groupStateInGraph = groupState;
-				break;
+			if (groupState.getGroupSkeleton().getGroupName().equals(groupSkeleton.getGroupName())) {
+				GroupState newGroupState = new GroupState(groupSkeleton);
+				newGroupState.setIsCollapse(groupState.getIsCollapse());
+				newGroupState.setIsDisplay(groupState.getIsDisplay());
+				newGroupStates.add(newGroupState);
+			} else {
+				newGroupStates.add(groupState);
 			}
 		}
-		if (groupStateInGraph != null) {
-			switch (action) {
-				case "ADD" :
-					// add the act to group skeleton
-					for (String act : changedActs) {
-						groupSkeleton.getListAct().add(act);
-					}
-					// find and add the group skeleton
-					for (String group : changedGroups) {
-						for (GroupState groupState : groupStates) {
-							if (groupState.getGroupSkeleton().getGroupName().equals(group)) {
-								groupSkeleton.getListGroup().add(groupState.getGroupSkeleton());
-								// set this group state 
-								// check if the current group skeleton display
-								if (groupStateInGraph.getIsDisplay()) {
-									// check if the current group skeleton collapsed
-									if (groupStateInGraph.getIsCollapse()) {
-										// hide the group skeleton
-										GoalDrivenDFGUtils.setGroupStateHidden(goalDrivenDFG,
-												groupState.getGroupSkeleton());
-									} else {
-										// display and collapse the group skeleton
-										GoalDrivenDFGUtils.setGroupStateCollapsed(goalDrivenDFG,
-												groupState.getGroupSkeleton());
-									}
-								} else {
-									// hide the newly added group
-									GoalDrivenDFGUtils.setGroupStateHidden(goalDrivenDFG,
-											groupState.getGroupSkeleton());
-								}
-								break;
-							}
-						}
-					}
-
-					break;
-				case "REMOVE" :
-					// remove the act from group skeleton
-					for (String act : changedActs) {
-						groupSkeleton.getListAct().remove(act);
-					}
-					for (String group : changedGroups) {
-						for (GroupState groupState : groupStates) {
-							if (groupState.getGroupSkeleton().getGroupName().equals(group)) {
-								groupSkeleton.getListGroup().remove(groupState.getGroupSkeleton());
-								GoalDrivenDFGUtils.setGroupStateCollapsed(goalDrivenDFG, groupState.getGroupSkeleton());
-								break;
-							}
-						}
-					}
-					break;
-			}
-		}
-
+		groupStates = newGroupStates;
 	}
 
-	/* Remove group */
+	/* Remove group completely */
 	public static void removeGroupState(GoalDrivenDFG goalDrivenDFG, GroupSkeleton deletingGroup,
 			GroupSkeleton parentGroup) {
 		List<GroupState> newGroupStates = new ArrayList<>();
@@ -228,6 +178,29 @@ public class GoalDrivenDFGUtils {
 		}
 		groupStates = newGroupStates;
 		GoalDrivenDFGUtils.removeGroup(goalDrivenDFG, deletingGroup);
+		for (GroupSkeleton childGroup : deletingGroup.getListGroup()) {
+			// set to collapsed
+			GoalDrivenDFGUtils.setGroupStateCollapsed(goalDrivenDFG, childGroup);
+		}
+	}
+
+	/* Remove group from parent group */
+	public static void removeGroupStateFromGroup(GoalDrivenDFG goalDrivenDFG, GroupSkeleton deletingGroup,
+			GroupSkeleton parentGroup) {
+		List<GroupState> newGroupStates = new ArrayList<>();
+		for (GroupState groupState : groupStates) {
+			if (groupState.getGroupSkeleton().getGroupName().equals(parentGroup.getGroupName())) {
+				// a new parent group without the deleting group
+				GroupState newGroupState = new GroupState(parentGroup);
+				newGroupState.setIsCollapse(groupState.getIsCollapse());
+				newGroupState.setIsDisplay(groupState.getIsDisplay());
+				newGroupStates.add(newGroupState);
+			} else {
+				newGroupStates.add(groupState);
+			}
+		}
+		groupStates = newGroupStates;
+		GoalDrivenDFGUtils.removeGroup(goalDrivenDFG, parentGroup);
 		for (GroupSkeleton childGroup : deletingGroup.getListGroup()) {
 			// set to collapsed
 			GoalDrivenDFGUtils.setGroupStateCollapsed(goalDrivenDFG, childGroup);
@@ -270,6 +243,12 @@ public class GoalDrivenDFGUtils {
 		HashMap<String, Integer> newFrequencyNode = new HashMap<String, Integer>();
 		HashMap<EdgeObject, Integer> newFrequencyEdge = new HashMap<EdgeObject, Integer>();
 		newFrequencyEdge.putAll(goalDrivenDFG.getFrequencyEdge());
+
+		// default display all act
+		for (String act : goalDrivenDFG.getFrequencyNode().keySet()) {
+			Node node = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
+			goalDrivenDFG.displayNode(goalDrivenDFG.getGraph(), node);
+		}
 
 		for (GroupSkeleton groupSkeleton : groupSkeletons) {
 			String groupName = groupSkeleton.getGroupName();
