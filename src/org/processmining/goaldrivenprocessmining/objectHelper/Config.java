@@ -3,7 +3,9 @@ package org.processmining.goaldrivenprocessmining.objectHelper;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Config implements Serializable {
 	/**
@@ -13,11 +15,13 @@ public class Config implements Serializable {
 	private List<GroupSkeleton> listGroupSkeletons;
 	private String[] selectedActs;
 	private String[] unselectedActs;
+	private Map<EdgeObject, Map<EdgeObject, Map<Integer, List<Integer[]>>>> mapEdgeChildEdge;
 
 	public Config() {
 		this.listGroupSkeletons = new ArrayList<GroupSkeleton>();
 		this.selectedActs = new String[] {};
 		this.unselectedActs = new String[] {};
+		this.mapEdgeChildEdge = new HashMap<>();
 	}
 
 	public void removeGroup(List<GroupSkeleton> groupActObjects) {
@@ -60,6 +64,14 @@ public class Config implements Serializable {
 
 	public void setUnselectedActs(String[] unselectedActs) {
 		this.unselectedActs = unselectedActs;
+	}
+
+	public Map<EdgeObject, Map<EdgeObject, Map<Integer, List<Integer[]>>>> getMapEdgeChildEdge() {
+		return mapEdgeChildEdge;
+	}
+
+	public void setMapEdgeChildEdge(Map<EdgeObject, Map<EdgeObject, Map<Integer, List<Integer[]>>>> mapEdgeChildEdge) {
+		this.mapEdgeChildEdge = mapEdgeChildEdge;
 	}
 
 	public int hashCode() {

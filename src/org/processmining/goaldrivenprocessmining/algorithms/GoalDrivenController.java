@@ -122,7 +122,7 @@ public class GoalDrivenController {
 		Config currentConfig = CONFIG_Update.currentConfig == null ? new Config() : CONFIG_Update.currentConfig;
 		GroupSkeleton selectedGroup = null;
 		GroupSkeleton changedGroup = null;
-		for (GroupSkeleton groupSkeleton: currentConfig.getListGroupSkeletons()) {
+		for (GroupSkeleton groupSkeleton : currentConfig.getListGroupSkeletons()) {
 			if (groupSkeleton.getGroupName().equals(act)) {
 				changedGroup = groupSkeleton;
 			}
@@ -130,11 +130,11 @@ public class GoalDrivenController {
 				selectedGroup = groupSkeleton;
 			}
 		}
-		
+
 		if (changedGroup == null) {
 			// change the selected group
 			List<String> newChildAct = new ArrayList<String>();
-			for (String childAct: selectedGroup.getListAct()) {
+			for (String childAct : selectedGroup.getListAct()) {
 				if (!childAct.equals(act)) {
 					newChildAct.add(childAct);
 				}
@@ -142,7 +142,7 @@ public class GoalDrivenController {
 			selectedGroup.setListAct(newChildAct);
 		} else {
 			List<GroupSkeleton> newChildGroups = new ArrayList<GroupSkeleton>();
-			for (GroupSkeleton groupSkeleton: selectedGroup.getListGroup()) {
+			for (GroupSkeleton groupSkeleton : selectedGroup.getListGroup()) {
 				if (!groupSkeleton.getGroupName().equals(act)) {
 					newChildGroups.add(groupSkeleton);
 				}
@@ -150,14 +150,14 @@ public class GoalDrivenController {
 			selectedGroup.setListGroup(newChildGroups);
 			// reset group in graph
 			GoalDrivenDFGUtils.removeGroupStateFromGroup(panel.getHighDfgPanel(), changedGroup, selectedGroup);
-//			GoalDrivenDFGUtils.addGroupState(changedGroup);
+			//			GoalDrivenDFGUtils.addGroupState(changedGroup);
 		}
 		// update dfg
 		GoalDrivenDFGUtils.editGroupState(panel.getHighDfgPanel(), selectedGroup);
 		GoalDrivenDFGUtils.updateDfg(panel.getHighDfgPanel());
 		// for config 
 		List<GroupSkeleton> newGroupSkeletons = new ArrayList<GroupSkeleton>();
-		for (GroupSkeleton groupSkeleton: currentConfig.getListGroupSkeletons()) {
+		for (GroupSkeleton groupSkeleton : currentConfig.getListGroupSkeletons()) {
 			if (groupSkeleton.getGroupName().equals(groupName)) {
 				newGroupSkeletons.add(selectedGroup);
 			} else {
@@ -278,7 +278,7 @@ public class GoalDrivenController {
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				Boolean isLowClear = false;
 				if (inputs.has(GoalDrivenObject.low_level_dfg)) {
-					if (!inputs.get(GoalDrivenObject.low_level_dfg).getLog().getLog().isEmpty()) {
+					if (!inputs.get(GoalDrivenObject.low_level_dfg).getLog().getActivityHashTable().getActivityTable().isEmpty()) {
 						panel.getContentRightPanel().remove(panel.getLowDfgPanel());
 						panel.setLowDfgPanel(inputs.get(GoalDrivenObject.low_level_dfg));
 						panel.getLowDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);

@@ -6,6 +6,7 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 import graph.GoalDrivenDFG;
+import graph.utils.node.GoalDrivenDFGUtils;
 
 public class LOW_MakeLowLevelDFG<C> extends DataChainLinkComputationAbstract<C> {
 
@@ -36,6 +37,7 @@ public class LOW_MakeLowLevelDFG<C> extends DataChainLinkComputationAbstract<C> 
 		System.out.println("--- LOW_MakeLowLevelDFG");
 		GoalDrivenDFG dfg = new GoalDrivenDFG(inputs.get(GoalDrivenObject.low_level_log_skeleton), false);
 		//		dfg.addControlListener(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
+		GoalDrivenDFGUtils.updateDfg(dfg);
 		dfg.addSeeOnlyControls();
 		currentLowLevelDfg = dfg; 
 		return new IvMObjectValues().//

@@ -108,7 +108,7 @@ public class GoalDrivenDFG extends Display {
 		repaint.add(new RepaintAction());
 		m_vis.putAction("repaint", repaint);
 
-		if (this.log != null && !this.log.getLog().isEmpty()) {
+		if (this.log != null && !this.log.getActivityHashTable().getActivityTable().isEmpty()) {
 			//			this.frequencyEdge = gdpmLogSkeleton.getStatObject().getMapStatEdge();
 			//			this.frequencyNode = gdpmLogSkeleton.getStatObject().getMapStatNode();
 			this.makeInviGraph();
@@ -208,14 +208,10 @@ public class GoalDrivenDFG extends Display {
 		Table edgeTable = this.initEdgeTable();
 		// init graph
 		this.graph = new Graph(nodeTable, edgeTable, true);
-		if (!this.log.getLog().isEmpty()) {
-			// add begin and end node;
-			this.addBeginToTable(this.graph);
-			// add activities in log to node table and add edges
-			this.addActToTable();
-		} else {
-			this.graph = new Graph();
-		}
+		// add begin and end node;
+		this.addBeginToTable(this.graph);
+		// add activities in log to node table and add edges
+		this.addActToTable();
 
 	}
 
@@ -632,7 +628,6 @@ public class GoalDrivenDFG extends Display {
 			node1 = this.graph.addNode();
 			this.configNode(node1, act, false);
 		}
-
 		// add edge
 		for (EdgeObject edge : edgeHashTable.getEdgeTable().keySet()) {
 			Node node1 = this.getNodeByLabelInGraph(this.graph, edge.getNode1());
@@ -640,7 +635,6 @@ public class GoalDrivenDFG extends Display {
 			Edge e = this.graph.addEdge(node1, node2);
 			this.configEdge(e, edge);
 		}
-
 	}
 
 	public void hideNode(Graph graph, Node node) {
