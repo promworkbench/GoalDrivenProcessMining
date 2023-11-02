@@ -103,7 +103,7 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 					if (activityHashTable.getActivityTable().containsKey(act2)) {
 						if (activityHashTable.getActivityTable().get(act2).containsKey(trace)) {
 							List<Integer> actPos = activityHashTable.getActivityTable().get(act2).get(trace);
-							for (Integer pos : sourceIndexes) {
+							for (Integer pos : targetIndexes) {
 								if (!actPos.contains(pos)) {
 									actPos.add(pos);
 								}
@@ -111,12 +111,12 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 							activityHashTable.getActivityTable().get(act2).replace(trace, actPos);
 						} else {
 							List<Integer> actPos = new ArrayList<>();
-							actPos.addAll(sourceIndexes);
+							actPos.addAll(targetIndexes);
 							activityHashTable.getActivityTable().get(act2).put(trace, actPos);
 						}
 					} else {
 						Map<Integer, List<Integer>> mapPosTrace = new HashMap<>();
-						mapPosTrace.put(trace, sourceIndexes);
+						mapPosTrace.put(trace, targetIndexes);
 						activityHashTable.getActivityTable().put(act2, mapPosTrace);
 					}
 				}

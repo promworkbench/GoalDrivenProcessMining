@@ -12,6 +12,7 @@ public class GraphConstants {
 	public static final int ARROW_HEAD_HEIGHT = 12;
 	//graph field
 	public static final String LABEL_FIELD = "label";
+	public static final String DISPLAY_LABEL_FIELD = "displayLabel";
 	public static final String BEGIN_FIELD = "begin";
 	public static final String END_FIELD = "end";
 	public static final String IS_SELECTED = "select";

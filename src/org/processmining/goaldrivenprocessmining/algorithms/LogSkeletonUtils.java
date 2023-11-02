@@ -63,6 +63,22 @@ public class LogSkeletonUtils {
 		}
 	}
 
+	public static List<String> getUsingActsInLog(GDPMLogSkeleton gdpmLogSkeleton) {
+		EdgeHashTable edgeHashTable = gdpmLogSkeleton.getEdgeHashTable();
+
+		// get all using nodes
+		List<String> usingActs = new ArrayList<>();
+		for (EdgeObject edgeObject : edgeHashTable.getEdgeTable().keySet()) {
+			if (!usingActs.contains(edgeObject.getNode1())) {
+				usingActs.add(edgeObject.getNode1());
+			}
+			if (!usingActs.contains(edgeObject.getNode2())) {
+				usingActs.add(edgeObject.getNode2());
+			}
+		}
+		return usingActs;
+	}
+
 	public static GDPMLogSkeleton setupEdgeHashTableAfterChangingGroup(GDPMLogSkeleton gdpmLogSkeleton) {
 		EdgeHashTable newEdgeHashTable = new EdgeHashTable();
 		for (EdgeObject edgeObject : gdpmLogSkeleton.getEdgeHashTable().getEdgeTable().keySet()) {
@@ -214,29 +230,32 @@ public class LogSkeletonUtils {
 					}
 					/*----------*/
 					if (newEdge != null) {
-						// check if newly edge contains at least one not deleted act
-						if (!unselectedActs.contains(newEdge.getNode1())) {
-							Map<EdgeObject, Map<Integer, List<Integer[]>>> edges = new HashMap<>();
-							// check if the edgeLeft is stored
-							if (mapEdgeChildEdge.containsKey(edgeLeft)) {
-								edges = mapEdgeChildEdge.get(edgeLeft);
-								mapEdgeChildEdge.remove(edgeLeft);
-							} else {
-								edges.put(edgeLeft, traceLeft);
-							}
+						Map<EdgeObject, Map<Integer, List<Integer[]>>> edges = new HashMap<>();
+						// check if the edgeLeft is stored
+						if (mapEdgeChildEdge.containsKey(edgeLeft)) {
+							edges.putAll(mapEdgeChildEdge.get(edgeLeft));
+							
+						} else {
+							edges.put(edgeLeft, traceLeft);
+						}
+						if (mapEdgeChildEdge.containsKey(edgeRight)) {
+							edges.putAll(mapEdgeChildEdge.get(edgeRight));
+							mapEdgeChildEdge.remove(edgeRight);
+						} else {
 							edges.put(edgeRight, traceRight);
-							if (mapEdgeChildEdge.containsKey(newEdge)) {
-								Map<EdgeObject, Map<Integer, List<Integer[]>>> cur = mapEdgeChildEdge.get(newEdge);
-								cur.putAll(edges);
-								mapEdgeChildEdge.replace(newEdge, cur);
-							} else {
-								mapEdgeChildEdge.put(newEdge, edges);
-							}
+						}
+						if (mapEdgeChildEdge.containsKey(newEdge)) {
+							Map<EdgeObject, Map<Integer, List<Integer[]>>> cur = mapEdgeChildEdge.get(newEdge);
+							cur.putAll(edges);
+							mapEdgeChildEdge.replace(newEdge, cur);
+						} else {
+							mapEdgeChildEdge.put(newEdge, edges);
 						}
 
 					}
 					/*----------*/
 				}
+				mapEdgeChildEdge.remove(edgeLeft);
 				affectedEdges.getEdgeTable().remove(edgeLeft);
 			}
 			for (EdgeObject edge : removedEdges) {

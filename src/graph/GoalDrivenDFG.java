@@ -109,8 +109,9 @@ public class GoalDrivenDFG extends Display {
 		m_vis.putAction("repaint", repaint);
 
 		if (this.log != null && !this.log.getActivityHashTable().getActivityTable().isEmpty()) {
-			//			this.frequencyEdge = gdpmLogSkeleton.getStatObject().getMapStatEdge();
-			//			this.frequencyNode = gdpmLogSkeleton.getStatObject().getMapStatNode();
+			this.calculateFrequencyNode();
+			this.calculateFrequencyEdge();
+
 			this.makeInviGraph();
 			this.makeGraph();
 			m_vis.addGraph("graph", this.graph);
@@ -125,7 +126,6 @@ public class GoalDrivenDFG extends Display {
 			// center graph
 			this.centerGraph();
 			this.test();
-			//			this.dragMultipleNodesControl.initInvisibleNodes();
 
 		}
 
@@ -319,7 +319,7 @@ public class GoalDrivenDFG extends Display {
 		edgeR.setArrowHeadSize(GraphConstants.ARROW_HEAD_WIDTH, GraphConstants.ARROW_HEAD_HEIGHT);
 		edgeR.setArrowDoubleHeadSize(GraphConstants.ARROW_HEAD_WIDTH + 5, GraphConstants.ARROW_HEAD_HEIGHT);
 
-		NodeRenderer label = new NodeRenderer("label");
+		NodeRenderer label = new NodeRenderer(GraphConstants.DISPLAY_LABEL_FIELD);
 		label.setRoundedCorner(8, 8);
 		label.setHorizontalPadding(10);
 		label.setVerticalPadding(10);
@@ -383,7 +383,6 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	private void setDefaultEdgeStrokeWidth() {
-		this.calculateFrequencyEdge();
 		this.currentFrequencyEdge = this.frequencyEdge;
 		this.runCustomEdgeStrokeWidthAction();
 	}
@@ -429,6 +428,7 @@ public class GoalDrivenDFG extends Display {
 			}
 			this.frequencyEdge.put(edge, total);
 		}
+		this.currentFrequencyEdge = this.frequencyEdge;
 	}
 
 	public void runCustomEdgeStrokeWidthAction() {
@@ -489,7 +489,6 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	private void setDefaultNodeFillColor() {
-		this.calculateFrequencyNode();
 		HashMap<String, Integer> newFrequencyNode = new HashMap<String, Integer>();
 		for (String act : this.frequencyNode.keySet()) {
 			String trueLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(),
@@ -586,6 +585,7 @@ public class GoalDrivenDFG extends Display {
 				mapActColor.put(act, new Color(red, green, blue));
 			}
 		}
+		//		Predicate displayPredicaate = (Predicate) ExpressionParser.parse("isDisplay = true");
 		CustomColorNodeFillAction customFillByLabel = new CustomColorNodeFillAction(GraphConstants.NODE_GROUP,
 				mapActColor);
 		m_vis.putAction(GraphConstants.NODE_FILL_COLOR_ACTION, customFillByLabel);
@@ -603,6 +603,7 @@ public class GoalDrivenDFG extends Display {
 			}
 			this.frequencyNode.put(act, total);
 		}
+		this.currentFrequencyNode = this.frequencyNode;
 	}
 
 	private int interpolate(int start, int end, double t) {
@@ -622,11 +623,17 @@ public class GoalDrivenDFG extends Display {
 	private void addActToTable() {
 		ActivityHashTable activityHashTable = this.log.getActivityHashTable();
 		EdgeHashTable edgeHashTable = this.log.getEdgeHashTable();
+
+		// get all using nodes
+		List<String> usingActs = LogSkeletonUtils.getUsingActsInLog(this.log);
+
 		// add all node, set display true
 		for (String act : activityHashTable.getActivityTable().keySet()) {
-			Node node1 = null;
-			node1 = this.graph.addNode();
-			this.configNode(node1, act, false);
+			if (usingActs.contains(act)) {
+				Node node1 = null;
+				node1 = this.graph.addNode();
+				this.configNode(node1, act, false);
+			}
 		}
 		// add edge
 		for (EdgeObject edge : edgeHashTable.getEdgeTable().keySet()) {
@@ -794,6 +801,7 @@ public class GoalDrivenDFG extends Display {
 
 	public void configGroupNode(Node node, String label) {
 		node.setString(GraphConstants.LABEL_FIELD, label);
+		node.setString(GraphConstants.DISPLAY_LABEL_FIELD, label + "\n test freq");
 		node.setBoolean(GraphConstants.BEGIN_FIELD, false);
 		node.setBoolean(GraphConstants.END_FIELD, false);
 		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.GROUP_NODE);
@@ -803,6 +811,7 @@ public class GoalDrivenDFG extends Display {
 
 	private void configNode(Node node, String label, Boolean isGroup) {
 		node.setString(GraphConstants.LABEL_FIELD, label);
+		node.setString(GraphConstants.DISPLAY_LABEL_FIELD, label + "\n" + this.currentFrequencyNode.get(label));
 		node.setBoolean(GraphConstants.BEGIN_FIELD, false);
 		node.setBoolean(GraphConstants.END_FIELD, false);
 		if (isGroup) {
@@ -826,6 +835,7 @@ public class GoalDrivenDFG extends Display {
 	private Table initNodeTable() {
 		Table nodeData = new Table(0, 1);
 		nodeData.addColumn(GraphConstants.LABEL_FIELD, String.class);
+		nodeData.addColumn(GraphConstants.DISPLAY_LABEL_FIELD, String.class);
 		nodeData.addColumn(GraphConstants.BEGIN_FIELD, boolean.class);
 		nodeData.addColumn(GraphConstants.END_FIELD, boolean.class);
 		nodeData.addColumn(GraphConstants.IS_SELECTED, boolean.class);
