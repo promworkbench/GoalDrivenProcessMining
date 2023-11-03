@@ -8,12 +8,10 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 import graph.GoalDrivenDFG;
+import graph.GoalDrivenDFGUtils;
 import graph.controls.GraphObjectClickControl;
-import graph.utils.node.GoalDrivenDFGUtils;
 
 public class HIGH_MakeHighLevelDFG<C> extends DataChainLinkComputationAbstract<C> {
-	
-	public static GoalDrivenDFG currentHighLevelDfg;
 	
 	@Override
 	public String getName() {
@@ -45,7 +43,6 @@ public class HIGH_MakeHighLevelDFG<C> extends DataChainLinkComputationAbstract<C
 		dfg.setEdgeClickControl(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 		dfg.addControlListener(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain()));
 		GoalDrivenDFGUtils.updateDfg(dfg);
-		currentHighLevelDfg = dfg;
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.high_level_dfg, dfg)
 				;

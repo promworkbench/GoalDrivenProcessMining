@@ -9,8 +9,8 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
+import graph.GoalDrivenDFGUtils;
 import graph.GraphConstants;
-import graph.utils.node.GoalDrivenDFGUtils;
 import prefuse.Display;
 import prefuse.Visualization;
 import prefuse.controls.ControlAdapter;

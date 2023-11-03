@@ -1,4 +1,4 @@
-package graph.utils.node;
+package graph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +10,6 @@ import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupState;
 
-import graph.GoalDrivenDFG;
 import prefuse.Visualization;
 import prefuse.data.Edge;
 import prefuse.data.Graph;
@@ -304,10 +303,10 @@ public class GoalDrivenDFGUtils {
 		goalDrivenDFG.setCurrentFrequencyEdge(newFrequencyEdge);
 		newFrequencyNode.putAll(goalDrivenDFG.getCurrentFrequencyNode());
 		goalDrivenDFG.setCurrentFrequencyNode(newFrequencyNode);
-		
+
 		// collapse group
 		for (GroupSkeleton group : groupSkeletons) {
-			        GoalDrivenDFGUtils.collapseGroup(goalDrivenDFG, group);
+			GoalDrivenDFGUtils.collapseGroup(goalDrivenDFG, group);
 		}
 		// run the action
 		GoalDrivenDFGUtils.display(goalDrivenDFG);
@@ -315,15 +314,15 @@ public class GoalDrivenDFGUtils {
 
 	/* Display all plain act nodes */
 	public static void displayDefault(GoalDrivenDFG goalDrivenDFG) {
-//		goalDrivenDFG.setCurrentFrequencyNode(goalDrivenDFG.getFrequencyNode());
-//		goalDrivenDFG.setCurrentFrequencyEdge(goalDrivenDFG.getFrequencyEdge());
+		//		goalDrivenDFG.setCurrentFrequencyNode(goalDrivenDFG.getFrequencyNode());
+		//		goalDrivenDFG.setCurrentFrequencyEdge(goalDrivenDFG.getFrequencyEdge());
 
 		for (String act : goalDrivenDFG.getCurrentFrequencyNode().keySet()) {
 			Node node = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
 			if (node != null) {
 				goalDrivenDFG.displayNode(goalDrivenDFG.getGraph(), node);
 			}
-			
+
 		}
 		GoalDrivenDFGUtils.display(goalDrivenDFG);
 	}
@@ -431,8 +430,11 @@ public class GoalDrivenDFGUtils {
 			goalDrivenDFG.removeNode(goalDrivenDFG.getInviGraph(), nodes.get(goalDrivenDFG.getInviGraph()));
 			// display node of the children act 
 			for (String act : groupSkeleton.getListAct()) {
-				goalDrivenDFG.displayNode(goalDrivenDFG.getGraph(),
-						goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act));
+				Node nodeToHide = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
+				if (nodeToHide != null) {
+					goalDrivenDFG.displayNode(goalDrivenDFG.getGraph(), nodeToHide);
+				}
+
 			}
 		}
 	}

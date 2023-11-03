@@ -137,6 +137,44 @@ public class LogSkeletonUtils {
 		return groupSkeleton;
 	}
 
+	public static Boolean updateEdgesPositionForMapChildEdge(
+			Map<EdgeObject, Map<EdgeObject, Map<Integer, List<Integer[]>>>> mapEdgeChildEdge, EdgeObject edgeObject,
+			int traceIndex, Map<EdgeObject, Map<Integer, List<Integer[]>>> edges, Integer[] posEdge) {
+		if (mapEdgeChildEdge.containsKey(edgeObject)) {
+			Map<EdgeObject, Map<Integer, List<Integer[]>>> edgeLeftPos = mapEdgeChildEdge.get(edgeObject);
+			// get only the children in the same trace
+			Boolean isSameTraceIndex = false;
+			for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : edgeLeftPos.entrySet()) {
+				EdgeObject child = entry.getKey();
+				Map<Integer, List<Integer[]>> childPos = entry.getValue();
+				for (Map.Entry<Integer, List<Integer[]>> cEntry : childPos.entrySet()) {
+					if (cEntry.getKey() == traceIndex) {
+						Map<Integer, List<Integer[]>> newMap = new HashMap<>();
+						newMap.put(cEntry.getKey(), cEntry.getValue());
+						edges.put(child, newMap);
+						isSameTraceIndex = true;
+						break;
+					}
+				}
+			}
+			if (!isSameTraceIndex) {
+				Map<Integer, List<Integer[]>> trace = new HashMap<>();
+				List<Integer[]> listPos = new ArrayList<>();
+				listPos.add(posEdge);
+				trace.put(traceIndex, listPos);
+				edges.put(edgeObject, trace);
+			}
+			return true;
+		} else {
+			Map<Integer, List<Integer[]>> trace = new HashMap<>();
+			List<Integer[]> listPos = new ArrayList<>();
+			listPos.add(posEdge);
+			trace.put(traceIndex, listPos);
+			edges.put(edgeObject, trace);
+			return false;
+		}
+	}
+
 	public static void setupEdgeHashTableForHighLevelAfterChangingDisplayedActs(GDPMLogSkeleton gdpmLogSkeleton,
 			EdgeHashTable originalEdgeHashTable) {
 		Config config = gdpmLogSkeleton.getConfig();
@@ -172,25 +210,21 @@ public class LogSkeletonUtils {
 				}
 			}
 			// start with the left edges
+			Boolean isEdgeLeftStored = false;
+			Boolean isEdgeRightStored = false;
 			for (EdgeObject edgeLeft : actLeft) {
 				// get all pos of the left edge
-				Map<Integer, List<Integer[]>> mapAllPosEdgeLeft = originalEdgeHashTable
-						.getEdgePositions(edgeLeft) == null ? affectedEdges.getEdgePositions(edgeLeft)
-								: originalEdgeHashTable.getEdgePositions(edgeLeft);
+				Map<Integer, List<Integer[]>> mapAllPosEdgeLeft = affectedEdges.getEdgePositions(edgeLeft);
 				// check the right edges
 				for (EdgeObject edgeRight : actRight) {
 					// get the pos of right edge
-					Map<Integer, List<Integer[]>> mapAllPosEdgeRight = originalEdgeHashTable
-							.getEdgePositions(edgeRight) == null ? affectedEdges.getEdgePositions(edgeRight)
-									: originalEdgeHashTable.getEdgePositions(edgeRight);
+					Map<Integer, List<Integer[]>> mapAllPosEdgeRight = affectedEdges.getEdgePositions(edgeRight);
 					// find the common case where both left and right edges happened
 					Set<Integer> affectedTraces = mapAllPosEdgeLeft.keySet().stream().distinct()
 							.filter(mapAllPosEdgeRight.keySet()::contains).collect(Collectors.toSet());
 					EdgeObject newEdge = null;
 					/*-----------------*/
-					Map<Integer, List<Integer[]>> traceLeft = new HashMap<>();
-					Map<Integer, List<Integer[]>> traceRight = new HashMap<>();
-					/*-----------------*/
+
 					for (Integer traceIndex : affectedTraces) {
 						// find the pos of the edge happen in the trace
 						List<Integer[]> listPosEdgeLeft = mapAllPosEdgeLeft.get(traceIndex);
@@ -202,24 +236,40 @@ public class LogSkeletonUtils {
 									// create a new indirect edge
 									newEdge = new EdgeObject(edgeLeft.getNode1(), edgeRight.getNode2(), true);
 									affectedEdges.addEdge(newEdge, traceIndex, posEdgeLeft[0], posEdgeRight[1]);
-									if (!traceLeft.containsKey(traceIndex)) {
-										List<Integer[]> listPos = new ArrayList<>();
-										listPos.add(posEdgeLeft);
-										traceLeft.put(traceIndex, listPos);
+									/*-----------------*/
+									// add the map child edge here
+									// add the edge left
+									Map<EdgeObject, Map<Integer, List<Integer[]>>> edges = new HashMap<>();
+									// if edge left is a combination of other atomic edges
+									isEdgeLeftStored = LogSkeletonUtils.updateEdgesPositionForMapChildEdge(
+											mapEdgeChildEdge, edgeLeft, traceIndex, edges, posEdgeLeft);
+									// the same for edge right
+									isEdgeRightStored = LogSkeletonUtils.updateEdgesPositionForMapChildEdge(
+											mapEdgeChildEdge, edgeRight, traceIndex, edges, posEdgeRight);
+									// add the new edge to map child edge
+									if (mapEdgeChildEdge.containsKey(newEdge)) {
+										Map<EdgeObject, Map<Integer, List<Integer[]>>> cur = mapEdgeChildEdge
+												.get(newEdge);
+										for (EdgeObject edgeObject : edges.keySet()) {
+											Map<Integer, List<Integer[]>> edgeObjectPos = edges.get(edgeObject);
+											if (cur.containsKey(edgeObject)) {
+												for (Integer t : edgeObjectPos.keySet()) {
+													if (cur.get(edgeObject).containsKey(t)) {
+														List<Integer[]> p = cur.get(edgeObject).get(t);
+														p.addAll(edgeObjectPos.get(t));
+														cur.get(edgeObject).replace(t, p);
+													} else {
+														cur.get(edgeObject).put(t, edgeObjectPos.get(t));
+													}
+												}
+											} else {
+												cur.put(edgeObject, edgeObjectPos);
+											}
+										}
 									} else {
-										List<Integer[]> listPos = traceLeft.get(traceIndex);
-										listPos.add(posEdgeLeft);
-										traceLeft.replace(traceIndex, listPos);
+										mapEdgeChildEdge.put(newEdge, edges);
 									}
-									if (!traceRight.containsKey(traceIndex)) {
-										List<Integer[]> listPos = new ArrayList<>();
-										listPos.add(posEdgeRight);
-										traceRight.put(traceIndex, listPos);
-									} else {
-										List<Integer[]> listPos = traceRight.get(traceIndex);
-										listPos.add(posEdgeRight);
-										traceRight.replace(traceIndex, listPos);
-									}
+									/*-----------------*/
 									break;
 								}
 							}
@@ -228,38 +278,15 @@ public class LogSkeletonUtils {
 					if (!removedEdges.contains(edgeRight)) {
 						removedEdges.add(edgeRight);
 					}
-					/*----------*/
-					if (newEdge != null) {
-						Map<EdgeObject, Map<Integer, List<Integer[]>>> edges = new HashMap<>();
-						// check if the edgeLeft is stored
-						if (mapEdgeChildEdge.containsKey(edgeLeft)) {
-							edges.putAll(mapEdgeChildEdge.get(edgeLeft));
-							
-						} else {
-							edges.put(edgeLeft, traceLeft);
-						}
-						if (mapEdgeChildEdge.containsKey(edgeRight)) {
-							edges.putAll(mapEdgeChildEdge.get(edgeRight));
-							mapEdgeChildEdge.remove(edgeRight);
-						} else {
-							edges.put(edgeRight, traceRight);
-						}
-						if (mapEdgeChildEdge.containsKey(newEdge)) {
-							Map<EdgeObject, Map<Integer, List<Integer[]>>> cur = mapEdgeChildEdge.get(newEdge);
-							cur.putAll(edges);
-							mapEdgeChildEdge.replace(newEdge, cur);
-						} else {
-							mapEdgeChildEdge.put(newEdge, edges);
-						}
-
-					}
-					/*----------*/
 				}
-				mapEdgeChildEdge.remove(edgeLeft);
+				if (isEdgeLeftStored) {
+					mapEdgeChildEdge.remove(edgeLeft);
+				}
 				affectedEdges.getEdgeTable().remove(edgeLeft);
 			}
 			for (EdgeObject edge : removedEdges) {
 				affectedEdges.getEdgeTable().remove(edge);
+				mapEdgeChildEdge.remove(edge);
 			}
 		}
 		for (EdgeObject edge : affectedEdges.getEdgeTable().keySet()) {

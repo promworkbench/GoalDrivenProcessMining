@@ -10,8 +10,8 @@ import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
+import graph.GoalDrivenDFGUtils;
 import graph.GraphConstants;
-import graph.utils.node.GoalDrivenDFGUtils;
 import prefuse.Display;
 import prefuse.controls.ControlAdapter;
 import prefuse.data.Table;

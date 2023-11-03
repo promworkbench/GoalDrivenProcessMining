@@ -12,7 +12,6 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C> {
-	public static GDPMLogSkeleton currentHighLogSkeleton = null;
 
 	public String getStatusBusyMessage() {
 		// TODO Auto-generated method stub
@@ -39,8 +38,7 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 			throws Exception {
 		System.out.println("--- HIGH_MakeHighLevelLog");
 		//		Config config = inputs.get(GoalDrivenObject.config);
-		GDPMLogSkeleton gdpmLog = currentHighLogSkeleton == null ? inputs.get(GoalDrivenObject.full_log_skeleton)
-				: currentHighLogSkeleton;
+		GDPMLogSkeleton gdpmLog = inputs.get(GoalDrivenObject.full_log_skeleton);
 		// for config 
 		Config updatedConfig = CONFIG_Update.currentConfig == null ? new Config() : CONFIG_Update.currentConfig;
 		UpdateConfig update = inputs.get(GoalDrivenObject.update_config_object);
@@ -57,9 +55,8 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 		gdpmLog.setConfig(updatedConfig);
 		LogSkeletonUtils.setupEdgeHashTableForHighLevelAfterChangingDisplayedActs(gdpmLog,
 				Cl01GatherAttributes.originalEdgeHashTable);
-		currentHighLogSkeleton = gdpmLog;
 		CONFIG_Update.currentConfig = updatedConfig;
-		
+
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.high_level_log_skeleton, gdpmLog).s(GoalDrivenObject.config, updatedConfig);
 	}

@@ -53,8 +53,8 @@ import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.
 import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.Miner;
 
 import graph.GoalDrivenDFG;
+import graph.GoalDrivenDFGUtils;
 import graph.GraphConstants;
-import graph.utils.node.GoalDrivenDFGUtils;
 import prefuse.Visualization;
 import prefuse.visual.VisualItem;
 

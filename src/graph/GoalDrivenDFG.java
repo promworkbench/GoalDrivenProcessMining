@@ -489,18 +489,7 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	private void setDefaultNodeFillColor() {
-		HashMap<String, Integer> newFrequencyNode = new HashMap<String, Integer>();
-		for (String act : this.frequencyNode.keySet()) {
-			String trueLabel = LogSkeletonUtils.getTrueActivityLabel(this.getLog(),
-					this.getLog().getConfig().getListGroupSkeletons(), act);
-			if (newFrequencyNode.containsKey(trueLabel)) {
-				newFrequencyNode.put(trueLabel, this.frequencyNode.get(act) + newFrequencyNode.get(trueLabel));
-			} else {
-				newFrequencyNode.put(trueLabel, this.frequencyNode.get(act));
-			}
-
-		}
-		this.currentFrequencyNode = newFrequencyNode;
+		this.currentFrequencyNode = this.frequencyNode;
 		this.runCustomColorNodeFillAction();
 	}
 

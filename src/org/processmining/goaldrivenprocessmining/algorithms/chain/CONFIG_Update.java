@@ -14,7 +14,6 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenConfiguration> {
 
 	public static Config currentConfig = null;
-	public static UpdateConfig currentUpdateConfig = null;
 
 	@Override
 	public String getName() {
@@ -128,7 +127,6 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 		}
 
 		currentConfig = updatedConfig;
-		currentUpdateConfig = update;
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.config, updatedConfig);
 	}

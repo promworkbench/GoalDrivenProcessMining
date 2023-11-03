@@ -79,7 +79,6 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 
 		GDPMLogSkeleton gdpmLogSkeleton = new GDPMLogSkeleton(log);
 		originalEdgeHashTable = gdpmLogSkeleton.getEdgeHashTable();
-		HIGH_MakeHighLevelLog.currentHighLogSkeleton = null;
 
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.full_xlog, log)
