@@ -7,12 +7,16 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 
+import graph.GoalDrivenDFG;
 import graph.GraphConstants;
 import prefuse.Constants;
 import prefuse.render.LabelRenderer;
+import prefuse.util.GraphicsLib;
 import prefuse.visual.VisualItem;
 
 public class NodeRenderer extends LabelRenderer {
+
+	private GoalDrivenDFG goalDrivenDFG;
 
 	private int m_baseSize = 20;
 	private Ellipse2D m_ellipse = new Ellipse2D.Double();
@@ -25,8 +29,9 @@ public class NodeRenderer extends LabelRenderer {
 
 	/** The holder for the currently computed bounding box */
 
-	public NodeRenderer(String string) {
+	public NodeRenderer(GoalDrivenDFG goalDrivenDFG, String string) {
 		super(string);
+		this.goalDrivenDFG = goalDrivenDFG;
 	}
 
 	public void render(Graphics2D g, VisualItem item) {
@@ -34,32 +39,30 @@ public class NodeRenderer extends LabelRenderer {
 			Shape shape = getRawShapeNode(item);
 			if (shape != null)
 				drawShape(g, item, shape);
-		}
-		//		else if (item.getBoolean(GraphConstants.IS_INVISIBLE)) {
-		//			Shape shape = getRawShape(item);
-		//			GraphicsLib.paint(g, item, shape, dashedStroke, RENDER_TYPE_DRAW);
-		//		} 
-		else if (item.getBoolean(GraphConstants.IS_DISPLAY)) {
+		} else if (item.canGetBoolean(GraphConstants.IS_INVISIBLE) && item.getBoolean(GraphConstants.IS_DISPLAY)) {
+			Shape shape = getRawShape(item);
+			GraphicsLib.paint(g, item, shape, dashedStroke, RENDER_TYPE_DRAW);
+		} else if (item.getBoolean(GraphConstants.IS_DISPLAY)) {
 			super.render(g, item);
 		}
 	}
 
 	protected Shape getDashedRectangle(VisualItem item) {
+		String groupName = item.getString(GraphConstants.LABEL_FIELD);
 		Rectangle2D bounds = super.getRawShape(item).getBounds2D();
 		float x = (float) bounds.getX();
 		float y = (float) bounds.getY();
-		float width = (float) bounds.getWidth();
-		float height = (float) bounds.getHeight();
-		return new Rectangle2D.Float(x - 100, y - 100, width + 200, height + 200);
+		float width = (float) this.goalDrivenDFG.getMapGroupNodeDimension().get(groupName)[0];
+		float height = (float) this.goalDrivenDFG.getMapGroupNodeDimension().get(groupName)[1];
+		return new Rectangle2D.Float(x - width / 2 - 100, y - height / 2 - 100, width + 200, height + 200);
 	}
 
 	protected Shape getRawShape(VisualItem item) {
-		//		if (!item.getBoolean(GraphConstants.IS_INVISIBLE)) {
-		//			
-		//		} else {
-		//			return this.getDashedRectangle(item);
-		//		}
-		return super.getRawShape(item);
+		if (!item.canGetBoolean(GraphConstants.IS_INVISIBLE)) {
+			return super.getRawShape(item);
+		} else {
+			return this.getDashedRectangle(item);
+		}
 	}
 
 	protected Shape getRawShapeNode(VisualItem item) {

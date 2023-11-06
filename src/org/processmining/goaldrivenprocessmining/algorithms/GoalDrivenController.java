@@ -34,7 +34,6 @@ import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.SelectedGroup;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateType;
@@ -82,13 +81,17 @@ public class GoalDrivenController {
 	}
 
 	public static void expandSelectedGroup(GroupSkeleton groupSkeleton, Boolean isHighLevel) {
-		SelectedGroup selectedGroup = new SelectedGroup(groupSkeleton, isHighLevel, true);
-		chain.setObject(GoalDrivenObject.selected_group, selectedGroup);
+		if (isHighLevel) {
+			GoalDrivenDFGUtils.setGroupStateExpanded(panel.getHighDfgPanel(), groupSkeleton);
+		}
+		GoalDrivenDFGUtils.updateDfg(panel.getHighDfgPanel());
 	}
 
 	public static void collapseSelectedGroup(GroupSkeleton groupSkeleton, Boolean isHighLevel) {
-		SelectedGroup selectedGroup = new SelectedGroup(groupSkeleton, isHighLevel, false);
-		chain.setObject(GoalDrivenObject.selected_group, selectedGroup);
+		if (isHighLevel) {
+			GoalDrivenDFGUtils.setGroupStateCollapsed(panel.getHighDfgPanel(), groupSkeleton);
+		}
+		GoalDrivenDFGUtils.updateDfg(panel.getHighDfgPanel());
 	}
 
 	public static void removeGroupFromGraph(String groupName) {
@@ -278,7 +281,8 @@ public class GoalDrivenController {
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				Boolean isLowClear = false;
 				if (inputs.has(GoalDrivenObject.low_level_dfg)) {
-					if (!inputs.get(GoalDrivenObject.low_level_dfg).getLog().getActivityHashTable().getActivityTable().isEmpty()) {
+					if (!inputs.get(GoalDrivenObject.low_level_dfg).getLog().getActivityHashTable().getActivityTable()
+							.isEmpty()) {
 						panel.getContentRightPanel().remove(panel.getLowDfgPanel());
 						panel.setLowDfgPanel(inputs.get(GoalDrivenObject.low_level_dfg));
 						panel.getLowDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);

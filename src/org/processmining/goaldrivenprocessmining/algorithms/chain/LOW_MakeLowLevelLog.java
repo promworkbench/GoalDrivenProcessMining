@@ -9,6 +9,7 @@ import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
+import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
@@ -39,16 +40,61 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 	@Override
 	public IvMObjectValues execute(C configuration, IvMObjectValues inputs, IvMCanceller canceller) throws Exception {
 		System.out.println("--- LOW_MakeLowLevelLog");
-
-		GDPMLogSkeleton newGdpmLog = new GDPMLogSkeleton();
 		HashMap<String, Object> passValues = inputs.get(GoalDrivenObject.selected_source_target_node);
 		String source = (String) passValues.get("source");
 		String target = (String) passValues.get("target");
 
+		GDPMLogSkeleton newGdpmLog = new GDPMLogSkeleton();
 		Config config = CONFIG_Update.currentConfig;
-
+		List<GroupSkeleton> groups = config.getListGroupSkeletons();
 		Map<EdgeObject, Map<EdgeObject, Map<Integer, List<Integer[]>>>> mapEdgeChildEdge = config.getMapEdgeChildEdge();
 
+		List<String> listSources = new ArrayList<String>();
+		List<String> listTargets = new ArrayList<String>();
+		// check if source is a group
+		for (GroupSkeleton groupSkeleton : groups) {
+			if (groupSkeleton.getGroupName().equals(source)) {
+				listSources.addAll(this.getAllActsInGroup(groupSkeleton));
+			}
+		}
+		// otherwise
+		if (listSources.isEmpty()) {
+			listSources.add(source);
+		}
+		// check if target is a group
+		for (GroupSkeleton groupSkeleton : groups) {
+			if (groupSkeleton.getGroupName().equals(target)) {
+				listTargets.addAll(this.getAllActsInGroup(groupSkeleton));
+			}
+		}
+		// otherwise
+		if (listTargets.isEmpty()) {
+			listTargets.add(target);
+		}
+		for (String s : listSources) {
+			for (String t : listTargets) {
+				// create log based on the source and target
+				this.createLog(newGdpmLog, mapEdgeChildEdge, s, t);
+			}
+		}
+
+		return new IvMObjectValues().//
+				s(GoalDrivenObject.low_level_log_skeleton, newGdpmLog);
+
+	}
+
+	private List<String> getAllActsInGroup(GroupSkeleton groupSkeleton) {
+		List<String> res = new ArrayList<>();
+		res.addAll(groupSkeleton.getListAct());
+		for (GroupSkeleton groupSkeleton2 : groupSkeleton.getListGroup()) {
+			res.addAll(this.getAllActsInGroup(groupSkeleton2));
+		}
+		return res;
+	}
+
+	private void createLog(GDPMLogSkeleton newGdpmLog,
+			Map<EdgeObject, Map<EdgeObject, Map<Integer, List<Integer[]>>>> mapEdgeChildEdge, String source,
+			String target) {
 		// Find the edge match the source and target
 		Map<EdgeObject, Map<Integer, List<Integer[]>>> children = new HashMap<>();
 		for (Map.Entry<EdgeObject, Map<EdgeObject, Map<Integer, List<Integer[]>>>> entry : mapEdgeChildEdge
@@ -75,11 +121,51 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 		}
 		// Create simple activity hash table
 		ActivityHashTable activityHashTable = new ActivityHashTable();
-		for (EdgeObject edgeObject : newGdpmLog.getEdgeHashTable().getEdgeTable().keySet()) {
+		this.addActToActivityHashTable(newGdpmLog, activityHashTable);
+		newGdpmLog.setActivityHashTable(activityHashTable);
+	}
+
+	private void addEdgeToEdgeHashTable(GDPMLogSkeleton gdpmLogSkeleton, EdgeObject edgeObject,
+			Map<EdgeObject, Map<Integer, List<Integer[]>>> mapEdgePos, String source, String target) {
+		Map<Integer, List<Integer[]>> allPos = mapEdgePos.get(edgeObject);
+		String node1 = edgeObject.getNode1();
+		String node2 = edgeObject.getNode2();
+		if (node1.equals(source)) {
+			if (!node1.equals("begin")) {
+				for (Integer i : allPos.keySet()) {
+					List<Integer[]> posInTrace = mapEdgePos.get(edgeObject).get(i);
+					for (Integer[] pos : posInTrace) {
+						EdgeObject newEdgeObject = new EdgeObject("begin", node1);
+						gdpmLogSkeleton.getEdgeHashTable().addEdge(newEdgeObject, i, -1, pos[0]);
+					}
+
+				}
+			}
+
+		}
+		if (node2.equals(target)) {
+			if (!node2.equals("end")) {
+				for (Integer i : allPos.keySet()) {
+					List<Integer[]> posInTrace = mapEdgePos.get(edgeObject).get(i);
+					for (Integer[] pos : posInTrace) {
+						EdgeObject newEdgeObject = new EdgeObject(node2, "end");
+						gdpmLogSkeleton.getEdgeHashTable().addEdge(newEdgeObject, i, pos[1], -2);
+					}
+
+				}
+			}
+
+		}
+		gdpmLogSkeleton.getEdgeHashTable().addEdge(edgeObject, allPos);
+	}
+
+	private void addActToActivityHashTable(GDPMLogSkeleton gdpmLogSkeleton, ActivityHashTable activityHashTable) {
+		for (EdgeObject edgeObject : gdpmLogSkeleton.getEdgeHashTable().getEdgeTable().keySet()) {
 			String act1 = edgeObject.getNode1();
 			String act2 = edgeObject.getNode2();
 
-			Map<Integer, List<Integer[]>> allTracePos = newGdpmLog.getEdgeHashTable().getEdgeTable().get(edgeObject);
+			Map<Integer, List<Integer[]>> allTracePos = gdpmLogSkeleton.getEdgeHashTable().getEdgeTable()
+					.get(edgeObject);
 			for (Map.Entry<Integer, List<Integer[]>> entry : allTracePos.entrySet()) {
 				int trace = entry.getKey();
 				List<Integer[]> listEdgePos = entry.getValue();
@@ -136,45 +222,5 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 				}
 			}
 		}
-		newGdpmLog.setActivityHashTable(activityHashTable);
-
-		return new IvMObjectValues().//
-				s(GoalDrivenObject.low_level_log_skeleton, newGdpmLog);
-
 	}
-
-	private void addEdgeToEdgeHashTable(GDPMLogSkeleton gdpmLogSkeleton, EdgeObject edgeObject,
-			Map<EdgeObject, Map<Integer, List<Integer[]>>> mapEdgePos, String source, String target) {
-		Map<Integer, List<Integer[]>> allPos = mapEdgePos.get(edgeObject);
-		String node1 = edgeObject.getNode1();
-		String node2 = edgeObject.getNode2();
-		if (node1.equals(source)) {
-			if (!node1.equals("begin")) {
-				for (Integer i : allPos.keySet()) {
-					List<Integer[]> posInTrace = mapEdgePos.get(edgeObject).get(i);
-					for (Integer[] pos : posInTrace) {
-						EdgeObject newEdgeObject = new EdgeObject("begin", node1);
-						gdpmLogSkeleton.getEdgeHashTable().addEdge(newEdgeObject, i, -1, pos[0]);
-					}
-
-				}
-			}
-
-		}
-		if (node2.equals(target)) {
-			if (!node2.equals("end")) {
-				for (Integer i : allPos.keySet()) {
-					List<Integer[]> posInTrace = mapEdgePos.get(edgeObject).get(i);
-					for (Integer[] pos : posInTrace) {
-						EdgeObject newEdgeObject = new EdgeObject(node2, "end");
-						gdpmLogSkeleton.getEdgeHashTable().addEdge(newEdgeObject, i, pos[1], -2);
-					}
-
-				}
-			}
-
-		}
-		gdpmLogSkeleton.getEdgeHashTable().addEdge(edgeObject, allPos);
-	}
-
 }

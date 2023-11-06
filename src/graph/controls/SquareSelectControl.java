@@ -67,8 +67,10 @@ public class SquareSelectControl extends ControlAdapter {
 		if (rectangle != null) {
 			for (VisualItem item : allVisualItems) {
 				if (isInsideRectangle(item, rectangle)) {
-					nodeTable.set(item.getRow(), GraphConstants.IS_SELECTED, true);
-					item.setFillColor(GraphConstants.SELECTED_NODE_FILL_COLOR);
+					if (item.getBoolean(GraphConstants.IS_DISPLAY)) {
+						nodeTable.set(item.getRow(), GraphConstants.IS_SELECTED, true);
+						item.setFillColor(GraphConstants.SELECTED_NODE_FILL_COLOR);
+					}
 				}
 			}
 			showPopup = true;

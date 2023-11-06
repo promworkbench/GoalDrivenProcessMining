@@ -1,9 +1,11 @@
 package graph;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
@@ -225,13 +227,16 @@ public class GoalDrivenDFGUtils {
 			GoalDrivenDFGUtils.displayCollapseGroup(goalDrivenDFG, displayCollapseGroups);
 		}
 		if (!displayExpandGroups.isEmpty()) {
-
+			GoalDrivenDFGUtils.displayExpandGroup(goalDrivenDFG, displayExpandGroups);
 		}
 		if (displayCollapseGroups.isEmpty() && displayExpandGroups.isEmpty()) {
 			GoalDrivenDFGUtils.displayDefault(goalDrivenDFG);
 		}
 
 		// filter state
+
+		goalDrivenDFG.revalidate();
+		goalDrivenDFG.repaint();
 	}
 
 	/*
@@ -249,7 +254,7 @@ public class GoalDrivenDFGUtils {
 				goalDrivenDFG.displayNode(goalDrivenDFG.getGraph(), node);
 			}
 		}
-
+		// collapse all groups
 		for (GroupSkeleton groupSkeleton : groupSkeletons) {
 			String groupName = groupSkeleton.getGroupName();
 			List<String> acts = groupSkeleton.getListAct();
@@ -291,7 +296,9 @@ public class GoalDrivenDFGUtils {
 			// calculate new frequency for node
 			int newFreq = 0;
 			for (String act : acts) {
-				newFreq += goalDrivenDFG.getFrequencyNode().get(act);
+				if (goalDrivenDFG.getFrequencyNode().containsKey(act)) {
+					newFreq += goalDrivenDFG.getFrequencyNode().get(act);
+				}
 			}
 			for (GroupSkeleton group : groups) {
 				if (newFrequencyNode.containsKey(group.getGroupName())) {
@@ -299,9 +306,18 @@ public class GoalDrivenDFGUtils {
 				}
 			}
 			newFrequencyNode.put(groupSkeleton.getGroupName(), newFreq);
+			// set label of the group name to name + freq 
+			Node groupNode = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), groupName);
+			if (groupNode != null) {
+				groupNode.setString(GraphConstants.DISPLAY_LABEL_FIELD, groupName + "\n" + newFreq);
+			}
+
 		}
 		goalDrivenDFG.setCurrentFrequencyEdge(newFrequencyEdge);
-		newFrequencyNode.putAll(goalDrivenDFG.getCurrentFrequencyNode());
+		for (Map.Entry<String, Integer> entry : goalDrivenDFG.getCurrentFrequencyNode().entrySet()) {
+			newFrequencyNode.put(entry.getKey(), entry.getValue());
+		}
+
 		goalDrivenDFG.setCurrentFrequencyNode(newFrequencyNode);
 
 		// collapse group
@@ -310,6 +326,54 @@ public class GoalDrivenDFGUtils {
 		}
 		// run the action
 		GoalDrivenDFGUtils.display(goalDrivenDFG);
+	}
+
+	/* Hide all group nodes -> display children act nodes and edges */
+	public static void displayExpandGroup(GoalDrivenDFG goalDrivenDFG, List<GroupSkeleton> groupSkeletons) {
+
+		List<String> allDisplayActs = new ArrayList<String>();
+		for (GroupSkeleton groupSkeleton : groupSkeletons) {
+			allDisplayActs.addAll(groupSkeleton.getListAct());
+		}
+
+		// default display all act
+		for (String act : goalDrivenDFG.getFrequencyNode().keySet()) {
+			if (allDisplayActs.contains(act)) {
+				Node node = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
+				if (node != null) {
+					goalDrivenDFG.displayNode(goalDrivenDFG.getGraph(), node);
+				}
+			}
+		}
+		// hide all group nodes + display collapse children group nodes
+		for (GroupSkeleton groupSkeleton : groupSkeletons) {
+			String groupName = groupSkeleton.getGroupName();
+			List<GroupSkeleton> groups = groupSkeleton.getListGroup();
+
+			// hide group node
+			Node nodeToHide = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), groupName);
+			if (nodeToHide != null) {
+				goalDrivenDFG.hideNode(goalDrivenDFG.getGraph(), nodeToHide);
+			}
+			// display collapse or expand children group
+			for (GroupSkeleton childGroupSkeleton : groups) {
+				for (GroupState groupState : GoalDrivenDFGUtils.groupStates) {
+					if (groupState.getGroupSkeleton().equals(childGroupSkeleton)) {
+						List<GroupSkeleton> cGroup = new ArrayList<>();
+						cGroup.add(childGroupSkeleton);
+						if (groupState.getIsCollapse()) {
+							// set group state to collapse
+							GoalDrivenDFGUtils.displayCollapseGroup(goalDrivenDFG, cGroup);
+						} else {
+							// set group state to expand
+							GoalDrivenDFGUtils.displayExpandGroup(goalDrivenDFG, cGroup);
+						}
+					}
+				}
+
+			}
+
+		}
 	}
 
 	/* Display all plain act nodes */
@@ -329,6 +393,7 @@ public class GoalDrivenDFGUtils {
 
 	/* Run all the action so that the dfg can be displayed */
 	public static void display(GoalDrivenDFG goalDrivenDFG) {
+
 		// run the action
 		goalDrivenDFG.runCustomColorNodeFillAction();
 		goalDrivenDFG.runCustomEdgeStrokeWidthAction();
@@ -339,6 +404,7 @@ public class GoalDrivenDFGUtils {
 		goalDrivenDFG.setDefaultArrowFillColor();
 		goalDrivenDFG.setDefaultEdgeStrokeColor();
 		goalDrivenDFG.setDefaultNodeSize();
+
 	}
 	/*----------------------------------------------------------------*/
 
@@ -354,11 +420,54 @@ public class GoalDrivenDFGUtils {
 		Node node2 = null;
 		node2 = goalDrivenDFG.getGraph().addNode();
 		goalDrivenDFG.configGroupNode(node2, groupSkeleton.getGroupName());
+
+		/*-------------*/
+		List<Double> listX = new ArrayList<Double>();
+		List<Double> listY = new ArrayList<Double>();
+		double totalX = 0;
+		double totalY = 0;
+		int numChild = 0;
+		for (String act : groupSkeleton.getListAct()) {
+			Node node = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
+			listX.add(goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getX());
+			listY.add(goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getY());
+			totalX += goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getX();
+			totalY += goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getY();
+			numChild++;
+		}
+		for (GroupSkeleton child : groupSkeleton.getListGroup()) {
+			Node node = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), child.getGroupName());
+			listX.add(goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getX());
+			listY.add(goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getY());
+			totalX += goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getX();
+			totalY += goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getY();
+			numChild++;
+		}
+		// new group node is center of its children
+		double groupX = totalX / numChild;
+		double groupY = totalY / numChild;
+		// init location of group node 
+		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node2).setX(groupX);
+		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node2).setY(groupY);
+		// init location of invi group node
+		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.INVI_NODE_GROUP, node1).setX(groupX);
+		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.INVI_NODE_GROUP, node1).setY(groupY);
+		// calculate the width of group node
+		double minX = Collections.min(listX);
+		double maxX = Collections.max(listX);
+		double minY = Collections.min(listY);
+		double maxY = Collections.max(listY);
+		double width = maxX-minX;
+		double height = maxY-minY;
+		double[] dimension = new double[] {width, height};
+		goalDrivenDFG.getMapGroupNodeDimension().put(groupSkeleton.getGroupName(), dimension);
+		/*-------------*/
 		HashMap<Graph, Node> res = new HashMap<Graph, Node>();
+		double[] groupPos = new double[] { groupX, groupY };
 		res.put(goalDrivenDFG.getGraph(), node2);
 		res.put(goalDrivenDFG.getInviGraph(), node1);
-
 		goalDrivenDFG.getMapGroupNode().put(groupSkeleton.getGroupName(), res);
+		goalDrivenDFG.getMapGroupNodePos().put(node2, groupPos);
 	}
 
 	public static void collapseGroup(GoalDrivenDFG goalDrivenDFG, GroupSkeleton groupSkeleton) {
@@ -366,8 +475,10 @@ public class GoalDrivenDFGUtils {
 		List<GroupSkeleton> allGroups = groupSkeleton.getListGroup();
 		// display the group node 
 		HashMap<Graph, Node> nodes = goalDrivenDFG.getMapGroupNode().get(groupSkeleton.getGroupName());
-		goalDrivenDFG.displayNode(goalDrivenDFG.getGraph(), nodes.get(goalDrivenDFG.getGraph()));
-		goalDrivenDFG.displayNode(goalDrivenDFG.getInviGraph(), nodes.get(goalDrivenDFG.getInviGraph()));
+		Node groupNode = nodes.get(goalDrivenDFG.getGraph());
+		Node inviNode = nodes.get(goalDrivenDFG.getInviGraph());
+		goalDrivenDFG.displayNode(goalDrivenDFG.getGraph(), groupNode);
+		goalDrivenDFG.displayNode(goalDrivenDFG.getInviGraph(), inviNode);
 		// hide the children act node
 		for (String act : allActs) {
 			Node nodeToHide = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
@@ -380,19 +491,28 @@ public class GoalDrivenDFGUtils {
 		for (GroupSkeleton groupSkeleton2 : allGroups) {
 			GoalDrivenDFGUtils.hideGroup(goalDrivenDFG, groupSkeleton2);
 		}
+		// relocate the group and invi node to correct position
+		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, groupNode)
+				.setX(goalDrivenDFG.getMapGroupNodePos().get(groupNode)[0]);
+		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, groupNode)
+				.setY(goalDrivenDFG.getMapGroupNodePos().get(groupNode)[1]);
+		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.INVI_NODE_GROUP, inviNode)
+				.setX(goalDrivenDFG.getMapGroupNodePos().get(groupNode)[0]);
+		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.INVI_NODE_GROUP, inviNode)
+				.setY(goalDrivenDFG.getMapGroupNodePos().get(groupNode)[1]);
 	}
 
-	public static void displayAndExpandGroup(GoalDrivenDFG goalDrivenDFG, GroupSkeleton groupSkeleton) {
+	public static void expandGroup(GoalDrivenDFG goalDrivenDFG, GroupSkeleton groupSkeleton) {
 		// hide the group node and its invi square
 		HashMap<Graph, Node> nodes = goalDrivenDFG.getMapGroupNode().get(groupSkeleton.getGroupName());
 		// hide group node in graph
 		goalDrivenDFG.hideNode(goalDrivenDFG.getGraph(), nodes.get(goalDrivenDFG.getGraph()));
-		// hide invi group node in inviGraph
-		goalDrivenDFG.hideNode(goalDrivenDFG.getInviGraph(), nodes.get(goalDrivenDFG.getInviGraph()));
 		// display the children act node
 		for (String act : groupSkeleton.getListAct()) {
-			goalDrivenDFG.displayNode(goalDrivenDFG.getGraph(),
-					goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act));
+			Node nodeToDisplay = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
+			if (nodeToDisplay != null) {
+				goalDrivenDFG.displayNode(goalDrivenDFG.getGraph(), nodeToDisplay);
+			}
 		}
 		// display the children group node and collapse themselves
 		for (GroupSkeleton group : groupSkeleton.getListGroup()) {

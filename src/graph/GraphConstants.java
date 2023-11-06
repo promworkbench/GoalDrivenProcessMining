@@ -26,6 +26,7 @@ public class GraphConstants {
 	
 	public static final String NODE_GROUP = "graph.nodes";
 	public static final String EDGE_GROUP = "graph.edges";
+	public static final String INVI_NODE_GROUP = "inviGraph.nodes";
 
 	//color
 	public static final Color[] CATEGORY_COLOR = { new Color(229,83,75), new Color(85, 22, 57), new Color(16, 52, 23),
