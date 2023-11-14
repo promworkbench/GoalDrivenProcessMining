@@ -13,7 +13,7 @@ import prefuse.visual.VisualItem;
 public class CustomEdgeStrokeWidthAction extends StrokeAction {
 	private HashMap<EdgeObject, Float> mapEdgeStrokeWidth;
 
-	public CustomEdgeStrokeWidthAction(String group, HashMap<EdgeObject, Float> mapEdgeStrokeWidth) {
+	public CustomEdgeStrokeWidthAction(String group,  HashMap<EdgeObject, Float> mapEdgeStrokeWidth) {
 		super(group);
 		this.mapEdgeStrokeWidth = mapEdgeStrokeWidth;
 	}

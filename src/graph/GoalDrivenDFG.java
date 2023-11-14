@@ -109,7 +109,7 @@ public class GoalDrivenDFG extends Display {
 		if (this.log != null && !this.log.getActivityHashTable().getActivityTable().isEmpty()) {
 			this.calculateFrequencyNode();
 			this.calculateFrequencyEdge();
-			
+
 			this.makeGraph();
 			m_vis.addGraph("graph", this.graph);
 
@@ -210,7 +210,6 @@ public class GoalDrivenDFG extends Display {
 		this.addActToTable();
 
 	}
-
 
 	private void configDefaultGraph() {
 
@@ -437,13 +436,13 @@ public class GoalDrivenDFG extends Display {
 	public void setDefaultNodeStrokeColor() {
 		this.nodeStrokeColorAction = new ColorAction("graph.nodes", VisualItem.STROKECOLOR);
 		this.nodeStrokeColorAction.setDefaultColor(GraphConstants.NODE_STROKE_COLOR);
-		
+
 		ColorAction invi = new ColorAction("inviGraph.nodes", VisualItem.STROKECOLOR);
 		invi.setDefaultColor(GraphConstants.NODE_STROKE_COLOR);
-		
+
 		m_vis.putAction(GraphConstants.NODE_STROKE_COLOR_ACTION, this.nodeStrokeColorAction);
 		m_vis.putAction("invi", invi);
-		
+
 		m_vis.run(GraphConstants.NODE_STROKE_COLOR_ACTION);
 		m_vis.run("invi");
 
@@ -478,7 +477,6 @@ public class GoalDrivenDFG extends Display {
 		m_vis.putAction("test", test);
 		m_vis.run("test");
 	}
-
 
 	public void runCustomColorNodeFillAction() {
 		// Find the minimum and maximum values in the data array
@@ -516,8 +514,8 @@ public class GoalDrivenDFG extends Display {
 				mapActColor.put(act, new Color(red, green, blue));
 			}
 		}
-		//		Predicate displayPredicaate = (Predicate) ExpressionParser.parse("isDisplay = true");
-		CustomColorNodeFillAction customFillByLabel = new CustomColorNodeFillAction(GraphConstants.NODE_GROUP,
+		Predicate displayPredicate = (Predicate) ExpressionParser.parse("isDisplay = true");
+		CustomColorNodeFillAction customFillByLabel = new CustomColorNodeFillAction(GraphConstants.NODE_GROUP,displayPredicate,
 				mapActColor);
 		m_vis.putAction(GraphConstants.NODE_FILL_COLOR_ACTION, customFillByLabel);
 		m_vis.run(GraphConstants.NODE_FILL_COLOR_ACTION);
@@ -607,7 +605,7 @@ public class GoalDrivenDFG extends Display {
 		// make it true in the table
 		graph.getNodeTable().setBoolean(node.getRow(), GraphConstants.IS_DISPLAY, true);
 		graph.getNodeTable().setBoolean(node.getRow(), GraphConstants.IS_SELECTED, false);
-		
+
 		// make the regarding edges shown
 		TableIterator edges = edgeTable.iterator();
 		List<Integer> affectedRows = new ArrayList<Integer>();
@@ -728,7 +726,7 @@ public class GoalDrivenDFG extends Display {
 
 	public void configGroupNode(Node node, String label) {
 		node.setString(GraphConstants.LABEL_FIELD, label);
-		node.setString(GraphConstants.DISPLAY_LABEL_FIELD, label);
+		node.setString(GraphConstants.DISPLAY_LABEL_FIELD, "Group: " + label);
 		node.setBoolean(GraphConstants.BEGIN_FIELD, false);
 		node.setBoolean(GraphConstants.END_FIELD, false);
 		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.GROUP_NODE);

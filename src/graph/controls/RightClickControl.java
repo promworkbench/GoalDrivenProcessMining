@@ -30,7 +30,7 @@ public class RightClickControl extends ControlAdapter {
 					&& item.getTable().get(item.getRow(), GraphConstants.NODE_TYPE_FIELD).equals(NodeType.ACT_NODE)) {
 
 				PopupPanel.showGroupPopupPanel(this.display, e.getPoint());
-			} else if (item.canGetBoolean(GraphConstants.IS_INVISIBLE)) {
+			} else if (item.get(GraphConstants.NODE_TYPE_FIELD) == NodeType.GROUP_NODE) {
 				GroupSkeleton selectedGroup = this.display.getLog().getGroupSkeletonByGroupName(
 						item.getTable().getString(item.getRow(), GraphConstants.LABEL_FIELD));
 				Boolean isCollapsed = true;
