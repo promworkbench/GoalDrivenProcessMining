@@ -9,6 +9,7 @@ import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
+import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
@@ -23,6 +24,7 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalDrivenConfiguration> {
 
 	public static EdgeHashTable originalEdgeHashTable;
+	public static ActivityHashTable originalActivityHashTable;
 	
 	@Override
 	public String getName() {
@@ -79,6 +81,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 
 		GDPMLogSkeleton gdpmLogSkeleton = new GDPMLogSkeleton(log);
 		originalEdgeHashTable = gdpmLogSkeleton.getEdgeHashTable();
+		originalActivityHashTable = gdpmLogSkeleton.getActivityHashTable();
 
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.full_xlog, log)
@@ -110,7 +113,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 				maxFreq = mapActFreq.get(key);
 			}
 		}
-		int threshold = (int) (0.3 * maxFreq);
+		int threshold = (int) (0.5 * maxFreq);
 		List<String> l = new ArrayList<>();
 		List<String> allL = new ArrayList<>();
 		for (String key : mapActFreq.keySet()) {

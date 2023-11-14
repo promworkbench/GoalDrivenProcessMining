@@ -61,7 +61,6 @@ public class GoalDrivenDFG extends Display {
 	private int beginNodeRow;
 	private int endNodeRow;
 	private Graph graph;
-	private Graph inviGraph;
 	private Boolean isHighLevel;
 	// control 
 	private SelectMultipleNodesControl selectMultipleNodesControl;
@@ -86,9 +85,7 @@ public class GoalDrivenDFG extends Display {
 	private HashMap<EdgeObject, Integer> frequencyEdge = new HashMap<EdgeObject, Integer>();
 	private HashMap<EdgeObject, Integer> currentFrequencyEdge = new HashMap<EdgeObject, Integer>();
 	// group
-	private HashMap<String, HashMap<Graph, Node>> mapGroupNode;
-	private HashMap<Node, double[]> mapGroupNodePos;
-	private HashMap<String, double[]> mapGroupNodeDimension;
+	private HashMap<String, Node> mapGroupNode;
 
 	public GoalDrivenDFG(GDPMLogSkeleton gdpmLogSkeleton, Boolean isHighLevel) {
 		super(new Visualization());
@@ -102,9 +99,7 @@ public class GoalDrivenDFG extends Display {
 		this.textColorAction = null;
 
 		// group
-		this.mapGroupNode = new HashMap<>();
-		this.mapGroupNodePos = new HashMap<>();
-		this.mapGroupNodeDimension = new HashMap<>();
+		this.mapGroupNode = new HashMap<String, Node>();
 
 		// repaint
 		ActionList repaint = new ActionList();
@@ -114,11 +109,9 @@ public class GoalDrivenDFG extends Display {
 		if (this.log != null && !this.log.getActivityHashTable().getActivityTable().isEmpty()) {
 			this.calculateFrequencyNode();
 			this.calculateFrequencyEdge();
-
-			this.makeInviGraph();
+			
 			this.makeGraph();
 			m_vis.addGraph("graph", this.graph);
-			m_vis.addGraph("inviGraph", inviGraph);
 
 			// control
 			this.setDefaultControl();
@@ -218,20 +211,6 @@ public class GoalDrivenDFG extends Display {
 
 	}
 
-	private void makeInviGraph() {
-		// Create tables for node and edge data, and configure their columns.
-		// init node table
-		Table nodeTable = new Table(0, 1);
-		nodeTable.addColumn(GraphConstants.LABEL_FIELD, String.class);
-		nodeTable.addColumn(GraphConstants.IS_INVISIBLE, boolean.class);
-		nodeTable.addColumn(GraphConstants.BEGIN_FIELD, boolean.class);
-		nodeTable.addColumn(GraphConstants.END_FIELD, boolean.class);
-		nodeTable.addColumn(GraphConstants.IS_DISPLAY, boolean.class);
-		nodeTable.addColumn(GraphConstants.IS_SELECTED, boolean.class);
-		nodeTable.addColumn(GraphConstants.IS_INVISIBLE_COLLAPSED, boolean.class);
-		nodeTable.addColumn(GraphConstants.NODE_TYPE_FIELD, NodeType.class);
-		this.inviGraph = new Graph(nodeTable, true);
-	}
 
 	private void configDefaultGraph() {
 
@@ -684,7 +663,6 @@ public class GoalDrivenDFG extends Display {
 
 	public void removeNode(String label) {
 		Table nodeTable = this.graph.getNodeTable();
-		Table inviNodeTable = this.inviGraph.getNodeTable();
 		// get the remove node 
 		Node nodeToRemove = null;
 		TableIterator nodes = nodeTable.iterator();
@@ -700,20 +678,6 @@ public class GoalDrivenDFG extends Display {
 		}
 		// remove node in graph
 		this.removeNode(this.graph, nodeToRemove);
-		// get the invi node
-		nodes = inviNodeTable.iterator();
-		while (nodes.hasNext()) {
-			int row = nodes.nextInt();
-			if (inviNodeTable.isValidRow(row)) {
-				Node node = this.inviGraph.getNode(row);
-				if (node.getString(GraphConstants.LABEL_FIELD).equals(label)) {
-					nodeToRemove = node;
-					break;
-				}
-			}
-		}
-		// remove invi node
-		this.removeNode(this.inviGraph, nodeToRemove);
 	}
 
 	public Node getNodeByLabelInGraph(Graph g, String label) {
@@ -875,36 +839,12 @@ public class GoalDrivenDFG extends Display {
 		return endNodeRow;
 	}
 
-	public Graph getInviGraph() {
-		return inviGraph;
-	}
-
-	public void setInviGraph(Graph inviGraph) {
-		this.inviGraph = inviGraph;
-	}
-
-	public HashMap<String, HashMap<Graph, Node>> getMapGroupNode() {
+	public HashMap<String, Node> getMapGroupNode() {
 		return mapGroupNode;
 	}
 
-	public void setMapGroupNode(HashMap<String, HashMap<Graph, Node>> mapGroupNode) {
+	public void setMapGroupNode(HashMap<String, Node> mapGroupNode) {
 		this.mapGroupNode = mapGroupNode;
-	}
-	
-	public HashMap<Node, double[]> getMapGroupNodePos() {
-		return mapGroupNodePos;
-	}
-
-	public void setMapGroupNodePos(HashMap<Node, double[]> mapGroupNodePos) {
-		this.mapGroupNodePos = mapGroupNodePos;
-	}
-
-	public HashMap<String, double[]> getMapGroupNodeDimension() {
-		return mapGroupNodeDimension;
-	}
-
-	public void setMapGroupNodeDimension(HashMap<String, double[]> mapGroupNodeDimension) {
-		this.mapGroupNodeDimension = mapGroupNodeDimension;
 	}
 
 	public HashMap<String, Integer> getCurrentFrequencyNode() {

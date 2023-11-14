@@ -38,7 +38,8 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 			throws Exception {
 		System.out.println("--- HIGH_MakeHighLevelLog");
 		//		Config config = inputs.get(GoalDrivenObject.config);
-		GDPMLogSkeleton gdpmLog = inputs.get(GoalDrivenObject.full_log_skeleton);
+//		GDPMLogSkeleton gdpmLog = inputs.get(GoalDrivenObject.full_log_skeleton);
+		GDPMLogSkeleton gdpmLog = new GDPMLogSkeleton();
 		// for config 
 		Config updatedConfig = CONFIG_Update.currentConfig == null ? new Config() : CONFIG_Update.currentConfig;
 		UpdateConfig update = inputs.get(GoalDrivenObject.update_config_object);
@@ -47,14 +48,15 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 		// Select/Unselect
 		String[] selectedActs = selectedActMap.get("High");
 		String[] unselectedActs = selectedActMap.get("Low");
-		gdpmLog = LogSkeletonUtils.addActivitiesInLog(gdpmLog, selectedActs);
-		gdpmLog = LogSkeletonUtils.removeActivitiesInLog(gdpmLog, unselectedActs);
+//		gdpmLog = LogSkeletonUtils.addActivitiesInLog(gdpmLog, selectedActs);
+//		gdpmLog = LogSkeletonUtils.removeActivitiesInLog(gdpmLog, unselectedActs);
 		// for config 
 		updatedConfig.setSelectedActs(selectedActMap.get("High"));
 		updatedConfig.setUnselectedActs(selectedActMap.get("Low"));
 		gdpmLog.setConfig(updatedConfig);
-		LogSkeletonUtils.setupEdgeHashTableForHighLevelAfterChangingDisplayedActs(gdpmLog,
+		LogSkeletonUtils.setupEdgeHashTableForHighLevelAfterChangingDisplayedActs(gdpmLog, updatedConfig,
 				Cl01GatherAttributes.originalEdgeHashTable);
+		gdpmLog.setActivityHashTable(Cl01GatherAttributes.originalActivityHashTable);
 		CONFIG_Update.currentConfig = updatedConfig;
 
 		return new IvMObjectValues().//

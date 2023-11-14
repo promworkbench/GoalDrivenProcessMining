@@ -3,20 +3,13 @@ package graph.controls;
 import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.SwingUtilities;
 
-import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
-import org.processmining.goaldrivenprocessmining.objectHelper.GroupState;
-
 import graph.GoalDrivenDFG;
-import graph.GoalDrivenDFGUtils;
 import graph.GraphConstants;
 import prefuse.Display;
 import prefuse.controls.ControlAdapter;
-import prefuse.data.Node;
 import prefuse.data.Table;
 import prefuse.data.event.EventConstants;
 import prefuse.data.event.TableListener;
@@ -124,13 +117,6 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 		double dy = temp.getY() - down.getY();
 		// no matter what drag the item
 		this.updatePosNode(item, dx, dy);
-		// if is invisible node 
-		if (item.canGetBoolean(GraphConstants.IS_INVISIBLE)) {
-			// get the group corresponding to this invisible node
-			String groupName = item.getString(GraphConstants.LABEL_FIELD);
-			this.updatePosGroup(groupName, dx, dy);
-		}
-
 		if (repaint)
 			item.getVisualization().repaint();
 
@@ -140,46 +126,6 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 
 	}
 
-	private void updatePosGroup(String groupName, double dx, double dy) {
-		GroupState groupState = null;
-		for (GroupState gState : GoalDrivenDFGUtils.groupStates) {
-			if (gState.getGroupSkeleton().getGroupName().equals(groupName)) {
-				groupState = gState;
-				break;
-			}
-		}
-		GroupSkeleton groupSkeleton = groupState.getGroupSkeleton();
-		// move the group node
-		Node groupNode = this.goalDrivenDFG.getMapGroupNode().get(groupName).get(goalDrivenDFG.getGraph());
-		VisualItem groupItem = this.goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
-				groupNode);
-		this.updatePosNode(groupItem, dx, dy);
-		// update the pos of group node
-		double curX = groupItem.getX();
-		double curY = groupItem.getY();
-		double[] curPos = new double[] { curX, curY };
-		goalDrivenDFG.getMapGroupNodePos().replace(groupNode, curPos);
-		// move all the children act nodes
-		List<Node> actNodes = new ArrayList<>();
-		for (String act : groupSkeleton.getListAct()) {
-			if (this.goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act) != null) {
-				actNodes.add(this.goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act));
-			}
-		}
-		for (Node actNode : actNodes) {
-			VisualItem vItem = this.goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, actNode);
-			this.updatePosNode(vItem, dx, dy);
-		}
-		// move the invi node of the child group 
-		for (GroupSkeleton cGroupSkeleton : groupSkeleton.getListGroup()) {
-			Node inviNode = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getInviGraph(), cGroupSkeleton.getGroupName());
-			if (inviNode != null) {
-				VisualItem vItem = this.goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.INVI_NODE_GROUP, inviNode);
-				this.updatePosNode(vItem, dx, dy);
-			}
-			this.updatePosGroup(cGroupSkeleton.getGroupName(), dx, dy);
-		}
-	}
 
 	private void updatePosNode(VisualItem item, double dx, double dy) {
 		double x = item.getX();

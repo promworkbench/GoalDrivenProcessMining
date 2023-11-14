@@ -175,9 +175,8 @@ public class LogSkeletonUtils {
 		}
 	}
 
-	public static void setupEdgeHashTableForHighLevelAfterChangingDisplayedActs(GDPMLogSkeleton gdpmLogSkeleton,
+	public static void setupEdgeHashTableForHighLevelAfterChangingDisplayedActs(GDPMLogSkeleton gdpmLogSkeleton, Config config,
 			EdgeHashTable originalEdgeHashTable) {
-		Config config = gdpmLogSkeleton.getConfig();
 		EdgeHashTable newEdgeHashTable = new EdgeHashTable();
 		List<String> unselectedActs = new ArrayList<String>();
 		EdgeHashTable affectedEdges = new EdgeHashTable();
@@ -289,6 +288,7 @@ public class LogSkeletonUtils {
 				mapEdgeChildEdge.remove(edge);
 			}
 		}
+		
 		for (EdgeObject edge : affectedEdges.getEdgeTable().keySet()) {
 			if (newEdgeHashTable.getEdgeTable().keySet().contains(edge)) {
 				edge.setIsIndirected(true);

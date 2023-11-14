@@ -1,7 +1,6 @@
 package graph;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -49,47 +48,6 @@ public class GoalDrivenDFGUtils {
 			}
 		}
 		return res;
-	}
-
-	public static double[] repositionNodes(List<VisualItem> nodes, Visualization vis, double x, double y) {
-		int numNodes = nodes.size();
-		int numCol = (int) Math.sqrt(numNodes);
-		int numRow = numNodes % numCol == 0 ? numNodes / numCol : numNodes / numCol + 1;
-		int vItemIndex = 0;
-		double curX = x;
-		double curY = y;
-		int widthMargin = 160;
-		int heightMargin = 160;
-		outer: for (int row = 0; row < numRow; row++) {
-			for (int col = 0; col < numCol; col++) {
-				if (vItemIndex < numNodes) {
-					VisualItem vItem = nodes.get(vItemIndex);
-					vItem.setX(curX);
-					vItem.setY(curY);
-					if (row % 2 == 0) {
-						// go to right
-						if (col + 1 < numCol) {
-							curX += widthMargin;
-						}
-					} else {
-						// go to left
-						if (col + 1 < numCol) {
-							curX -= widthMargin;
-						}
-					}
-					vItemIndex++;
-				} else {
-					break outer;
-				}
-			}
-			curY += heightMargin;
-		}
-
-		double midX = x + (numCol / 2) * 100;
-		double midY = y + (numRow / 2) * 100;
-		double[] midNodePos = new double[] { midX, midY };
-		return midNodePos;
-
 	}
 
 	/*----------------------------------------------------------------*/
@@ -413,72 +371,54 @@ public class GoalDrivenDFGUtils {
 
 	public static void addGroupNodes(GoalDrivenDFG goalDrivenDFG, GroupSkeleton groupSkeleton) {
 		// add node for dashed box
-		Node node1 = null;
-		node1 = goalDrivenDFG.getInviGraph().addNode();
-		goalDrivenDFG.configInvisibleNode(node1, groupSkeleton.getGroupName());
+		//		Node node1 = null;
+		//		node1 = goalDrivenDFG.getInviGraph().addNode();
+		//		goalDrivenDFG.configInvisibleNode(node1, groupSkeleton.getGroupName());
 		// add node for group
 		Node node2 = null;
 		node2 = goalDrivenDFG.getGraph().addNode();
 		goalDrivenDFG.configGroupNode(node2, groupSkeleton.getGroupName());
 
 		/*-------------*/
-		List<Double> listX = new ArrayList<Double>();
-		List<Double> listY = new ArrayList<Double>();
+		// find the children nodes
+		List<Node> childrenNodes = new ArrayList<Node>();
+		for (String act : groupSkeleton.getListAct()) {
+			Node n = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
+			if (n != null) {
+				childrenNodes.add(n);
+			}
+		}
+		for (GroupSkeleton group : groupSkeleton.getListGroup()) {
+			Node n = goalDrivenDFG.getMapGroupNode().get(group.getGroupName());
+			if (n != null) {
+				childrenNodes.add(n);
+			}
+		}
+		// reposition the group node to be in the middle of the children nodes
+		GoalDrivenDFGUtils.repositionGroupNodes(goalDrivenDFG, node2, childrenNodes);
+		/*-------------*/
+		goalDrivenDFG.getMapGroupNode().put(groupSkeleton.getGroupName(), node2);
+	}
+
+	public static void repositionGroupNodes(GoalDrivenDFG goalDrivenDFG, Node groupNode, List<Node> childrenNodes) {
 		double totalX = 0;
 		double totalY = 0;
-		int numChild = 0;
-		for (String act : groupSkeleton.getListAct()) {
-			Node node = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
-			listX.add(goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getX());
-			listY.add(goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getY());
-			totalX += goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getX();
-			totalY += goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getY();
-			numChild++;
+		for (Node n : childrenNodes) {
+			totalX += goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, n).getX();
+			totalY += goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, n).getY();
 		}
-		for (GroupSkeleton child : groupSkeleton.getListGroup()) {
-			Node node = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), child.getGroupName());
-			listX.add(goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getX());
-			listY.add(goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getY());
-			totalX += goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getX();
-			totalY += goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node).getY();
-			numChild++;
-		}
-		// new group node is center of its children
-		double groupX = totalX / numChild;
-		double groupY = totalY / numChild;
-		// init location of group node 
-		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node2).setX(groupX);
-		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node2).setY(groupY);
-		// init location of invi group node
-		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.INVI_NODE_GROUP, node1).setX(groupX);
-		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.INVI_NODE_GROUP, node1).setY(groupY);
-		// calculate the width of group node
-		double minX = Collections.min(listX);
-		double maxX = Collections.max(listX);
-		double minY = Collections.min(listY);
-		double maxY = Collections.max(listY);
-		double width = maxX-minX;
-		double height = maxY-minY;
-		double[] dimension = new double[] {width, height};
-		goalDrivenDFG.getMapGroupNodeDimension().put(groupSkeleton.getGroupName(), dimension);
-		/*-------------*/
-		HashMap<Graph, Node> res = new HashMap<Graph, Node>();
-		double[] groupPos = new double[] { groupX, groupY };
-		res.put(goalDrivenDFG.getGraph(), node2);
-		res.put(goalDrivenDFG.getInviGraph(), node1);
-		goalDrivenDFG.getMapGroupNode().put(groupSkeleton.getGroupName(), res);
-		goalDrivenDFG.getMapGroupNodePos().put(node2, groupPos);
+		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, groupNode)
+				.setX(totalX / childrenNodes.size());
+		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, groupNode)
+				.setY(totalY / childrenNodes.size());
 	}
 
 	public static void collapseGroup(GoalDrivenDFG goalDrivenDFG, GroupSkeleton groupSkeleton) {
 		List<String> allActs = groupSkeleton.getListAct();
 		List<GroupSkeleton> allGroups = groupSkeleton.getListGroup();
 		// display the group node 
-		HashMap<Graph, Node> nodes = goalDrivenDFG.getMapGroupNode().get(groupSkeleton.getGroupName());
-		Node groupNode = nodes.get(goalDrivenDFG.getGraph());
-		Node inviNode = nodes.get(goalDrivenDFG.getInviGraph());
+		Node groupNode = goalDrivenDFG.getMapGroupNode().get(groupSkeleton.getGroupName());
 		goalDrivenDFG.displayNode(goalDrivenDFG.getGraph(), groupNode);
-		goalDrivenDFG.displayNode(goalDrivenDFG.getInviGraph(), inviNode);
 		// hide the children act node
 		for (String act : allActs) {
 			Node nodeToHide = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
@@ -491,22 +431,13 @@ public class GoalDrivenDFGUtils {
 		for (GroupSkeleton groupSkeleton2 : allGroups) {
 			GoalDrivenDFGUtils.hideGroup(goalDrivenDFG, groupSkeleton2);
 		}
-		// relocate the group and invi node to correct position
-		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, groupNode)
-				.setX(goalDrivenDFG.getMapGroupNodePos().get(groupNode)[0]);
-		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, groupNode)
-				.setY(goalDrivenDFG.getMapGroupNodePos().get(groupNode)[1]);
-		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.INVI_NODE_GROUP, inviNode)
-				.setX(goalDrivenDFG.getMapGroupNodePos().get(groupNode)[0]);
-		goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.INVI_NODE_GROUP, inviNode)
-				.setY(goalDrivenDFG.getMapGroupNodePos().get(groupNode)[1]);
 	}
 
 	public static void expandGroup(GoalDrivenDFG goalDrivenDFG, GroupSkeleton groupSkeleton) {
 		// hide the group node and its invi square
-		HashMap<Graph, Node> nodes = goalDrivenDFG.getMapGroupNode().get(groupSkeleton.getGroupName());
+		Node groupNode = goalDrivenDFG.getMapGroupNode().get(groupSkeleton.getGroupName());
 		// hide group node in graph
-		goalDrivenDFG.hideNode(goalDrivenDFG.getGraph(), nodes.get(goalDrivenDFG.getGraph()));
+		goalDrivenDFG.hideNode(goalDrivenDFG.getGraph(), groupNode);
 		// display the children act node
 		for (String act : groupSkeleton.getListAct()) {
 			Node nodeToDisplay = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
@@ -522,11 +453,9 @@ public class GoalDrivenDFGUtils {
 
 	public static void hideGroup(GoalDrivenDFG goalDrivenDFG, GroupSkeleton groupSkeleton) {
 		// hide the group node
-		HashMap<Graph, Node> nodes = goalDrivenDFG.getMapGroupNode().get(groupSkeleton.getGroupName());
+		Node groupNode = goalDrivenDFG.getMapGroupNode().get(groupSkeleton.getGroupName());
 		// hide group node in graph
-		goalDrivenDFG.hideNode(goalDrivenDFG.getGraph(), nodes.get(goalDrivenDFG.getGraph()));
-		// hide invi group node in inviGraph
-		goalDrivenDFG.hideNode(goalDrivenDFG.getInviGraph(), nodes.get(goalDrivenDFG.getInviGraph()));
+		goalDrivenDFG.hideNode(goalDrivenDFG.getGraph(), groupNode);
 		// hide all children act nodes
 		for (String act : groupSkeleton.getListAct()) {
 			Node nodeToHide = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
@@ -544,10 +473,9 @@ public class GoalDrivenDFGUtils {
 
 	public static void removeGroup(GoalDrivenDFG goalDrivenDFG, GroupSkeleton groupSkeleton) {
 		// remove all group nodes
-		HashMap<Graph, Node> nodes = goalDrivenDFG.getMapGroupNode().get(groupSkeleton.getGroupName());
-		if (nodes != null) {
-			goalDrivenDFG.removeNode(goalDrivenDFG.getGraph(), nodes.get(goalDrivenDFG.getGraph()));
-			goalDrivenDFG.removeNode(goalDrivenDFG.getInviGraph(), nodes.get(goalDrivenDFG.getInviGraph()));
+		Node groupNode = goalDrivenDFG.getMapGroupNode().get(groupSkeleton.getGroupName());
+		if (groupNode != null) {
+			goalDrivenDFG.removeNode(goalDrivenDFG.getGraph(), groupNode);
 			// display node of the children act 
 			for (String act : groupSkeleton.getListAct()) {
 				Node nodeToHide = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
