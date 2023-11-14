@@ -17,7 +17,6 @@ import prefuse.visual.EdgeItem;
 import prefuse.visual.VisualItem;
 
 public class CustomizedEdgeRenderer extends EdgeRenderer {
-	private float clickBoxSize = 0;
 
 	public CustomizedEdgeRenderer(int edgeTypeCurve, int edgeArrowForward) {
 		super(edgeTypeCurve, edgeArrowForward);
@@ -51,48 +50,22 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 				double x2 = curve.getX2();
 				double y2 = curve.getY2();
 
-				// Compute the midpoint of the curve
-				double midX = curve.getCtrlX1() + (curve.getCtrlX2() - curve.getCtrlX1()) / 2.0;
-				double midY = curve.getCtrlY1() + (curve.getCtrlY2() - curve.getCtrlY1()) / 2.0;
-
-				// Compute the distance between the midpoint and the control points
-				double dx1 = midX - ctrlX1;
-				double dy1 = midY - ctrlY1;
-				double dx2 = midX - ctrlX2;
-				double dy2 = midY - ctrlY2;
-
-				// Compute the distance between the midpoint and the edge points
-				double dx3 = midX - x1;
-				double dy3 = midY - y1;
-				double dx4 = midX - x2;
-				double dy4 = midY - y2;
-
-				// Compute the maximum distance to cover the entire curve
-				double maxDistance = Math.max(Math.max(Math.hypot(dx1, dy1), Math.hypot(dx2, dy2)),
-						Math.max(Math.hypot(dx3, dy3), Math.hypot(dx4, dy4)));
-
-				// Adjust the clickbox size to be a fraction of the maximum distance
-				double clickBoxDistance = clickBoxSize / 2.0;
-				double scaleFactor = clickBoxDistance / maxDistance;
-
-				// Compute the new control points based on the adjusted size
-				double newCtrlX1 = midX + dx1 * scaleFactor;
-				double newCtrlY1 = midY + dy1 * scaleFactor;
-				double newCtrlX2 = midX + dx2 * scaleFactor;
-				double newCtrlY2 = midY + dy2 * scaleFactor;
 				// Create a new shape with the adjusted control points
-				CubicCurve2D adjustedCurve = new CubicCurve2D.Double(x1, y1, newCtrlX1, newCtrlY1, newCtrlX2, newCtrlY2,
+				CubicCurve2D adjustedCurve = new CubicCurve2D.Double(x1, y1, ctrlX1, ctrlY1, ctrlX2, ctrlY2,
 						x2, y2);
-
+				
+				
+				
 				// Create a composite shape with the original shape and the boundary shape
 				Area compositeShape = new Area();
-				BasicStroke boundaryStroke = new BasicStroke(1f);
-				//				Shape boundaryShape = boundaryStroke.createStrokedShape(adjustedCurve);
+				BasicStroke boundaryStroke = new BasicStroke(3f);
 				Shape boundaryShape = boundaryStroke.createStrokedShape(adjustedCurve);
 
-				compositeShape.add(new Area(boundaryShape));
+				compositeShape.add(new Area(adjustedCurve));
+//				compositeShape.add(new Area(adjustedCurve.getBounds()));
 
-				return new Area(boundaryShape);
+//				return compositeShape;
+				return boundaryShape;
 			}
 
 		}

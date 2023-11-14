@@ -1,6 +1,5 @@
 package graph.action;
 
-import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -15,14 +14,10 @@ import prefuse.visual.VisualItem;
 
 public class NodeRenderer extends LabelRenderer {
 
-	private GoalDrivenDFG goalDrivenDFG;
-
 	private int m_baseSize = 20;
 	private Ellipse2D m_ellipse = new Ellipse2D.Double();
 	private Rectangle2D m_rect = new Rectangle2D.Double();
 	private GeneralPath m_path = new GeneralPath();
-	private BasicStroke dashedStroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
-			new float[] { 5 }, 0);
 
 	/** Transform used to scale and position images */
 
@@ -30,7 +25,6 @@ public class NodeRenderer extends LabelRenderer {
 
 	public NodeRenderer(GoalDrivenDFG goalDrivenDFG, String string) {
 		super(string);
-		this.goalDrivenDFG = goalDrivenDFG;
 	}
 
 	public void render(Graphics2D g, VisualItem item) {

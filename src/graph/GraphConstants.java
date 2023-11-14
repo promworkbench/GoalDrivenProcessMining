@@ -6,10 +6,10 @@ import prefuse.util.ColorLib;
 
 public class GraphConstants {
 	// graph att
-	public static final float UPPER_BOUND_EDGE_STROKE_WIDTH = 8f;
-	public static final float LOWER_BOUND_EDGE_STROKE_WIDTH = 1f;
-	public static final int ARROW_HEAD_WIDTH = 25;
-	public static final int ARROW_HEAD_HEIGHT = 12;
+	public static final float UPPER_BOUND_EDGE_STROKE_WIDTH = 12f;
+	public static final float LOWER_BOUND_EDGE_STROKE_WIDTH = 3f;
+	public static final int ARROW_HEAD_WIDTH = 60;
+	public static final int ARROW_HEAD_HEIGHT = 30;
 	//graph field
 	public static final String LABEL_FIELD = "label";
 	public static final String DISPLAY_LABEL_FIELD = "displayLabel";
