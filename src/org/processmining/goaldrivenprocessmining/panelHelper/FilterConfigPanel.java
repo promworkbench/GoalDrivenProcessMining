@@ -4,6 +4,9 @@ import java.awt.FlowLayout;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import com.fluxicon.slickerbox.components.NiceDoubleSlider;
 import com.fluxicon.slickerbox.components.NiceSlider.Orientation;
@@ -13,7 +16,7 @@ import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
 
 public class FilterConfigPanel extends JPanel{
-	private final NiceDoubleSlider activitiesSlider;
+	private final JSlider activitiesSlider;
 	private final NiceDoubleSlider pathsSlider;
 	private final JButton filterCancelButton;
 	private final JButton filterDoneButton;
@@ -23,8 +26,15 @@ public class FilterConfigPanel extends JPanel{
 		setLayout(new TableLayout(filterConfigSize));
 		//activities slider
 		{
-			activitiesSlider = SlickerFactory.instance().createNiceDoubleSlider("Activities", 0, 1.0, 1.0,
-					Orientation.VERTICAL);
+			activitiesSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
+			activitiesSlider.addChangeListener(new ChangeListener() {
+	            @Override
+	            public void stateChanged(ChangeEvent e) {
+	                if (activitiesSlider.getValue() < 50) {
+	                	activitiesSlider.setValue(50);
+	                }
+	            }
+	        });
 			add(activitiesSlider, "0, 0");
 		}
 
@@ -53,11 +63,11 @@ public class FilterConfigPanel extends JPanel{
 	public JButton getFilterDoneButton() {
 		return filterDoneButton;
 	}
-	public NiceDoubleSlider getActivitiesSlider() {
-		return activitiesSlider;
-	}
 	public NiceDoubleSlider getPathsSlider() {
 		return pathsSlider;
+	}
+	public JSlider getActivitiesSlider() {
+		return activitiesSlider;
 	}
 	
 }

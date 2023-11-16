@@ -1,6 +1,7 @@
 package graph.controls;
 
 import java.awt.BasicStroke;
+import java.awt.Font;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
@@ -20,6 +21,7 @@ public class GraphObjectClickControl extends ControlAdapter {
 
 	private DataChain<GoalDrivenConfiguration> chain;
 	private BasicStroke curStroke = new BasicStroke();
+	private Font curFont;
 
 	public GraphObjectClickControl() {
 	}
@@ -31,7 +33,7 @@ public class GraphObjectClickControl extends ControlAdapter {
 	public void itemClicked(VisualItem item, java.awt.event.MouseEvent e) {
 		if (!e.isControlDown() && e.getButton() != MouseEvent.BUTTON3) {
 			if (edgeFilter.getBoolean(item)) {
-				item.setStrokeColor(GraphConstants.CLICK_EDGE_STROKE_COLOR);
+				item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
 				EdgeItem edge = (EdgeItem) item;
 				String sourceNode = edge.getSourceItem().getString(GraphConstants.LABEL_FIELD)
 						.equals(GraphConstants.BEGIN_NODE_NAME)
@@ -65,12 +67,16 @@ public class GraphObjectClickControl extends ControlAdapter {
 
 	public void itemEntered(VisualItem item, java.awt.event.MouseEvent e) {
 		if (edgeFilter.getBoolean(item)) {
-			item.setStrokeColor(GraphConstants.CLICK_EDGE_STROKE_COLOR);
+			item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
 			this.curStroke = item.getStroke();
-			item.setStroke(new BasicStroke(this.curStroke.getLineWidth() + 15));
-			item.setFillColor(GraphConstants.CLICK_EDGE_STROKE_COLOR);
-			item.getVisualization().repaint();
+			this.curFont = item.getFont();
+			item.setStroke(new BasicStroke(this.curStroke.getLineWidth() + 5));
+			item.setFont(new Font(curFont.getFontName(), curFont.getStyle(), this.curFont.getSize() + 10));
+			item.setFillColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
+		} else if (nodeFilter.getBoolean(item)) {
+			item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
 		}
+		item.getVisualization().repaint();
 	}
 
 	public void itemExited(VisualItem item, java.awt.event.MouseEvent e) {
@@ -78,8 +84,12 @@ public class GraphObjectClickControl extends ControlAdapter {
 			item.setStrokeColor(GraphConstants.EDGE_STROKE_COLOR);
 			item.setFillColor(GraphConstants.EDGE_STROKE_COLOR);
 			item.setStroke(this.curStroke);
-			item.getVisualization().repaint();
+			item.setFont(this.curFont);
+			
+		} else if (nodeFilter.getBoolean(item)) {
+			item.setStrokeColor(GraphConstants.NODE_STROKE_COLOR);
 		}
+		item.getVisualization().repaint();
 	}
 
 	public DataChain<GoalDrivenConfiguration> getChain() {

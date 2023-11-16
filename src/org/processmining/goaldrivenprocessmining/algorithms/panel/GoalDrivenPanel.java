@@ -80,7 +80,6 @@ public class GoalDrivenPanel extends JPanel {
 		add(layeredPanel, BorderLayout.CENTER);
 		//controls the margin on the left side of the settings panel
 		sidePanel = new SidePanel();
-		//		sidePanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 
 		//graph panel
 		{

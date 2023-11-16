@@ -440,7 +440,7 @@ public class GoalDrivenDFGUtils {
 		goalDrivenDFG.runCustomEdgeStrokeWidthAction();
 
 		goalDrivenDFG.setDefaultNodeStrokeWidth();
-		goalDrivenDFG.setDefaultTextColorAndSize();
+		goalDrivenDFG.setDefaultTextColorSizeAndFont();
 		goalDrivenDFG.setDefaultNodeStrokeColor();
 		goalDrivenDFG.setDefaultArrowFillColor();
 		goalDrivenDFG.setDefaultEdgeStrokeColor();

@@ -6,10 +6,8 @@ import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl01GatherAttributes;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighLevelLog;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_UpdateCategoryHighLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_MakeLowLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_MakeLowLevelLog;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_UpdateCategoryLowLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChain;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainImplNonBlocking;
@@ -42,10 +40,8 @@ public class GoalDrivenConfigurationDefault extends GoalDrivenConfigurationAbstr
 		chain.register(new Cl01GatherAttributes());
 		chain.register(new HIGH_MakeHighLevelLog<GoalDrivenConfiguration>());
 		chain.register(new HIGH_MakeHighLevelDFG<GoalDrivenConfiguration>());
-		chain.register(new HIGH_UpdateCategoryHighLevelDFG<GoalDrivenConfiguration>());
 		chain.register(new LOW_MakeLowLevelLog<GoalDrivenConfiguration>());
 		chain.register(new LOW_MakeLowLevelDFG<GoalDrivenConfiguration>());
-		chain.register(new LOW_UpdateCategoryLowLevelDFG<GoalDrivenConfiguration>());
 		return chain;
 	}
 

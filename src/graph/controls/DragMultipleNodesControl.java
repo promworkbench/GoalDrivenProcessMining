@@ -6,7 +6,6 @@ import java.awt.geom.Point2D;
 
 import javax.swing.SwingUtilities;
 
-import graph.GoalDrivenDFG;
 import graph.GraphConstants;
 import prefuse.Display;
 import prefuse.controls.ControlAdapter;
@@ -27,12 +26,6 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 	final InGroupPredicate nodeFilter = new InGroupPredicate(GraphConstants.NODE_GROUP);
 	final InGroupPredicate nodeFilterInvi = new InGroupPredicate(GraphConstants.INVI_NODE_GROUP);
 
-	private GoalDrivenDFG goalDrivenDFG;
-
-	public DragMultipleNodesControl(GoalDrivenDFG goalDrivenDFG) {
-		this.goalDrivenDFG = goalDrivenDFG;
-	}
-
 	public void setFixPositionOnMouseOver(boolean s) {
 		fixOnMouseOver = s;
 	}
@@ -42,19 +35,19 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 	 *      java.awt.event.MouseEvent)
 	 */
 	public void itemEntered(VisualItem item, MouseEvent e) {
-		InGroupPredicate nodeFilter = new InGroupPredicate(GraphConstants.NODE_GROUP);
-		if (nodeFilter.getBoolean(item)) {
-			Display d = (Display) e.getSource();
-			d.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-			activeItem = item;
-			if (fixOnMouseOver) {
-				wasFixed = item.isFixed();
-				resetItem = true;
-				item.setFixed(true);
-				item.getTable().addTableListener(this);
+		if (item.getBoolean(GraphConstants.IS_DISPLAY)) {
+			if (nodeFilter.getBoolean(item)) {
+				Display d = (Display) e.getSource();
+				d.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				activeItem = item;
+				if (fixOnMouseOver) {
+					wasFixed = item.isFixed();
+					resetItem = true;
+					item.setFixed(true);
+					item.getTable().addTableListener(this);
+				}
 			}
 		}
-
 	}
 
 	/**
@@ -62,32 +55,37 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 	 *      java.awt.event.MouseEvent)
 	 */
 	public void itemExited(VisualItem item, MouseEvent e) {
-		if (activeItem == item) {
-			activeItem = null;
-			item.getTable().removeTableListener(this);
-			if (resetItem)
-				item.setFixed(wasFixed);
+		if (item.getBoolean(GraphConstants.IS_DISPLAY)) {
+			if (activeItem == item) {
+				activeItem = null;
+				item.getTable().removeTableListener(this);
+				if (resetItem)
+					item.setFixed(wasFixed);
+			}
+			Display d = (Display) e.getSource();
+			d.setCursor(Cursor.getDefaultCursor());
 		}
-		Display d = (Display) e.getSource();
-		d.setCursor(Cursor.getDefaultCursor());
-	} //
+
+	}
 
 	/**
 	 * @see prefuse.controls.Control#itemPressed(prefuse.visual.VisualItem,
 	 *      java.awt.event.MouseEvent)
 	 */
 	public void itemPressed(VisualItem item, MouseEvent e) {
-		if (!SwingUtilities.isLeftMouseButton(e))
-			return;
-		if (!fixOnMouseOver) {
-			wasFixed = item.isFixed();
-			resetItem = true;
-			item.setFixed(true);
-			item.getTable().addTableListener(this);
+		if (item.getBoolean(GraphConstants.IS_DISPLAY)) {
+			if (!SwingUtilities.isLeftMouseButton(e))
+				return;
+			if (!fixOnMouseOver) {
+				wasFixed = item.isFixed();
+				resetItem = true;
+				item.setFixed(true);
+				item.getTable().addTableListener(this);
+			}
+			dragged = false;
+			Display d = (Display) e.getComponent();
+			d.getAbsoluteCoordinate(e.getPoint(), down);
 		}
-		dragged = false;
-		Display d = (Display) e.getComponent();
-		d.getAbsoluteCoordinate(e.getPoint(), down);
 	}
 
 	/**
@@ -95,37 +93,40 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 	 *      java.awt.event.MouseEvent)
 	 */
 	public void itemReleased(VisualItem item, MouseEvent e) {
-		if (!SwingUtilities.isLeftMouseButton(e))
-			return;
-		if (dragged) {
-			activeItem = null;
-			item.getTable().removeTableListener(this);
-			if (resetItem)
-				item.setFixed(wasFixed);
-			dragged = false;
+		if (item.getBoolean(GraphConstants.IS_DISPLAY)) {
+			if (!SwingUtilities.isLeftMouseButton(e))
+				return;
+			if (dragged) {
+				activeItem = null;
+				item.getTable().removeTableListener(this);
+				if (resetItem)
+					item.setFixed(wasFixed);
+				dragged = false;
 
+			}
 		}
+
 	}
 
 	public void itemDragged(VisualItem item, MouseEvent e) {
-		if (!SwingUtilities.isLeftMouseButton(e))
-			return;
-		dragged = true;
-		Display d = (Display) e.getComponent();
-		d.getAbsoluteCoordinate(e.getPoint(), temp);
-		double dx = temp.getX() - down.getX();
-		double dy = temp.getY() - down.getY();
-		// no matter what drag the item
-		this.updatePosNode(item, dx, dy);
-		if (repaint)
-			item.getVisualization().repaint();
+		if (item.getBoolean(GraphConstants.IS_DISPLAY)) {
+			if (!SwingUtilities.isLeftMouseButton(e))
+				return;
+			dragged = true;
+			Display d = (Display) e.getComponent();
+			d.getAbsoluteCoordinate(e.getPoint(), temp);
+			double dx = temp.getX() - down.getX();
+			double dy = temp.getY() - down.getY();
+			// no matter what drag the item
+			this.updatePosNode(item, dx, dy);
+			if (repaint)
+				item.getVisualization().repaint();
 
-		down.setLocation(temp);
-		if (action != null)
-			d.getVisualization().run(action);
-
+			down.setLocation(temp);
+			if (action != null)
+				d.getVisualization().run(action);
+		}
 	}
-
 
 	private void updatePosNode(VisualItem item, double dx, double dy) {
 		double x = item.getX();

@@ -17,8 +17,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -357,15 +355,15 @@ public class GoalDrivenController {
 
 	protected void initGuiControlBar() {
 
-		// mode button
-		panel.getControlBar().getModeButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setBounds(0, 0, (int) (0.5 * 0.37 * panel.getConfigCards().getsWidth()), 200);
-				panel.getConfigCards().setVisible(true);
-				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "1");
-
-			}
-		});
+//		// mode button
+//		panel.getControlBar().getModeButton().addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				panel.getConfigCards().setBounds(0, 0, (int) (0.5 * 0.37 * panel.getConfigCards().getsWidth()), 200);
+//				panel.getConfigCards().setVisible(true);
+//				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "1");
+//
+//			}
+//		});
 		// act button
 		panel.getControlBar().getActButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -420,17 +418,17 @@ public class GoalDrivenController {
 			}
 
 		});
-		// act config button
-		panel.getControlBar().getActConfigButton().addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setBounds(0, 0, (int) (0.37 * panel.getConfigCards().getsWidth()), 200);
-				panel.getConfigCards().setVisible(true);
-				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "3");
-
-			}
-
-		});
+//		// act config button
+//		panel.getControlBar().getActConfigButton().addActionListener(new ActionListener() {
+//
+//			public void actionPerformed(ActionEvent e) {
+//				panel.getConfigCards().setBounds(0, 0, (int) (0.37 * panel.getConfigCards().getsWidth()), 200);
+//				panel.getConfigCards().setVisible(true);
+//				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "3");
+//
+//			}
+//
+//		});
 		// mode done button
 		panel.getConfigCards().getModePanel().getModeDoneButton().addActionListener(new ActionListener() {
 
@@ -522,16 +520,16 @@ public class GoalDrivenController {
 				panel.getConfigCards().setVisible(false);
 			}
 		});
-		// filter act slider
-		panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				if (!panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().getSlider()
-						.getValueIsAdjusting()) {
-					chain.setObject(IvMObject.selected_activities_threshold,
-							panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().getValue());
-				}
-			}
-		});
+//		// filter act slider
+//		panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().addChangeListener(new ChangeListener() {
+//			public void stateChanged(ChangeEvent e) {
+//				if (!panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().getSlider()
+//						.getValueIsAdjusting()) {
+//					chain.setObject(IvMObject.selected_activities_threshold,
+//							panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().getValue());
+//				}
+//			}
+//		});
 		// act config new group button
 		panel.getConfigCards().getActConfigPanel().getActConfigNewGroupButton().addActionListener(new ActionListener() {
 

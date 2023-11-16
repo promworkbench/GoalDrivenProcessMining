@@ -62,6 +62,9 @@ public class GoalDrivenDFG extends Display {
 	private int endNodeRow;
 	private Graph graph;
 	private Boolean isHighLevel;
+
+	// renderer
+	private CustomizedEdgeRenderer edgeRenderer;
 	// control 
 	private SelectMultipleNodesControl selectMultipleNodesControl;
 	private BackgroundDoubleClickControl backgroundDoubleClickControl;
@@ -119,24 +122,8 @@ public class GoalDrivenDFG extends Display {
 			this.setDefaultLayout();
 			// action
 			this.configDefaultGraph();
-			// center graph
-			this.centerGraph();
-			this.test();
-
 		}
 
-	}
-
-	private void centerGraph() {
-		double zoomWidth = this.getBounds().getWidth() / this.getVisualization().getBounds("graph").getWidth();
-		double zoomHeight = this.getBounds().getHeight() / this.getVisualization().getBounds("graph").getHeight();
-		double zoomRatio = zoomWidth < zoomHeight ? zoomWidth : zoomHeight;
-
-		double x = this.getVisualization().getBounds("graph").getCenterX();
-		double y = this.getVisualization().getBounds("graph").getCenterY();
-		this.animatePanAndZoomTo(new Point2D.Double(x, y), zoomRatio, 1000);
-		this.revalidate();
-		this.repaint();
 	}
 
 	//	public static void main(String[] args) throws Exception {
@@ -219,7 +206,7 @@ public class GoalDrivenDFG extends Display {
 		this.setDefaultNodeStrokeWidth();
 		this.setDefaultNodeFillColor();
 		this.setDefaultNodeStrokeColor();
-		this.setDefaultTextColorAndSize();
+		this.setDefaultTextColorSizeAndFont();
 		this.setDefaultNodeSize();
 
 		this.setDefaultRenderer();
@@ -249,7 +236,7 @@ public class GoalDrivenDFG extends Display {
 			addControlListener(backgroundDoubleClickControl);
 			/*************************/
 			/* drag multiple nodes */
-			dragMultipleNodesControl = new DragMultipleNodesControl(this);
+			dragMultipleNodesControl = new DragMultipleNodesControl();
 			addControlListener(dragMultipleNodesControl);
 			squareSelectControl = new SquareSelectControl(this.graph.getNodeTable(), this);
 			addControlListener(squareSelectControl);
@@ -276,7 +263,7 @@ public class GoalDrivenDFG extends Display {
 		addControlListener(wheelZoomControl);
 		focusControl = new FocusControl();
 		addControlListener(focusControl);
-		dragMultipleNodesControl = new DragMultipleNodesControl(this);
+		dragMultipleNodesControl = new DragMultipleNodesControl();
 		addControlListener(dragMultipleNodesControl);
 		rightClickControl = new RightClickControl(this);
 		addControlListener(rightClickControl);
@@ -296,10 +283,12 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	private void setDefaultRenderer() {
-		CustomizedEdgeRenderer edgeR = new CustomizedEdgeRenderer(prefuse.Constants.EDGE_TYPE_CURVE,
+		this.edgeRenderer = new CustomizedEdgeRenderer(prefuse.Constants.EDGE_TYPE_CURVE,
 				prefuse.Constants.EDGE_ARROW_FORWARD);
-		edgeR.setArrowHeadSize(GraphConstants.ARROW_HEAD_WIDTH, GraphConstants.ARROW_HEAD_HEIGHT);
-		edgeR.setArrowDoubleHeadSize(GraphConstants.ARROW_HEAD_WIDTH + 5, GraphConstants.ARROW_HEAD_HEIGHT);
+		this.edgeRenderer.setArrowHeadSize(GraphConstants.ARROW_HEAD_WIDTH, GraphConstants.ARROW_HEAD_HEIGHT);
+		this.edgeRenderer.setArrowDoubleHeadSize(GraphConstants.ARROW_HEAD_WIDTH + 5, GraphConstants.ARROW_HEAD_HEIGHT);
+		// pass the frequency edge to the custom edge renderer
+		this.edgeRenderer.setCurrentFrequencyEdge(this.currentFrequencyEdge);
 
 		NodeRenderer label = new NodeRenderer(this, GraphConstants.DISPLAY_LABEL_FIELD);
 		label.setRoundedCorner(8, 8);
@@ -319,7 +308,7 @@ public class GoalDrivenDFG extends Display {
 		m_vis.putAction("shape", shape);
 		m_vis.run("shape");
 		/******************/
-		drf.setDefaultEdgeRenderer(edgeR);
+		drf.setDefaultEdgeRenderer(this.edgeRenderer);
 		m_vis.setRendererFactory(drf);
 	}
 
@@ -338,15 +327,18 @@ public class GoalDrivenDFG extends Display {
 		m_vis.run(GraphConstants.LAYOUT_ACTION);
 	}
 
-	public void setDefaultTextColorAndSize() {
+	public void setDefaultTextColorSizeAndFont() {
 		this.textColorAction = new ColorAction(GraphConstants.NODE_GROUP, VisualItem.TEXTCOLOR,
 				GraphConstants.TEXT_COLOR);
 		m_vis.putAction(GraphConstants.TEXT_COLOR_ACTION, this.textColorAction);
 		m_vis.run(GraphConstants.TEXT_COLOR_ACTION);
 
-		FontAction fontAction = new FontAction(GraphConstants.NODE_GROUP, new Font("Arial", Font.BOLD, 14));
-		m_vis.putAction(GraphConstants.FONT_ACTION, fontAction);
+		FontAction fontActionNode = new FontAction(GraphConstants.NODE_GROUP, new Font("Arial", Font.BOLD, 20));
+		FontAction fontActionEdge = new FontAction(GraphConstants.EDGE_GROUP, new Font("Arial", Font.BOLD, 24));
+		m_vis.putAction(GraphConstants.FONT_ACTION, fontActionNode);
+		m_vis.putAction("fontEdge", fontActionEdge);
 		m_vis.run(GraphConstants.FONT_ACTION);
+		m_vis.run("fontEdge");
 	}
 
 	public void setDefaultArrowFillColor() {
@@ -434,14 +426,9 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	public void setDefaultNodeStrokeColor() {
-		this.nodeStrokeColorAction = new ColorAction("graph.nodes", VisualItem.STROKECOLOR);
+		this.nodeStrokeColorAction = new ColorAction(GraphConstants.NODE_GROUP, VisualItem.STROKECOLOR);
 		this.nodeStrokeColorAction.setDefaultColor(GraphConstants.NODE_STROKE_COLOR);
-
-		ColorAction invi = new ColorAction("inviGraph.nodes", VisualItem.STROKECOLOR);
-		invi.setDefaultColor(GraphConstants.NODE_STROKE_COLOR);
-
 		m_vis.putAction(GraphConstants.NODE_STROKE_COLOR_ACTION, this.nodeStrokeColorAction);
-		m_vis.putAction("invi", invi);
 
 		m_vis.run(GraphConstants.NODE_STROKE_COLOR_ACTION);
 		m_vis.run("invi");
@@ -515,8 +502,8 @@ public class GoalDrivenDFG extends Display {
 			}
 		}
 		Predicate displayPredicate = (Predicate) ExpressionParser.parse("isDisplay = true");
-		CustomColorNodeFillAction customFillByLabel = new CustomColorNodeFillAction(GraphConstants.NODE_GROUP,displayPredicate,
-				mapActColor);
+		CustomColorNodeFillAction customFillByLabel = new CustomColorNodeFillAction(GraphConstants.NODE_GROUP,
+				displayPredicate, mapActColor);
 		m_vis.putAction(GraphConstants.NODE_FILL_COLOR_ACTION, customFillByLabel);
 		m_vis.run(GraphConstants.NODE_FILL_COLOR_ACTION);
 	}

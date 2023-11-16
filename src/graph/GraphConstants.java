@@ -23,7 +23,6 @@ public class GraphConstants {
 	public static final String IS_INVISIBLE = "isInvisible";
 	public static final String IS_INVISIBLE_COLLAPSED = "isInvisibleCollapsed";
 	public static final String IS_DISPLAY = "isDisplay";
-	
 	public static final String NODE_GROUP = "graph.nodes";
 	public static final String EDGE_GROUP = "graph.edges";
 	public static final String INVI_NODE_GROUP = "inviGraph.nodes";
@@ -34,15 +33,16 @@ public class GraphConstants {
 	public static final int BEGIN_END_NODE_COLOR =  ColorLib.rgb(3, 218, 197);
 	public static final int TEXT_COLOR = ColorLib.rgb(255, 255, 255);
 	//color node
-	public static final int NODE_FILL_COLOR = ColorLib.rgb(55, 0, 179);
 	public static final int SELECTED_NODE_FILL_COLOR = ColorLib.rgb(207, 102, 121);
 	public static final int NODE_STROKE_COLOR = ColorLib.rgb(255, 255, 255);
 	public static final Color NODE_FILL_DARK_COLOR = new Color(18,92,164);
 	public static final Color NODE_FILL_LIGHT_COLOR = new Color(190,216,236);
 	//color edge
 	public static final int EDGE_STROKE_COLOR = ColorLib.rgb(255, 255, 255);
-	public static final int CLICK_EDGE_STROKE_COLOR = ColorLib.rgb(141,108,46);
-
+	// highlight color
+	public static final int HIGHLIGHT_STROKE_COLOR = ColorLib.rgb(230, 126, 34);
+	// unhighlight color
+	public static final int UNHIGHLIGHT_STROKE_COLOR = ColorLib.rgb(51, 51, 51);
 	//action name
 	public static final String NODE_STROKE_COLOR_ACTION = "nodeStrokeColor";
 	public static final String NODE_FILL_COLOR_ACTION = "nodeFillColor";

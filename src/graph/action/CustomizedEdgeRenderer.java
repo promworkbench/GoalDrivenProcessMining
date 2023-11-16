@@ -8,6 +8,9 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.CubicCurve2D;
 import java.awt.geom.Point2D;
+import java.util.HashMap;
+
+import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 
 import graph.GraphConstants;
 import prefuse.Constants;
@@ -17,9 +20,11 @@ import prefuse.visual.EdgeItem;
 import prefuse.visual.VisualItem;
 
 public class CustomizedEdgeRenderer extends EdgeRenderer {
+	private HashMap<EdgeObject, Integer> currentFrequencyEdge;
 
 	public CustomizedEdgeRenderer(int edgeTypeCurve, int edgeArrowForward) {
 		super(edgeTypeCurve, edgeArrowForward);
+		this.currentFrequencyEdge = new HashMap<EdgeObject, Integer>();
 	}
 
 	protected Polygon m_arrowDoubleHead = updateArrowDoubleHead(m_arrowWidth, m_arrowHeight);
@@ -28,6 +33,7 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 		if (item.getBoolean(GraphConstants.IS_DISPLAY)) {
 			// render the edge line
 			super.render(g, item);
+			this.drawLabelOfEdge(g, item);
 		}
 	}
 
@@ -51,20 +57,17 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 				double y2 = curve.getY2();
 
 				// Create a new shape with the adjusted control points
-				CubicCurve2D adjustedCurve = new CubicCurve2D.Double(x1, y1, ctrlX1, ctrlY1, ctrlX2, ctrlY2,
-						x2, y2);
-				
-				
-				
+				CubicCurve2D adjustedCurve = new CubicCurve2D.Double(x1, y1, ctrlX1, ctrlY1, ctrlX2, ctrlY2, x2, y2);
+
 				// Create a composite shape with the original shape and the boundary shape
 				Area compositeShape = new Area();
-				BasicStroke boundaryStroke = new BasicStroke(3f);
+				BasicStroke boundaryStroke = new BasicStroke(2f);
 				Shape boundaryShape = boundaryStroke.createStrokedShape(adjustedCurve);
 
 				compositeShape.add(new Area(adjustedCurve));
-//				compositeShape.add(new Area(adjustedCurve.getBounds()));
+				//				compositeShape.add(new Area(adjustedCurve.getBounds()));
 
-//				return compositeShape;
+				//				return compositeShape;
 				return boundaryShape;
 			}
 
@@ -72,6 +75,50 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 
 		return super.getShape(item);
 
+	}
+
+	private void drawLabelOfEdge(Graphics2D g, VisualItem item) {
+		if (item instanceof EdgeItem && item.isValid()) {
+			EdgeItem edge = (EdgeItem) item;
+			CubicCurve2D curve = (CubicCurve2D) getRawShape(item);
+			Point2D midPoint = this.getMiddlePoint(curve);
+			VisualItem item1 = edge.getSourceItem();
+			VisualItem item2 = edge.getTargetItem();
+
+			String source = item1.getString(GraphConstants.LABEL_FIELD);
+			String target = item2.getString(GraphConstants.LABEL_FIELD);
+
+			source = source.equals("**BEGIN**") ? "begin" : source;
+			target = target.equals("**END**") ? "end" : target;
+			int label = 0;
+			for (EdgeObject edgeObject : this.currentFrequencyEdge.keySet()) {
+				if (edgeObject.getNode1().equals(source) && edgeObject.getNode2().equals(target)) {
+					label = this.currentFrequencyEdge.get(edgeObject);
+					break;
+				}
+			}
+//			if (label <= 50000) {
+//				item.setStrokeColor(GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
+//				item.setFillColor(GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
+//				g.setColor(new Color(51, 51, 51));
+//			}
+			g.setFont(item.getFont());
+			g.drawString(Integer.toString(label), (int) midPoint.getX() + 20, (int) midPoint.getY() - 10);
+			item.getVisualization().repaint();
+		}
+	}
+
+	private static Point2D getMiddlePoint(CubicCurve2D curve) {
+		double t = 0.5; // Midpoint
+
+		// Evaluate the cubic curve at t = 0.5
+		double x = Math.pow(1 - t, 3) * curve.getX1() + 3 * Math.pow(1 - t, 2) * t * curve.getCtrlX1()
+				+ 3 * (1 - t) * Math.pow(t, 2) * curve.getCtrlX2() + Math.pow(t, 3) * curve.getX2();
+
+		double y = Math.pow(1 - t, 3) * curve.getY1() + 3 * Math.pow(1 - t, 2) * t * curve.getCtrlY1()
+				+ 3 * (1 - t) * Math.pow(t, 2) * curve.getCtrlY2() + Math.pow(t, 3) * curve.getY2();
+
+		return new Point2D.Double(x, y);
 	}
 
 	protected Shape getRawShape(VisualItem item) {
@@ -209,6 +256,14 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 		m_arrowWidth = width;
 		m_arrowHeight = height;
 		m_arrowDoubleHead = updateArrowDoubleHead(width, height);
+	}
+
+	public HashMap<EdgeObject, Integer> getCurrentFrequencyEdge() {
+		return currentFrequencyEdge;
+	}
+
+	public void setCurrentFrequencyEdge(HashMap<EdgeObject, Integer> currentFrequencyEdge) {
+		this.currentFrequencyEdge = currentFrequencyEdge;
 	}
 
 }

@@ -15,16 +15,16 @@ public class GoalDrivenConstants {
 			"yyyy-MM-dd'T'HH:mm:ssXXX"
 			);
 	// Color in panel
-	public static final Color BACKGROUND_COLOR = new Color(12,16,24);
-	public static final Color CONTENT_CARD_COLOR = new Color(12,16,24);
-	public static final Color CONTENT_CARD_BACKGROUND_COLOR = new Color(24, 47, 69);
+	public static final Color BACKGROUND_COLOR = new Color(26, 26, 26);
+	public static final Color CONTENT_CARD_COLOR = BACKGROUND_COLOR;
+	public static final Color CONTENT_CARD_BACKGROUND_COLOR = new Color(51, 51, 51);
 	public static final Color SIDE_PANEL_CARD_COLOR = new Color(255, 255, 255);
-	public static final Color STATISTIC_PANEL_BACKGROUND_COLOR = new Color(34, 51, 64);
+	public static final Color STATISTIC_PANEL_BACKGROUND_COLOR = BACKGROUND_COLOR;
 	public static final Color STATISTIC_PANEL_TAB_SELECTED_COLOR = new Color(151, 89, 57);
 	public static final Color STATISTIC_PANEL_TAB_UNSELECTED_COLOR = new Color(100, 138, 170);
-	public static final Color CONTROL_BAR_BACKGROUND_COLOR = new Color(12,16,24);
+	public static final Color CONTROL_BAR_BACKGROUND_COLOR = BACKGROUND_COLOR;
 	// Color in border
-	public static final Color BORDER_COLOR = new Color(14,26,44);
+	public static final Color BORDER_COLOR = new Color(38, 38, 38);
 	// Border
 	public static final Border BETWEEN_PANEL_BORDER = BorderFactory.createLineBorder(GoalDrivenConstants.BORDER_COLOR, 
 			6, false);
