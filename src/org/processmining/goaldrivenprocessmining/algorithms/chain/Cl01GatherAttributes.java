@@ -13,6 +13,7 @@ import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
+import org.processmining.goaldrivenprocessmining.objectHelper.TraceSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateType;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
@@ -23,6 +24,7 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalDrivenConfiguration> {
 
+	public static List<TraceSkeleton> originalLog;
 	public static EdgeHashTable originalEdgeHashTable;
 	public static ActivityHashTable originalActivityHashTable;
 	
@@ -70,8 +72,8 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 			allAct.add(valuesDistribution.get(2)[i].toString());
 		}
 		Config config = new Config();
-		config.setSelectedActs(values);
-		config.setUnselectedActs(values1);
+		config.setHighActs(values);
+		config.setLowActs(values1);
 		CONFIG_Update.currentConfig = config;
 
 		HashMap<String, String[]> updateMap = new HashMap<String, String[]>();
@@ -80,6 +82,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		UpdateConfig updateConfig = new UpdateConfig(UpdateType.SELECTED_ACT, updateMap);
 
 		GDPMLogSkeleton gdpmLogSkeleton = new GDPMLogSkeleton(log);
+		originalLog = gdpmLogSkeleton.getLog();
 		originalEdgeHashTable = gdpmLogSkeleton.getEdgeHashTable();
 		originalActivityHashTable = gdpmLogSkeleton.getActivityHashTable();
 
@@ -113,7 +116,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 				maxFreq = mapActFreq.get(key);
 			}
 		}
-		int threshold = (int) (0.2 * maxFreq);
+		int threshold = (int) (0.8 * maxFreq);
 		List<String> l = new ArrayList<>();
 		List<String> allL = new ArrayList<>();
 		for (String key : mapActFreq.keySet()) {

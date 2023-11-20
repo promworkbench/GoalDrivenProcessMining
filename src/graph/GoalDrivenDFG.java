@@ -232,7 +232,7 @@ public class GoalDrivenDFG extends Display {
 			addControlListener(selectMultipleNodesControl);
 			/************************/
 			/* double click background */
-			backgroundDoubleClickControl = new BackgroundDoubleClickControl(this.graph.getNodeTable());
+			backgroundDoubleClickControl = new BackgroundDoubleClickControl(this);
 			addControlListener(backgroundDoubleClickControl);
 			/*************************/
 			/* drag multiple nodes */
@@ -267,6 +267,8 @@ public class GoalDrivenDFG extends Display {
 		addControlListener(dragMultipleNodesControl);
 		rightClickControl = new RightClickControl(this);
 		addControlListener(rightClickControl);
+		backgroundDoubleClickControl = new BackgroundDoubleClickControl(this);
+		addControlListener(backgroundDoubleClickControl);
 
 	}
 
@@ -571,7 +573,7 @@ public class GoalDrivenDFG extends Display {
 		List<Integer> affectedRows = new ArrayList<Integer>();
 		while (edges.hasNext()) {
 			int row = edges.nextInt();
-			if (graph.getEdgeTable().isValidRow(nodeRow)) {
+			if (graph.getEdgeTable().isValidRow(row)) {
 				int source = graph.getEdgeTable().getTuple(row).getInt(Graph.DEFAULT_SOURCE_KEY);
 				int target = graph.getEdgeTable().getTuple(row).getInt(Graph.DEFAULT_TARGET_KEY);
 				if (source == nodeRow || target == nodeRow) {
@@ -847,4 +849,13 @@ public class GoalDrivenDFG extends Display {
 	public void setCurrentFrequencyEdge(HashMap<EdgeObject, Integer> currentFrequencyEdge) {
 		this.currentFrequencyEdge = currentFrequencyEdge;
 	}
+
+	public CustomizedEdgeRenderer getEdgeRenderer() {
+		return edgeRenderer;
+	}
+
+	public void setEdgeRenderer(CustomizedEdgeRenderer edgeRenderer) {
+		this.edgeRenderer = edgeRenderer;
+	}
+
 }

@@ -24,7 +24,6 @@ import org.processmining.goaldrivenprocessmining.panelHelper.ConfigCards;
 import org.processmining.goaldrivenprocessmining.panelHelper.ControlBar;
 import org.processmining.goaldrivenprocessmining.panelHelper.SidePanel;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
-import org.processmining.plugins.inductiveVisualMiner.animation.AnimationEnabledChangedListener;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataState;
 import org.processmining.plugins.inductiveVisualMiner.helperClasses.ControllerView;
 
@@ -214,9 +213,6 @@ public class GoalDrivenPanel extends JPanel {
 
 	public void setLowDfgTitle(JLabel lowDfgTitle) {
 		this.lowDfgTitle = lowDfgTitle;
-	}
-
-	public void setOnAnimationEnabledChanged(AnimationEnabledChangedListener onAnimationEnabledChanged) {
 	}
 
 	public ControllerView<DataState> getControllerView() {

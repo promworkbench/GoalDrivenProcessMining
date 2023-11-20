@@ -9,6 +9,7 @@ import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfigurat
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChain;
 
+import graph.GoalDrivenDFGUtils;
 import graph.GraphConstants;
 import prefuse.controls.ControlAdapter;
 import prefuse.visual.EdgeItem;
@@ -66,30 +67,36 @@ public class GraphObjectClickControl extends ControlAdapter {
 	}
 
 	public void itemEntered(VisualItem item, java.awt.event.MouseEvent e) {
-		if (edgeFilter.getBoolean(item)) {
-			item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
-			this.curStroke = item.getStroke();
-			this.curFont = item.getFont();
-			item.setStroke(new BasicStroke(this.curStroke.getLineWidth() + 5));
-			item.setFont(new Font(curFont.getFontName(), curFont.getStyle(), this.curFont.getSize() + 10));
-			item.setFillColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
-		} else if (nodeFilter.getBoolean(item)) {
-			item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
+		if (!GoalDrivenDFGUtils.isInSelectActMode) {
+			if (edgeFilter.getBoolean(item)) {
+				item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
+				this.curStroke = item.getStroke();
+				this.curFont = item.getFont();
+				item.setStroke(new BasicStroke(this.curStroke.getLineWidth() + 5));
+				item.setFont(new Font(curFont.getFontName(), curFont.getStyle(), this.curFont.getSize() + 10));
+				item.setFillColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
+			} else if (nodeFilter.getBoolean(item)) {
+				item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
+				
+			}
+			
+			item.getVisualization().repaint();
 		}
-		item.getVisualization().repaint();
 	}
 
 	public void itemExited(VisualItem item, java.awt.event.MouseEvent e) {
-		if (edgeFilter.getBoolean(item)) {
-			item.setStrokeColor(GraphConstants.EDGE_STROKE_COLOR);
-			item.setFillColor(GraphConstants.EDGE_STROKE_COLOR);
-			item.setStroke(this.curStroke);
-			item.setFont(this.curFont);
-			
-		} else if (nodeFilter.getBoolean(item)) {
-			item.setStrokeColor(GraphConstants.NODE_STROKE_COLOR);
+		if (!GoalDrivenDFGUtils.isInSelectActMode) {
+			if (edgeFilter.getBoolean(item)) {
+				item.setStrokeColor(GraphConstants.EDGE_STROKE_COLOR);
+				item.setFillColor(GraphConstants.EDGE_STROKE_COLOR);
+				item.setStroke(this.curStroke);
+				item.setFont(this.curFont);
+				
+			} else if (nodeFilter.getBoolean(item)) {
+				item.setStrokeColor(GraphConstants.NODE_STROKE_COLOR);
+			}
+			item.getVisualization().repaint();
 		}
-		item.getVisualization().repaint();
 	}
 
 	public DataChain<GoalDrivenConfiguration> getChain() {

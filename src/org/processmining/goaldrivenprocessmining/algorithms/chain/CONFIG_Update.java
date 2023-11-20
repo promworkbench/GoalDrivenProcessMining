@@ -44,8 +44,8 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 			switch (update.getUpdateType()) {
 				case SELECTED_ACT :
 					HashMap<String, String[]> selectedActMap = (HashMap<String, String[]>) update.getUpdateObject();
-					updatedConfig.setSelectedActs(selectedActMap.get("High"));
-					updatedConfig.setUnselectedActs(selectedActMap.get("Low"));
+					updatedConfig.setHighActs(selectedActMap.get("High"));
+					updatedConfig.setLowActs(selectedActMap.get("Low"));
 					break;
 				case GROUP :
 					switch (update.getUpdateAction()) {
@@ -72,43 +72,6 @@ public class CONFIG_Update extends DataChainLinkComputationAbstract<GoalDrivenCo
 
 							break;
 						case REMOVE :
-//							Class<?> objClass = update.getUpdateObject().getClass();
-//							if (objClass.isArray()) {
-//								String[] array = (String[]) update.getUpdateObject();
-//								GroupSkeleton selectedGroup = null;
-//								outerloop: for (GroupSkeleton group : updatedConfig.getListGroupSkeletons()) {
-//									if (group.getGroupName().equals(array[0])) {
-//										if (group.getListAct().contains(array[1])) {
-//											group.getListAct().remove(array[1]);
-//										} else {
-//											for (GroupSkeleton groupItem : group.getListGroup()) {
-//												if (groupItem.getGroupName().equals(array[1])) {
-//													selectedGroup = groupItem;
-//													break outerloop;
-//												}
-//											}
-//
-//										}
-//
-//									}
-//								}
-//								if (selectedGroup != null) {
-//									updatedConfig.setListGroupSkeletons(updateGroupConfigWithRemovingGroup(
-//											selectedGroup, updatedConfig.getListGroupSkeletons()));
-//								}
-//
-//							} else {
-//								String groupName = (String) update.getUpdateObject();
-//								GroupSkeleton selectedGroup = null;
-//								for (GroupSkeleton group : updatedConfig.getListGroupSkeletons()) {
-//									if (group.getGroupName().equals(groupName)) {
-//										selectedGroup = group;
-//										break;
-//									}
-//								}
-//								updatedConfig.setListGroupSkeletons(updateGroupConfigWithRemovingGroup(
-//										selectedGroup, updatedConfig.getListGroupSkeletons()));
-//							}
 							break;
 					}
 

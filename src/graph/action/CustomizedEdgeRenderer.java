@@ -21,10 +21,12 @@ import prefuse.visual.VisualItem;
 
 public class CustomizedEdgeRenderer extends EdgeRenderer {
 	private HashMap<EdgeObject, Integer> currentFrequencyEdge;
+	private HashMap<EdgeObject, Integer> customizedFrequencyEdge;
 
 	public CustomizedEdgeRenderer(int edgeTypeCurve, int edgeArrowForward) {
 		super(edgeTypeCurve, edgeArrowForward);
-		this.currentFrequencyEdge = new HashMap<EdgeObject, Integer>();
+		this.currentFrequencyEdge = new HashMap<>();
+		this.customizedFrequencyEdge = new HashMap<>();
 	}
 
 	protected Polygon m_arrowDoubleHead = updateArrowDoubleHead(m_arrowWidth, m_arrowHeight);
@@ -93,15 +95,14 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 			int label = 0;
 			for (EdgeObject edgeObject : this.currentFrequencyEdge.keySet()) {
 				if (edgeObject.getNode1().equals(source) && edgeObject.getNode2().equals(target)) {
-					label = this.currentFrequencyEdge.get(edgeObject);
+					if (this.customizedFrequencyEdge.containsKey(edgeObject)) {
+						label = this.customizedFrequencyEdge.get(edgeObject);
+					} else {
+						label = this.currentFrequencyEdge.get(edgeObject);
+					}
 					break;
 				}
 			}
-//			if (label <= 50000) {
-//				item.setStrokeColor(GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
-//				item.setFillColor(GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
-//				g.setColor(new Color(51, 51, 51));
-//			}
 			g.setFont(item.getFont());
 			g.drawString(Integer.toString(label), (int) midPoint.getX() + 20, (int) midPoint.getY() - 10);
 			item.getVisualization().repaint();
@@ -264,6 +265,14 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 
 	public void setCurrentFrequencyEdge(HashMap<EdgeObject, Integer> currentFrequencyEdge) {
 		this.currentFrequencyEdge = currentFrequencyEdge;
+	}
+
+	public HashMap<EdgeObject, Integer> getCustomizedFrequencyEdge() {
+		return customizedFrequencyEdge;
+	}
+
+	public void setCustomizedFrequencyEdge(HashMap<EdgeObject, Integer> customizedFrequencyEdge) {
+		this.customizedFrequencyEdge = customizedFrequencyEdge;
 	}
 
 }

@@ -2,16 +2,20 @@ package org.processmining.goaldrivenprocessmining.algorithms;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -19,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.MouseInputAdapter;
 import javax.swing.table.DefaultTableModel;
 
 import org.deckfour.xes.model.XLog;
@@ -215,7 +220,6 @@ public class GoalDrivenController {
 	}
 
 	protected void initGui(final ProMCanceller canceller, final GoalDrivenConfiguration configuration) {
-		initGuiUniqueValue();
 		initGuiControlBar();
 		initGuiSidePanel();
 		initGuiMiner();
@@ -355,15 +359,15 @@ public class GoalDrivenController {
 
 	protected void initGuiControlBar() {
 
-//		// mode button
-//		panel.getControlBar().getModeButton().addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				panel.getConfigCards().setBounds(0, 0, (int) (0.5 * 0.37 * panel.getConfigCards().getsWidth()), 200);
-//				panel.getConfigCards().setVisible(true);
-//				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "1");
-//
-//			}
-//		});
+		//		// mode button
+		//		panel.getControlBar().getModeButton().addActionListener(new ActionListener() {
+		//			public void actionPerformed(ActionEvent e) {
+		//				panel.getConfigCards().setBounds(0, 0, (int) (0.5 * 0.37 * panel.getConfigCards().getsWidth()), 200);
+		//				panel.getConfigCards().setVisible(true);
+		//				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "1");
+		//
+		//			}
+		//		});
 		// act button
 		panel.getControlBar().getActButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -418,17 +422,89 @@ public class GoalDrivenController {
 			}
 
 		});
-//		// act config button
-//		panel.getControlBar().getActConfigButton().addActionListener(new ActionListener() {
-//
-//			public void actionPerformed(ActionEvent e) {
-//				panel.getConfigCards().setBounds(0, 0, (int) (0.37 * panel.getConfigCards().getsWidth()), 200);
-//				panel.getConfigCards().setVisible(true);
-//				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "3");
-//
-//			}
-//
-//		});
+
+		/*--------All act config panel---------*/
+		// all act config button
+		panel.getControlBar().getAllActivityButton().addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setBounds(0, 0, (int) (0.37 * panel.getConfigCards().getsWidth()), 200);
+				panel.getConfigCards().setVisible(true);
+				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "7");
+
+			}
+
+		});
+		// all act table row listener
+		panel.getConfigCards().getAllActivityConfigPanel().getTable().addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent evt) {
+				JTable table = panel.getConfigCards().getAllActivityConfigPanel().getTable();
+				int row = table.rowAtPoint(evt.getPoint());
+				int col = table.columnAtPoint(evt.getPoint());
+				if (row >= 0 && col == 0) {
+					String act = table.getValueAt(row, col).toString();
+					GoalDrivenDFGUtils.highlightSelectedAct(panel.getHighDfgPanel(), act);
+					if (panel.getLowDfgPanel().getGraph() != null) {
+						GoalDrivenDFGUtils.highlightSelectedAct(panel.getLowDfgPanel(), act);
+					}
+				}
+			}
+		});
+		panel.getConfigCards().getAllActivityConfigPanel().getTable().addMouseMotionListener(new MouseInputAdapter() {
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				JTable table = panel.getConfigCards().getAllActivityConfigPanel().getTable();
+				int row = table.rowAtPoint(e.getPoint());
+				if (row >= 0) {
+					table.clearSelection(); // Clear previous selections
+					table.addRowSelectionInterval(row, row);
+					table.setCursor(new Cursor(Cursor.HAND_CURSOR));
+				} else {
+					table.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+				}
+			}
+		});
+		// all act config cancel button
+		panel.getConfigCards().getAllActivityConfigPanel().getAllActConfigCancelButton()
+				.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						panel.getConfigCards().setVisible(false);
+					}
+				});
+		// update the all act config
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Unique value to gui";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.selected_unique_values,
+						GoalDrivenObject.unselected_unique_values };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				AttributeClassifier[] selectedUniqueValues = inputs.get(GoalDrivenObject.selected_unique_values);
+				AttributeClassifier[] unselectedUniqueValues = inputs.get(GoalDrivenObject.unselected_unique_values);
+				Map<String, String> mapActToHierarchy = new HashMap<String, String>();
+				for (AttributeClassifier attribute : selectedUniqueValues) {
+					mapActToHierarchy.put(attribute.toString(), "High");
+				}
+				for (AttributeClassifier attribute : unselectedUniqueValues) {
+					mapActToHierarchy.put(attribute.toString(), "Low");
+				}
+				panel.getConfigCards().getAllActivityConfigPanel().updateDefaultConfigTable(mapActToHierarchy);
+
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+
+		/*--------All act config panel---------*/
+
 		// mode done button
 		panel.getConfigCards().getModePanel().getModeDoneButton().addActionListener(new ActionListener() {
 
@@ -466,6 +542,7 @@ public class GoalDrivenController {
 				panel.getConfigCards().setVisible(false);
 			}
 		});
+
 		// act done button		
 		panel.getConfigCards().getActDisplayPanel().getActDoneButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -520,16 +597,16 @@ public class GoalDrivenController {
 				panel.getConfigCards().setVisible(false);
 			}
 		});
-//		// filter act slider
-//		panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().addChangeListener(new ChangeListener() {
-//			public void stateChanged(ChangeEvent e) {
-//				if (!panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().getSlider()
-//						.getValueIsAdjusting()) {
-//					chain.setObject(IvMObject.selected_activities_threshold,
-//							panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().getValue());
-//				}
-//			}
-//		});
+		//		// filter act slider
+		//		panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().addChangeListener(new ChangeListener() {
+		//			public void stateChanged(ChangeEvent e) {
+		//				if (!panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().getSlider()
+		//						.getValueIsAdjusting()) {
+		//					chain.setObject(IvMObject.selected_activities_threshold,
+		//							panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().getValue());
+		//				}
+		//			}
+		//		});
 		// act config new group button
 		panel.getConfigCards().getActConfigPanel().getActConfigNewGroupButton().addActionListener(new ActionListener() {
 
@@ -730,6 +807,8 @@ public class GoalDrivenController {
 			}
 
 		});
+
+		/*--------Group config panel---------*/
 		// group button
 		panel.getControlBar().getGroupButton().addActionListener(new ActionListener() {
 
@@ -752,6 +831,7 @@ public class GoalDrivenController {
 				panel.getConfigCards().setVisible(false);
 			}
 		});
+		/*--------Group config panel---------*/
 
 		// update all group in the group config panel
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
@@ -822,6 +902,36 @@ public class GoalDrivenController {
 			}
 		});
 
+		// update the hierarchy config
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Unique value to gui";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.selected_unique_values,
+						GoalDrivenObject.unselected_unique_values };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				//				AttributeClassifier[] allUniqueValues = inputs.get(GoalDrivenObject.all_unique_values);
+				AttributeClassifier[] selectedUniqueValues = inputs.get(GoalDrivenObject.selected_unique_values);
+				AttributeClassifier[] unselectedUniqueValues = inputs.get(GoalDrivenObject.unselected_unique_values);
+
+				panel.getConfigCards().getActDisplayPanel().updateConfigTable(
+						panel.getConfigCards().getActDisplayPanel().getIncludeTable(), selectedUniqueValues, "Exclude");
+				panel.getConfigCards().getActDisplayPanel().updateConfigTable(
+						panel.getConfigCards().getActDisplayPanel().getExcludeTable(), unselectedUniqueValues,
+						"Include");
+
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+
 	}
 
 	protected void initGuiSidePanel() {
@@ -850,39 +960,6 @@ public class GoalDrivenController {
 			}
 
 			public void invalidate(GoalDrivenPanel panel) {
-			}
-		});
-
-	}
-
-	protected void initGuiUniqueValue() {
-		//get the selected classifier to the gui
-		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
-
-			public String getName() {
-				return "Unique value to gui";
-			}
-
-			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.selected_unique_values,
-						GoalDrivenObject.unselected_unique_values };
-			}
-
-			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
-				//				AttributeClassifier[] allUniqueValues = inputs.get(GoalDrivenObject.all_unique_values);
-				AttributeClassifier[] selectedUniqueValues = inputs.get(GoalDrivenObject.selected_unique_values);
-				AttributeClassifier[] unselectedUniqueValues = inputs.get(GoalDrivenObject.unselected_unique_values);
-
-				panel.getConfigCards().getActDisplayPanel().updateConfigTable(
-						panel.getConfigCards().getActDisplayPanel().getIncludeTable(), selectedUniqueValues, "Exclude");
-				panel.getConfigCards().getActDisplayPanel().updateConfigTable(
-						panel.getConfigCards().getActDisplayPanel().getExcludeTable(), unselectedUniqueValues,
-						"Include");
-
-			}
-
-			public void invalidate(GoalDrivenPanel panel) {
-				//no action necessary (combobox will be disabled until new classifiers are computed)
 			}
 		});
 

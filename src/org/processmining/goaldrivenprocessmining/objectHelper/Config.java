@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class Config implements Serializable {
 	/**
@@ -13,15 +14,15 @@ public class Config implements Serializable {
 	 */
 	private static final long serialVersionUID = -9013552664319417538L;
 	private List<GroupSkeleton> listGroupSkeletons;
-	private String[] selectedActs;
-	private String[] unselectedActs;
-	private Map<EdgeObject, Map<EdgeObject, Map<Integer, List<Integer[]>>>> mapEdgeChildEdge;
+	private String[] highActs;
+	private String[] lowActs;
+	private Map<String, List<EdgeObject>> mapActEdgeInHighLevel;
 
 	public Config() {
 		this.listGroupSkeletons = new ArrayList<GroupSkeleton>();
-		this.selectedActs = new String[] {};
-		this.unselectedActs = new String[] {};
-		this.mapEdgeChildEdge = new HashMap<>();
+		this.highActs = new String[] {};
+		this.lowActs = new String[] {};
+		this.mapActEdgeInHighLevel = new HashMap<String, List<EdgeObject>>();
 	}
 
 	public void removeGroup(List<GroupSkeleton> groupActObjects) {
@@ -50,34 +51,36 @@ public class Config implements Serializable {
 		this.listGroupSkeletons = listGroupSkeletons;
 	}
 
-	public String[] getSelectedActs() {
-		return selectedActs;
+	public String[] getHighActs() {
+		return highActs;
 	}
 
-	public void setSelectedActs(String[] selectedActs) {
-		this.selectedActs = selectedActs;
+	public void setHighActs(String[] selectedActs) {
+		this.highActs = selectedActs;
 	}
 
-	public String[] getUnselectedActs() {
-		return unselectedActs;
+	public String[] getLowActs() {
+		return lowActs;
 	}
 
-	public void setUnselectedActs(String[] unselectedActs) {
-		this.unselectedActs = unselectedActs;
+	public void setLowActs(String[] unselectedActs) {
+		this.lowActs = unselectedActs;
 	}
 
-	public Map<EdgeObject, Map<EdgeObject, Map<Integer, List<Integer[]>>>> getMapEdgeChildEdge() {
-		return mapEdgeChildEdge;
+	public Map<String, List<EdgeObject>> getMapActEdgeInHighLevel() {
+		return mapActEdgeInHighLevel;
 	}
 
-	public void setMapEdgeChildEdge(Map<EdgeObject, Map<EdgeObject, Map<Integer, List<Integer[]>>>> mapEdgeChildEdge) {
-		this.mapEdgeChildEdge = mapEdgeChildEdge;
+	public void setMapActEdgeInHighLevel(Map<String, List<EdgeObject>> mapActEdgeInHighLevel) {
+		this.mapActEdgeInHighLevel = mapActEdgeInHighLevel;
 	}
 
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Arrays.hashCode(unselectedActs);
+		result = prime * result + Arrays.hashCode(highActs);
+		result = prime * result + Arrays.hashCode(lowActs);
+		result = prime * result + Objects.hash(listGroupSkeletons, mapActEdgeInHighLevel);
 		return result;
 	}
 
@@ -89,12 +92,16 @@ public class Config implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Config other = (Config) obj;
-		return Arrays.equals(unselectedActs, other.unselectedActs);
+		return Objects.equals(listGroupSkeletons, other.listGroupSkeletons)
+				&& Objects.equals(mapActEdgeInHighLevel, other.mapActEdgeInHighLevel)
+				&& Arrays.equals(highActs, other.highActs)
+				&& Arrays.equals(lowActs, other.lowActs);
 	}
 
 	public String toString() {
-		return "Config [listGroupSkeletons=" + listGroupSkeletons + ", selectedActs=" + Arrays.toString(selectedActs)
-				+ ", unselectedActs=" + Arrays.toString(unselectedActs) + "]";
+		return "Config [listGroupSkeletons=" + listGroupSkeletons + ", selectedActs=" + Arrays.toString(highActs)
+				+ ", unselectedActs=" + Arrays.toString(lowActs) + ", mapActEdgeInHighLevel="
+				+ mapActEdgeInHighLevel + "]";
 	}
 
 }

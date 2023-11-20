@@ -46,8 +46,8 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 
 		HashMap<String, String[]> selectedActMap = (HashMap<String, String[]>) update.getUpdateObject();
 		// for config 
-		updatedConfig.setSelectedActs(selectedActMap.get("High"));
-		updatedConfig.setUnselectedActs(selectedActMap.get("Low"));
+		updatedConfig.setHighActs(selectedActMap.get("High"));
+		updatedConfig.setLowActs(selectedActMap.get("Low"));
 		gdpmLog.setConfig(updatedConfig);
 		LogSkeletonUtils.setupEdgeHashTableForHighLevelAfterChangingDisplayedActs(gdpmLog, updatedConfig,
 				Cl01GatherAttributes.originalEdgeHashTable);

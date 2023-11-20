@@ -16,10 +16,10 @@ import info.clearthought.layout.TableLayoutConstants;
 
 public class ControlBar extends JPanel {
 	private final JPanel configPanel;
-//	private final JButton modeButton;
+	//	private final JButton modeButton;
 	private final JButton filterButton;
 	private final JButton actButton;
-//	private final JButton actConfigButton;
+	private final JButton allActivityButton;
 	private final JButton groupButton;
 	private final JPanel expandPanel;
 	private final JButton expandButton;
@@ -38,17 +38,17 @@ public class ControlBar extends JPanel {
 		{
 			add(configPanel, "0,0");
 			configPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-//			modeButton = this.drawButton("Mode");
+			//			modeButton = this.drawButton("Mode");
 			filterButton = this.drawButton("Filter");
 			actButton = this.drawButton("Activity Display");
-//			actConfigButton = this.drawButton("Activity Configuration");
+			allActivityButton = this.drawButton("All activity");
 			groupButton = this.drawButton("Group");
 			legendButton = this.drawButton("Legend");
 
-//			configPanel.add(modeButton);
+			//			configPanel.add(modeButton);
 			configPanel.add(filterButton);
 			configPanel.add(actButton);
-//			configPanel.add(actConfigButton);
+			configPanel.add(allActivityButton);
 			configPanel.add(groupButton);
 			configPanel.add(legendButton);
 
@@ -107,13 +107,9 @@ public class ControlBar extends JPanel {
 		return expandButton;
 	}
 
-//	public JButton getActConfigButton() {
-//		return actConfigButton;
-//	}
-//
-//	public JButton getModeButton() {
-//		return modeButton;
-//	}
+	public JButton getAllActivityButton() {
+		return allActivityButton;
+	}
 
 	public JButton getLegendButton() {
 		return legendButton;

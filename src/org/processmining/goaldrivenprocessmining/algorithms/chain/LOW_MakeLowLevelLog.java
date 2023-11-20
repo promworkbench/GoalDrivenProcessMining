@@ -52,7 +52,6 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 		GDPMLogSkeleton newGdpmLog = new GDPMLogSkeleton();
 		Config config = CONFIG_Update.currentConfig;
 		List<GroupSkeleton> groups = config.getListGroupSkeletons();
-		Map<EdgeObject, Map<EdgeObject, Map<Integer, List<Integer[]>>>> mapEdgeChildEdge = config.getMapEdgeChildEdge();
 
 		List<String> listSources = new ArrayList<String>();
 		List<String> listTargets = new ArrayList<String>();
@@ -108,9 +107,9 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 			if (edgeObject.getNode1().equals(source) && edgeObject.getNode2().equals(target)) {
 				Map<Integer, List<Integer[]>> mapCasePos = edgeTable.get(edgeObject);
 				for (Map.Entry<Integer, List<Integer[]>> entry : mapCasePos.entrySet()) {
+					TraceSkeleton trace = fullLogSkeleton.getLog().get(entry.getKey());
+					
 					for (Integer[] pos : entry.getValue()) {
-						TraceSkeleton trace = fullLogSkeleton.getLog().get(entry.getKey());
-
 						if (pos[0] == -1) {
 							String sourceAct = "begin";
 							String targetAct = trace.getTrace().get(0).getActivity();
