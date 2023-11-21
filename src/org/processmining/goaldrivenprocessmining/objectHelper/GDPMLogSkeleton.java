@@ -26,8 +26,6 @@ public class GDPMLogSkeleton implements Serializable {
 	public GDPMLogSkeleton(XLog log) {
 		GDPMLogSkeleton clone = LogSkeletonUtils.getLogSkeleton(log);
 		this.log = clone.getLog();
-		//		this.groupConfig = new HashMap<>();
-//		this.activityHashTable = clone.getActivityHashTable();
 		this.edgeHashTable = clone.getEdgeHashTable();
 		this.config = clone.getConfig();
 	}

@@ -251,11 +251,14 @@ public class GoalDrivenController {
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				if (inputs.has(GoalDrivenObject.high_level_dfg)) {
+					GoalDrivenDFG dfg = inputs.get(GoalDrivenObject.high_level_dfg);
+					if (GoalDrivenDFGUtils.isInSelectActMode) {
+						GoalDrivenDFGUtils.highlightSelectedAct(dfg, GoalDrivenDFGUtils.selectingAct);
+					}
 					panel.getContentLeftPanel().remove(panel.getHighDfgPanel());
-					panel.setHighDfgPanel(inputs.get(GoalDrivenObject.high_level_dfg));
+					panel.setHighDfgPanel(dfg);
 					panel.getHighDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 					panel.getHighDfgPanel().setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
-					//					panel.getHighDfgPanel().updateDFG(inputs.get(GoalDrivenObject.high_level_dfg));
 					panel.getContentLeftPanel().add(panel.getHighDfgPanel(), BorderLayout.CENTER);
 					panel.revalidate();
 					panel.repaint();
@@ -283,10 +286,13 @@ public class GoalDrivenController {
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				Boolean isLowClear = false;
 				if (inputs.has(GoalDrivenObject.low_level_dfg)) {
-					if (!inputs.get(GoalDrivenObject.low_level_dfg).getLog().getEdgeHashTable().getEdgeTable()
-							.isEmpty()) {
+					GoalDrivenDFG dfg = inputs.get(GoalDrivenObject.low_level_dfg);
+					if (GoalDrivenDFGUtils.isInSelectActMode) {
+						GoalDrivenDFGUtils.highlightSelectedAct(dfg, GoalDrivenDFGUtils.selectingAct);
+					}
+					if (!dfg.getLog().getEdgeHashTable().getEdgeTable().isEmpty()) {
 						panel.getContentRightPanel().remove(panel.getLowDfgPanel());
-						panel.setLowDfgPanel(inputs.get(GoalDrivenObject.low_level_dfg));
+						panel.setLowDfgPanel(dfg);
 						panel.getLowDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 						panel.getLowDfgPanel().setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 						panel.getContentRightPanel().add(panel.getLowDfgPanel(), BorderLayout.CENTER);

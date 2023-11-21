@@ -200,7 +200,8 @@ public class GoalDrivenDFGUtils {
 		}
 
 		// filter state
-
+		// run the action
+		GoalDrivenDFGUtils.display(goalDrivenDFG);
 
 		goalDrivenDFG.revalidate();
 		goalDrivenDFG.repaint();
@@ -310,8 +311,6 @@ public class GoalDrivenDFGUtils {
 		for (GroupSkeleton group : groupSkeletons) {
 			GoalDrivenDFGUtils.collapseGroup(goalDrivenDFG, group);
 		}
-		// run the action
-		GoalDrivenDFGUtils.display(goalDrivenDFG);
 	}
 
 	/* Hide all group nodes -> display children act nodes and edges */
@@ -380,14 +379,11 @@ public class GoalDrivenDFGUtils {
 			}
 
 		}
-		// run the action
-		GoalDrivenDFGUtils.display(goalDrivenDFG);
+
 	}
 
 	/* Display all plain act nodes */
 	public static void displayDefault(GoalDrivenDFG goalDrivenDFG) {
-		//		goalDrivenDFG.setCurrentFrequencyNode(goalDrivenDFG.getFrequencyNode());
-		//		goalDrivenDFG.setCurrentFrequencyEdge(goalDrivenDFG.getFrequencyEdge());
 
 		for (String act : goalDrivenDFG.getCurrentFrequencyNode().keySet()) {
 			Node node = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
@@ -396,7 +392,6 @@ public class GoalDrivenDFGUtils {
 			}
 
 		}
-		GoalDrivenDFGUtils.display(goalDrivenDFG);
 	}
 
 	/* Run all the action so that the dfg can be displayed */
