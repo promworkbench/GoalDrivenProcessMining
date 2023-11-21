@@ -283,7 +283,7 @@ public class GoalDrivenController {
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				Boolean isLowClear = false;
 				if (inputs.has(GoalDrivenObject.low_level_dfg)) {
-					if (!inputs.get(GoalDrivenObject.low_level_dfg).getLog().getActivityHashTable().getActivityTable()
+					if (!inputs.get(GoalDrivenObject.low_level_dfg).getLog().getEdgeHashTable().getEdgeTable()
 							.isEmpty()) {
 						panel.getContentRightPanel().remove(panel.getLowDfgPanel());
 						panel.setLowDfgPanel(inputs.get(GoalDrivenObject.low_level_dfg));
@@ -444,10 +444,8 @@ public class GoalDrivenController {
 				int col = table.columnAtPoint(evt.getPoint());
 				if (row >= 0 && col == 0) {
 					String act = table.getValueAt(row, col).toString();
-					GoalDrivenDFGUtils.highlightSelectedAct(panel.getHighDfgPanel(), act);
-					if (panel.getLowDfgPanel().getGraph() != null) {
-						GoalDrivenDFGUtils.highlightSelectedAct(panel.getLowDfgPanel(), act);
-					}
+					GoalDrivenDFGUtils.isInSelectActMode = true;
+					chain.setObject(GoalDrivenObject.selected_act, act);
 				}
 			}
 		});
@@ -496,6 +494,52 @@ public class GoalDrivenController {
 				}
 				panel.getConfigCards().getAllActivityConfigPanel().updateDefaultConfigTable(mapActToHierarchy);
 
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+		// update the selected act on high level DFG
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Display the selected act on the high level graph";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.selected_act, GoalDrivenObject.high_level_dfg };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				if (GoalDrivenDFGUtils.isInSelectActMode) {
+					GoalDrivenDFG highLevelDFG = inputs.get(GoalDrivenObject.high_level_dfg);
+					String selectedAct = inputs.get(GoalDrivenObject.selected_act);
+					GoalDrivenDFGUtils.highlightSelectedAct(highLevelDFG, selectedAct);
+				}
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+		// update the selected act on low level DFG
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Display the selected act on the low level graph";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.selected_act, GoalDrivenObject.low_level_dfg };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				if (GoalDrivenDFGUtils.isInSelectActMode) {
+					GoalDrivenDFG lowLevelDFG = inputs.get(GoalDrivenObject.low_level_dfg);
+					String selectedAct = inputs.get(GoalDrivenObject.selected_act);
+					GoalDrivenDFGUtils.highlightSelectedAct(lowLevelDFG, selectedAct);
+				}
 			}
 
 			public void invalidate(GoalDrivenPanel panel) {

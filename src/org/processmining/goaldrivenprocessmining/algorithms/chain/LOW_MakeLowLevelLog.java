@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
@@ -108,7 +107,7 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 				Map<Integer, List<Integer[]>> mapCasePos = edgeTable.get(edgeObject);
 				for (Map.Entry<Integer, List<Integer[]>> entry : mapCasePos.entrySet()) {
 					TraceSkeleton trace = fullLogSkeleton.getLog().get(entry.getKey());
-					
+
 					for (Integer[] pos : entry.getValue()) {
 						if (pos[0] == -1) {
 							String sourceAct = "begin";
@@ -151,74 +150,6 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 		/*------------------*/
 		newGdpmLog.setEdgeHashTable(newEdgeHashTable);
 		// Create simple activity hash table
-		ActivityHashTable activityHashTable = new ActivityHashTable();
-		this.addActToActivityHashTable(newGdpmLog, activityHashTable);
-		newGdpmLog.setActivityHashTable(activityHashTable);
 	}
 
-
-	private void addActToActivityHashTable(GDPMLogSkeleton gdpmLogSkeleton, ActivityHashTable activityHashTable) {
-		for (EdgeObject edgeObject : gdpmLogSkeleton.getEdgeHashTable().getEdgeTable().keySet()) {
-			String act1 = edgeObject.getNode1();
-			String act2 = edgeObject.getNode2();
-
-			Map<Integer, List<Integer[]>> allTracePos = gdpmLogSkeleton.getEdgeHashTable().getEdgeTable()
-					.get(edgeObject);
-			for (Map.Entry<Integer, List<Integer[]>> entry : allTracePos.entrySet()) {
-				int trace = entry.getKey();
-				List<Integer[]> listEdgePos = entry.getValue();
-				List<Integer> sourceIndexes = new ArrayList<>();
-				List<Integer> targetIndexes = new ArrayList<>();
-				for (Integer[] edge : listEdgePos) {
-					sourceIndexes.add(edge[0]);
-					targetIndexes.add(edge[1]);
-				}
-				if (!act1.equals("begin")) {
-					if (activityHashTable.getActivityTable().containsKey(act1)) {
-
-						if (activityHashTable.getActivityTable().get(act1).containsKey(trace)) {
-							List<Integer> actPos = activityHashTable.getActivityTable().get(act1).get(trace);
-							for (Integer pos : sourceIndexes) {
-								if (!actPos.contains(pos)) {
-									actPos.add(pos);
-								}
-							}
-							activityHashTable.getActivityTable().get(act1).replace(trace, actPos);
-						} else {
-							List<Integer> actPos = new ArrayList<>();
-							actPos.addAll(sourceIndexes);
-							activityHashTable.getActivityTable().get(act1).put(trace, actPos);
-						}
-					}
-
-					else {
-						Map<Integer, List<Integer>> mapPosTrace = new HashMap<>();
-						mapPosTrace.put(trace, sourceIndexes);
-						activityHashTable.getActivityTable().put(act1, mapPosTrace);
-					}
-				}
-				if (!act2.equals("end")) {
-					if (activityHashTable.getActivityTable().containsKey(act2)) {
-						if (activityHashTable.getActivityTable().get(act2).containsKey(trace)) {
-							List<Integer> actPos = activityHashTable.getActivityTable().get(act2).get(trace);
-							for (Integer pos : targetIndexes) {
-								if (!actPos.contains(pos)) {
-									actPos.add(pos);
-								}
-							}
-							activityHashTable.getActivityTable().get(act2).replace(trace, actPos);
-						} else {
-							List<Integer> actPos = new ArrayList<>();
-							actPos.addAll(targetIndexes);
-							activityHashTable.getActivityTable().get(act2).put(trace, actPos);
-						}
-					} else {
-						Map<Integer, List<Integer>> mapPosTrace = new HashMap<>();
-						mapPosTrace.put(trace, targetIndexes);
-						activityHashTable.getActivityTable().put(act2, mapPosTrace);
-					}
-				}
-			}
-		}
-	}
 }

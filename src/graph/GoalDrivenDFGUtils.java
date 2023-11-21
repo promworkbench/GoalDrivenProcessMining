@@ -201,10 +201,6 @@ public class GoalDrivenDFGUtils {
 
 		// filter state
 
-		// check if is in select mode
-		if (isInSelectActMode) {
-			highlightSelectedAct(goalDrivenDFG, selectingAct);
-		}
 
 		goalDrivenDFG.revalidate();
 		goalDrivenDFG.repaint();
@@ -730,13 +726,14 @@ public class GoalDrivenDFGUtils {
 						highlightEdges.add(row);
 					} else {
 						unhighlightEdges.add(row);
-						if (!unhighlightNodes.contains(source)) {
-							unhighlightNodes.add(source);
-						}
-						if (!unhighlightNodes.contains(target)) {
-							unhighlightNodes.add(target);
-						}
 					}
+				}
+			}
+			TableIterator nodes = nodeTable.iterator();
+			while (nodes.hasNext()) {
+				int row = nodes.nextInt();
+				if (row != highlightNode.getRow()) {
+					unhighlightNodes.add(row);
 				}
 			}
 			// highlight nodes and edges
@@ -744,6 +741,7 @@ public class GoalDrivenDFGUtils {
 			VisualItem nodeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
 					nodeTable.getTuple(highlightNode.getRow()));
 			highLightItem(nodeItem);
+
 			for (Integer i : unhighlightNodes) {
 				nodeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
 						nodeTable.getTuple(i));

@@ -13,14 +13,12 @@ public class GDPMLogSkeleton implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -5522692751620232352L;
-	private ActivityHashTable activityHashTable;
 	private EdgeHashTable edgeHashTable;
 	private List<TraceSkeleton> log;
 	private Config config;
 
 	public GDPMLogSkeleton() {
 		this.log = new ArrayList<>();
-		this.activityHashTable = new ActivityHashTable();
 		this.edgeHashTable = new EdgeHashTable();
 		this.config = new Config();
 	}
@@ -29,7 +27,7 @@ public class GDPMLogSkeleton implements Serializable {
 		GDPMLogSkeleton clone = LogSkeletonUtils.getLogSkeleton(log);
 		this.log = clone.getLog();
 		//		this.groupConfig = new HashMap<>();
-		this.activityHashTable = clone.getActivityHashTable();
+//		this.activityHashTable = clone.getActivityHashTable();
 		this.edgeHashTable = clone.getEdgeHashTable();
 		this.config = clone.getConfig();
 	}
@@ -90,13 +88,6 @@ public class GDPMLogSkeleton implements Serializable {
 		return result;
 	}
 
-	public ActivityHashTable getActivityHashTable() {
-		return activityHashTable;
-	}
-
-	public void setActivityHashTable(ActivityHashTable activityHashTable) {
-		this.activityHashTable = activityHashTable;
-	}
 
 	public List<TraceSkeleton> getLog() {
 		return log;
@@ -123,8 +114,7 @@ public class GDPMLogSkeleton implements Serializable {
 	}
 
 	public String toString() {
-		return "LogSkeleton [activityHashTable=" + activityHashTable + ", edgeHashTable=" + edgeHashTable + ", log="
-				+ log + ", config=" + config + "]";
+		return "GDPMLogSkeleton [edgeHashTable=" + edgeHashTable + ", log=" + log + ", config=" + config + "]";
 	}
 
 	@Override

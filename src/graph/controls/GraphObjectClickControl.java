@@ -34,7 +34,11 @@ public class GraphObjectClickControl extends ControlAdapter {
 	public void itemClicked(VisualItem item, java.awt.event.MouseEvent e) {
 		if (!e.isControlDown() && e.getButton() != MouseEvent.BUTTON3) {
 			if (edgeFilter.getBoolean(item)) {
-				item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
+				// only highlight edge when not in selected mode
+				if (!GoalDrivenDFGUtils.isInSelectActMode) {
+					item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
+				}
+				// find the source and end of edge
 				EdgeItem edge = (EdgeItem) item;
 				String sourceNode = edge.getSourceItem().getString(GraphConstants.LABEL_FIELD)
 						.equals(GraphConstants.BEGIN_NODE_NAME)

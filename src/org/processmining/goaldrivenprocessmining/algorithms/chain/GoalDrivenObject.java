@@ -7,7 +7,6 @@ import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.SelectedGroup;
 import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
@@ -61,7 +60,8 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	public static final IvMObject<GoalDrivenDFG> low_level_dfg = c("low-level DFG", GoalDrivenDFG.class);
 	public static final IvMObject<GoalDrivenDFG> selected_group_dfg = c("DFG of the selected group", GoalDrivenDFG.class);
 	// selected group
-	public static final IvMObject<SelectedGroup> selected_group = c("Selected group from UI", SelectedGroup.class);
+	public static final IvMObject<String> selected_act = c("Selected act from UI", String.class);
+	
 	// 
 	public GoalDrivenObject(String name, Class<C> clazz) {
 		super(name, clazz);

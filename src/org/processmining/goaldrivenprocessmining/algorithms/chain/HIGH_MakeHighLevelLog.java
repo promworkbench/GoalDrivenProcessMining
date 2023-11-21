@@ -51,7 +51,6 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 		gdpmLog.setConfig(updatedConfig);
 		LogSkeletonUtils.setupEdgeHashTableForHighLevelAfterChangingDisplayedActs(gdpmLog, updatedConfig,
 				Cl01GatherAttributes.originalEdgeHashTable);
-		gdpmLog.setActivityHashTable(Cl01GatherAttributes.originalActivityHashTable);
 		CONFIG_Update.currentConfig = updatedConfig;
 		HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable = gdpmLog.getEdgeHashTable();
 		

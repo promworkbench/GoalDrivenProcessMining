@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
-import org.processmining.goaldrivenprocessmining.objectHelper.ActivityHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
@@ -49,7 +48,6 @@ import prefuse.data.expression.Predicate;
 import prefuse.data.expression.parser.ExpressionParser;
 import prefuse.data.util.TableIterator;
 import prefuse.render.DefaultRendererFactory;
-import prefuse.util.ColorLib;
 import prefuse.visual.VisualItem;
 
 public class GoalDrivenDFG extends Display {
@@ -109,7 +107,7 @@ public class GoalDrivenDFG extends Display {
 		repaint.add(new RepaintAction());
 		m_vis.putAction("repaint", repaint);
 
-		if (this.log != null && !this.log.getActivityHashTable().getActivityTable().isEmpty()) {
+		if (this.log != null && !this.log.getEdgeHashTable().getEdgeTable().isEmpty()) {
 			this.calculateFrequencyNode();
 			this.calculateFrequencyEdge();
 
@@ -210,7 +208,6 @@ public class GoalDrivenDFG extends Display {
 		this.setDefaultNodeSize();
 
 		this.setDefaultRenderer();
-		this.testInviNode();
 	}
 
 	private void setDefaultControl() {
@@ -442,31 +439,6 @@ public class GoalDrivenDFG extends Display {
 		this.runCustomColorNodeFillAction();
 	}
 
-	public void testInviNode() {
-		// stroke color
-		ColorAction testC = new ColorAction("inviGraph.nodes", VisualItem.STROKECOLOR);
-		testC.setDefaultColor(ColorLib.color(Color.WHITE));
-
-		float[] dashPattern = { 2.0f, 2.0f }; // 2-pixel dash, 2-pixel gap
-		// Create a BasicStroke with the specified dash pattern
-		BasicStroke dashedStroke = new BasicStroke(2.0f, // Width of the stroke
-				BasicStroke.CAP_BUTT, // End cap style
-				BasicStroke.JOIN_MITER, // Join style
-				10.0f, // Miter limit
-				dashPattern, // Dash pattern
-				0.0f // Dash phase (offset into the dash pattern)
-		);
-		StrokeAction testStroke = new StrokeAction("inviGraph.nodes", dashedStroke);
-		ColorAction testColor = new ColorAction("inviGraph.nodes", VisualItem.FILLCOLOR);
-		testColor.setDefaultColor(ColorLib.color(Color.RED));
-		ActionList test = new ActionList();
-		test.add(testC);
-		test.add(testStroke);
-		test.add(testColor);
-		m_vis.putAction("test", test);
-		m_vis.run("test");
-	}
-
 	public void runCustomColorNodeFillAction() {
 		// Find the minimum and maximum values in the data array
 		int minFreq = Integer.MAX_VALUE;
@@ -511,15 +483,29 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	private void calculateFrequencyNode() {
-		for (Map.Entry<String, Map<Integer, List<Integer>>> entry : this.log.getActivityHashTable().getActivityTable()
+		for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : this.log.getEdgeHashTable().getEdgeTable()
 				.entrySet()) {
-			String act = entry.getKey();
-			Map<Integer, List<Integer>> allPos = entry.getValue();
+			EdgeObject edgeObject = entry.getKey();
+			String source = edgeObject.getNode1();
+			String target = edgeObject.getNode2();
+			Map<Integer, List<Integer[]>> allPos = entry.getValue();
 			int total = 0;
-			for (List<Integer> pos : allPos.values()) {
+			for (List<Integer[]> pos : allPos.values()) {
 				total += pos.size();
 			}
-			this.frequencyNode.put(act, total);
+			if (this.frequencyNode.containsKey(source)) {
+				this.frequencyNode.put(source, this.frequencyNode.get(source) + total);
+			} else {
+				this.frequencyNode.put(source, total);
+			}
+			if (this.frequencyNode.containsKey(target)) {
+				this.frequencyNode.put(target, this.frequencyNode.get(target) + total);
+			} else {
+				this.frequencyNode.put(target, total);
+			}
+		}
+		for (Map.Entry<String, Integer> entry : this.frequencyNode.entrySet()) {
+			this.frequencyNode.replace(entry.getKey(), entry.getValue() / 2);
 		}
 		this.currentFrequencyNode = this.frequencyNode;
 	}
@@ -539,24 +525,32 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	private void addActToTable() {
-		ActivityHashTable activityHashTable = this.log.getActivityHashTable();
+		//		ActivityHashTable activityHashTable = this.log.getActivityHashTable();
 		EdgeHashTable edgeHashTable = this.log.getEdgeHashTable();
 
 		// get all using nodes
 		List<String> usingActs = LogSkeletonUtils.getUsingActsInLog(this.log);
 
 		// add all node, set display true
-		for (String act : activityHashTable.getActivityTable().keySet()) {
-			if (usingActs.contains(act)) {
-				Node node1 = null;
-				node1 = this.graph.addNode();
-				this.configNode(node1, act, false);
-			}
-		}
+		//		for (String act : activityHashTable.getActivityTable().keySet()) {
+		//			if (usingActs.contains(act)) {
+		//				Node node1 = null;
+		//				node1 = this.graph.addNode();
+		//				this.configNode(node1, act, false);
+		//			}
+		//		}
 		// add edge
 		for (EdgeObject edge : edgeHashTable.getEdgeTable().keySet()) {
 			Node node1 = this.getNodeByLabelInGraph(this.graph, edge.getNode1());
+			if (node1 == null) {
+				node1 = this.graph.addNode();
+				this.configNode(node1, edge.getNode1(), false);
+			}
 			Node node2 = this.getNodeByLabelInGraph(this.graph, edge.getNode2());
+			if (node2 == null) {
+				node2 = this.graph.addNode();
+				this.configNode(node2, edge.getNode2(), false);
+			}
 			Edge e = this.graph.addEdge(node1, node2);
 			this.configEdge(e, edge);
 		}
