@@ -1,14 +1,10 @@
 package graph.action;
 
-import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Shape;
-import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
-
-import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
 
 import graph.GoalDrivenDFG;
 import graph.GraphConstants;
@@ -40,39 +36,6 @@ public class NodeRenderer extends LabelRenderer {
 		} else if (item.getBoolean(GraphConstants.IS_DISPLAY)) {
 			super.render(g, item);
 		}
-		if (item.get(GraphConstants.NODE_TYPE_FIELD).equals(NodeType.GROUP_NODE)
-				&& item.getBoolean(GraphConstants.IS_DISPLAY)) {
-			// Get position and bounds information from VisualItem
-			double x = item.getX();
-			double y = item.getY();
-			double width = item.getBounds().getWidth();
-			double height = item.getBounds().getHeight();
-
-			// Set the dashed stroke
-			float[] dashPattern = { 5, 5 }; // 5 pixels on, 5 pixels off
-			BasicStroke dashedStroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f,
-					dashPattern, 0.0f);
-
-			// Save the current stroke, set the dashed stroke, and draw the rectangle
-			Stroke originalStroke = g.getStroke();
-			g.setStroke(dashedStroke);
-			// Draw the top border
-			g.drawLine((int) (x - width / 2) - 25, (int) (y - height / 2) - 25, (int) (x + width/2 + 25),
-					(int) (y - height / 2) - 25);
-			// Draw the bottom border
-			g.drawLine((int) (x + width/2 + 25), (int) (y - height / 2) - 25, (int) (x + width/2 + 25),
-					(int) (y + height / 2) + 25);
-			// Draw the left border
-			g.drawLine((int) (x + width/2 + 25), (int) (y + height / 2) + 25, (int) (x - width / 2) - 25,
-					(int) (y + height / 2) + 25);
-			// Draw the right border
-			g.drawLine((int) (x - width / 2) - 25, (int) (y + height / 2) + 25, (int) (x - width / 2) - 25,
-					(int) (y - height / 2) - 25);
-
-			// Restore the original stroke
-			g.setStroke(originalStroke);
-		}
-
 	}
 
 	protected Shape getRawShape(VisualItem item) {

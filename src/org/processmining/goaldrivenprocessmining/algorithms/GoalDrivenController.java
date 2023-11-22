@@ -37,7 +37,6 @@ import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateType;
 import org.processmining.goaldrivenprocessmining.objectHelper.ValueCategoryObject;
@@ -203,12 +202,6 @@ public class GoalDrivenController {
 			}
 		}
 		GroupSkeleton newGroupSkeleton = new GroupSkeleton(groupName, selectedAct, selectedGroup);
-		//		if (isHighLevel) {
-		//			GoalDrivenDFGUtils.addGroupToDFG(panel.getHighDfgPanel(), newGroupSkeleton);
-		//
-		//		} else {
-		//			GoalDrivenDFGUtils.addGroupToDFG(panel.getLowDfgPanel(), newGroupSkeleton);
-		//		}
 		GoalDrivenDFGUtils.addGroupState(newGroupSkeleton);
 		GoalDrivenDFGUtils.updateDfg(panel.getHighDfgPanel());
 		// update config
@@ -221,7 +214,6 @@ public class GoalDrivenController {
 
 	protected void initGui(final ProMCanceller canceller, final GoalDrivenConfiguration configuration) {
 		initGuiControlBar();
-		initGuiSidePanel();
 		initGuiMiner();
 		initHighLevelGraph();
 		initLowLevelGraph();
@@ -979,37 +971,6 @@ public class GoalDrivenController {
 
 			public void invalidate(GoalDrivenPanel panel) {
 				//no action necessary (combobox will be disabled until new classifiers are computed)
-			}
-		});
-
-	}
-
-	protected void initGuiSidePanel() {
-		//stat panel in side panel
-		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
-			public String getName() {
-				return "update stat for selected objects";
-			}
-
-			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.stat_selected_node };
-			}
-
-			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
-				if (inputs.has(GoalDrivenObject.stat_selected_node)) {
-					StatNodeObject statNodeObject = inputs.get(GoalDrivenObject.stat_selected_node);
-					HashMap<String, String> attributes = new HashMap<String, String>();
-					attributes.put("Total occurrences", Integer.toString(statNodeObject.getTotalOccurences()));
-					attributes.put("Average occurrences per case", Float.toString(statNodeObject.getAvgOccurences()));
-					attributes.put("Average throughput time per case", statNodeObject.getAvgThroughputTime());
-					panel.getSidePanel().getStatisticPanel().setContentMap(attributes);
-					panel.getSidePanel().getStatisticPanel().updateStatistics();
-					panel.revalidate();
-					panel.repaint();
-				}
-			}
-
-			public void invalidate(GoalDrivenPanel panel) {
 			}
 		});
 

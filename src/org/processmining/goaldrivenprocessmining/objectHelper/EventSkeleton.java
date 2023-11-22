@@ -8,10 +8,10 @@ public class EventSkeleton implements Serializable {
 	 */
 	private static final long serialVersionUID = -3889100038468173203L;
 	private String activity;
-	private String time;
+	private long time;
 	private Boolean isDisplayed;
 
-	public EventSkeleton(String activity, String time, Boolean isDisplayed) {
+	public EventSkeleton(String activity, long time, Boolean isDisplayed) {
 		this.activity = activity;
 		this.time = time;
 		this.isDisplayed = isDisplayed;
@@ -31,11 +31,11 @@ public class EventSkeleton implements Serializable {
 		this.activity = activity;
 	}
 
-	public String getTime() {
+	public long getTime() {
 		return time;
 	}
 
-	public void setTime(String time) {
+	public void setTime(long time) {
 		this.time = time;
 	}
 

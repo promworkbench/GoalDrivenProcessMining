@@ -7,7 +7,7 @@ import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
-import org.processmining.goaldrivenprocessmining.objectHelper.StatNodeObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.ThroughputTimeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
@@ -27,8 +27,8 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	public static final IvMObject<AttributeClassifier[]> unselected_unique_values = c("unselected unique values",
 			AttributeClassifier[].class);
 	public static final IvMObject<String> selected_node = c("selected node", String.class);
-	public static final IvMObject<StatNodeObject> stat_selected_node = c("stat of the selected node",
-			StatNodeObject.class);
+	public static final IvMObject<ThroughputTimeObject> stat_selected_node = c("stat of the selected node",
+			ThroughputTimeObject.class);
 	// im log in high level
 	public static final IvMObject<AttributeClassifier[]> all_unique_values = c("all unique values",
 			AttributeClassifier[].class);

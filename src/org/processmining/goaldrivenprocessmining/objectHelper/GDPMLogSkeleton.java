@@ -2,7 +2,9 @@ package org.processmining.goaldrivenprocessmining.objectHelper;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.deckfour.xes.model.XLog;
@@ -14,12 +16,14 @@ public class GDPMLogSkeleton implements Serializable {
 	 */
 	private static final long serialVersionUID = -5522692751620232352L;
 	private EdgeHashTable edgeHashTable;
+	private Map<EdgeObject, ThroughputTimeObject> edgeThroughputTime;
 	private List<TraceSkeleton> log;
 	private Config config;
 
 	public GDPMLogSkeleton() {
 		this.log = new ArrayList<>();
 		this.edgeHashTable = new EdgeHashTable();
+		this.edgeThroughputTime = new HashMap<>();
 		this.config = new Config();
 	}
 
@@ -86,7 +90,6 @@ public class GDPMLogSkeleton implements Serializable {
 		return result;
 	}
 
-
 	public List<TraceSkeleton> getLog() {
 		return log;
 	}
@@ -109,6 +112,14 @@ public class GDPMLogSkeleton implements Serializable {
 
 	public void setConfig(Config config) {
 		this.config = config;
+	}
+
+	public Map<EdgeObject, ThroughputTimeObject> getEdgeThroughputTime() {
+		return edgeThroughputTime;
+	}
+
+	public void setEdgeThroughputTime(Map<EdgeObject, ThroughputTimeObject> edgeThroughputTime) {
+		this.edgeThroughputTime = edgeThroughputTime;
 	}
 
 	public String toString() {

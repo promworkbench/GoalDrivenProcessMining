@@ -21,6 +21,7 @@ import prefuse.visual.VisualItem;
 
 public class CustomizedEdgeRenderer extends EdgeRenderer {
 	private HashMap<EdgeObject, Integer> currentFrequencyEdge;
+	private HashMap<EdgeObject, String> currentTimeEdge;
 	private HashMap<EdgeObject, Integer> customizedFrequencyEdge;
 
 	public CustomizedEdgeRenderer(int edgeTypeCurve, int edgeArrowForward) {

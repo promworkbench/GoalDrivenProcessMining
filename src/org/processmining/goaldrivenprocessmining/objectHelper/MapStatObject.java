@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 public class MapStatObject implements Serializable {
-	private HashMap<String, StatNodeObject> mapStatNode;
+	private HashMap<String, ThroughputTimeObject> mapStatNode;
 	private HashMap<EdgeObject, StatEdgeObject> mapStatEdge;
 
 	public MapStatObject() {
@@ -20,11 +20,11 @@ public class MapStatObject implements Serializable {
 		this.mapStatEdge = mapStatEdge;
 	}
 
-	public HashMap<String, StatNodeObject> getMapStatNode() {
+	public HashMap<String, ThroughputTimeObject> getMapStatNode() {
 		return mapStatNode;
 	}
 
-	public void setMapStatNode(HashMap<String, StatNodeObject> mapStatNode) {
+	public void setMapStatNode(HashMap<String, ThroughputTimeObject> mapStatNode) {
 		this.mapStatNode = mapStatNode;
 	}
 

@@ -98,7 +98,7 @@ public class GoalDrivenPanel extends JPanel {
 			highDfgPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 			contentLeftPanel.add(highDfgPanel, BorderLayout.CENTER);
 			contentLeftPanel.add(highDfgPanel);
-			GridBagConstraints gbcContentLeftPanel = createGridBagConstraints(0, 0, 0.37);
+			GridBagConstraints gbcContentLeftPanel = createGridBagConstraints(0, 0, 0.5);
 			contentPanel.add(contentLeftPanel, gbcContentLeftPanel);
 		}
 
@@ -117,12 +117,10 @@ public class GoalDrivenPanel extends JPanel {
 			lowDfgPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 			contentRightPanel.add(lowDfgPanel, BorderLayout.CENTER);
 
-			GridBagConstraints gbcContentRightPanel = createGridBagConstraints(1, 0, 0.37);
+			GridBagConstraints gbcContentRightPanel = createGridBagConstraints(1, 0, 0.5);
 			contentPanel.add(contentRightPanel, gbcContentRightPanel);
 
 		}
-		GridBagConstraints gbcSidePanel = createGridBagConstraints(2, 0, 0.26);
-		contentPanel.add(sidePanel, gbcSidePanel);
 		//controller view
 		{
 			controllerView = new ControllerView<>(this);
