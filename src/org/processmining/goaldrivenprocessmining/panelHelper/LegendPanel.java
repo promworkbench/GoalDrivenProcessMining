@@ -27,7 +27,7 @@ public class LegendPanel extends JPanel {
 
 		// Second Row
 		JLabel edgeWidthLabel = new JLabel("Edge width");
-		JComboBox<String> edgeWidthComboBox = new JComboBox<>(new String[] { "Frequency" });
+		JComboBox<String> edgeWidthComboBox = new JComboBox<>(new String[] { "Frequency", "Throughput time" });
 
 		// Add components to the panel
 		legendPanel.add(nodeColorLabel);
