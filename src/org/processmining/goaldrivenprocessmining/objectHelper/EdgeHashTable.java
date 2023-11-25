@@ -16,7 +16,7 @@ public class EdgeHashTable implements Serializable {
 	public EdgeHashTable() {
 		this.edgeTable = new HashMap<>();
 	}
-
+	
 	public void addEdge(EdgeObject edge, Map<Integer, List<Integer[]>> edgeTable) {
 		for (Map.Entry<Integer, List<Integer[]>> entry : edgeTable.entrySet()) {
 			for (Integer[] i : entry.getValue()) {

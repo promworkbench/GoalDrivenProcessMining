@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,10 +96,14 @@ public class LogSkeletonUtils {
 		}
 
 		// calculate affected edges for each activity
+		List<String> checkedUnselectedActs = new ArrayList<>();
 		for (String act : unselectedActs) {
 			List<EdgeObject> actLeft = new ArrayList<>();
 			List<EdgeObject> actRight = new ArrayList<>();
 			List<EdgeObject> removedEdges = new ArrayList<>();
+			// remove self loop edges in calculation
+			removeSelfLoopEdges(affectedEdges, act, checkedUnselectedActs);
+
 			// get the left edge and right edge to the activity L:(a, X), R:(X,a)
 			for (EdgeObject edge : affectedEdges.getEdgeTable().keySet()) {
 				if (edge.getNode2().equals(act)) {
@@ -125,8 +130,10 @@ public class LogSkeletonUtils {
 						List<Integer[]> listPosEdgeRight = mapAllPosEdgeRight.get(traceIndex);
 						for (Integer[] posEdgeLeft : listPosEdgeLeft) {
 							for (Integer[] posEdgeRight : listPosEdgeRight) {
+								int s = posEdgeLeft[1];
+								int e = posEdgeRight[0];
 								// check if the 2 edges happen sequentially
-								if (posEdgeLeft[1] == posEdgeRight[0]) {
+								if (s == e) {
 									// create a new indirect edge
 									newEdge = new EdgeObject(edgeLeft.getNode1(), edgeRight.getNode2(), true);
 									affectedEdges.addEdge(newEdge, traceIndex, posEdgeLeft[0], posEdgeRight[1]);
@@ -144,6 +151,7 @@ public class LogSkeletonUtils {
 			for (EdgeObject edge : removedEdges) {
 				affectedEdges.getEdgeTable().remove(edge);
 			}
+			checkedUnselectedActs.add(act);
 		}
 
 		for (EdgeObject edge : affectedEdges.getEdgeTable().keySet()) {
@@ -160,6 +168,14 @@ public class LogSkeletonUtils {
 		gdpmLogSkeleton.setEdgeHashTable(newEdgeHashTable);
 
 		/*-----------------*/
+		// calculate throughput for each edge
+		calculateThroughputForEachEdge(gdpmLogSkeleton);
+
+		setupMapActToEdgeHighLevel(newEdgeHashTable, config);
+		/*-----------------*/
+	}
+
+	public static void calculateThroughputForEachEdge(GDPMLogSkeleton gdpmLogSkeleton) {
 		// calculate throughput time for each edge
 		Map<EdgeObject, ThroughputTimeObject> mapEdgeThroughputTime = new HashMap<>();
 		for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : gdpmLogSkeleton.getEdgeHashTable()
@@ -216,8 +232,93 @@ public class LogSkeletonUtils {
 			}
 
 		}
-		setupMapActToEdgeHighLevel(newEdgeHashTable, config);
-		/*-----------------*/
+		gdpmLogSkeleton.setEdgeThroughputTime(mapEdgeThroughputTime);
+	}
+
+	public static void removeSelfLoopEdges(EdgeHashTable affectedEdges, String act,
+			List<String> checkedUnselectedActs) {
+		List<EdgeObject> loopEdges = new ArrayList<>();
+		// fix the self loop edge: (x,x) -> (a,x) + (x,b) 
+		// find the self loop edge
+		List<EdgeObject> edges = new ArrayList<>();
+		for (EdgeObject edge : affectedEdges.getEdgeTable().keySet()) {
+			edges.add(edge);
+		}
+		for (EdgeObject edge : edges) {
+			if (edge.getNode1().equals(edge.getNode2()) && edge.getNode1().equals(act)) {
+				loopEdges.add(edge);
+				//merge all consecutive loop sequence in a trace
+				Map<Integer, List<Integer[]>> mapAllPosLoopEdge = affectedEdges.getEdgePositions(edge);
+				Map<Integer, List<Integer[]>> newMap = new HashMap<>();
+				for (Integer trace : mapAllPosLoopEdge.keySet()) {
+					List<Integer[]> allPos = mapAllPosLoopEdge.get(trace);
+					List<Integer[]> newPos = new ArrayList<>();
+					allPos.sort(Comparator.comparing(array -> array[0]));
+					int curS = allPos.get(0)[0];
+					int curE = allPos.get(0)[1];
+					if (allPos.size() == 1) {
+						newPos.add(new Integer[] { curS, curE });
+					} else {
+						for (int i = 1; i < allPos.size(); i++) {
+							if (curE == allPos.get(i)[0]) {
+								curE = allPos.get(i)[1];
+							} else {
+								newPos.add(new Integer[] { curS, curE });
+								curS = allPos.get(i)[0];
+								curE = allPos.get(i)[1];
+							}
+							if (i == allPos.size() - 1) {
+								newPos.add(new Integer[] { curS, curE });
+							}
+						}
+					}
+
+					newMap.put(trace, newPos);
+				}
+				affectedEdges.getEdgeTable().remove(edge);
+				affectedEdges.addEdge(edge, newMap);
+			}
+		}
+
+		// for each merge loop edge, find its connecting edge to the left and to the right
+		// keep the left, replace the right
+		EdgeHashTable newMap = new EdgeHashTable();
+		for (EdgeObject edge : loopEdges) {
+			String start = edge.getNode1();
+			Map<Integer, List<Integer[]>> mapAllPosLoopEdge = affectedEdges.getEdgePositions(edge);
+			for (Integer trace : mapAllPosLoopEdge.keySet()) {
+				TraceSkeleton traceSkeleton = Cl01GatherAttributes.originalLog.get(trace);
+				for (Integer[] pos : mapAllPosLoopEdge.get(trace)) {
+					int endPos = pos[1];
+					int endIndex = pos[1] + 1;
+					String end = "";
+					if (endPos + 1 == traceSkeleton.getTrace().size()) {
+						end = "end";
+						endIndex = -2;
+					} else {
+						for (int i = endPos + 1; i < traceSkeleton.getTrace().size(); i++) {
+							if (!checkedUnselectedActs.contains(traceSkeleton.getTrace().get(i).getActivity())) {
+								end = traceSkeleton.getTrace().get(i).getActivity();
+								endIndex = i;
+								break;
+							}
+						}
+						if (end.isEmpty()) {
+							end = "end";
+							endIndex = -2;
+						}
+					}
+					EdgeObject newEdge = new EdgeObject(start, end, true);
+					newMap.addEdge(newEdge, trace, pos[0], endIndex);
+				}
+			}
+		}
+		for (EdgeObject edge : loopEdges) {
+			affectedEdges.getEdgeTable().remove(edge);
+		}
+		for (EdgeObject edge : newMap.getEdgeTable().keySet()) {
+			affectedEdges.addEdge(edge, newMap.getEdgePositions(edge));
+		}
 	}
 
 	public static void setupMapActToEdgeHighLevel(EdgeHashTable edgeHashTable, Config config) {
