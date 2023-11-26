@@ -544,8 +544,7 @@ public class GoalDrivenController {
 				//no action necessary (combobox will be disabled until new classifiers are computed)
 			}
 		});
-
-		/*--------All act config panel---------*/
+		/*-----------------------------------------*/
 
 		// mode done button
 		panel.getConfigCards().getModePanel().getModeDoneButton().addActionListener(new ActionListener() {
@@ -585,6 +584,7 @@ public class GoalDrivenController {
 			}
 		});
 
+		/*--------Act display config panel---------*/
 		// act done button		
 		panel.getConfigCards().getActDisplayPanel().getActDoneButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -632,6 +632,8 @@ public class GoalDrivenController {
 				panel.getConfigCards().setVisible(false);
 			}
 		});
+		/*-----------------------------------------*/
+
 		// filter done button
 		// filter cancel button
 		panel.getConfigCards().getFilterConfigPanel().getFilterCancelButton().addActionListener(new ActionListener() {
@@ -922,6 +924,7 @@ public class GoalDrivenController {
 						}
 					}
 				});
+
 		// legend button
 		panel.getControlBar().getLegendButton().addActionListener(new ActionListener() {
 
@@ -931,18 +934,111 @@ public class GoalDrivenController {
 			}
 		});
 		// legend done button
-		panel.getConfigCards().getLegendPanel().getDoneButton().addActionListener(new ActionListener() {
+		panel.getConfigCards().getLegendPanel().getLegendDoneButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				panel.getConfigCards().setVisible(false);
-			}
-		});
 
+				String selectedMode = (String) panel.getConfigCards().getLegendPanel().getModeComboBox()
+						.getSelectedItem();
+				String selectedAdditionalMode = (String) panel.getConfigCards().getLegendPanel()
+						.getAdditionalModeComboBox().getSelectedItem();
+				chain.setObject(GoalDrivenObject.selected_mode, selectedMode);
+				chain.setObject(GoalDrivenObject.selected_additional_mode, selectedAdditionalMode);
+			}
+		});
 		// legend cancel button
-		panel.getConfigCards().getLegendPanel().getCancelButton().addActionListener(new ActionListener() {
+		panel.getConfigCards().getLegendPanel().getLegendCancelButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				panel.getConfigCards().setVisible(false);
 			}
 		});
+		// update legend in high level dfg
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Display the high level graph based on the selected mode";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.selected_additional_mode, GoalDrivenObject.selected_mode,
+						GoalDrivenObject.high_level_dfg };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				GoalDrivenDFG highLevelDFG = inputs.get(GoalDrivenObject.high_level_dfg);
+				String selectedMode = inputs.get(GoalDrivenObject.selected_mode);
+				String selectedAdditionalMode = inputs.get(GoalDrivenObject.selected_additional_mode);
+				switch (selectedMode) {
+					case GraphConstants.MODE_FREQUENCY :
+						GoalDrivenDFGUtils.displayModeFrequency(highLevelDFG);
+						break;
+					case GraphConstants.MODE_MEAN_THROUGHPUT :
+						GoalDrivenDFGUtils.displayModeMeanThroughput(highLevelDFG);
+						break;
+					case GraphConstants.MODE_MEDIAN_THROUGHPUT :
+						GoalDrivenDFGUtils.displayModeMedianThroughput(highLevelDFG);
+						break;
+					case GraphConstants.MODE_MIN_THROUGHPUT :
+						GoalDrivenDFGUtils.displayModeMinThroughput(highLevelDFG);
+						break;
+					case GraphConstants.MODE_MAX_THROUGHPUT :
+						GoalDrivenDFGUtils.displayModeMaxThroughput(highLevelDFG);
+						break;
+					default :
+						break;
+				}
+
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+		// update legend in low level dfg
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Display the low level graph based on the selected mode";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.selected_additional_mode, GoalDrivenObject.selected_mode,
+						GoalDrivenObject.low_level_dfg };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				GoalDrivenDFG lowLevelDFG = inputs.get(GoalDrivenObject.low_level_dfg);
+				String selectedMode = inputs.get(GoalDrivenObject.selected_mode);
+				String selectedAdditionalMode = inputs.get(GoalDrivenObject.selected_additional_mode);
+				switch (selectedMode) {
+					case GraphConstants.MODE_FREQUENCY :
+						GoalDrivenDFGUtils.displayModeFrequency(lowLevelDFG);
+						break;
+					case GraphConstants.MODE_MEAN_THROUGHPUT :
+						GoalDrivenDFGUtils.displayModeMeanThroughput(lowLevelDFG);
+						break;
+					case GraphConstants.MODE_MEDIAN_THROUGHPUT :
+						GoalDrivenDFGUtils.displayModeMedianThroughput(lowLevelDFG);
+						break;
+					case GraphConstants.MODE_MIN_THROUGHPUT :
+						GoalDrivenDFGUtils.displayModeMinThroughput(lowLevelDFG);
+						break;
+					case GraphConstants.MODE_MAX_THROUGHPUT :
+						GoalDrivenDFGUtils.displayModeMaxThroughput(lowLevelDFG);
+						break;
+					default :
+						break;
+				}
+
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+		
+		
+		
 
 		// update the hierarchy config
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {

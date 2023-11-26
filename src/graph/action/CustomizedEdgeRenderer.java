@@ -20,14 +20,13 @@ import prefuse.visual.EdgeItem;
 import prefuse.visual.VisualItem;
 
 public class CustomizedEdgeRenderer extends EdgeRenderer {
-	private HashMap<EdgeObject, Integer> currentFrequencyEdge;
-	private HashMap<EdgeObject, String> currentTimeEdge;
-	private HashMap<EdgeObject, Integer> customizedFrequencyEdge;
+	private HashMap<EdgeObject, String> mapEdgeLabel;
+	private HashMap<EdgeObject, String> customizedFrequencyEdge;
 
 	public CustomizedEdgeRenderer(int edgeTypeCurve, int edgeArrowForward) {
 		super(edgeTypeCurve, edgeArrowForward);
-		this.currentFrequencyEdge = new HashMap<>();
 		this.customizedFrequencyEdge = new HashMap<>();
+		this.mapEdgeLabel = new HashMap<>();
 	}
 
 	protected Polygon m_arrowDoubleHead = updateArrowDoubleHead(m_arrowWidth, m_arrowHeight);
@@ -38,6 +37,7 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 			super.render(g, item);
 			this.drawLabelOfEdge(g, item);
 		}
+		item.getVisualization().repaint();
 	}
 
 	@Override
@@ -93,19 +93,19 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 
 			source = source.equals("**BEGIN**") ? "begin" : source;
 			target = target.equals("**END**") ? "end" : target;
-			int label = 0;
-			for (EdgeObject edgeObject : this.currentFrequencyEdge.keySet()) {
+			String label = "";
+			for (EdgeObject edgeObject : this.mapEdgeLabel.keySet()) {
 				if (edgeObject.getNode1().equals(source) && edgeObject.getNode2().equals(target)) {
 					if (this.customizedFrequencyEdge.containsKey(edgeObject)) {
 						label = this.customizedFrequencyEdge.get(edgeObject);
 					} else {
-						label = this.currentFrequencyEdge.get(edgeObject);
+						label = this.mapEdgeLabel.get(edgeObject);
 					}
 					break;
 				}
 			}
 			g.setFont(item.getFont());
-			g.drawString(Integer.toString(label), (int) midPoint.getX() + 20, (int) midPoint.getY() - 10);
+			g.drawString(label, (int) midPoint.getX() + 20, (int) midPoint.getY() - 10);
 			item.getVisualization().repaint();
 		}
 	}
@@ -260,20 +260,22 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 		m_arrowDoubleHead = updateArrowDoubleHead(width, height);
 	}
 
-	public HashMap<EdgeObject, Integer> getCurrentFrequencyEdge() {
-		return currentFrequencyEdge;
-	}
 
-	public void setCurrentFrequencyEdge(HashMap<EdgeObject, Integer> currentFrequencyEdge) {
-		this.currentFrequencyEdge = currentFrequencyEdge;
-	}
-
-	public HashMap<EdgeObject, Integer> getCustomizedFrequencyEdge() {
+	public HashMap<EdgeObject, String> getCustomizedFrequencyEdge() {
 		return customizedFrequencyEdge;
 	}
 
-	public void setCustomizedFrequencyEdge(HashMap<EdgeObject, Integer> customizedFrequencyEdge) {
+	public void setCustomizedFrequencyEdge(HashMap<EdgeObject, String> customizedFrequencyEdge) {
 		this.customizedFrequencyEdge = customizedFrequencyEdge;
 	}
 
+	public HashMap<EdgeObject, String> getMapEdgeLabel() {
+		return mapEdgeLabel;
+	}
+
+	public void setMapEdgeLabel(HashMap<EdgeObject, String> mapEdgeLabel) {
+		this.mapEdgeLabel = mapEdgeLabel;
+	}
+
+	
 }

@@ -8,11 +8,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
+import org.processmining.goaldrivenprocessmining.algorithms.StatUtils;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.CONFIG_Update;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupState;
+import org.processmining.goaldrivenprocessmining.objectHelper.ThroughputTimeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
 
 import prefuse.Visualization;
@@ -438,14 +440,14 @@ public class GoalDrivenDFGUtils {
 			}
 		}
 		// run the action
-		goalDrivenDFG.runCustomColorNodeFillAction();
-		goalDrivenDFG.runCustomEdgeStrokeWidthAction();
+		goalDrivenDFG.runCustomColorNodeFillAction(goalDrivenDFG.getCurrentFrequencyNode());
+		goalDrivenDFG.runCustomEdgeStrokeWidthAction(goalDrivenDFG.getCurrentFrequencyEdge());
 
 		goalDrivenDFG.setDefaultNodeStrokeWidth();
 		goalDrivenDFG.setDefaultTextColorSizeAndFont();
 		goalDrivenDFG.setDefaultNodeStrokeColor();
 		goalDrivenDFG.setDefaultArrowFillColor();
-		goalDrivenDFG.setDefaultEdgeStrokeColor();
+		goalDrivenDFG.setDefaultEdgeColor();
 		goalDrivenDFG.setDefaultNodeSize();
 
 	}
@@ -680,22 +682,23 @@ public class GoalDrivenDFGUtils {
 		for (Integer i : unhighlightNode) {
 			VisualItem nodeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
 					edgeTable.getTuple(i));
-			unhighLightItem(nodeItem);
+			unhighlightItem(nodeItem);
 		}
 		// highlight edges
 		for (Integer i : highlightEdges) {
 			VisualItem edgeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.EDGE_GROUP,
 					edgeTable.getTuple(i));
-			highLightItem(edgeItem);
+			highlightItem(edgeItem);
 		}
 		for (Integer i : unhighlightEdges) {
 			VisualItem edgeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.EDGE_GROUP,
 					edgeTable.getTuple(i));
-			unhighLightItem(edgeItem);
+			unhighlightItem(edgeItem);
 		}
 		// change customized label 
 		for (Map.Entry<EdgeObject, Integer> entry : frequencyOfActInEdge.entrySet()) {
-			goalDrivenDFG.getEdgeRenderer().getCustomizedFrequencyEdge().put(entry.getKey(), entry.getValue());
+			goalDrivenDFG.getEdgeRenderer().getCustomizedFrequencyEdge().put(entry.getKey(),
+					Integer.toString(entry.getValue()));
 		}
 	}
 
@@ -735,35 +738,35 @@ public class GoalDrivenDFGUtils {
 			// unhighlight nodes and edges
 			VisualItem nodeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
 					nodeTable.getTuple(highlightNode.getRow()));
-			highLightItem(nodeItem);
+			highlightItem(nodeItem);
 
 			for (Integer i : unhighlightNodes) {
 				nodeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
 						nodeTable.getTuple(i));
-				unhighLightItem(nodeItem);
+				unhighlightItem(nodeItem);
 			}
 
 			for (Integer i : highlightEdges) {
 				VisualItem edgeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.EDGE_GROUP,
 						edgeTable.getTuple(i));
-				highLightItem(edgeItem);
+				highlightItem(edgeItem);
 			}
 			for (Integer i : unhighlightEdges) {
 				VisualItem edgeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.EDGE_GROUP,
 						edgeTable.getTuple(i));
-				unhighLightItem(edgeItem);
+				unhighlightItem(edgeItem);
 			}
 		}
 
 	}
 
-	public static void highLightItem(VisualItem item) {
+	public static void highlightItem(VisualItem item) {
 		item.setFillColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
 		item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
 		item.getVisualization().repaint();
 	}
 
-	public static void unhighLightItem(VisualItem item) {
+	public static void unhighlightItem(VisualItem item) {
 		item.setFillColor(GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
 		item.setStrokeColor(GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
 		item.getVisualization().repaint();
@@ -793,7 +796,7 @@ public class GoalDrivenDFGUtils {
 				if (item.getBoolean(GraphConstants.BEGIN_FIELD) || item.getBoolean(GraphConstants.END_FIELD)) {
 					item.setFillColor(GraphConstants.BEGIN_END_NODE_COLOR);
 				} else {
-					item.setFillColor(item.getInt(GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD));
+					item.setFillColor(item.getInt(GraphConstants.NODE_FILL_COLOR_FIELD));
 				}
 				item.setStrokeColor(GraphConstants.NODE_STROKE_COLOR);
 			}
@@ -805,10 +808,143 @@ public class GoalDrivenDFGUtils {
 			if (edgeTable.isValidRow(row)) {
 				VisualItem item = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.EDGE_GROUP,
 						edgeTable.getTuple(row));
-				item.setStrokeColor(GraphConstants.EDGE_STROKE_COLOR);
-				item.setFillColor(GraphConstants.EDGE_STROKE_COLOR);
+				item.setStrokeColor(item.getInt(GraphConstants.EDGE_FILL_COLOR_FIELD));
+				item.setFillColor(item.getInt(GraphConstants.EDGE_FILL_COLOR_FIELD));
 			}
 		}
+		goalDrivenDFG.revalidate();
+		goalDrivenDFG.repaint();
+	}
+	/*----------------------------------------------------------------*/
+
+	/*----------------------------------------------------------------*/
+	/*
+	 * Process graph based on the mode view: frequency, throughput, desirability
+	 * priority: 1) Choose the map to compute for node and edge 2) Rerun the
+	 * corresponding action for node fill color, edge stroke color, edge stroke
+	 * width
+	 */
+	// mode frequency: display on node and edges the frequency of the acts and paths
+	public static void displayModeFrequency(GoalDrivenDFG goalDrivenDFG) {
+		// color fill node based on the frequency
+		goalDrivenDFG.runCustomColorNodeFillAction(goalDrivenDFG.getCurrentFrequencyNode());
+		// label node with frequency 
+		// edge stroke color default
+		goalDrivenDFG.setDefaultEdgeColor();
+		// edge stroke width based on freq
+		goalDrivenDFG.runCustomEdgeStrokeWidthAction(goalDrivenDFG.getCurrentFrequencyEdge());
+		// edge label to frequency
+		HashMap<EdgeObject, String> mapEdgeLabel = new HashMap<EdgeObject, String>();
+		for (EdgeObject edgeObject : goalDrivenDFG.getCurrentFrequencyEdge().keySet()) {
+			mapEdgeLabel.put(edgeObject, Integer.toString(goalDrivenDFG.getCurrentFrequencyEdge().get(edgeObject)));
+		}
+		goalDrivenDFG.getEdgeRenderer().setMapEdgeLabel(mapEdgeLabel);
+
+		goalDrivenDFG.revalidate();
+		goalDrivenDFG.repaint();
+
+	}
+
+	// mode mean throughput: display on edge the mean throughput
+	public static void displayModeMeanThroughput(GoalDrivenDFG goalDrivenDFG) {
+		HashMap<EdgeObject, ThroughputTimeObject> mapThroughput = goalDrivenDFG.getCurrentThroughputEdge();
+		HashMap<EdgeObject, Long> mapMeanThroughput = new HashMap<>();
+
+		for (Map.Entry<EdgeObject, ThroughputTimeObject> entry : mapThroughput.entrySet()) {
+			mapMeanThroughput.put(entry.getKey(), entry.getValue().getMean());
+		}
+
+		// color fill node default for time
+		goalDrivenDFG.setNodeFillColorWith(GraphConstants.NODE_TIME_DEFAULT_COLOR);
+		// edge stroke color
+		goalDrivenDFG.runCustomEdgeColorAction(mapMeanThroughput);
+		// edge stroke width
+		goalDrivenDFG.runCustomEdgeStrokeWidthAction(mapMeanThroughput);
+		// edge label to mean throughput
+		HashMap<EdgeObject, String> mapEdgeLabel = new HashMap<EdgeObject, String>();
+		for (EdgeObject edgeObject : mapThroughput.keySet()) {
+			mapEdgeLabel.put(edgeObject, StatUtils.getDateString(mapMeanThroughput.get(edgeObject)));
+		}
+		goalDrivenDFG.getEdgeRenderer().setMapEdgeLabel(mapEdgeLabel);
+
+		goalDrivenDFG.revalidate();
+		goalDrivenDFG.repaint();
+	}
+
+	// mode median throughput: display on edge the mean throughput
+	public static void displayModeMedianThroughput(GoalDrivenDFG goalDrivenDFG) {
+		HashMap<EdgeObject, ThroughputTimeObject> mapThroughput = goalDrivenDFG.getCurrentThroughputEdge();
+		HashMap<EdgeObject, Long> mapMedianThroughput = new HashMap<>();
+
+		for (Map.Entry<EdgeObject, ThroughputTimeObject> entry : mapThroughput.entrySet()) {
+			mapMedianThroughput.put(entry.getKey(), entry.getValue().getMedian());
+		}
+
+		// color fill node default for time
+		goalDrivenDFG.setNodeFillColorWith(GraphConstants.NODE_TIME_DEFAULT_COLOR);
+		// edge stroke color
+		goalDrivenDFG.runCustomEdgeColorAction(mapMedianThroughput);
+		// edge stroke width
+		goalDrivenDFG.runCustomEdgeStrokeWidthAction(mapMedianThroughput);
+		// edge label to mean throughput
+		HashMap<EdgeObject, String> mapEdgeLabel = new HashMap<EdgeObject, String>();
+		for (EdgeObject edgeObject : mapThroughput.keySet()) {
+			mapEdgeLabel.put(edgeObject, StatUtils.getDateString(mapMedianThroughput.get(edgeObject)));
+		}
+		goalDrivenDFG.getEdgeRenderer().setMapEdgeLabel(mapEdgeLabel);
+
+		goalDrivenDFG.revalidate();
+		goalDrivenDFG.repaint();
+	}
+
+	// mode min throughput: display on edge the mean throughput
+	public static void displayModeMinThroughput(GoalDrivenDFG goalDrivenDFG) {
+		HashMap<EdgeObject, ThroughputTimeObject> mapThroughput = goalDrivenDFG.getCurrentThroughputEdge();
+		HashMap<EdgeObject, Long> mapMinThroughput = new HashMap<>();
+
+		for (Map.Entry<EdgeObject, ThroughputTimeObject> entry : mapThroughput.entrySet()) {
+			mapMinThroughput.put(entry.getKey(), entry.getValue().getMin());
+		}
+
+		// color fill node default for time
+		goalDrivenDFG.setNodeFillColorWith(GraphConstants.NODE_TIME_DEFAULT_COLOR);
+		// edge stroke color
+		goalDrivenDFG.runCustomEdgeColorAction(mapMinThroughput);
+		// edge stroke width
+		goalDrivenDFG.runCustomEdgeStrokeWidthAction(mapMinThroughput);
+		// edge label to mean throughput
+		HashMap<EdgeObject, String> mapEdgeLabel = new HashMap<EdgeObject, String>();
+		for (EdgeObject edgeObject : mapThroughput.keySet()) {
+			mapEdgeLabel.put(edgeObject, StatUtils.getDateString(mapMinThroughput.get(edgeObject)));
+		}
+		goalDrivenDFG.getEdgeRenderer().setMapEdgeLabel(mapEdgeLabel);
+
+		goalDrivenDFG.revalidate();
+		goalDrivenDFG.repaint();
+	}
+
+	// mode max throughput: display on edge the mean throughput
+	public static void displayModeMaxThroughput(GoalDrivenDFG goalDrivenDFG) {
+		HashMap<EdgeObject, ThroughputTimeObject> mapThroughput = goalDrivenDFG.getCurrentThroughputEdge();
+		HashMap<EdgeObject, Long> mapMaxThroughput = new HashMap<>();
+
+		for (Map.Entry<EdgeObject, ThroughputTimeObject> entry : mapThroughput.entrySet()) {
+			mapMaxThroughput.put(entry.getKey(), entry.getValue().getMax());
+		}
+
+		// color fill node default for time
+		goalDrivenDFG.setNodeFillColorWith(GraphConstants.NODE_TIME_DEFAULT_COLOR);
+		// edge stroke color
+		goalDrivenDFG.runCustomEdgeColorAction(mapMaxThroughput);
+		// edge stroke width
+		goalDrivenDFG.runCustomEdgeStrokeWidthAction(mapMaxThroughput);
+		// edge label to mean throughput
+		HashMap<EdgeObject, String> mapEdgeLabel = new HashMap<EdgeObject, String>();
+		for (EdgeObject edgeObject : mapThroughput.keySet()) {
+			mapEdgeLabel.put(edgeObject, StatUtils.getDateString(mapMaxThroughput.get(edgeObject)));
+		}
+		goalDrivenDFG.getEdgeRenderer().setMapEdgeLabel(mapEdgeLabel);
+
 		goalDrivenDFG.revalidate();
 		goalDrivenDFG.repaint();
 	}

@@ -91,8 +91,8 @@ public class GraphObjectClickControl extends ControlAdapter {
 	public void itemExited(VisualItem item, java.awt.event.MouseEvent e) {
 		if (!GoalDrivenDFGUtils.isInSelectActMode) {
 			if (edgeFilter.getBoolean(item)) {
-				item.setStrokeColor(GraphConstants.EDGE_STROKE_COLOR);
-				item.setFillColor(GraphConstants.EDGE_STROKE_COLOR);
+				item.setStrokeColor(item.getInt(GraphConstants.EDGE_FILL_COLOR_FIELD));
+				item.setFillColor(item.getInt(GraphConstants.EDGE_FILL_COLOR_FIELD));
 				item.setStroke(this.curStroke);
 				item.setFont(this.curFont);
 				

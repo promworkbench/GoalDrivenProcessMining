@@ -13,9 +13,12 @@ import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
+import org.processmining.goaldrivenprocessmining.objectHelper.ThroughputTimeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
 
 import graph.action.CustomColorNodeFillAction;
+import graph.action.CustomEdgeFillColorAction;
+import graph.action.CustomEdgeStrokeColorAction;
 import graph.action.CustomEdgeStrokeWidthAction;
 import graph.action.CustomizedEdgeRenderer;
 import graph.action.NodeRenderer;
@@ -48,6 +51,7 @@ import prefuse.data.expression.Predicate;
 import prefuse.data.expression.parser.ExpressionParser;
 import prefuse.data.util.TableIterator;
 import prefuse.render.DefaultRendererFactory;
+import prefuse.util.ColorLib;
 import prefuse.visual.VisualItem;
 
 public class GoalDrivenDFG extends Display {
@@ -85,6 +89,9 @@ public class GoalDrivenDFG extends Display {
 	private HashMap<String, Integer> currentFrequencyNode = new HashMap<String, Integer>();
 	private HashMap<EdgeObject, Integer> frequencyEdge = new HashMap<EdgeObject, Integer>();
 	private HashMap<EdgeObject, Integer> currentFrequencyEdge = new HashMap<EdgeObject, Integer>();
+	// throughput
+	private HashMap<EdgeObject, ThroughputTimeObject> throughputEdge = new HashMap<EdgeObject, ThroughputTimeObject>();
+	private HashMap<EdgeObject, ThroughputTimeObject> currentThroughputEdge = new HashMap<EdgeObject, ThroughputTimeObject>();
 	// group
 	private HashMap<String, Node> mapGroupNode;
 
@@ -110,6 +117,7 @@ public class GoalDrivenDFG extends Display {
 		if (this.log != null && !this.log.getEdgeHashTable().getEdgeTable().isEmpty()) {
 			this.calculateFrequencyNode();
 			this.calculateFrequencyEdge();
+			this.calculateThroughputEdge();
 
 			this.makeGraph();
 			m_vis.addGraph("graph", this.graph);
@@ -198,7 +206,7 @@ public class GoalDrivenDFG extends Display {
 
 	private void configDefaultGraph() {
 
-		this.setDefaultEdgeStrokeColor();
+		this.setDefaultEdgeColor();
 		this.setDefaultEdgeStrokeWidth();
 
 		this.setDefaultNodeStrokeWidth();
@@ -287,7 +295,11 @@ public class GoalDrivenDFG extends Display {
 		this.edgeRenderer.setArrowHeadSize(GraphConstants.ARROW_HEAD_WIDTH, GraphConstants.ARROW_HEAD_HEIGHT);
 		this.edgeRenderer.setArrowDoubleHeadSize(GraphConstants.ARROW_HEAD_WIDTH + 5, GraphConstants.ARROW_HEAD_HEIGHT);
 		// pass the frequency edge to the custom edge renderer
-		this.edgeRenderer.setCurrentFrequencyEdge(this.currentFrequencyEdge);
+		HashMap<EdgeObject, String> mapEdgeLabel = new HashMap<EdgeObject, String>();
+		for (Map.Entry<EdgeObject, Integer> entry : this.currentFrequencyEdge.entrySet()) {
+			mapEdgeLabel.put(entry.getKey(), Integer.toString(entry.getValue()));
+		}
+		this.edgeRenderer.setMapEdgeLabel(mapEdgeLabel);
 
 		NodeRenderer label = new NodeRenderer(this, GraphConstants.DISPLAY_LABEL_FIELD);
 		label.setRoundedCorner(8, 8);
@@ -299,11 +311,9 @@ public class GoalDrivenDFG extends Display {
 		/* begin end shape */
 		Predicate beginPredicate = (Predicate) ExpressionParser.parse("begin = true");
 		ShapeAction shapeAction = new ShapeAction("graph.nodes", Constants.SHAPE_RECTANGLE);
-		ShapeAction shapeAction1 = new ShapeAction("inviGraph.nodes", Constants.SHAPE_RECTANGLE);
 		shapeAction.add(beginPredicate, Constants.SHAPE_TRIANGLE_RIGHT);
 		ActionList shape = new ActionList();
 		shape.add(shapeAction);
-		shape.add(shapeAction1);
 		m_vis.putAction("shape", shape);
 		m_vis.run("shape");
 		/******************/
@@ -350,14 +360,19 @@ public class GoalDrivenDFG extends Display {
 
 	public void setDefaultNodeStrokeWidth() {
 		this.nodeStrokeWidthAction = new StrokeAction(GraphConstants.NODE_GROUP);
-		this.nodeStrokeWidthAction.setDefaultStroke(new BasicStroke(7));
+		this.nodeStrokeWidthAction.setDefaultStroke(new BasicStroke(6));
 		m_vis.putAction(GraphConstants.NODE_STROKE_WIDTH_ACTION, this.nodeStrokeWidthAction);
 		m_vis.run(GraphConstants.NODE_STROKE_WIDTH_ACTION);
 	}
 
 	private void setDefaultEdgeStrokeWidth() {
 		this.currentFrequencyEdge = this.frequencyEdge;
-		this.runCustomEdgeStrokeWidthAction();
+		this.runCustomEdgeStrokeWidthAction(this.currentFrequencyEdge);
+	}
+
+	private void calculateThroughputEdge() {
+		this.throughputEdge = (HashMap<EdgeObject, ThroughputTimeObject>) this.getLog().getEdgeThroughputTime();
+		this.currentThroughputEdge = this.throughputEdge;
 	}
 
 	private void calculateFrequencyEdge() {
@@ -375,33 +390,33 @@ public class GoalDrivenDFG extends Display {
 		this.currentFrequencyEdge = this.frequencyEdge;
 	}
 
-	public void runCustomEdgeStrokeWidthAction() {
+	public void runCustomEdgeStrokeWidthAction(HashMap<EdgeObject, ?> mapEdge) {
 		// transform frequency to color
 		HashMap<EdgeObject, Float> mapEdgeStrokeWidth = new HashMap<>();
 		float min = GraphConstants.LOWER_BOUND_EDGE_STROKE_WIDTH;
 		float max = GraphConstants.UPPER_BOUND_EDGE_STROKE_WIDTH;
-		int minFreq = Integer.MAX_VALUE;
-		int maxFreq = 0;
-		for (EdgeObject edgeObject : this.currentFrequencyEdge.keySet()) {
-			if (this.currentFrequencyEdge.get(edgeObject) >= maxFreq) {
-				maxFreq = this.currentFrequencyEdge.get(edgeObject);
+		long minFreq = Integer.MAX_VALUE;
+		long maxFreq = 0;
+		for (EdgeObject edgeObject : mapEdge.keySet()) {
+			if (((Number) mapEdge.get(edgeObject)).longValue() >= maxFreq) {
+				maxFreq = ((Number) mapEdge.get(edgeObject)).longValue();
 			}
-			if (this.currentFrequencyEdge.get(edgeObject) <= minFreq) {
-				minFreq = this.currentFrequencyEdge.get(edgeObject);
+			if (((Number) mapEdge.get(edgeObject)).longValue() <= minFreq) {
+				minFreq = ((Number) mapEdge.get(edgeObject)).longValue();
 			}
 		}
 		if (maxFreq == minFreq) {
-			for (EdgeObject edge : this.currentFrequencyEdge.keySet()) {
+			for (EdgeObject edge : mapEdge.keySet()) {
 				mapEdgeStrokeWidth.put(edge, 3f);
 			}
 		} else {
 			// Calculate the ratio between the range and the range of data values
 			float range = max - min;
-			int dataRange = maxFreq - minFreq;
+			long dataRange = maxFreq - minFreq;
 			float ratio = range / dataRange;
 
-			for (EdgeObject edge : this.currentFrequencyEdge.keySet()) {
-				int value = this.currentFrequencyEdge.get(edge);
+			for (EdgeObject edge : mapEdge.keySet()) {
+				long value = ((Number) mapEdge.get(edge)).longValue();
 				float assignedValue = min + ((value - minFreq) * ratio);
 				mapEdgeStrokeWidth.put(edge, assignedValue);
 			}
@@ -412,58 +427,31 @@ public class GoalDrivenDFG extends Display {
 		m_vis.run(GraphConstants.EDGE_STROKE_WIDTH_ACTION);
 	}
 
-	public void setDefaultEdgeStrokeColor() {
-		this.edgeStrokeColorAction = new ColorAction("graph.edges", VisualItem.STROKECOLOR,
-				GraphConstants.EDGE_STROKE_COLOR);
-		m_vis.putAction(GraphConstants.EDGE_STROKE_COLOR_ACTION, this.edgeStrokeColorAction);
-		m_vis.run(GraphConstants.EDGE_STROKE_COLOR_ACTION);
-		this.arrowFillColorAction = new ColorAction("graph.edges", VisualItem.FILLCOLOR,
-				GraphConstants.EDGE_STROKE_COLOR);
-		m_vis.putAction(GraphConstants.ARROW_FILL_COLOR_ACTION, this.arrowFillColorAction);
-		m_vis.run(GraphConstants.ARROW_FILL_COLOR_ACTION);
-
-	}
-
-	public void setDefaultNodeStrokeColor() {
-		this.nodeStrokeColorAction = new ColorAction(GraphConstants.NODE_GROUP, VisualItem.STROKECOLOR);
-		this.nodeStrokeColorAction.setDefaultColor(GraphConstants.NODE_STROKE_COLOR);
-		m_vis.putAction(GraphConstants.NODE_STROKE_COLOR_ACTION, this.nodeStrokeColorAction);
-
-		m_vis.run(GraphConstants.NODE_STROKE_COLOR_ACTION);
-		m_vis.run("invi");
-
-	}
-
-	private void setDefaultNodeFillColor() {
-		this.currentFrequencyNode = this.frequencyNode;
-		this.runCustomColorNodeFillAction();
-	}
-
-	public void runCustomColorNodeFillAction() {
-		// Find the minimum and maximum values in the data array
-		int minFreq = Integer.MAX_VALUE;
-		int maxFreq = 0;
-		for (String act : this.currentFrequencyNode.keySet()) {
-			if (this.currentFrequencyNode.get(act) >= maxFreq) {
-				maxFreq = this.currentFrequencyNode.get(act);
+	public void runCustomEdgeColorAction(HashMap<EdgeObject, ?> mapEdge) {
+		// transform frequency to color
+		HashMap<EdgeObject, Color> mapEdgeStrokeColor = new HashMap<>();
+		long minFreq = Long.MAX_VALUE;
+		long maxFreq = 0;
+		for (EdgeObject edgeObject : mapEdge.keySet()) {
+			if (((Number) mapEdge.get(edgeObject)).longValue() >= maxFreq) {
+				maxFreq = ((Number) mapEdge.get(edgeObject)).longValue();
 			}
-			if (this.currentFrequencyNode.get(act) <= minFreq) {
-				minFreq = this.currentFrequencyNode.get(act);
+			if (((Number) mapEdge.get(edgeObject)).longValue() <= minFreq) {
+				minFreq = ((Number) mapEdge.get(edgeObject)).longValue();
 			}
 		}
-		HashMap<String, Color> mapActColor = new HashMap<String, Color>();
 		if (maxFreq == minFreq) {
-			for (String act : this.currentFrequencyNode.keySet()) {
-				mapActColor.put(act, GraphConstants.NODE_FILL_DARK_COLOR);
+			for (EdgeObject edge : mapEdge.keySet()) {
+				mapEdgeStrokeColor.put(edge, GraphConstants.EDGE_TIME_LONG_COLOR);
 			}
 		} else {
 			double valueRange = maxFreq - minFreq;
 			// Calculate the color gradient for each data value
-			Color darkColor = GraphConstants.NODE_FILL_DARK_COLOR;
-			Color lightColor = GraphConstants.NODE_FILL_LIGHT_COLOR;
+			Color darkColor = GraphConstants.EDGE_TIME_LONG_COLOR;
+			Color lightColor = GraphConstants.EDGE_TIME_NORMAL_COLOR;
 
-			for (String act : this.currentFrequencyNode.keySet()) {
-				int value = this.currentFrequencyNode.get(act);
+			for (EdgeObject edgeObject : mapEdge.keySet()) {
+				long value = ((Number) mapEdge.get(edgeObject)).longValue();
 				double normalizedValue = (value - minFreq) / valueRange;
 
 				// Interpolate the color based on the normalized value
@@ -472,9 +460,111 @@ public class GoalDrivenDFG extends Display {
 				int blue = interpolate(lightColor.getBlue(), darkColor.getBlue(), normalizedValue);
 
 				// Create the gradient color
-				mapActColor.put(act, new Color(red, green, blue));
+				mapEdgeStrokeColor.put(edgeObject, new Color(red, green, blue));
 			}
 		}
+
+		CustomEdgeStrokeColorAction customEdgeStrokeColorAction = new CustomEdgeStrokeColorAction(
+				GraphConstants.EDGE_GROUP, mapEdgeStrokeColor);
+		m_vis.putAction("edgeStrokeColor", customEdgeStrokeColorAction);
+		m_vis.run("edgeStrokeColor");
+
+		CustomEdgeFillColorAction customEdgeFillColorAction = new CustomEdgeFillColorAction(GraphConstants.EDGE_GROUP,
+				mapEdgeStrokeColor);
+		m_vis.putAction("edgeFillColor", customEdgeFillColorAction);
+		m_vis.run("edgeFillColor");
+
+	}
+
+	public void setDefaultEdgeColor() {
+		this.edgeStrokeColorAction = new ColorAction(GraphConstants.EDGE_GROUP, VisualItem.STROKECOLOR,
+				GraphConstants.EDGE_STROKE_COLOR);
+		m_vis.putAction(GraphConstants.EDGE_STROKE_COLOR_ACTION, this.edgeStrokeColorAction);
+		m_vis.run(GraphConstants.EDGE_STROKE_COLOR_ACTION);
+		this.arrowFillColorAction = new ColorAction(GraphConstants.EDGE_GROUP, VisualItem.FILLCOLOR,
+				GraphConstants.EDGE_STROKE_COLOR);
+		m_vis.putAction(GraphConstants.ARROW_FILL_COLOR_ACTION, this.arrowFillColorAction);
+		m_vis.run(GraphConstants.ARROW_FILL_COLOR_ACTION);
+
+	}
+
+	public void setNodeFillColorWith(Color color) {
+		List<Integer> changeColorNode = new ArrayList<>();
+		TableIterator nodes = this.graph.getNodeTable().iterator();
+		while (nodes.hasNext()) {
+			int row = nodes.nextInt();
+			if (this.graph.getNodeTable().isValidRow(row)) {
+				changeColorNode.add(row);
+
+			}
+		}
+		for (Integer i : changeColorNode) {
+			this.graph.getNodeTable().setInt(i, GraphConstants.NODE_FILL_COLOR_FIELD, ColorLib.color(color));
+		}
+		ColorAction nodeFillColor = new ColorAction(GraphConstants.NODE_GROUP, VisualItem.FILLCOLOR);
+		nodeFillColor.setDefaultColor(ColorLib.color(color));
+		m_vis.putAction(GraphConstants.NODE_FILL_COLOR_ACTION, nodeFillColor);
+		m_vis.run(GraphConstants.NODE_FILL_COLOR_ACTION);
+	}
+
+	public void setDefaultNodeStrokeColor() {
+		this.nodeStrokeColorAction = new ColorAction(GraphConstants.NODE_GROUP, VisualItem.STROKECOLOR);
+		this.nodeStrokeColorAction.setDefaultColor(GraphConstants.NODE_STROKE_COLOR);
+		m_vis.putAction(GraphConstants.NODE_STROKE_COLOR_ACTION, this.nodeStrokeColorAction);
+
+		m_vis.run(GraphConstants.NODE_STROKE_COLOR_ACTION);
+
+	}
+
+	private void setDefaultNodeFillColor() {
+		this.currentFrequencyNode = this.frequencyNode;
+		this.runCustomColorNodeFillAction(this.currentFrequencyNode);
+	}
+
+	public void runCustomColorNodeFillAction(HashMap<String, ?> mapNode) {
+		HashMap<String, Color> mapActColor = new HashMap<String, Color>();
+		if (mapNode.isEmpty()) {
+			for (String act : this.currentFrequencyNode.keySet()) {
+				mapActColor.put(act, GraphConstants.NODE_TIME_DEFAULT_COLOR);
+			}
+		} else {
+			// Find the minimum and maximum values in the data array
+			int minFreq = Integer.MAX_VALUE;
+			int maxFreq = 0;
+			for (String act : mapNode.keySet()) {
+				if (((Number) mapNode.get(act)).intValue() >= maxFreq) {
+					maxFreq = ((Number) mapNode.get(act)).intValue();
+				}
+				if (((Number) mapNode.get(act)).intValue() <= minFreq) {
+					minFreq = ((Number) mapNode.get(act)).intValue();
+				}
+			}
+
+			if (maxFreq == minFreq) {
+				for (String act : mapNode.keySet()) {
+					mapActColor.put(act, GraphConstants.NODE_FILL_DARK_COLOR);
+				}
+			} else {
+				double valueRange = maxFreq - minFreq;
+				// Calculate the color gradient for each data value
+				Color darkColor = GraphConstants.NODE_FILL_DARK_COLOR;
+				Color lightColor = GraphConstants.NODE_FILL_LIGHT_COLOR;
+
+				for (String act : mapNode.keySet()) {
+					int value = ((Number) mapNode.get(act)).intValue();
+					double normalizedValue = (value - minFreq) / valueRange;
+
+					// Interpolate the color based on the normalized value
+					int red = interpolate(lightColor.getRed(), darkColor.getRed(), normalizedValue);
+					int green = interpolate(lightColor.getGreen(), darkColor.getGreen(), normalizedValue);
+					int blue = interpolate(lightColor.getBlue(), darkColor.getBlue(), normalizedValue);
+
+					// Create the gradient color
+					mapActColor.put(act, new Color(red, green, blue));
+				}
+			}
+		}
+
 		Predicate displayPredicate = (Predicate) ExpressionParser.parse("isDisplay = true");
 		CustomColorNodeFillAction customFillByLabel = new CustomColorNodeFillAction(GraphConstants.NODE_GROUP,
 				displayPredicate, mapActColor);
@@ -738,6 +828,7 @@ public class GoalDrivenDFG extends Display {
 		}
 		e.setString(GraphConstants.LABEL_FIELD, "(" + edgeObject.getNode1() + " ," + edgeObject.getNode2() + ")");
 		e.setBoolean(GraphConstants.IS_DISPLAY, true);
+		e.setInt(GraphConstants.EDGE_FILL_COLOR_FIELD, GraphConstants.EDGE_STROKE_COLOR);
 	}
 
 	private Table initNodeTable() {
@@ -747,7 +838,7 @@ public class GoalDrivenDFG extends Display {
 		nodeData.addColumn(GraphConstants.BEGIN_FIELD, boolean.class);
 		nodeData.addColumn(GraphConstants.END_FIELD, boolean.class);
 		nodeData.addColumn(GraphConstants.IS_SELECTED, boolean.class);
-		nodeData.addColumn(GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD, int.class);
+		nodeData.addColumn(GraphConstants.NODE_FILL_COLOR_FIELD, int.class);
 		nodeData.addColumn(GraphConstants.NODE_TYPE_FIELD, NodeType.class);
 		nodeData.addColumn(GraphConstants.IS_DISPLAY, boolean.class);
 		return nodeData;
@@ -760,6 +851,7 @@ public class GoalDrivenDFG extends Display {
 		edgeData.addColumn(GraphConstants.LABEL_FIELD, String.class);
 		edgeData.addColumn(GraphConstants.IS_INDIRECTED_EDGE_FIELD, boolean.class);
 		edgeData.addColumn(GraphConstants.IS_DISPLAY, boolean.class);
+		edgeData.addColumn(GraphConstants.EDGE_FILL_COLOR_FIELD, int.class);
 		return edgeData;
 	}
 
@@ -842,6 +934,14 @@ public class GoalDrivenDFG extends Display {
 
 	public void setCurrentFrequencyEdge(HashMap<EdgeObject, Integer> currentFrequencyEdge) {
 		this.currentFrequencyEdge = currentFrequencyEdge;
+	}
+
+	public HashMap<EdgeObject, ThroughputTimeObject> getCurrentThroughputEdge() {
+		return currentThroughputEdge;
+	}
+
+	public void setCurrentThroughputEdge(HashMap<EdgeObject, ThroughputTimeObject> currentThroughputEdge) {
+		this.currentThroughputEdge = currentThroughputEdge;
 	}
 
 	public CustomizedEdgeRenderer getEdgeRenderer() {

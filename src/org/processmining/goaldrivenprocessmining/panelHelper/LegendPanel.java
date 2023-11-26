@@ -1,55 +1,67 @@
 package org.processmining.goaldrivenprocessmining.panelHelper;
 
-import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import graph.GraphConstants;
+
 public class LegendPanel extends JPanel {
 
-	private final JButton doneButton;
-	private final JButton cancelButton;
+	private final JButton legendDoneButton;
+	private final JButton legendCancelButton;
+	private final JComboBox<String> modeComboBox;
+	private final JComboBox<String> additionalModeComboBox;
 
 	public LegendPanel() {
-		setLayout(new BorderLayout());
+		// Set layout manager to FlowLayout
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		// 1st row: Label "Mode" and JComboBox
+		JPanel legend = new JPanel();
+		legend.setLayout(new FlowLayout(FlowLayout.LEFT));
+		JLabel modeLabel = new JLabel("Mode");
+		modeComboBox = new JComboBox<>(new String[] { GraphConstants.MODE_FREQUENCY,
+				GraphConstants.MODE_MEAN_THROUGHPUT, GraphConstants.MODE_MEDIAN_THROUGHPUT,
+				GraphConstants.MODE_MIN_THROUGHPUT, GraphConstants.MODE_MAX_THROUGHPUT, });
+		modeComboBox.setSelectedItem(GraphConstants.MODE_FREQUENCY);
+		JLabel additionalModeLabel = new JLabel("Additioinal display");
+		additionalModeComboBox = new JComboBox<>(
+				new String[] {"None", GraphConstants.MODE_DESIRABILITY, GraphConstants.MODE_PRIORITY });
+		additionalModeComboBox.setSelectedItem("None");
+		legend.add(modeLabel);
+		legend.add(modeComboBox);
+		legend.add(additionalModeLabel);
+		legend.add(additionalModeComboBox);
 
-		// Legend panel
-		JPanel legendPanel = new JPanel();
-		legendPanel.setLayout(new GridLayout(2, 2, 10, 10)); // 2 rows, 2 columns, with gaps
+		// cancel done button
+		JPanel actEndPanel = new JPanel();
+		actEndPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		legendCancelButton = new JButton("Cancel");
+		legendDoneButton = new JButton("Done");
+		actEndPanel.add(legendCancelButton);
+		actEndPanel.add(legendDoneButton);
 
-		// First Row
-		JLabel nodeColorLabel = new JLabel("Node color");
-		JComboBox<String> nodeColorComboBox = new JComboBox<>(new String[] { "Frequency" });
-
-		// Second Row
-		JLabel edgeWidthLabel = new JLabel("Edge width");
-		JComboBox<String> edgeWidthComboBox = new JComboBox<>(new String[] { "Frequency", "Throughput time" });
-
-		// Add components to the panel
-		legendPanel.add(nodeColorLabel);
-		legendPanel.add(nodeColorComboBox);
-		legendPanel.add(edgeWidthLabel);
-		legendPanel.add(edgeWidthComboBox);
-		add(legendPanel, BorderLayout.CENTER);
-		// Add Done and Cancel buttons at the bottom
-		JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		doneButton = new JButton("Done");
-		cancelButton = new JButton("Cancel");
-		bottomPanel.add(doneButton);
-		bottomPanel.add(cancelButton);
-		add(bottomPanel, BorderLayout.SOUTH);
+		add(legend);
+		add(actEndPanel);
 	}
 
-	public JButton getDoneButton() {
-		return doneButton;
+	public JButton getLegendDoneButton() {
+		return legendDoneButton;
 	}
 
-	public JButton getCancelButton() {
-		return cancelButton;
+	public JButton getLegendCancelButton() {
+		return legendCancelButton;
 	}
 
+	public JComboBox<String> getModeComboBox() {
+		return modeComboBox;
+	}
+
+	public JComboBox<String> getAdditionalModeComboBox() {
+		return additionalModeComboBox;
+	}
 }

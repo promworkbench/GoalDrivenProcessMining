@@ -18,6 +18,7 @@ public class CustomColorNodeFillAction extends ColorAction {
 		super(group, filter, VisualItem.FILLCOLOR);
 		this.mapActColor = mapActColor;
 	}
+	
 	public CustomColorNodeFillAction(String group, HashMap<String, Color> mapActColor) {
 		super(group, VisualItem.FILLCOLOR);
 		this.mapActColor = mapActColor;
@@ -25,16 +26,15 @@ public class CustomColorNodeFillAction extends ColorAction {
 
 	public int getColor(VisualItem item) {
 		if (item instanceof Node) {
-
 			Table table = (Table) item.getVisualization().getSourceData(this.m_group);
 			int rowIndex = item.getRow();
 			if (rowIndex == 0 || rowIndex == 1) {
-				table.set(rowIndex, GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD,
+				table.set(rowIndex, GraphConstants.NODE_FILL_COLOR_FIELD,
 						GraphConstants.BEGIN_END_NODE_COLOR);
 				return GraphConstants.BEGIN_END_NODE_COLOR;
 			} else {
 				String label = table.getString(rowIndex, GraphConstants.LABEL_FIELD);
-				table.set(rowIndex, GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD,
+				table.set(rowIndex, GraphConstants.NODE_FILL_COLOR_FIELD,
 						ColorLib.color(mapActColor.get(label)));
 				return ColorLib.color(mapActColor.get(label));
 			}

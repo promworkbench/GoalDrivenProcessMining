@@ -68,6 +68,8 @@ public class NodeRenderer extends LabelRenderer {
 				return ellipse(x, y, width, width);
 			case Constants.SHAPE_TRIANGLE_RIGHT :
 				return triangle_right((float) x, (float) y, (float) width);
+			case Constants.SHAPE_STAR :
+				return star((float) x, (float) y, (float) width);
 			default :
 				throw new IllegalStateException("Unknown shape type: " + stype);
 		}
@@ -81,6 +83,30 @@ public class NodeRenderer extends LabelRenderer {
 	public Shape ellipse(double x, double y, double width, double height) {
 		m_ellipse.setFrame(x, y, width, height);
 		return m_ellipse;
+	}
+
+	public Shape star(float x, float y, float height) {
+		float s = (float) (height / (2 * Math.sin(Math.toRadians(54))));
+		float shortSide = (float) (height / (2 * Math.tan(Math.toRadians(54))));
+		float mediumSide = (float) (s * Math.sin(Math.toRadians(18)));
+		float longSide = (float) (s * Math.cos(Math.toRadians(18)));
+		float innerLongSide = (float) (s / (2 * Math.cos(Math.toRadians(36))));
+		float innerShortSide = innerLongSide * (float) Math.sin(Math.toRadians(36));
+		float innerMediumSide = innerLongSide * (float) Math.cos(Math.toRadians(36));
+
+		m_path.reset();
+		m_path.moveTo(x, y + shortSide);
+		m_path.lineTo((x + innerLongSide), (y + shortSide));
+		m_path.lineTo((x + height / 2), y);
+		m_path.lineTo((x + height - innerLongSide), (y + shortSide));
+		m_path.lineTo((x + height), (y + shortSide));
+		m_path.lineTo((x + height - innerMediumSide), (y + shortSide + innerShortSide));
+		m_path.lineTo((x + height - mediumSide), (y + height));
+		m_path.lineTo((x + height / 2), (y + shortSide + longSide - innerShortSide));
+		m_path.lineTo((x + mediumSide), (y + height));
+		m_path.lineTo((x + innerMediumSide), (y + shortSide + innerShortSide));
+		m_path.closePath();
+		return m_path;
 	}
 
 	public Shape triangle_right(float x, float y, float height) {

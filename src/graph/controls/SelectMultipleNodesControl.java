@@ -31,7 +31,7 @@ public class SelectMultipleNodesControl extends ControlAdapter {
 						if (item.getBoolean("begin") || item.getBoolean("end")) {
 							item.setFillColor(GraphConstants.BEGIN_END_NODE_COLOR);
 						} else {
-							item.setFillColor(item.getInt(GraphConstants.FREQUENCY_FILL_COLOR_NODE_FIELD));
+							item.setFillColor(item.getInt(GraphConstants.NODE_FILL_COLOR_FIELD));
 						}
 					} else {
 						this.nodeTable.set(item.getRow(), GraphConstants.IS_SELECTED, true);

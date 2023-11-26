@@ -18,7 +18,8 @@ public class GraphConstants {
 	public static final String IS_SELECTED = "select";
 	public static final String IS_INDIRECTED_EDGE_FIELD = "isDirectedEdge";
 	public static final String STROKE_WIDTH_EDGE_FIELD = "strokeWidth";
-	public static final String FREQUENCY_FILL_COLOR_NODE_FIELD = "freqFillColorNode";
+	public static final String NODE_FILL_COLOR_FIELD = "freqFillColorNode";
+	public static final String EDGE_FILL_COLOR_FIELD = "edgeFillColor";
 	public static final String NODE_TYPE_FIELD = "nodeType";
 	public static final String IS_INVISIBLE = "isInvisible";
 	public static final String IS_INVISIBLE_COLLAPSED = "isInvisibleCollapsed";
@@ -28,19 +29,24 @@ public class GraphConstants {
 	public static final String INVI_NODE_GROUP = "inviGraph.nodes";
 
 	//color
-	public static final Color[] CATEGORY_COLOR = { new Color(229,83,75), new Color(85, 22, 57), new Color(16, 52, 23),
+	public static final Color[] CATEGORY_COLOR = { new Color(229, 83, 75), new Color(85, 22, 57), new Color(16, 52, 23),
 			new Color(50, 50, 255) };
-	public static final int BEGIN_END_NODE_COLOR =  ColorLib.rgb(3, 218, 197);
+	public static final int BEGIN_END_NODE_COLOR = ColorLib.rgb(3, 218, 197);
 	public static final int TEXT_COLOR = ColorLib.rgb(255, 255, 255);
 	//color node
 	public static final int SELECTED_NODE_FILL_COLOR = ColorLib.rgb(207, 102, 121);
 	public static final int NODE_STROKE_COLOR = ColorLib.rgb(255, 255, 255);
-	public static final Color NODE_FILL_DARK_COLOR = new Color(18,92,164);
-	public static final Color NODE_FILL_LIGHT_COLOR = new Color(190,216,236);
+	public static final int NODE_HIGH_DESIRED_STROKE_COLOR = ColorLib.rgb(102, 255, 105);
+	public static final int NODE_LOW_DESIRED_STROKE_COLOR = ColorLib.rgb(255, 102, 102);
+	public static final Color NODE_FILL_DARK_COLOR = new Color(18, 92, 164);
+	public static final Color NODE_FILL_LIGHT_COLOR = new Color(190, 216, 236);
+	public static final Color NODE_TIME_DEFAULT_COLOR = new Color(105, 119, 150);
 	//color edge
 	public static final int EDGE_STROKE_COLOR = ColorLib.rgb(255, 255, 255);
+	public static final Color EDGE_TIME_LONG_COLOR = new Color(246, 49, 35);
+	public static final Color EDGE_TIME_NORMAL_COLOR = new Color(255, 255, 255);
 	// highlight color
-	public static final int HIGHLIGHT_STROKE_COLOR = ColorLib.rgb(230, 126, 34);
+	public static final int HIGHLIGHT_STROKE_COLOR = ColorLib.rgb(255, 89, 0);
 	// unhighlight color
 	public static final int UNHIGHLIGHT_STROKE_COLOR = ColorLib.rgb(51, 51, 51);
 	//action name
@@ -54,9 +60,18 @@ public class GraphConstants {
 	public static final String FONT_ACTION = "fontSize";
 	public static final String LAYOUT_ACTION = "layout";
 	public static final String NODE_SIZE_ACTION = "nodeSize";
-	
+
 	//node name
 	public static final String BEGIN_NODE_NAME = "**BEGIN**";
 	public static final String END_NODE_NAME = "**END**";
+
+	// mode constant
+	public static final String MODE_FREQUENCY = "Frequency";
+	public static final String MODE_MEAN_THROUGHPUT = "Mean throughput";
+	public static final String MODE_MEDIAN_THROUGHPUT = "Median throughput";
+	public static final String MODE_MIN_THROUGHPUT = "Min throughput";
+	public static final String MODE_MAX_THROUGHPUT = "Max throughput";
+	public static final String MODE_DESIRABILITY = "Desirability";
+	public static final String MODE_PRIORITY = "Priority";
 
 }
