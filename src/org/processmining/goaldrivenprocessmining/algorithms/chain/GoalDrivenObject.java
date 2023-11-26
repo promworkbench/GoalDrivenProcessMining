@@ -65,6 +65,13 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	// selected mode 
 	public static final IvMObject<String> selected_mode = c("Selected mode from UI", String.class);
 	public static final IvMObject<String> selected_additional_mode = c("Selected additional mode from UI", String.class);
+	public static final IvMObject<String[]> high_desire_acts = c("High desire act", String[].class);
+	public static final IvMObject<String[]> low_desire_acts = c("Low desire act", String[].class);
+	public static final IvMObject<String[]> high_priority_acts = c("High priority act", String[].class);
+	public static final IvMObject<String[]> low_priority_acts = c("Low priority act", String[].class);
+	
+	
+	
 	public GoalDrivenObject(String name, Class<C> clazz) {
 		super(name, clazz);
 	}

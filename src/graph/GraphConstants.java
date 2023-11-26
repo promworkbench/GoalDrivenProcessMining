@@ -1,5 +1,6 @@
 package graph;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 
 import prefuse.util.ColorLib;
@@ -19,6 +20,7 @@ public class GraphConstants {
 	public static final String IS_INDIRECTED_EDGE_FIELD = "isDirectedEdge";
 	public static final String STROKE_WIDTH_EDGE_FIELD = "strokeWidth";
 	public static final String NODE_FILL_COLOR_FIELD = "freqFillColorNode";
+	public static final String NODE_STROKE_COLOR_FIELD = "StrokeColorNode"; 
 	public static final String EDGE_FILL_COLOR_FIELD = "edgeFillColor";
 	public static final String NODE_TYPE_FIELD = "nodeType";
 	public static final String IS_INVISIBLE = "isInvisible";
@@ -26,7 +28,6 @@ public class GraphConstants {
 	public static final String IS_DISPLAY = "isDisplay";
 	public static final String NODE_GROUP = "graph.nodes";
 	public static final String EDGE_GROUP = "graph.edges";
-	public static final String INVI_NODE_GROUP = "inviGraph.nodes";
 
 	//color
 	public static final Color[] CATEGORY_COLOR = { new Color(229, 83, 75), new Color(85, 22, 57), new Color(16, 52, 23),
@@ -37,7 +38,9 @@ public class GraphConstants {
 	public static final int SELECTED_NODE_FILL_COLOR = ColorLib.rgb(207, 102, 121);
 	public static final int NODE_STROKE_COLOR = ColorLib.rgb(255, 255, 255);
 	public static final int NODE_HIGH_DESIRED_STROKE_COLOR = ColorLib.rgb(102, 255, 105);
-	public static final int NODE_LOW_DESIRED_STROKE_COLOR = ColorLib.rgb(255, 102, 102);
+	public static final int NODE_LOW_DESIRED_STROKE_COLOR = ColorLib.rgb(0, 26, 0);
+	public static final int NODE_HIGH_PRIORITY_STROKE_COLOR = ColorLib.rgb(255, 0, 0);
+	public static final int NODE_LOW_PRIORITY_STROKE_COLOR = ColorLib.rgb(255, 204, 204);
 	public static final Color NODE_FILL_DARK_COLOR = new Color(18, 92, 164);
 	public static final Color NODE_FILL_LIGHT_COLOR = new Color(190, 216, 236);
 	public static final Color NODE_TIME_DEFAULT_COLOR = new Color(105, 119, 150);
@@ -47,6 +50,7 @@ public class GraphConstants {
 	public static final Color EDGE_TIME_NORMAL_COLOR = new Color(255, 255, 255);
 	// highlight color
 	public static final int HIGHLIGHT_STROKE_COLOR = ColorLib.rgb(255, 89, 0);
+	public static final BasicStroke HIGHLIGHT_STROKE = new BasicStroke(10);
 	// unhighlight color
 	public static final int UNHIGHLIGHT_STROKE_COLOR = ColorLib.rgb(51, 51, 51);
 	//action name

@@ -30,7 +30,7 @@ public class LegendPanel extends JPanel {
 		modeComboBox.setSelectedItem(GraphConstants.MODE_FREQUENCY);
 		JLabel additionalModeLabel = new JLabel("Additioinal display");
 		additionalModeComboBox = new JComboBox<>(
-				new String[] {"None", GraphConstants.MODE_DESIRABILITY, GraphConstants.MODE_PRIORITY });
+				new String[] { "None", GraphConstants.MODE_PRIORITY, GraphConstants.MODE_DESIRABILITY, });
 		additionalModeComboBox.setSelectedItem("None");
 		legend.add(modeLabel);
 		legend.add(modeComboBox);

@@ -120,7 +120,7 @@ public class AllActivityConfigPanel extends JPanel {
 	public void updateDefaultConfigTable(Map<String, String> mapActToHierarchy) {
 		this.model.setRowCount(0);
 		for (Map.Entry<String, String> entry : mapActToHierarchy.entrySet()) {
-			model.addRow(new Object[] { entry.getKey(), entry.getValue(), "High", "Neutral" });
+			model.addRow(new Object[] { entry.getKey(), entry.getValue(), "Neutral", "Neutral" });
 		}
 	}
 

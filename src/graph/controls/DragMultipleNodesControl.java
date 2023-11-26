@@ -24,7 +24,6 @@ public class DragMultipleNodesControl extends ControlAdapter implements TableLis
 	private boolean fixOnMouseOver = true;
 	protected boolean repaint = true;
 	final InGroupPredicate nodeFilter = new InGroupPredicate(GraphConstants.NODE_GROUP);
-	final InGroupPredicate nodeFilterInvi = new InGroupPredicate(GraphConstants.INVI_NODE_GROUP);
 
 	public void setFixPositionOnMouseOver(boolean s) {
 		fixOnMouseOver = s;

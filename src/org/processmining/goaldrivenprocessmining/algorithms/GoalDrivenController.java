@@ -366,15 +366,6 @@ public class GoalDrivenController {
 		//
 		//			}
 		//		});
-		// act button
-		panel.getControlBar().getActButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setBounds(0, 0, (int) (0.37 * panel.getConfigCards().getsWidth()), 200);
-				panel.getConfigCards().setVisible(true);
-				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "4");
-
-			}
-		});
 		// filter button
 		panel.getControlBar().getFilterButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -461,6 +452,92 @@ public class GoalDrivenController {
 				}
 			}
 		});
+		// inti first all act object
+		List<String> highDesireActs = new ArrayList<String>();
+		List<String> lowDesireActs = new ArrayList<String>();
+		List<String> highPriorityActs = new ArrayList<String>();
+		List<String> lowPriorityActs = new ArrayList<String>();
+		// get data from table
+		JTable table = panel.getConfigCards().getAllActivityConfigPanel().getTable();
+		for (int row = 0; row < table.getRowCount(); row++) {
+			String act = (String) table.getValueAt(row, 0);
+			String priority = (String) table.getValueAt(row, 2);
+			String desire = (String) table.getValueAt(row, 3);
+			// priority
+			if (priority.equals("High")) {
+				highPriorityActs.add(act);
+			} else if (priority.equals("Low")) {
+				lowPriorityActs.add(act);
+			}
+			// desire
+			if (desire.equals("High")) {
+				highDesireActs.add(act);
+			} else if (desire.equals("Low")) {
+				lowDesireActs.add(act);
+			}
+		}
+		chain.setObject(GoalDrivenObject.high_desire_acts, highDesireActs.toArray(new String[0]));
+		chain.setObject(GoalDrivenObject.low_desire_acts, lowDesireActs.toArray(new String[0]));
+		chain.setObject(GoalDrivenObject.high_priority_acts, highPriorityActs.toArray(new String[0]));
+		chain.setObject(GoalDrivenObject.low_priority_acts, lowPriorityActs.toArray(new String[0]));
+		chain.setObject(GoalDrivenObject.selected_additional_mode, "None");
+		// all act config done button
+		panel.getConfigCards().getAllActivityConfigPanel().getAllActConfigDoneButton()
+				.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						List<String> highLevelActs = new ArrayList<String>();
+						List<String> lowLevelActs = new ArrayList<String>();
+						List<String> highDesireActs = new ArrayList<String>();
+						List<String> neutralDesireActs = new ArrayList<String>();
+						List<String> lowDesireActs = new ArrayList<String>();
+						List<String> highPriorityActs = new ArrayList<String>();
+						List<String> neutralPriorityActs = new ArrayList<String>();
+						List<String> lowPriorityActs = new ArrayList<String>();
+						// get data from table
+						JTable table = panel.getConfigCards().getAllActivityConfigPanel().getTable();
+						for (int row = 0; row < table.getRowCount(); row++) {
+							String act = (String) table.getValueAt(row, 0);
+							String hierarchy = (String) table.getValueAt(row, 1);
+							String priority = (String) table.getValueAt(row, 2);
+							String desire = (String) table.getValueAt(row, 3);
+							// hierarchy
+							if (hierarchy.equals("High")) {
+								highLevelActs.add(act);
+							} else {
+								lowLevelActs.add(act);
+							}
+							// priority
+							if (priority.equals("High")) {
+								highPriorityActs.add(act);
+							} else if (priority.equals("Neutral")) {
+								neutralPriorityActs.add(act);
+							} else {
+								lowPriorityActs.add(act);
+							}
+							// desire
+							if (desire.equals("High")) {
+								highDesireActs.add(act);
+							} else if (desire.equals("Neutral")) {
+								neutralDesireActs.add(act);
+							} else {
+								lowDesireActs.add(act);
+							}
+						}
+						// update config for hierarchy
+						HashMap<String, String[]> updateMap = new HashMap<String, String[]>();
+						updateMap.put("High", highLevelActs.toArray(new String[0]));
+						updateMap.put("Low", lowLevelActs.toArray(new String[0]));
+						UpdateConfig updateConfig = new UpdateConfig(UpdateType.SELECTED_ACT, updateMap);
+						// update
+						chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
+						chain.setObject(GoalDrivenObject.high_desire_acts, highDesireActs.toArray(new String[0]));
+						chain.setObject(GoalDrivenObject.low_desire_acts, lowDesireActs.toArray(new String[0]));
+						chain.setObject(GoalDrivenObject.high_priority_acts, highPriorityActs.toArray(new String[0]));
+						chain.setObject(GoalDrivenObject.low_priority_acts, lowPriorityActs.toArray(new String[0]));
+						panel.getConfigCards().setVisible(false);
+					}
+
+				});
 		// all act config cancel button
 		panel.getConfigCards().getAllActivityConfigPanel().getAllActConfigCancelButton()
 				.addActionListener(new ActionListener() {
@@ -584,73 +661,7 @@ public class GoalDrivenController {
 			}
 		});
 
-		/*--------Act display config panel---------*/
-		// act done button		
-		panel.getConfigCards().getActDisplayPanel().getActDoneButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-
-				String[] attInclude = new String[panel.getConfigCards().getActDisplayPanel().getIncludeTable()
-						.getModel().getRowCount()];
-				for (int i = 0; i < attInclude.length; i++) {
-					AttributeClassifier att = (AttributeClassifier) panel.getConfigCards().getActDisplayPanel()
-							.getIncludeTable().getValueAt(i, 0);
-					attInclude[i] = att.toString();
-					if (!panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().keySet().contains(att)) {
-						panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().put(att, "include");
-					} else {
-						panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().replace(att, "include");
-					}
-
-				}
-				String[] attExclude = new String[panel.getConfigCards().getActDisplayPanel().getExcludeTable()
-						.getModel().getRowCount()];
-				for (int i = 0; i < attExclude.length; i++) {
-					AttributeClassifier att = (AttributeClassifier) panel.getConfigCards().getActDisplayPanel()
-							.getExcludeTable().getValueAt(i, 0);
-					attExclude[i] = att.toString();
-					if (!panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().keySet().contains(att)) {
-						panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().put(att, "exclude");
-					} else {
-						panel.getConfigCards().getActDisplayPanel().getMapTableAttribute().replace(att, "exclude");
-					}
-				}
-				panel.getConfigCards().setVisible(false);
-				HashMap<String, String[]> updateMap = new HashMap<String, String[]>();
-				updateMap.put("High", attInclude);
-				updateMap.put("Low", attExclude);
-				UpdateConfig updateConfig = new UpdateConfig(UpdateType.SELECTED_ACT, updateMap);
-
-				// update
-				chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
-				//				panel.getLowDfgTitle().setText("");
-
-			}
-		});
-		// act cancel button
-		panel.getConfigCards().getActDisplayPanel().getActCancelButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				panel.getConfigCards().setVisible(false);
-			}
-		});
 		/*-----------------------------------------*/
-
-		// filter done button
-		// filter cancel button
-		panel.getConfigCards().getFilterConfigPanel().getFilterCancelButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				panel.getConfigCards().setVisible(false);
-			}
-		});
-		//		// filter act slider
-		//		panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().addChangeListener(new ChangeListener() {
-		//			public void stateChanged(ChangeEvent e) {
-		//				if (!panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().getSlider()
-		//						.getValueIsAdjusting()) {
-		//					chain.setObject(IvMObject.selected_activities_threshold,
-		//							panel.getConfigCards().getFilterConfigPanel().getActivitiesSlider().getValue());
-		//				}
-		//			}
-		//		});
 		// act config new group button
 		panel.getConfigCards().getActConfigPanel().getActConfigNewGroupButton().addActionListener(new ActionListener() {
 
@@ -875,7 +886,7 @@ public class GoalDrivenController {
 				panel.getConfigCards().setVisible(false);
 			}
 		});
-		/*--------Group config panel---------*/
+		/*-----------------------------------*/
 
 		// update all group in the group config panel
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
@@ -960,7 +971,9 @@ public class GoalDrivenController {
 			}
 
 			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.selected_additional_mode, GoalDrivenObject.selected_mode,
+				return new IvMObject<?>[] { GoalDrivenObject.high_desire_acts, GoalDrivenObject.low_desire_acts,
+						GoalDrivenObject.high_priority_acts, GoalDrivenObject.low_priority_acts,
+						GoalDrivenObject.selected_additional_mode, GoalDrivenObject.selected_mode,
 						GoalDrivenObject.high_level_dfg };
 			}
 
@@ -968,6 +981,7 @@ public class GoalDrivenController {
 				GoalDrivenDFG highLevelDFG = inputs.get(GoalDrivenObject.high_level_dfg);
 				String selectedMode = inputs.get(GoalDrivenObject.selected_mode);
 				String selectedAdditionalMode = inputs.get(GoalDrivenObject.selected_additional_mode);
+				// mode legend: frequency, throughput
 				switch (selectedMode) {
 					case GraphConstants.MODE_FREQUENCY :
 						GoalDrivenDFGUtils.displayModeFrequency(highLevelDFG);
@@ -987,6 +1001,24 @@ public class GoalDrivenController {
 					default :
 						break;
 				}
+				// additional mode: desire, priority
+				switch (selectedAdditionalMode) {
+					case "Desirability" :
+						GoalDrivenDFGUtils.displayDesirability(highLevelDFG,
+								inputs.get(GoalDrivenObject.high_desire_acts),
+								inputs.get(GoalDrivenObject.low_desire_acts));
+						break;
+					case "Priority" :
+						GoalDrivenDFGUtils.displayPriority(highLevelDFG,
+								inputs.get(GoalDrivenObject.high_priority_acts),
+								inputs.get(GoalDrivenObject.low_priority_acts));
+						break;
+					case "None" :
+						GoalDrivenDFGUtils.displayNoneAdditional(highLevelDFG);
+						break;
+					default :
+						break;
+				}
 
 			}
 
@@ -1002,7 +1034,9 @@ public class GoalDrivenController {
 			}
 
 			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.selected_additional_mode, GoalDrivenObject.selected_mode,
+				return new IvMObject<?>[] { GoalDrivenObject.high_desire_acts, GoalDrivenObject.low_desire_acts,
+						GoalDrivenObject.high_priority_acts, GoalDrivenObject.low_priority_acts,
+						GoalDrivenObject.selected_additional_mode, GoalDrivenObject.selected_mode,
 						GoalDrivenObject.low_level_dfg };
 			}
 
@@ -1029,16 +1063,30 @@ public class GoalDrivenController {
 					default :
 						break;
 				}
+				// additional mode: desire, priority
+				switch (selectedAdditionalMode) {
+					case "Desirability" :
+						GoalDrivenDFGUtils.displayDesirability(lowLevelDFG,
+								inputs.get(GoalDrivenObject.high_desire_acts),
+								inputs.get(GoalDrivenObject.low_desire_acts));
+						break;
+					case "Priority" :
+						GoalDrivenDFGUtils.displayPriority(lowLevelDFG, inputs.get(GoalDrivenObject.high_priority_acts),
+								inputs.get(GoalDrivenObject.low_priority_acts));
+						break;
+					case "None" :
+						GoalDrivenDFGUtils.displayNoneAdditional(lowLevelDFG);
+						break;
+					default :
+						break;
 
+				}
 			}
 
 			public void invalidate(GoalDrivenPanel panel) {
 				//no action necessary (combobox will be disabled until new classifiers are computed)
 			}
 		});
-		
-		
-		
 
 		// update the hierarchy config
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {

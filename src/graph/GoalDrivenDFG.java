@@ -41,6 +41,7 @@ import prefuse.action.assignment.FontAction;
 import prefuse.action.assignment.ShapeAction;
 import prefuse.action.assignment.StrokeAction;
 import prefuse.action.layout.graph.NodeLinkTreeLayout;
+import prefuse.action.layout.graph.TreeLayout;
 import prefuse.controls.FocusControl;
 import prefuse.controls.WheelZoomControl;
 import prefuse.data.Edge;
@@ -131,62 +132,6 @@ public class GoalDrivenDFG extends Display {
 		}
 
 	}
-
-	//	public static void main(String[] args) throws Exception {
-	//				File file = new File("C:\\D\\data\\receipt.xes");
-	//				File file2 = new File("C:\\D\\data\\complaint-handling.xes");
-	//		
-	//				// Create an input stream for the XES file
-	//				InputStream is = new FileInputStream(file);
-	//		
-	//				// Create a parser for XES files
-	//				XesXmlParser parser = new XesXmlParser();
-	//		
-	//				XLog log = parser.parse(is).get(0);
-	//		
-	//				// Create an input stream for the XES file
-	//				InputStream is2 = new FileInputStream(file2);
-	//		
-	//				// Create a parser for XES files
-	//				XesXmlParser parser2 = new XesXmlParser();
-	//		
-	//				XLog log2 = parser2.parse(is2).get(0);
-	//		
-	//				GoalDrivenDFG ex = new GoalDrivenDFG(null);
-	//				GoalDrivenDFG ex2 = new GoalDrivenDFG(new GDPMLogSkeleton(log));
-	//				GoalDrivenDFG ex3 = new GoalDrivenDFG(new GDPMLogSkeleton(log2));
-	//				
-	//				
-	//			
-	//				System.out.println(ex.getVisualization().getBounds("graph"));
-	//				System.out.println(ex.getBounds());
-	//				
-	//
-	//				
-	//				double zoomWidth = ex.getBounds().getWidth() / ex.getVisualization().getBounds("graph").getWidth();
-	//				double zoomHeight = ex.getBounds().getHeight() / ex.getVisualization().getBounds("graph").getHeight();
-	//				double zoomRatio = zoomWidth < zoomHeight ? zoomWidth : zoomHeight;
-	//				
-	//				
-	//				
-	//				double x = 300;
-	//				double y = -450;
-	//				System.out.println(zoomRatio);
-	//				ex.animatePanAndZoomTo(new Point2D.Double(x, y), zoomRatio, 1000);
-	//				
-	//				ex.validate();
-	//				ex.repaint();
-	//
-	//				JFrame frame = new JFrame("prefuse example");
-	//				JPanel p = new JPanel();
-	//				p.setBackground(Color.BLACK);
-	//				p.add(ex);
-	//				ex.setBackground(Color.BLACK);
-	//				frame.getContentPane().add(p);
-	//				frame.pack(); // layout components in window
-	//				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	//				frame.setVisible(true); // show the window
-	//	}
 
 	private void makeGraph() {
 
@@ -330,7 +275,7 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	private void setDefaultLayout() {
-		NodeLinkTreeLayout treeLayout = new NodeLinkTreeLayout("graph", Constants.ORIENT_TOP_BOTTOM, 300, 220, 300);
+		TreeLayout treeLayout = new NodeLinkTreeLayout("graph", Constants.ORIENT_TOP_BOTTOM, 400, 380, 400);
 		m_vis.putAction(GraphConstants.LAYOUT_ACTION, treeLayout);
 		treeLayout.setLayoutAnchor(new Point2D.Double(500, 100));
 		m_vis.run(GraphConstants.LAYOUT_ACTION);
@@ -351,7 +296,7 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	public void setDefaultArrowFillColor() {
-		this.arrowFillColorAction = new ColorAction("graph.edges", VisualItem.FILLCOLOR,
+		this.arrowFillColorAction = new ColorAction(GraphConstants.EDGE_GROUP, VisualItem.FILLCOLOR,
 				GraphConstants.EDGE_STROKE_COLOR);
 		m_vis.putAction(GraphConstants.ARROW_FILL_COLOR_ACTION, this.arrowFillColorAction);
 		m_vis.run(GraphConstants.ARROW_FILL_COLOR_ACTION);
@@ -360,7 +305,7 @@ public class GoalDrivenDFG extends Display {
 
 	public void setDefaultNodeStrokeWidth() {
 		this.nodeStrokeWidthAction = new StrokeAction(GraphConstants.NODE_GROUP);
-		this.nodeStrokeWidthAction.setDefaultStroke(new BasicStroke(6));
+		this.nodeStrokeWidthAction.setDefaultStroke(new BasicStroke(2));
 		m_vis.putAction(GraphConstants.NODE_STROKE_WIDTH_ACTION, this.nodeStrokeWidthAction);
 		m_vis.run(GraphConstants.NODE_STROKE_WIDTH_ACTION);
 	}
@@ -786,17 +731,6 @@ public class GoalDrivenDFG extends Display {
 		node.setBoolean(GraphConstants.IS_DISPLAY, true);
 	}
 
-	public void configInvisibleNode(Node node, String label) {
-		node.setString(GraphConstants.LABEL_FIELD, label);
-		node.setBoolean(GraphConstants.BEGIN_FIELD, false);
-		node.setBoolean(GraphConstants.END_FIELD, false);
-		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.GROUP_NODE);
-		node.setBoolean(GraphConstants.IS_INVISIBLE, true);
-		node.setBoolean(GraphConstants.IS_DISPLAY, true);
-		node.setBoolean(GraphConstants.IS_SELECTED, false);
-		node.setBoolean(GraphConstants.IS_INVISIBLE_COLLAPSED, true);
-	}
-
 	public void configGroupNode(Node node, String label) {
 		node.setString(GraphConstants.LABEL_FIELD, label);
 		node.setString(GraphConstants.DISPLAY_LABEL_FIELD, "Group: " + label);
@@ -805,6 +739,7 @@ public class GoalDrivenDFG extends Display {
 		node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.GROUP_NODE);
 		node.setBoolean(GraphConstants.IS_DISPLAY, true);
 		node.setBoolean(GraphConstants.IS_SELECTED, false);
+		node.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD, GraphConstants.NODE_STROKE_COLOR);
 	}
 
 	private void configNode(Node node, String label, Boolean isGroup) {
@@ -818,6 +753,7 @@ public class GoalDrivenDFG extends Display {
 			node.set(GraphConstants.NODE_TYPE_FIELD, NodeType.ACT_NODE);
 		}
 		node.setBoolean(GraphConstants.IS_DISPLAY, true);
+		node.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD, GraphConstants.NODE_STROKE_COLOR);
 	}
 
 	public void configEdge(Edge e, EdgeObject edgeObject) {
@@ -839,6 +775,7 @@ public class GoalDrivenDFG extends Display {
 		nodeData.addColumn(GraphConstants.END_FIELD, boolean.class);
 		nodeData.addColumn(GraphConstants.IS_SELECTED, boolean.class);
 		nodeData.addColumn(GraphConstants.NODE_FILL_COLOR_FIELD, int.class);
+		nodeData.addColumn(GraphConstants.NODE_STROKE_COLOR_FIELD, int.class);
 		nodeData.addColumn(GraphConstants.NODE_TYPE_FIELD, NodeType.class);
 		nodeData.addColumn(GraphConstants.IS_DISPLAY, boolean.class);
 		return nodeData;

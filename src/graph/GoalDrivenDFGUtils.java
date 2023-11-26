@@ -1,5 +1,6 @@
 package graph;
 
+import java.awt.BasicStroke;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import prefuse.data.Edge;
 import prefuse.data.Graph;
 import prefuse.data.Node;
 import prefuse.data.Table;
+import prefuse.data.Tuple;
 import prefuse.data.util.TableIterator;
 import prefuse.visual.VisualItem;
 
@@ -948,6 +950,79 @@ public class GoalDrivenDFGUtils {
 		goalDrivenDFG.revalidate();
 		goalDrivenDFG.repaint();
 	}
+
+	// display additional desire
+	public static void displayDesirability(GoalDrivenDFG goalDrivenDFG, String[] highActs, String[] lowActs) {
+		displayNoneAdditional(goalDrivenDFG);
+		for (String act : highActs) {
+			Node node = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
+			if (node != null) {
+				VisualItem visualItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node);
+				visualItem.setStroke(GraphConstants.HIGHLIGHT_STROKE);
+				visualItem.setStrokeColor(GraphConstants.NODE_HIGH_DESIRED_STROKE_COLOR);
+				visualItem.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD, GraphConstants.NODE_HIGH_DESIRED_STROKE_COLOR);
+			}
+		}
+		for (String act : lowActs) {
+			Node node = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
+			if (node != null) {
+				VisualItem visualItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node);
+				visualItem.setStroke(GraphConstants.HIGHLIGHT_STROKE);
+				visualItem.setStrokeColor(GraphConstants.NODE_LOW_DESIRED_STROKE_COLOR);
+				visualItem.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD, GraphConstants.NODE_LOW_DESIRED_STROKE_COLOR);
+			}
+		}
+		goalDrivenDFG.revalidate();
+		goalDrivenDFG.repaint();
+
+	}
+
+	// display additional priority
+	public static void displayPriority(GoalDrivenDFG goalDrivenDFG, String[] highActs, String[] lowActs) {
+		displayNoneAdditional(goalDrivenDFG);
+		for (String act : highActs) {
+			Node node = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
+			if (node != null) {
+				VisualItem visualItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node);
+				visualItem.setStroke(GraphConstants.HIGHLIGHT_STROKE);
+				visualItem.setStrokeColor(GraphConstants.NODE_HIGH_PRIORITY_STROKE_COLOR);
+				visualItem.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD, GraphConstants.NODE_HIGH_PRIORITY_STROKE_COLOR);
+			}
+		}
+		for (String act : lowActs) {
+			Node node = goalDrivenDFG.getNodeByLabelInGraph(goalDrivenDFG.getGraph(), act);
+			if (node != null) {
+				VisualItem visualItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node);
+				visualItem.setStroke(GraphConstants.HIGHLIGHT_STROKE);
+				visualItem.setStrokeColor(GraphConstants.NODE_LOW_PRIORITY_STROKE_COLOR);
+				visualItem.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD, GraphConstants.NODE_LOW_PRIORITY_STROKE_COLOR);
+			}
+		}
+		goalDrivenDFG.revalidate();
+		goalDrivenDFG.repaint();
+	}
+
+	// display additional none
+	public static void displayNoneAdditional(GoalDrivenDFG goalDrivenDFG) {
+		List<VisualItem> vList = new ArrayList<VisualItem>();
+		TableIterator nodes = goalDrivenDFG.getGraph().getNodeTable().iterator();
+		while (nodes.hasNext()) {
+			int row = nodes.nextInt();
+			if (goalDrivenDFG.getGraph().getNodeTable().isValidRow(row)) {
+				Tuple node = goalDrivenDFG.getGraph().getNodeTable().getTuple(row);
+				VisualItem visualItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node);
+				vList.add(visualItem);
+			}
+		}
+		for (VisualItem visualItem: vList) {
+			visualItem.setStroke(new BasicStroke(2));
+			visualItem.setStrokeColor(GraphConstants.NODE_STROKE_COLOR);
+			visualItem.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD, GraphConstants.NODE_STROKE_COLOR);
+		}
+		goalDrivenDFG.revalidate();
+		goalDrivenDFG.repaint();
+	}
+
 	/*----------------------------------------------------------------*/
 
 }

@@ -97,7 +97,7 @@ public class GraphObjectClickControl extends ControlAdapter {
 				item.setFont(this.curFont);
 				
 			} else if (nodeFilter.getBoolean(item)) {
-				item.setStrokeColor(GraphConstants.NODE_STROKE_COLOR);
+				item.setStrokeColor(item.getInt(GraphConstants.NODE_STROKE_COLOR_FIELD));
 			}
 			item.getVisualization().repaint();
 		}
