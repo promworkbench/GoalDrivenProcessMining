@@ -1,17 +1,15 @@
 package org.processmining.goaldrivenprocessmining.panelHelper;
 
 import java.awt.CardLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 
-import javax.swing.BorderFactory;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class ConfigCards extends JPanel {
 	private final ModePanel modePanel;
 	private final ActDisplayPanel actDisplayPanel;
-	private final FilterConfigPanel filterConfigPanel;
 	private final ActConfigPanel actConfigPanel;
 	private final GroupConfigPanel groupConfigPanel;
 	private final AllActivityConfigPanel allActivityConfigPanel;
@@ -20,19 +18,18 @@ public class ConfigCards extends JPanel {
 	private final double sWidth;
 
 	public ConfigCards() {
-
+		
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		sWidth = screenSize.getWidth();
-		setBounds(0, 0, (int) (0.37 * sWidth), 200);
+		setSize(new Dimension(800, 800));
 
 		layoutCard = new CardLayout();
 		setLayout(layoutCard);
+		JLabel a = new JLabel("ASDFasdf");
+		add(a);
 		// Mode button panel
 		modePanel = new ModePanel(this.getBounds().width);
 		add(modePanel, "1");
-		// Filter button panel
-		filterConfigPanel = new FilterConfigPanel(this.getBounds().width);
-		add(filterConfigPanel, "2");
 		// Act config panel
 		actConfigPanel = new ActConfigPanel(this.getBounds().width);
 		add(actConfigPanel, "3");
@@ -46,16 +43,12 @@ public class ConfigCards extends JPanel {
 		legendPanel = new LegendPanel();
 		add(legendPanel, "6");
 		// all act config panel
-		allActivityConfigPanel = new AllActivityConfigPanel();
+		allActivityConfigPanel = new AllActivityConfigPanel(this.getBounds().width);
 		add(allActivityConfigPanel, "7");
 
-		setBorder(BorderFactory.createLineBorder(Color.blue));
 		setVisible(false);
 	}
-
-	public FilterConfigPanel getFilterConfigPanel() {
-		return filterConfigPanel;
-	}
+	
 
 	public ActDisplayPanel getActDisplayPanel() {
 		return actDisplayPanel;

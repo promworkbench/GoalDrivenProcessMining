@@ -2,20 +2,23 @@ package org.processmining.goaldrivenprocessmining.panelHelper;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.RowFilter;
-import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -33,8 +36,11 @@ public class AllActivityConfigPanel extends JPanel {
 	private JButton allActConfigCancelButton;
 	private JButton allActConfigDoneButton;
 	private TableRowSorter<DefaultTableModel> tr;
+	private RangeSliderPanel rangeSlider;
+	private JCheckBox enableSliderCheckbox;
+	private int maxActFreq = 1;
 
-	public AllActivityConfigPanel() {
+	public AllActivityConfigPanel(double width) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		// First Row: Search Label and TextField
 		JPanel searchPanel = new JPanel();
@@ -59,30 +65,69 @@ public class AllActivityConfigPanel extends JPanel {
 
 			private void updateFilter() {
 				String filterText = searchTextField.getText().toLowerCase();
-				filter(filterText);
+				filterAct(filterText);
 			}
 		});
 		searchPanel.add(searchLabel);
 		searchPanel.add(searchTextField);
 		add(searchPanel);
 
-		// Second Row: All Activities Label and Scrollable Table
-		JLabel allActivitiesLabel = new JLabel("All activities");
-		String[] columnNames = { "Activity", "Hierarchy", "Priority", "Desirability" };
-		Object[][] data = { { "Register", "Hierarchy", "Priority", "Desirability" },{ "Fill Report", "Hierarchy", "Priority", "Desirability" },
+		// frequency slider
+		JPanel sliderPanel = new JPanel();
+		sliderPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		rangeSlider = new RangeSliderPanel(400);
+		rangeSlider.getRangeSlider().setEnabled(false);
+		rangeSlider.getRangeSlider().addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				RangeSlider slider = (RangeSlider) e.getSource();
+				float lowerPercent = slider.getValue() / 100f;
+				float upperPercent = slider.getUpperValue() / 100f;
+				int lower = (int) (maxActFreq * lowerPercent);
+				int upper = (int) (maxActFreq * upperPercent);
+				filterFreq(lower, upper);
+			}
+		});
+		enableSliderCheckbox = new JCheckBox("Filter with frequency");
+		enableSliderCheckbox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				boolean enabled = enableSliderCheckbox.isSelected();
+				rangeSlider.getRangeSlider().setEnabled(enabled);
+				if (enabled) {
+					allActConfigDoneButton.setEnabled(false);
+				}
+				if (!enabled) {
+					disableFilterFreq();
+				}
+			}
+		});
 
-				// Add more rows as needed
-		};
+		sliderPanel.add(enableSliderCheckbox);
+		sliderPanel.add(rangeSlider);
+		add(sliderPanel);
+
+		// All Activities Label and Scrollable Table
+		JLabel allActivitiesLabel = new JLabel("All activities");
+		String[] columnNames = { "Activity", "Frequency", "Hierarchy", "Priority", "Desirability" };
+		Object[][] data = {};
 
 		this.model = new NonEditableColumnTableModel(data, columnNames);
 		this.table = new JTable(model);
 		this.tr = new TableRowSorter<DefaultTableModel>(this.model);
+
+		RowFilter<Object, Object> rangeFilter = new RowFilter<Object, Object>() {
+			public boolean include(Entry<? extends Object, ? extends Object> entry) {
+				int freq = (int) entry.getValue(1);
+				return freq >= 1 && freq <= 2;
+			}
+		};
 		this.table.setRowSorter(this.tr);
 
 		// Customize the renderer and editor for JComboBox columns
-		customizeComboBoxColumn(table, 1); // Hierarchy
-		customizeComboBoxColumn(table, 2); // Priority
-		customizeComboBoxColumn(table, 3); // Desirability
+		customizeComboBoxColumn(table, 2); // Hierarchy
+		customizeComboBoxColumn(table, 3); // Priority
+		customizeComboBoxColumn(table, 4); // Desirability
 
 		JScrollPane scrollPane = new JScrollPane(table);
 
@@ -99,29 +144,35 @@ public class AllActivityConfigPanel extends JPanel {
 		add(actEndPanel);
 	}
 
-	public static void main(String[] args) {
-		SwingUtilities.invokeLater(() -> {
-			JFrame frame = new JFrame("My Custom JPanel Example");
-			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-			AllActivityConfigPanel customPanel = new AllActivityConfigPanel();
-			frame.getContentPane().add(customPanel);
-
-			frame.setSize(400, 300);
-			frame.setLocationRelativeTo(null);
-			frame.setVisible(true);
-		});
+	private void filterAct(String query) {
+		RowFilter<Object, Object> categoryFilter = RowFilter.regexFilter("(?i)" + query, 0);
+		this.tr.setRowFilter(categoryFilter);
 	}
 
-	private void filter(String query) {
-		this.tr.setRowFilter(RowFilter.regexFilter("(?i)" + query, 0));
+	private void filterFreq(int lower, int upper) {
+		RowFilter<Object, Object> rangeFilter = new RowFilter<Object, Object>() {
+			public boolean include(Entry<? extends Object, ? extends Object> entry) {
+				int freq = (int) entry.getValue(1);
+				return freq >= lower && freq <= upper;
+			}
+		};
+		this.tr.setRowFilter(rangeFilter);
 	}
 
-	public void updateDefaultConfigTable(Map<String, String> mapActToHierarchy) {
+	public void updateDefaultConfigTable(Map<String, String> mapActToHierarchy, Map<String, Integer> mapActFreq) {
 		this.model.setRowCount(0);
 		for (Map.Entry<String, String> entry : mapActToHierarchy.entrySet()) {
-			model.addRow(new Object[] { entry.getKey(), entry.getValue(), "Neutral", "Neutral" });
+			model.addRow(new Object[] { entry.getKey(), mapActFreq.get(entry.getKey()), entry.getValue(), "Neutral",
+					"Neutral" });
 		}
+	}
+
+	public void disableFilterFreq() {
+		this.getEnableSliderCheckbox().setSelected(false);
+		this.getRangeSlider().getRangeSlider().setEnabled(false);
+		this.getRangeSlider().getRangeSlider().setValue(0);
+		this.getRangeSlider().getRangeSlider().setUpperValue(100);
+		this.getAllActConfigDoneButton().setEnabled(true);
 	}
 
 	private void customizeComboBoxColumn(JTable table, int columnIndex) {
@@ -131,7 +182,7 @@ public class AllActivityConfigPanel extends JPanel {
 		column.setCellRenderer(new ComboBoxCellRenderer());
 
 		// Set a custom cell editor
-		if (columnIndex == 1) {
+		if (columnIndex == 2) {
 			column.setCellEditor(new DefaultCellEditor(new JComboBox<>(new String[] { "High", "Low" })));
 		} else {
 			column.setCellEditor(new DefaultCellEditor(new JComboBox<>(new String[] { "High", "Neutral", "Low" })));
@@ -155,23 +206,40 @@ public class AllActivityConfigPanel extends JPanel {
 			}
 		}
 	}
-	
+
 	private static class NonEditableColumnTableModel extends DefaultTableModel {
-        /**
+		/**
 		 * 
 		 */
 		private static final long serialVersionUID = -1129274464463881537L;
 
 		public NonEditableColumnTableModel(Object[][] data, Object[] columnNames) {
-            super(data, columnNames);
-        }
+			super(data, columnNames);
+		}
 
-        @Override
-        public boolean isCellEditable(int row, int column) {
-            // Make only column A non-editable
-            return column != 0;
-        }
-    }
+		@Override
+		public boolean isCellEditable(int row, int column) {
+			// Make only column 0, 1 non-editable
+			return column != 0 && column != 1;
+		}
+
+		@Override
+		public Class getColumnClass(int column) {
+			switch (column) {
+				case 0 :
+					return String.class;
+				case 1 :
+					return Integer.class;
+				case 2 :
+					return String.class;
+				case 3 :
+					return String.class;
+				default :
+					return String.class;
+			}
+		}
+	}
+
 	public DefaultTableModel getModel() {
 		return model;
 	}
@@ -203,4 +271,29 @@ public class AllActivityConfigPanel extends JPanel {
 	public void setAllActConfigDoneButton(JButton allActConfigDoneButton) {
 		this.allActConfigDoneButton = allActConfigDoneButton;
 	}
+
+	public RangeSliderPanel getRangeSlider() {
+		return rangeSlider;
+	}
+
+	public void setRangeSlider(RangeSliderPanel rangeSlider) {
+		this.rangeSlider = rangeSlider;
+	}
+
+	public int getMaxActFreq() {
+		return maxActFreq;
+	}
+
+	public void setMaxActFreq(int maxActFreq) {
+		this.maxActFreq = maxActFreq;
+	}
+
+	public JCheckBox getEnableSliderCheckbox() {
+		return enableSliderCheckbox;
+	}
+
+	public void setEnableSliderCheckbox(JCheckBox enableSliderCheckbox) {
+		this.enableSliderCheckbox = enableSliderCheckbox;
+	}
+
 }

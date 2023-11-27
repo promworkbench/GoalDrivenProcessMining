@@ -29,7 +29,7 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	public static final IvMObject<String> selected_node = c("selected node", String.class);
 	public static final IvMObject<ThroughputTimeObject> stat_selected_node = c("stat of the selected node",
 			ThroughputTimeObject.class);
-	// im log in high level
+	public static final IvMObject<HashMap> map_act_freq = c("map activity frequency", HashMap.class);
 	public static final IvMObject<AttributeClassifier[]> all_unique_values = c("all unique values",
 			AttributeClassifier[].class);
 

@@ -13,6 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -417,7 +418,7 @@ public class GoalDrivenController {
 		panel.getControlBar().getAllActivityButton().addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setBounds(0, 0, (int) (0.37 * panel.getConfigCards().getsWidth()), 200);
+				panel.getConfigCards().setBounds(0, 0, (int) (0.37 * panel.getConfigCards().getsWidth()), 400);
 				panel.getConfigCards().setVisible(true);
 				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "7");
 
@@ -497,9 +498,9 @@ public class GoalDrivenController {
 						JTable table = panel.getConfigCards().getAllActivityConfigPanel().getTable();
 						for (int row = 0; row < table.getRowCount(); row++) {
 							String act = (String) table.getValueAt(row, 0);
-							String hierarchy = (String) table.getValueAt(row, 1);
-							String priority = (String) table.getValueAt(row, 2);
-							String desire = (String) table.getValueAt(row, 3);
+							String hierarchy = (String) table.getValueAt(row, 2);
+							String priority = (String) table.getValueAt(row, 3);
+							String desire = (String) table.getValueAt(row, 4);
 							// hierarchy
 							if (hierarchy.equals("High")) {
 								highLevelActs.add(act);
@@ -543,6 +544,7 @@ public class GoalDrivenController {
 				.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						panel.getConfigCards().setVisible(false);
+						panel.getConfigCards().getAllActivityConfigPanel().disableFilterFreq();
 					}
 				});
 		// update the all act config
@@ -553,13 +555,14 @@ public class GoalDrivenController {
 			}
 
 			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.selected_unique_values,
+				return new IvMObject<?>[] { GoalDrivenObject.map_act_freq, GoalDrivenObject.selected_unique_values,
 						GoalDrivenObject.unselected_unique_values };
 			}
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				AttributeClassifier[] selectedUniqueValues = inputs.get(GoalDrivenObject.selected_unique_values);
 				AttributeClassifier[] unselectedUniqueValues = inputs.get(GoalDrivenObject.unselected_unique_values);
+				HashMap<String, Integer> mapActFreq = inputs.get(GoalDrivenObject.map_act_freq);
 				Map<String, String> mapActToHierarchy = new HashMap<String, String>();
 				for (AttributeClassifier attribute : selectedUniqueValues) {
 					mapActToHierarchy.put(attribute.toString(), "High");
@@ -567,7 +570,9 @@ public class GoalDrivenController {
 				for (AttributeClassifier attribute : unselectedUniqueValues) {
 					mapActToHierarchy.put(attribute.toString(), "Low");
 				}
-				panel.getConfigCards().getAllActivityConfigPanel().updateDefaultConfigTable(mapActToHierarchy);
+				int maxActFreq = Collections.max(mapActFreq.values());
+				panel.getConfigCards().getAllActivityConfigPanel().setMaxActFreq(maxActFreq);
+				panel.getConfigCards().getAllActivityConfigPanel().updateDefaultConfigTable(mapActToHierarchy, mapActFreq);
 
 			}
 

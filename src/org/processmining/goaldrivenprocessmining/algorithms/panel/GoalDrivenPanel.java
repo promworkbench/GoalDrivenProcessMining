@@ -64,17 +64,16 @@ public class GoalDrivenPanel extends JPanel {
 
 		controlBar = new ControlBar();
 		configCards = new ConfigCards();
-		//		configCards.setBounds(0, 0, 800, 400);
+
 		add(controlBar, BorderLayout.NORTH);
 
 		layeredPanel = new JLayeredPane();
-		layeredPanel.setBounds(0, 0, 800, 400);
-		layeredPanel.setBorder(BorderFactory.createLineBorder(Color.red));
 		contentPanel = new JPanel();
 		contentPanel.setLayout(new GridBagLayout());
 
 		layeredPanel.add(contentPanel, new Integer(0));
-		setDynamicBounds(GoalDrivenPanel.this, contentPanel);
+
+		//		setDynamicBounds(GoalDrivenPanel.this, contentPanel);
 		layeredPanel.add(configCards, new Integer(1), 0);
 		add(layeredPanel, BorderLayout.CENTER);
 		//controls the margin on the left side of the settings panel

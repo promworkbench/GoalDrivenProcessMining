@@ -25,7 +25,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 
 	public static List<TraceSkeleton> originalLog;
 	public static EdgeHashTable originalEdgeHashTable;
-	
+
 	@Override
 	public String getName() {
 		return "gather attributes";
@@ -44,7 +44,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 	@Override
 	public IvMObject<?>[] createOutputObjects() {
 		return new IvMObject<?>[] { GoalDrivenObject.full_xlog, GoalDrivenObject.all_unique_values,
-				GoalDrivenObject.selected_unique_values, GoalDrivenObject.unselected_unique_values,
+				GoalDrivenObject.selected_unique_values, GoalDrivenObject.unselected_unique_values, GoalDrivenObject.map_act_freq,
 				GoalDrivenObject.config, GoalDrivenObject.update_config_object, GoalDrivenObject.full_log_skeleton };
 	}
 
@@ -54,7 +54,8 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		System.out.println("Cl01 - gather att");
 		XLog log = inputs.get(IvMObject.input_log);
 		AttributeClassifier classifier = new AttributeClassifier(LogSkeletonUtils.getLogClassifier(log));
-		List<AttributeClassifier[]> valuesDistribution = this.getAllUniqueValues(log, classifier);
+		HashMap<String, Integer> mapActFreq = this.getMapActFreq(log, classifier);
+		List<AttributeClassifier[]> valuesDistribution = this.getAllUniqueValues(mapActFreq);
 
 		// string
 		String[] values = new String[valuesDistribution.get(0).length];
@@ -86,27 +87,14 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.full_xlog, log)
 				.s(GoalDrivenObject.unselected_unique_values, valuesDistribution.get(1))
-				.s(GoalDrivenObject.selected_unique_values, valuesDistribution.get(0)).// 
-				s(GoalDrivenObject.all_unique_values, valuesDistribution.get(2))
-				.s(GoalDrivenObject.config, config)
+				.s(GoalDrivenObject.selected_unique_values, valuesDistribution.get(0))
+				.s(GoalDrivenObject.map_act_freq, mapActFreq)
+				.s(GoalDrivenObject.all_unique_values, valuesDistribution.get(2)).s(GoalDrivenObject.config, config)
 				.s(GoalDrivenObject.full_log_skeleton, gdpmLogSkeleton)
 				.s(GoalDrivenObject.update_config_object, updateConfig);
 	}
 
-	private List<AttributeClassifier[]> getAllUniqueValues(XLog log, AttributeClassifier classifier) {
-		HashMap<String, Integer> mapActFreq = new HashMap<>();
-		for (XTrace trace : log) {
-			for (XEvent event : trace) {
-				String value = event.getAttributes().get(classifier.toString()).toString();
-				if (!mapActFreq.keySet().contains(value)) {
-					mapActFreq.put(value, 1);
-				} else {
-					int curFreq = mapActFreq.get(value);
-					mapActFreq.replace(value, curFreq + 1);
-				}
-			}
-		}
-
+	private List<AttributeClassifier[]> getAllUniqueValues(HashMap<String, Integer> mapActFreq) {
 		int maxFreq = 0;
 		for (String key : mapActFreq.keySet()) {
 			if (mapActFreq.get(key) >= maxFreq) {
@@ -145,6 +133,22 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		res.add(1, unselectedArrAtt);
 		res.add(2, arrAtt);
 		return res;
+	}
+
+	private HashMap<String, Integer> getMapActFreq(XLog log, AttributeClassifier classifier) {
+		HashMap<String, Integer> mapActFreq = new HashMap<>();
+		for (XTrace trace : log) {
+			for (XEvent event : trace) {
+				String value = event.getAttributes().get(classifier.toString()).toString();
+				if (!mapActFreq.keySet().contains(value)) {
+					mapActFreq.put(value, 1);
+				} else {
+					int curFreq = mapActFreq.get(value);
+					mapActFreq.replace(value, curFreq + 1);
+				}
+			}
+		}
+		return mapActFreq;
 	}
 
 }

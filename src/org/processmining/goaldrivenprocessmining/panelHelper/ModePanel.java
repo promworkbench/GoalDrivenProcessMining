@@ -1,7 +1,6 @@
 package org.processmining.goaldrivenprocessmining.panelHelper;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -29,7 +28,6 @@ public class ModePanel extends JPanel {
 
 	public ModePanel(int width) {
 //		setBackground(new Color(18, 18, 18));
-		setBounds(0,0,(int) 0.5*width, 200);
 		double modeConfigSize[][] = { { 0.25*width, 0.25*width },
 				{ TableLayoutConstants.MINIMUM, TableLayoutConstants.FILL, TableLayoutConstants.MINIMUM} };
 		setLayout(new TableLayout(modeConfigSize));
@@ -41,7 +39,7 @@ public class ModePanel extends JPanel {
 		catePanel = new JPanel();
 		catePanel.setEnabled(false);
 		catePanel.setBackground(Color.WHITE);
-		catePanel.setPreferredSize(new Dimension((int) 0.45*width, 200));
+//		catePanel.setPreferredSize(new Dimension((int) 0.45*width, 200));
 		
 		JPanel modeEndPanel = new JPanel();
 		modeEndPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
