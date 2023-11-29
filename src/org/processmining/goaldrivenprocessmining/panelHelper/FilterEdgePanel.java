@@ -195,15 +195,14 @@ public class FilterEdgePanel extends JPanel {
 	private ImageIcon createLegendImageIcon() {
 		try {
 			// Load your image file
-			File imageFile = new File("~/fig/icon/info.png");
-			System.out.println(imageFile.getAbsolutePath());
+			File imageFile = new File("./fig/icon/info.png");
 			Image image = ImageIO.read(imageFile);
+			Image resizedImage = image.getScaledInstance(12, 12, Image.SCALE_SMOOTH);
 
 			// Scale the image to fit the label (adjust as needed)
-			Image scaledImage = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 
 			// Create an ImageIcon from the scaled image
-			return new ImageIcon(scaledImage);
+			return new ImageIcon(resizedImage);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
