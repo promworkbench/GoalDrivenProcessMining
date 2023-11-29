@@ -1,7 +1,7 @@
 <ivy-module version="2.0">
     <info organisation="prom" module="GoalDrivenProcessMining" revision="latest">
     	<description>
-    		Version 6.14.22
+    		Version 6.14.23
     	</description>
     </info>
     <configurations>
@@ -27,5 +27,6 @@
     	<!-- dependency conf="lib->default" org="prom-libs" name="opencsv" rev="2.4-patched" transitive="false" /--> 
    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
 		<dependency org="org.apache.commons" name="commons-lang3" rev="3.12.0"/>
+		<dependency org="org.jgrapht" name="jgrapht-core" rev="1.3.1"/>
     </dependencies>
 </ivy-module>
