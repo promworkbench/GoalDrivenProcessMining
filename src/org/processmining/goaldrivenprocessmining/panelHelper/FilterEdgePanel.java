@@ -5,12 +5,17 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -55,9 +60,7 @@ public class FilterEdgePanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				JTable table = removingPathsTable;
 				int modelRow = Integer.valueOf(e.getActionCommand());
-				System.out.println(modelRow);
 				int realModelRow = table.convertRowIndexToView(modelRow);
-				System.out.println(realModelRow);
 				Object[] data = new Object[] { table.getValueAt(realModelRow, 0), table.getValueAt(realModelRow, 1),
 						table.getValueAt(realModelRow, 2), table.getValueAt(realModelRow, 3), "Remove" };
 				((DefaultTableModel) persistentPathsTable.getModel()).addRow(data);
@@ -84,6 +87,9 @@ public class FilterEdgePanel extends JPanel {
 		tablePanel.add(createTablePanel(persistentPathsLabel, persistentPathsScrollPane));
 
 		add(tablePanel, BorderLayout.CENTER);
+
+		JPanel legendLabel = createLegend();
+		add(legendLabel, BorderLayout.SOUTH);
 
 	}
 
@@ -160,7 +166,7 @@ public class FilterEdgePanel extends JPanel {
 		TableRowSorter<DefaultTableModel> tr = new TableRowSorter<DefaultTableModel>(model);
 		table.setRowSorter(tr);
 		// change color of cell in column source, target to highlight the not connect to begin, end nodes.
-		table.getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
+		DefaultTableCellRenderer renderer = new DefaultTableCellRenderer() {
 
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
 					boolean hasFocus, int row, int column) {
@@ -180,29 +186,45 @@ public class FilterEdgePanel extends JPanel {
 				return cellComponent;
 			}
 
-		});
-		table.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
-
-			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-					boolean hasFocus, int row, int column) {
-				Component cellComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
-						column);
-
-				if (disconnectedBeginActs.contains(value) && disconnectedEndActs.contains(value)) {
-					cellComponent.setBackground(Color.RED);
-				} else if (disconnectedBeginActs.contains(value)) {
-					cellComponent.setBackground(Color.MAGENTA);
-				} else if (disconnectedEndActs.contains(value)) {
-					cellComponent.setBackground(Color.ORANGE);
-				} else {
-					cellComponent.setBackground(table.getBackground());
-				}
-
-				return cellComponent;
-			}
-
-		});
+		};
+		table.getColumnModel().getColumn(1).setCellRenderer(renderer);
+		table.getColumnModel().getColumn(2).setCellRenderer(renderer);
 		return table;
+	}
+
+	private ImageIcon createLegendImageIcon() {
+		try {
+			// Load your image file
+			File imageFile = new File("~/fig/icon/info.png");
+			System.out.println(imageFile.getAbsolutePath());
+			Image image = ImageIO.read(imageFile);
+
+			// Scale the image to fit the label (adjust as needed)
+			Image scaledImage = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+
+			// Create an ImageIcon from the scaled image
+			return new ImageIcon(scaledImage);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private JPanel createLegend() {
+		JPanel panel = new JPanel();
+		JLabel legendLabel = new JLabel("");
+		ImageIcon legendImage = this.createLegendImageIcon();
+		if (legendImage != null) {
+			legendLabel.setIcon(legendImage);
+		}
+		panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		String legendLabelTooltip = "<html><font color='orange'>Orange: No path from begin to this act</font>"
+				+ "<br><font color='#FF00FF'>Magenta: No path from this act to end node</font>"
+				+ "<br><font color='red'>Red: Both conditions</font></html>";
+
+		legendLabel.setToolTipText(legendLabelTooltip);
+		panel.add(legendLabel);
+		return panel;
 	}
 
 	private JPanel createTablePanel(JLabel label, JScrollPane scrollPane) {

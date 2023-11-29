@@ -444,6 +444,37 @@ public class GoalDrivenController {
 						chain.setObject(GoalDrivenObject.high_keeping_path_table, labels);
 					}
 				});
+		// action for clicking source, target columns
+		panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().getRemovingPathsTable()
+				.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent evt) {
+						JTable table = panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
+								.getRemovingPathsTable();
+						int row = table.rowAtPoint(evt.getPoint());
+						int col = table.columnAtPoint(evt.getPoint());
+						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
+							String act = table.getValueAt(row, col).toString();
+							GoalDrivenDFGUtils.isInSelectActMode = true;
+							chain.setObject(GoalDrivenObject.selected_act, act);
+						}
+					}
+				});
+		panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().getPersistentPathsTable()
+				.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent evt) {
+						JTable table = panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
+								.getPersistentPathsTable();
+						int row = table.rowAtPoint(evt.getPoint());
+						int col = table.columnAtPoint(evt.getPoint());
+						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
+							String act = table.getValueAt(row, col).toString();
+							GoalDrivenDFGUtils.isInSelectActMode = true;
+							chain.setObject(GoalDrivenObject.selected_act, act);
+						}
+					}
+				});
 		// chain for tables
 		// high level chain
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
@@ -527,8 +558,9 @@ public class GoalDrivenController {
 				}
 
 				// update color cell
-				panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().updateCellColor(highLevelDfg.getGraph());
-				
+				panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
+						.updateCellColor(highLevelDfg.getGraph());
+
 				highLevelDfg.revalidate();
 				highLevelDfg.repaint();
 
@@ -568,9 +600,9 @@ public class GoalDrivenController {
 					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, false);
 				}
 				// update color cell
-				panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().updateCellColor(highLevelDfg.getGraph());
-				
-				
+				panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
+						.updateCellColor(highLevelDfg.getGraph());
+
 				highLevelDfg.revalidate();
 				highLevelDfg.repaint();
 
@@ -609,8 +641,9 @@ public class GoalDrivenController {
 					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, true);
 				}
 				// update color cell
-				panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().updateCellColor(highLevelDfg.getGraph());
-				
+				panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
+						.updateCellColor(highLevelDfg.getGraph());
+
 				highLevelDfg.revalidate();
 				highLevelDfg.repaint();
 
@@ -691,6 +724,37 @@ public class GoalDrivenController {
 							labels.add((String) model.getValueAt(i, 0));
 						}
 						chain.setObject(GoalDrivenObject.low_keeping_path_table, labels);
+					}
+				});
+		// action for clicking source, target columns
+		panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getRemovingPathsTable()
+				.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent evt) {
+						JTable table = panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
+								.getRemovingPathsTable();
+						int row = table.rowAtPoint(evt.getPoint());
+						int col = table.columnAtPoint(evt.getPoint());
+						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
+							String act = table.getValueAt(row, col).toString();
+							GoalDrivenDFGUtils.isInSelectActMode = true;
+							chain.setObject(GoalDrivenObject.selected_act, act);
+						}
+					}
+				});
+		panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getPersistentPathsTable()
+				.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent evt) {
+						JTable table = panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
+								.getPersistentPathsTable();
+						int row = table.rowAtPoint(evt.getPoint());
+						int col = table.columnAtPoint(evt.getPoint());
+						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
+							String act = table.getValueAt(row, col).toString();
+							GoalDrivenDFGUtils.isInSelectActMode = true;
+							chain.setObject(GoalDrivenObject.selected_act, act);
+						}
 					}
 				});
 		// chain for tables
@@ -775,7 +839,8 @@ public class GoalDrivenController {
 					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, true);
 				}
 				// update color cell
-				panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().updateCellColor(lowLevelDfg.getGraph());
+				panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
+						.updateCellColor(lowLevelDfg.getGraph());
 
 				lowLevelDfg.revalidate();
 				lowLevelDfg.repaint();
@@ -815,8 +880,9 @@ public class GoalDrivenController {
 					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, false);
 				}
 				// update color cell
-				panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().updateCellColor(lowLevelDfg.getGraph());
-				
+				panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
+						.updateCellColor(lowLevelDfg.getGraph());
+
 				lowLevelDfg.revalidate();
 				lowLevelDfg.repaint();
 
@@ -855,8 +921,9 @@ public class GoalDrivenController {
 					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, true);
 				}
 				// update color cell
-				panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().updateCellColor(lowLevelDfg.getGraph());
-				
+				panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
+						.updateCellColor(lowLevelDfg.getGraph());
+
 				lowLevelDfg.revalidate();
 				lowLevelDfg.repaint();
 
@@ -950,13 +1017,19 @@ public class GoalDrivenController {
 			public void mouseMoved(MouseEvent e) {
 				JTable table = panel.getConfigCards().getAllActivityConfigPanel().getTable();
 				int row = table.rowAtPoint(e.getPoint());
-				if (row >= 0) {
-					table.clearSelection(); // Clear previous selections
-					table.addRowSelectionInterval(row, row);
-					table.setCursor(new Cursor(Cursor.HAND_CURSOR));
+				if (table.getSelectedRows().length <= 1) {
+					if (row >= 0) {
+						table.clearSelection(); // Clear previous selections
+						table.addRowSelectionInterval(row, row);
+						table.setCursor(new Cursor(Cursor.HAND_CURSOR));
+					} else {
+						table.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+					}
 				} else {
+					// Rows are selected, disable hover effect
 					table.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 				}
+
 			}
 		});
 		// inti first all act object
