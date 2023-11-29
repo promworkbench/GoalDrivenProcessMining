@@ -38,9 +38,9 @@ public class ControlBar extends JPanel {
 			add(configPanel, "0,0");
 			configPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 			//			modeButton = this.drawButton("Mode");
-			filterButton = this.drawButton("Filter");
-			allActivityButton = this.drawButton("All activity");
-			groupButton = this.drawButton("Group");
+			filterButton = this.drawButton("Filter edges");
+			allActivityButton = this.drawButton("Activities");
+			groupButton = this.drawButton("Groups");
 			legendButton = this.drawButton("Legend");
 
 			//			configPanel.add(modeButton);

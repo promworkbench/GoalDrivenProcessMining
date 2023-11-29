@@ -1,6 +1,5 @@
 package org.processmining.goaldrivenprocessmining.panelHelper;
 
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,7 +20,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
@@ -178,9 +176,6 @@ public class AllActivityConfigPanel extends JPanel {
 	private void customizeComboBoxColumn(JTable table, int columnIndex) {
 		TableColumn column = table.getColumnModel().getColumn(columnIndex);
 
-		// Set a custom cell renderer
-		column.setCellRenderer(new ComboBoxCellRenderer());
-
 		// Set a custom cell editor
 		if (columnIndex == 2) {
 			column.setCellEditor(new DefaultCellEditor(new JComboBox<>(new String[] { "High", "Low" })));
@@ -190,24 +185,7 @@ public class AllActivityConfigPanel extends JPanel {
 
 	}
 
-	private static class ComboBoxCellRenderer extends DefaultTableCellRenderer {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1817070725673981243L;
-
-		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-				int row, int column) {
-			if (value instanceof Component) {
-				return (Component) value;
-			} else {
-				return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			}
-		}
-	}
-
-	private static class NonEditableColumnTableModel extends DefaultTableModel {
+	public static class NonEditableColumnTableModel extends DefaultTableModel {
 		/**
 		 * 
 		 */

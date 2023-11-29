@@ -1,6 +1,7 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.deckfour.xes.model.XLog;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
@@ -70,7 +71,15 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	public static final IvMObject<String[]> high_priority_acts = c("High priority act", String[].class);
 	public static final IvMObject<String[]> low_priority_acts = c("Low priority act", String[].class);
 	
+	// filter edge
+	public static final IvMObject<Double> high_edge_threshold = c("frequency threshold for high level dfg", Double.class);
+	public static final IvMObject<Double> low_edge_threshold = c("frequency threshold for low level dfg", Double.class);
 	
+	// from filter table to graph
+	public static final IvMObject<List> high_removing_path_table = c("removing path table for high level dfg", List.class);
+	public static final IvMObject<List> high_keeping_path_table = c("keeping path table for high level dfg", List.class);
+	public static final IvMObject<List> low_removing_path_table = c("removing path table for low level dfg", List.class);
+	public static final IvMObject<List> low_keeping_path_table = c("keeping path table for low level dfg", List.class);
 	
 	public GoalDrivenObject(String name, Class<C> clazz) {
 		super(name, clazz);

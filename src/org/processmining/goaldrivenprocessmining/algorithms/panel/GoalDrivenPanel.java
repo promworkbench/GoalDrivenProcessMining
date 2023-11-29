@@ -2,14 +2,19 @@ package org.processmining.goaldrivenprocessmining.algorithms.panel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
@@ -64,13 +69,10 @@ public class GoalDrivenPanel extends JPanel {
 
 		controlBar = new ControlBar();
 		configCards = new ConfigCards();
-
 		add(controlBar, BorderLayout.NORTH);
-
 		layeredPanel = new JLayeredPane();
 		contentPanel = new JPanel();
 		contentPanel.setLayout(new GridBagLayout());
-
 		layeredPanel.add(contentPanel, new Integer(0));
 
 		//		setDynamicBounds(GoalDrivenPanel.this, contentPanel);
@@ -85,7 +87,8 @@ public class GoalDrivenPanel extends JPanel {
 			contentLeftPanel.setLayout(new BorderLayout());
 			contentLeftPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_BACKGROUND_COLOR);
 			contentLeftPanel.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
-			JLabel hightitle = new JLabel("High-level DFG:");
+
+			JLabel hightitle = new JLabel("High-level DFG");
 			hightitle.setForeground(Color.WHITE);
 			hightitle.setFont(GoalDrivenConstants.BOLD_BIG_FONT);
 			contentLeftPanel.add(hightitle, BorderLayout.NORTH);
@@ -96,8 +99,8 @@ public class GoalDrivenPanel extends JPanel {
 			highDfgPanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 			highDfgPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 			contentLeftPanel.add(highDfgPanel, BorderLayout.CENTER);
-			contentLeftPanel.add(highDfgPanel);
 			GridBagConstraints gbcContentLeftPanel = createGridBagConstraints(0, 0, 0.5);
+
 			contentPanel.add(contentLeftPanel, gbcContentLeftPanel);
 		}
 
@@ -106,7 +109,7 @@ public class GoalDrivenPanel extends JPanel {
 			contentRightPanel.setLayout(new BorderLayout());
 			contentRightPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_BACKGROUND_COLOR);
 			contentRightPanel.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
-			lowDfgTitle = new JLabel("Low-level DFG: ");
+			lowDfgTitle = new JLabel("Low-level DFG");
 			lowDfgTitle.setForeground(Color.WHITE);
 			lowDfgTitle.setFont(GoalDrivenConstants.BOLD_BIG_FONT);
 			contentRightPanel.add(lowDfgTitle, BorderLayout.NORTH);
@@ -214,6 +217,43 @@ public class GoalDrivenPanel extends JPanel {
 
 	public ControllerView<DataState> getControllerView() {
 		return controllerView;
+	}
+
+	public static void main(String[] args) {
+		JFrame frame = new JFrame("JLayeredPane Example");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JLayeredPane layeredPane = new JLayeredPane();
+        frame.getContentPane().add(layeredPane);
+
+        JPanel panelB = new JPanel();
+        panelB.setBackground(Color.BLUE);
+        panelB.setBounds(50, 50, 300, 200); // Example bounds for panel B
+
+        JPanel panelC = new JPanel();
+        panelC.setBackground(Color.RED);
+        
+        // Set bounds for panel C relative to the top-right corner of panel B
+        int widthC = 200;
+        int heightC = 200;
+        int xC = panelB.getX() + panelB.getWidth() - widthC;
+        int yC = panelB.getY();
+        panelC.setBounds(xC, yC, widthC, heightC);
+
+        layeredPane.add(panelB, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(panelC, JLayeredPane.PALETTE_LAYER);
+
+        frame.setSize(400, 300);
+        frame.setVisible(true);
+	}
+
+	private static Image getScaledImage(Image srcImg, int width, int height) {
+		BufferedImage resizedImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = resizedImg.createGraphics();
+		g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g2d.drawImage(srcImg, 0, 0, width, height, null);
+		g2d.dispose();
+		return resizedImg;
 	}
 
 }

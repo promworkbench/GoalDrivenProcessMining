@@ -759,10 +759,12 @@ public class GoalDrivenDFG extends Display {
 	public void configEdge(Edge e, EdgeObject edgeObject) {
 		if (edgeObject.getIsIndirected()) {
 			e.setBoolean(GraphConstants.IS_INDIRECTED_EDGE_FIELD, true);
+			e.setString(GraphConstants.LABEL_FIELD, edgeObject.getNode1() + " \u21a0 " + edgeObject.getNode2());
 		} else {
 			e.setBoolean(GraphConstants.IS_INDIRECTED_EDGE_FIELD, false);
+			e.setString(GraphConstants.LABEL_FIELD, edgeObject.getNode1() + " \u2192 " + edgeObject.getNode2());
 		}
-		e.setString(GraphConstants.LABEL_FIELD, "(" + edgeObject.getNode1() + " ," + edgeObject.getNode2() + ")");
+
 		e.setBoolean(GraphConstants.IS_DISPLAY, true);
 		e.setInt(GraphConstants.EDGE_FILL_COLOR_FIELD, GraphConstants.EDGE_STROKE_COLOR);
 	}

@@ -22,10 +22,15 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MouseInputAdapter;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import org.deckfour.xes.model.XLog;
 import org.processmining.framework.plugin.PluginContext;
@@ -35,6 +40,7 @@ import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObje
 import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
+import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
@@ -58,6 +64,9 @@ import graph.GoalDrivenDFG;
 import graph.GoalDrivenDFGUtils;
 import graph.GraphConstants;
 import prefuse.Visualization;
+import prefuse.data.Graph;
+import prefuse.data.Table;
+import prefuse.data.util.TableIterator;
 import prefuse.visual.VisualItem;
 
 public class GoalDrivenController {
@@ -298,7 +307,7 @@ public class GoalDrivenController {
 						panel.getLowDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 						panel.getLowDfgPanel().setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 						panel.getContentRightPanel().add(panel.getLowDfgPanel(), BorderLayout.CENTER);
-						panel.getLowDfgTitle().setText("Low-level DFG:");
+						panel.getLowDfgTitle().setText("Low-level DFG");
 						isLowClear = true;
 					}
 					panel.revalidate();
@@ -309,7 +318,7 @@ public class GoalDrivenController {
 						HashMap<String, Object> passValues = inputs.get(GoalDrivenObject.selected_source_target_node);
 						String source = (String) passValues.get("source");
 						String target = (String) passValues.get("target");
-						panel.getLowDfgTitle().setText("Low-level DFG: " + source + " --> " + target);
+						panel.getLowDfgTitle().setText("Low-level DFG - " + source + " \u2192 " + target);
 						panel.revalidate();
 						panel.repaint();
 					}
@@ -358,24 +367,521 @@ public class GoalDrivenController {
 
 	protected void initGuiControlBar() {
 
-		//		// mode button
-		//		panel.getControlBar().getModeButton().addActionListener(new ActionListener() {
-		//			public void actionPerformed(ActionEvent e) {
-		//				panel.getConfigCards().setBounds(0, 0, (int) (0.5 * 0.37 * panel.getConfigCards().getsWidth()), 200);
-		//				panel.getConfigCards().setVisible(true);
-		//				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "1");
-		//
-		//			}
-		//		});
+		/*--------filter edge config panel---------*/
 		// filter button
 		panel.getControlBar().getFilterButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setBounds(0, 0, (int) (0.37 * panel.getConfigCards().getsWidth()), 200);
+				panel.getConfigCards().setBounds(0, 0, (int) (0.37 * panel.getConfigCards().getsWidth()), 400);
 				panel.getConfigCards().setVisible(true);
 				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "2");
 
 			}
 		});
+		panel.getConfigCards().getFilterConfigPanel().getFilterCloseButton().addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setVisible(false);
+			}
+
+		});
+		// high level
+		// action for hovering over tables
+		panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().getRemovingPathsTable()
+				.addMouseMotionListener(new MouseInputAdapter() {
+					@Override
+					public void mouseMoved(MouseEvent e) {
+						JTable table = panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
+								.getRemovingPathsTable();
+						int row = table.rowAtPoint(e.getPoint());
+						if (row >= 0) {
+							table.clearSelection(); // Clear previous selections
+							table.addRowSelectionInterval(row, row);
+							table.setCursor(new Cursor(Cursor.HAND_CURSOR));
+						} else {
+							table.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+						}
+					}
+				});
+		panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().getPersistentPathsTable()
+				.addMouseMotionListener(new MouseInputAdapter() {
+					@Override
+					public void mouseMoved(MouseEvent e) {
+						JTable table = panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
+								.getPersistentPathsTable();
+						int row = table.rowAtPoint(e.getPoint());
+						if (row >= 0) {
+							table.clearSelection(); // Clear previous selections
+							table.addRowSelectionInterval(row, row);
+							table.setCursor(new Cursor(Cursor.HAND_CURSOR));
+						} else {
+							table.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+						}
+					}
+				});
+		panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().getRemovingPathsTable().getModel()
+				.addTableModelListener(new TableModelListener() {
+					@Override
+					public void tableChanged(TableModelEvent e) {
+						TableModel model = (TableModel) e.getSource();
+						List<String> labels = new ArrayList<String>();
+
+						for (int i = 0; i < model.getRowCount(); i++) {
+							labels.add((String) model.getValueAt(i, 0));
+						}
+						chain.setObject(GoalDrivenObject.high_removing_path_table, labels);
+					}
+				});
+		panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().getPersistentPathsTable().getModel()
+				.addTableModelListener(new TableModelListener() {
+					@Override
+					public void tableChanged(TableModelEvent e) {
+						TableModel model = (TableModel) e.getSource();
+						List<String> labels = new ArrayList<String>();
+
+						for (int i = 0; i < model.getRowCount(); i++) {
+							labels.add((String) model.getValueAt(i, 0));
+						}
+						chain.setObject(GoalDrivenObject.high_keeping_path_table, labels);
+					}
+				});
+		// chain for tables
+		// high level chain
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Unique value to gui";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.high_edge_threshold, GoalDrivenObject.high_level_dfg };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				GoalDrivenDFG highLevelDfg = inputs.get(GoalDrivenObject.high_level_dfg);
+				double edgeThreshold = inputs.get(GoalDrivenObject.high_edge_threshold);
+				int maxFreq = Collections.max(highLevelDfg.getCurrentFrequencyEdge().values());
+				int freqThreshold = (int) Math.ceil((1f - edgeThreshold) * maxFreq);
+
+				// find the edges that need to be filtered and kept. That is has the freq below the threshold
+				List<EdgeObject> filteredEdges = new ArrayList<EdgeObject>();
+				List<EdgeObject> keptEdges = new ArrayList<EdgeObject>();
+
+				for (Map.Entry<EdgeObject, Integer> entry : highLevelDfg.getCurrentFrequencyEdge().entrySet()) {
+					if (entry.getValue() < freqThreshold) {
+						filteredEdges.add(entry.getKey());
+					} else {
+						keptEdges.add(entry.getKey());
+					}
+				}
+				// find these edges in the graph
+				List<Integer> filteredEdgeRows = new ArrayList<>();
+				List<Object[]> filteredEdgeData = new ArrayList<>();
+				List<Integer> keptEdgeRows = new ArrayList<>();
+				Table nodeTable = highLevelDfg.getGraph().getNodeTable();
+				Table edgeTable = highLevelDfg.getGraph().getEdgeTable();
+				TableIterator edges = edgeTable.iterator();
+				while (edges.hasNext()) {
+					int row = edges.nextInt();
+					if (edgeTable.isValidRow(row)) {
+						int source = edgeTable.getTuple(row).getInt(Graph.DEFAULT_SOURCE_KEY);
+						int target = edgeTable.getTuple(row).getInt(Graph.DEFAULT_TARGET_KEY);
+						String sourceString = nodeTable.getTuple(source).getString(GraphConstants.LABEL_FIELD);
+						String targetString = nodeTable.getTuple(target).getString(GraphConstants.LABEL_FIELD);
+						sourceString = sourceString.equals("**BEGIN**") ? "begin" : sourceString;
+						targetString = targetString.equals("**END**") ? "end" : targetString;
+						EdgeObject checkEdge = new EdgeObject(sourceString, targetString);
+						if (filteredEdges.contains(checkEdge)) {
+							// check if this edge persistent kept
+							if (!panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
+									.doesTableContainValue(
+											panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
+													.getPersistentPathsTable(),
+											edgeTable.getString(row, GraphConstants.LABEL_FIELD))) {
+								filteredEdgeRows.add(row);
+								// add to filtered edges data 
+								Object[] data = new Object[] { edgeTable.getString(row, GraphConstants.LABEL_FIELD),
+										sourceString, targetString,
+										highLevelDfg.getCurrentFrequencyEdge().get(checkEdge) };
+								filteredEdgeData.add(data);
+							} else {
+								keptEdgeRows.add(row);
+							}
+						}
+						if (keptEdges.contains(checkEdge)) {
+							keptEdgeRows.add(row);
+						}
+					}
+
+				}
+
+				// make these filtered edges non display
+				for (Integer i : filteredEdgeRows) {
+					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, false);
+				}
+				// update the removing paths table
+				panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
+						.updateRemovingTable(filteredEdgeData);
+				// make these kept edges display
+				for (Integer i : keptEdgeRows) {
+					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, true);
+				}
+
+				// update color cell
+				panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().updateCellColor(highLevelDfg.getGraph());
+				
+				highLevelDfg.revalidate();
+				highLevelDfg.repaint();
+
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Unique value to gui";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.high_removing_path_table,
+						GoalDrivenObject.high_level_dfg };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				GoalDrivenDFG highLevelDfg = inputs.get(GoalDrivenObject.high_level_dfg);
+
+				List<String> labels = inputs.get(GoalDrivenObject.high_removing_path_table);
+				List<Integer> removingEdgeRow = new ArrayList<>();
+				Table edgeTable = highLevelDfg.getGraph().getEdgeTable();
+				TableIterator edges = edgeTable.iterator();
+				while (edges.hasNext()) {
+					int row = edges.nextInt();
+					if (edgeTable.isValidRow(row)) {
+						if (labels.contains(edgeTable.getString(row, GraphConstants.LABEL_FIELD))) {
+							removingEdgeRow.add(row);
+						}
+					}
+				}
+				for (Integer i : removingEdgeRow) {
+					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, false);
+				}
+				// update color cell
+				panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().updateCellColor(highLevelDfg.getGraph());
+				
+				
+				highLevelDfg.revalidate();
+				highLevelDfg.repaint();
+
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Unique value to gui";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.high_keeping_path_table, GoalDrivenObject.high_level_dfg };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				GoalDrivenDFG highLevelDfg = inputs.get(GoalDrivenObject.high_level_dfg);
+
+				List<String> labels = inputs.get(GoalDrivenObject.high_keeping_path_table);
+				List<Integer> removingEdgeRow = new ArrayList<>();
+				Table edgeTable = highLevelDfg.getGraph().getEdgeTable();
+				TableIterator edges = edgeTable.iterator();
+				while (edges.hasNext()) {
+					int row = edges.nextInt();
+					if (edgeTable.isValidRow(row)) {
+						if (labels.contains(edgeTable.getString(row, GraphConstants.LABEL_FIELD))) {
+							removingEdgeRow.add(row);
+						}
+					}
+				}
+				for (Integer i : removingEdgeRow) {
+					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, true);
+				}
+				// update color cell
+				panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().updateCellColor(highLevelDfg.getGraph());
+				
+				highLevelDfg.revalidate();
+				highLevelDfg.repaint();
+
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+		// action for sliders 
+		panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().getEdgeSlider().getRangeSlider()
+				.addChangeListener(new ChangeListener() {
+
+					public void stateChanged(ChangeEvent e) {
+						double value = panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
+								.getEdgeSlider().getRangeSlider().getUpperValue() / 100f;
+						chain.setObject(GoalDrivenObject.high_edge_threshold, value);
+
+					}
+
+				});
+
+		// low level 
+		// action for hovering over tables
+		panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getRemovingPathsTable()
+				.addMouseMotionListener(new MouseInputAdapter() {
+					@Override
+					public void mouseMoved(MouseEvent e) {
+						JTable table = panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
+								.getRemovingPathsTable();
+						int row = table.rowAtPoint(e.getPoint());
+						if (row >= 0) {
+							table.clearSelection(); // Clear previous selections
+							table.addRowSelectionInterval(row, row);
+							table.setCursor(new Cursor(Cursor.HAND_CURSOR));
+						} else {
+							table.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+						}
+					}
+				});
+		panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getPersistentPathsTable()
+				.addMouseMotionListener(new MouseInputAdapter() {
+					@Override
+					public void mouseMoved(MouseEvent e) {
+						JTable table = panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
+								.getPersistentPathsTable();
+						int row = table.rowAtPoint(e.getPoint());
+						if (row >= 0) {
+							table.clearSelection(); // Clear previous selections
+							table.addRowSelectionInterval(row, row);
+							table.setCursor(new Cursor(Cursor.HAND_CURSOR));
+						} else {
+							table.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+						}
+					}
+				});
+		panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getRemovingPathsTable().getModel()
+				.addTableModelListener(new TableModelListener() {
+					@Override
+					public void tableChanged(TableModelEvent e) {
+						TableModel model = (TableModel) e.getSource();
+						List<String> labels = new ArrayList<String>();
+
+						for (int i = 0; i < model.getRowCount(); i++) {
+							labels.add((String) model.getValueAt(i, 0));
+						}
+						chain.setObject(GoalDrivenObject.low_removing_path_table, labels);
+					}
+				});
+		panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getPersistentPathsTable().getModel()
+				.addTableModelListener(new TableModelListener() {
+					@Override
+					public void tableChanged(TableModelEvent e) {
+						TableModel model = (TableModel) e.getSource();
+						List<String> labels = new ArrayList<String>();
+
+						for (int i = 0; i < model.getRowCount(); i++) {
+							labels.add((String) model.getValueAt(i, 0));
+						}
+						chain.setObject(GoalDrivenObject.low_keeping_path_table, labels);
+					}
+				});
+		// chain for tables
+		// low level chain
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Unique value to gui";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.low_edge_threshold, GoalDrivenObject.low_level_dfg };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				GoalDrivenDFG lowLevelDfg = inputs.get(GoalDrivenObject.low_level_dfg);
+				double edgeThreshold = inputs.get(GoalDrivenObject.low_edge_threshold);
+				int maxFreq = Collections.max(lowLevelDfg.getCurrentFrequencyEdge().values());
+				int freqThreshold = (int) Math.ceil((1f - edgeThreshold) * maxFreq);
+
+				// find the edges that need to be filtered and kept. That is has the freq below the threshold
+				List<EdgeObject> filteredEdges = new ArrayList<EdgeObject>();
+				List<EdgeObject> keptEdges = new ArrayList<EdgeObject>();
+
+				for (Map.Entry<EdgeObject, Integer> entry : lowLevelDfg.getCurrentFrequencyEdge().entrySet()) {
+					if (entry.getValue() < freqThreshold) {
+						filteredEdges.add(entry.getKey());
+					} else {
+						keptEdges.add(entry.getKey());
+					}
+				}
+				// find these edges in the graph
+				List<Integer> filteredEdgeRows = new ArrayList<>();
+				List<Object[]> filteredEdgeData = new ArrayList<>();
+				List<Integer> keptEdgeRows = new ArrayList<>();
+				Table nodeTable = lowLevelDfg.getGraph().getNodeTable();
+				Table edgeTable = lowLevelDfg.getGraph().getEdgeTable();
+				TableIterator edges = edgeTable.iterator();
+				while (edges.hasNext()) {
+					int row = edges.nextInt();
+					if (edgeTable.isValidRow(row)) {
+						int source = edgeTable.getTuple(row).getInt(Graph.DEFAULT_SOURCE_KEY);
+						int target = edgeTable.getTuple(row).getInt(Graph.DEFAULT_TARGET_KEY);
+						String sourceString = nodeTable.getTuple(source).getString(GraphConstants.LABEL_FIELD);
+						String targetString = nodeTable.getTuple(target).getString(GraphConstants.LABEL_FIELD);
+						sourceString = sourceString.equals("**BEGIN**") ? "begin" : sourceString;
+						targetString = targetString.equals("**END**") ? "end" : targetString;
+						EdgeObject checkEdge = new EdgeObject(sourceString, targetString);
+						if (filteredEdges.contains(checkEdge)) {
+							// check if this edge persistent kept
+							if (!panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
+									.doesTableContainValue(
+											panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
+													.getPersistentPathsTable(),
+											edgeTable.getString(row, GraphConstants.LABEL_FIELD))) {
+								filteredEdgeRows.add(row);
+								// add to filtered edges data 
+								Object[] data = new Object[] { edgeTable.getString(row, GraphConstants.LABEL_FIELD),
+										sourceString, targetString,
+										lowLevelDfg.getCurrentFrequencyEdge().get(checkEdge) };
+								filteredEdgeData.add(data);
+							} else {
+								keptEdgeRows.add(row);
+							}
+						}
+						if (keptEdges.contains(checkEdge)) {
+							keptEdgeRows.add(row);
+						}
+					}
+
+				}
+
+				// make these filtered edges non display
+				for (Integer i : filteredEdgeRows) {
+					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, false);
+				}
+				// update the removing paths table
+				panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
+						.updateRemovingTable(filteredEdgeData);
+				// make these kept edges display
+				for (Integer i : keptEdgeRows) {
+					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, true);
+				}
+				// update color cell
+				panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().updateCellColor(lowLevelDfg.getGraph());
+
+				lowLevelDfg.revalidate();
+				lowLevelDfg.repaint();
+
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Unique value to gui";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.low_removing_path_table, GoalDrivenObject.low_level_dfg };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				GoalDrivenDFG lowLevelDfg = inputs.get(GoalDrivenObject.low_level_dfg);
+
+				List<String> labels = inputs.get(GoalDrivenObject.low_removing_path_table);
+				List<Integer> removingEdgeRow = new ArrayList<>();
+				Table edgeTable = lowLevelDfg.getGraph().getEdgeTable();
+				TableIterator edges = edgeTable.iterator();
+				while (edges.hasNext()) {
+					int row = edges.nextInt();
+					if (edgeTable.isValidRow(row)) {
+						if (labels.contains(edgeTable.getString(row, GraphConstants.LABEL_FIELD))) {
+							removingEdgeRow.add(row);
+						}
+					}
+				}
+				for (Integer i : removingEdgeRow) {
+					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, false);
+				}
+				// update color cell
+				panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().updateCellColor(lowLevelDfg.getGraph());
+				
+				lowLevelDfg.revalidate();
+				lowLevelDfg.repaint();
+
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Unique value to gui";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.low_keeping_path_table, GoalDrivenObject.low_level_dfg };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				GoalDrivenDFG lowLevelDfg = inputs.get(GoalDrivenObject.low_level_dfg);
+
+				List<String> labels = inputs.get(GoalDrivenObject.low_keeping_path_table);
+				List<Integer> removingEdgeRow = new ArrayList<>();
+				Table edgeTable = lowLevelDfg.getGraph().getEdgeTable();
+				TableIterator edges = edgeTable.iterator();
+				while (edges.hasNext()) {
+					int row = edges.nextInt();
+					if (edgeTable.isValidRow(row)) {
+						if (labels.contains(edgeTable.getString(row, GraphConstants.LABEL_FIELD))) {
+							removingEdgeRow.add(row);
+						}
+					}
+				}
+				for (Integer i : removingEdgeRow) {
+					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, true);
+				}
+				// update color cell
+				panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().updateCellColor(lowLevelDfg.getGraph());
+				
+				lowLevelDfg.revalidate();
+				lowLevelDfg.repaint();
+
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+
+		// action for slider
+		panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getEdgeSlider().getRangeSlider()
+				.addChangeListener(new ChangeListener() {
+
+					public void stateChanged(ChangeEvent e) {
+						double value = panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
+								.getEdgeSlider().getRangeSlider().getUpperValue() / 100f;
+						chain.setObject(GoalDrivenObject.low_edge_threshold, value);
+
+					}
+
+				});
+
+		/*------------------------------------------*/
+
 		// expand button
 		panel.getControlBar().getExpandButton().addActionListener(new ActionListener() {
 
@@ -572,7 +1078,8 @@ public class GoalDrivenController {
 				}
 				int maxActFreq = Collections.max(mapActFreq.values());
 				panel.getConfigCards().getAllActivityConfigPanel().setMaxActFreq(maxActFreq);
-				panel.getConfigCards().getAllActivityConfigPanel().updateDefaultConfigTable(mapActToHierarchy, mapActFreq);
+				panel.getConfigCards().getAllActivityConfigPanel().updateDefaultConfigTable(mapActToHierarchy,
+						mapActFreq);
 
 			}
 

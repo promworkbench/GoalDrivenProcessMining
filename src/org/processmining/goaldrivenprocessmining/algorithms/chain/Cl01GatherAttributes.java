@@ -101,7 +101,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 				maxFreq = mapActFreq.get(key);
 			}
 		}
-		int threshold = (int) (0.3 * maxFreq);
+		int threshold = (int) (0.4 * maxFreq);
 		List<String> l = new ArrayList<>();
 		List<String> allL = new ArrayList<>();
 		for (String key : mapActFreq.keySet()) {

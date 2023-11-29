@@ -59,7 +59,6 @@ public class ActDisplayPanel extends JPanel {
 		};
 		new ButtonColumn(includeTable, excludeAct, 1);
 		new ButtonColumn(excludeTable, includeAct, 1);
-		
 		JScrollPane includeScrollPane = new JScrollPane(includeTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		JScrollPane excludeScrollPane = new JScrollPane(excludeTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
