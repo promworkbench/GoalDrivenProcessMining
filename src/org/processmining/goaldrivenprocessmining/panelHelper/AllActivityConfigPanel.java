@@ -46,7 +46,7 @@ public class AllActivityConfigPanel extends JPanel {
 	private JCheckBox enableSliderCheckbox;
 	private int maxActFreq = 1;
 
-	public AllActivityConfigPanel(double width) {
+	public AllActivityConfigPanel() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		// First Row: Search Label and TextField
 		JPanel searchPanel = new JPanel();

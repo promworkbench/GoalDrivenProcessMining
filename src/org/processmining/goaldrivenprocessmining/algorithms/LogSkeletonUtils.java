@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.deckfour.xes.in.XesXmlParser;
@@ -31,7 +30,7 @@ import org.processmining.goaldrivenprocessmining.objectHelper.TraceSkeleton;
 public class LogSkeletonUtils {
 
 	public static void main(String[] args) throws Exception {
-		File file = new File("C:\\D\\data\\running-example.xes");
+		File file = new File("C:\\D\\data\\BPI\\BPI-2019\\BPI_Challenge_2019_3wayAfter_EC.xes");
 
 		// Create an input stream for the XES file
 		InputStream is = new FileInputStream(file);
@@ -40,13 +39,8 @@ public class LogSkeletonUtils {
 		XesXmlParser parser = new XesXmlParser();
 
 		XLog log = parser.parse(is).get(0);
-		Consumer<XTrace> action = trace -> {
-			for (XEvent event : trace) {
-				System.out.println(event.getAttributes().get("concept:name"));
-			}
-			System.out.println(Thread.currentThread().getName());
-		};
-		log.parallelStream().forEach(action);
+		
+		System.out.println(log.get(0).get(0).getAttributes().keySet());
 
 	}
 
@@ -435,19 +429,45 @@ public class LogSkeletonUtils {
 		return res;
 	}
 
+	public static Set<String> getTraceAttributes(XLog log) {
+		return log.get(0).getAttributes().keySet();
+	}
+	
+	public static Set<String> getEventAttributes(XLog log) {
+		return log.get(0).get(0).getAttributes().keySet();
+	}
+	
 	public static GDPMLogSkeleton getLogSkeleton(XLog log) {
 		GDPMLogSkeleton logSkeleton = new GDPMLogSkeleton();
+		Set<String> traceAttributes = getTraceAttributes(log);
+		Set<String> eventAttributes = getEventAttributes(log);
 		EdgeHashTable edgeHashTable = new EdgeHashTable();
 		String classifier = LogSkeletonUtils.getLogClassifier(log);
 
 		int traceNum = 0;
 		for (XTrace trace : log) {
 			TraceSkeleton traceSkeleton = new TraceSkeleton();
+			HashMap<String, Object> traceAttribute = new HashMap<String, Object>();
+			// add trace attributes
+			for (String attribute : traceAttributes) {
+				traceAttribute.put(attribute, trace.getAttributes().get(attribute));
+			}
+			traceSkeleton.setAttributes(traceAttribute);
+			
+			// add events to trace
 			for (int i = 0; i < trace.size(); i++) {
 				XEvent event = trace.get(i);
 				String act = event.getAttributes().get(classifier).toString();
 				Long time = ((XAttributeTimestampImpl) event.getAttributes().get(TIME_CLASSIFIER)).getValueMillis();
 				EventSkeleton eventSkeleton = new EventSkeleton(act, time, true);
+				HashMap<String, Object> eventAttribute = new HashMap<String, Object>();
+				for (String attribute : eventAttributes) {
+					eventAttribute.put(attribute, event.getAttributes().get(attribute));
+				}
+				eventSkeleton.setAttributes(eventAttribute);
+				// add event attributes
+				
+				// add event
 				traceSkeleton.getTrace().add(eventSkeleton);
 				EdgeObject edgeObject;
 				//edge hash table

@@ -13,12 +13,14 @@ public class ConfigCards extends JPanel {
 	private final ActConfigPanel actConfigPanel;
 	private final GroupConfigPanel groupConfigPanel;
 	private final AllActivityConfigPanel allActivityConfigPanel;
+	private final CaseConfigPanel caseConfigPanel;
+	private final NotificationConfigPanel notificationConfigPanel;
 	private final LegendPanel legendPanel;
 	private final CardLayout layoutCard;
 	private final double sWidth;
 
 	public ConfigCards() {
-		
+
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		sWidth = screenSize.getWidth();
 		setSize(new Dimension(800, 800));
@@ -44,12 +46,17 @@ public class ConfigCards extends JPanel {
 		legendPanel = new LegendPanel();
 		add(legendPanel, "6");
 		// all act config panel
-		allActivityConfigPanel = new AllActivityConfigPanel(this.getBounds().width);
+		allActivityConfigPanel = new AllActivityConfigPanel();
 		add(allActivityConfigPanel, "7");
+		// all act config panel
+		caseConfigPanel = new CaseConfigPanel();
+		add(caseConfigPanel, "8");
+		// all act config panel
+		notificationConfigPanel = new NotificationConfigPanel();
+		add(notificationConfigPanel, "9");
 
 		setVisible(false);
 	}
-	
 
 	public FilterConfigPanel getFilterConfigPanel() {
 		return filterConfigPanel;
@@ -81,6 +88,14 @@ public class ConfigCards extends JPanel {
 
 	public AllActivityConfigPanel getAllActivityConfigPanel() {
 		return allActivityConfigPanel;
+	}
+
+	public CaseConfigPanel getCaseConfigPanel() {
+		return caseConfigPanel;
+	}
+	
+	public NotificationConfigPanel getNotificationConfigPanel() {
+		return notificationConfigPanel;
 	}
 
 	public double getsWidth() {

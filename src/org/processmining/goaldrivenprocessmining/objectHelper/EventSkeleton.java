@@ -1,6 +1,7 @@
 package org.processmining.goaldrivenprocessmining.objectHelper;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 public class EventSkeleton implements Serializable {
 	/**
@@ -10,7 +11,8 @@ public class EventSkeleton implements Serializable {
 	private String activity;
 	private long time;
 	private Boolean isDisplayed;
-
+	private HashMap<String, Object> attributes;
+	
 	public EventSkeleton(String activity, long time, Boolean isDisplayed) {
 		this.activity = activity;
 		this.time = time;
@@ -47,8 +49,18 @@ public class EventSkeleton implements Serializable {
 		this.isDisplayed = isDisplayed;
 	}
 
+	public HashMap<String, Object> getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(HashMap<String, Object> attributes) {
+		this.attributes = attributes;
+	}
+	
+
 	public String toString() {
-		return "EventSkeleton [activity=" + activity + ", time=" + time + ", isDisplayed=" + isDisplayed + "]";
+		return "EventSkeleton [activity=" + activity + ", time=" + time + ", isDisplayed=" + isDisplayed
+				+ ", attributes=" + attributes + "]";
 	}
 
 }

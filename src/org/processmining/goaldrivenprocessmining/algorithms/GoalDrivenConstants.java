@@ -9,6 +9,12 @@ import javax.swing.BorderFactory;
 import javax.swing.border.Border;
 
 public class GoalDrivenConstants {
+	// log constant:
+	public static final String CASE_NAME = "concept:name";
+	public static final String EVENT_ACTIVITY = "concept:name";
+	public static final String EVENT_TIME = "time:timestamp";
+	
+	
 	// date time format
 	public static final List<String> DATA_TIME_FORMAT = Arrays.asList(
 			"yyyy-MM-dd'T'HH:mm:ss.SSSXXX",

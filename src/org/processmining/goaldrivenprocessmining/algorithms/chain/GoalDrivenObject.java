@@ -60,7 +60,7 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	public static final IvMObject<GoalDrivenDFG> high_level_dfg = c("high-level DFG", GoalDrivenDFG.class);
 	public static final IvMObject<GoalDrivenDFG> low_level_dfg = c("low-level DFG", GoalDrivenDFG.class);
 	public static final IvMObject<GoalDrivenDFG> selected_group_dfg = c("DFG of the selected group", GoalDrivenDFG.class);
-	// selected group
+	// selected act
 	public static final IvMObject<String> selected_act = c("Selected act from UI", String.class);
 	
 	// selected mode 
@@ -80,6 +80,12 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	public static final IvMObject<List> high_keeping_path_table = c("keeping path table for high level dfg", List.class);
 	public static final IvMObject<List> low_removing_path_table = c("removing path table for low level dfg", List.class);
 	public static final IvMObject<List> low_keeping_path_table = c("keeping path table for low level dfg", List.class);
+	
+	// case table
+	public static final IvMObject<Integer> selected_case_index = c("Selected case index from choose case table", Integer.class);
+	public static final IvMObject<HashMap> selected_path_from_high= c("Selected path from high level dfg", HashMap.class);
+	public static final IvMObject<HashMap> selected_path_from_low = c("Selected path from low level dfg", HashMap.class);
+	
 	
 	public GoalDrivenObject(String name, Class<C> clazz) {
 		super(name, clazz);

@@ -41,9 +41,11 @@ import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPane
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.EventSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.TraceSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateType;
 import org.processmining.goaldrivenprocessmining.objectHelper.ValueCategoryObject;
@@ -1207,6 +1209,203 @@ public class GoalDrivenController {
 			}
 		});
 		/*-----------------------------------------*/
+
+		/*--------Case config panel---------*/
+		panel.getControlBar().getCaseButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setBounds(0, 0, (int) (0.5 * panel.getConfigCards().getsWidth()), 400);
+				panel.getConfigCards().setVisible(true);
+				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "8");
+
+			}
+
+		});
+		panel.getConfigCards().getCaseConfigPanel().getCaseConfigCancelButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setVisible(false);
+
+			}
+		});
+		panel.getConfigCards().getCaseConfigPanel().getCaseConfigDoneButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setVisible(false);
+
+			}
+		});
+		// action when choose case table clicked
+		panel.getConfigCards().getCaseConfigPanel().getChooseCaseTable().addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent evt) {
+				JTable table = panel.getConfigCards().getCaseConfigPanel().getChooseCaseTable();
+				int row = table.rowAtPoint(evt.getPoint());
+				int col = table.columnAtPoint(evt.getPoint());
+				if (row >= 0 && col == 0) {
+					chain.setObject(GoalDrivenObject.selected_case_index,
+							table.getRowSorter().convertRowIndexToModel(row));
+				}
+			}
+		});
+		// action when choose show table clicked
+		panel.getConfigCards().getCaseConfigPanel().getShowCaseTable().addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent evt) {
+				JTable table = panel.getConfigCards().getCaseConfigPanel().getShowCaseTable();
+				int row = table.rowAtPoint(evt.getPoint());
+				int col = table.columnAtPoint(evt.getPoint());
+				if (row >= 0 && col == 0) {
+					GoalDrivenDFGUtils.isInSelectActMode = true;
+					chain.setObject(GoalDrivenObject.selected_act, (String) table.getValueAt(row, col));
+				}
+			}
+		});
+
+		// chain to setup the choose case table and setup columns for show case table
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Update choose case table";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.full_log_skeleton };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				GDPMLogSkeleton gdpmLogSkeleton = inputs.get(GoalDrivenObject.full_log_skeleton);
+				List<TraceSkeleton> traces = gdpmLogSkeleton.getLog();
+				List<String[]> data = new ArrayList<String[]>();
+				for (TraceSkeleton trace : traces) {
+					String caseName = trace.getAttributes().get(GoalDrivenConstants.CASE_NAME).toString();
+					long duration = trace.getTrace().get(trace.getTrace().size() - 1).getTime()
+							- trace.getTrace().get(0).getTime();
+					String className = "Neutral";
+					String[] d = new String[] { caseName, StatUtils.getDurationString(duration), className };
+					data.add(d);
+				}
+				panel.getConfigCards().getCaseConfigPanel().updateChooseCaseTable(data);
+
+				List<String> columns = new ArrayList<String>();
+				columns.add("Activity");
+				columns.add("Timestamp");
+
+				for (String att : gdpmLogSkeleton.getLog().get(0).getTrace().get(0).getAttributes().keySet()) {
+					if (!att.equals(GoalDrivenConstants.CASE_NAME) && !att.equals(GoalDrivenConstants.EVENT_ACTIVITY)
+							&& !att.equals(GoalDrivenConstants.EVENT_TIME)) {
+						columns.add(att);
+					}
+				}
+
+				for (String att : gdpmLogSkeleton.getLog().get(0).getAttributes().keySet()) {
+					if (!att.equals(GoalDrivenConstants.CASE_NAME) && !att.equals(GoalDrivenConstants.EVENT_ACTIVITY)
+							&& !att.equals(GoalDrivenConstants.EVENT_TIME)) {
+						columns.add(att);
+					}
+				}
+				panel.getConfigCards().getCaseConfigPanel().updateColumnShowCaseTable(columns);
+
+				panel.revalidate();
+				panel.repaint();
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+		// chain to update show case table
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Update show case table";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.full_log_skeleton, GoalDrivenObject.selected_case_index };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				GDPMLogSkeleton gdpmLogSkeleton = inputs.get(GoalDrivenObject.full_log_skeleton);
+				TraceSkeleton traceSkeleton = gdpmLogSkeleton.getLog()
+						.get(inputs.get(GoalDrivenObject.selected_case_index));
+				// change label
+				String caseName = traceSkeleton.getAttributes().get(GoalDrivenConstants.CASE_NAME).toString();
+				panel.getConfigCards().getCaseConfigPanel().getShowCaseLabel().setText("Case: " + caseName);
+				// update row 
+				List<Object[]> data = new ArrayList<>();
+				for (EventSkeleton eventSkeleton : traceSkeleton.getTrace()) {
+					List<Object> row = new ArrayList<>();
+					row.add(eventSkeleton.getActivity());
+					row.add(StatUtils.convertMillisToDateString(eventSkeleton.getTime()));
+					for (Map.Entry<String, Object> entry : eventSkeleton.getAttributes().entrySet()) {
+						if (!entry.getKey().equals(GoalDrivenConstants.CASE_NAME)
+								&& !entry.getKey().equals(GoalDrivenConstants.EVENT_ACTIVITY)
+								&& !entry.getKey().equals(GoalDrivenConstants.EVENT_TIME))
+							row.add(entry.getValue());
+					}
+					for (Map.Entry<String, Object> entry : traceSkeleton.getAttributes().entrySet()) {
+						if (!entry.getKey().equals(GoalDrivenConstants.CASE_NAME)
+								&& !entry.getKey().equals(GoalDrivenConstants.EVENT_ACTIVITY)
+								&& !entry.getKey().equals(GoalDrivenConstants.EVENT_TIME))
+							row.add(entry.getValue());
+					}
+					data.add(row.toArray(new Object[0]));
+				}
+				panel.getConfigCards().getCaseConfigPanel().updateShowCaseTable(data);
+
+				panel.revalidate();
+				panel.repaint();
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Update show case table";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.selected_path_from_high };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				HashMap<String, Object> passValues = inputs.get(GoalDrivenObject.selected_path_from_high);
+				String source = (String) passValues.get("source");
+				String target = (String) passValues.get("target");
+
+				panel.getConfigCards().setBounds(0, 0, (int) (0.4 * panel.getConfigCards().getsWidth()), 50);
+				panel.getConfigCards().setVisible(true);
+				panel.getConfigCards().getNotificationConfigPanel().updateNotificationLabel(source, target);
+				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "9");
+
+				panel.revalidate();
+				panel.repaint();
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
+
+		// filter case on path
+		panel.getConfigCards().getNotificationConfigPanel().getNotiCloseButton()
+				.addActionListener(new ActionListener() {
+
+					public void actionPerformed(ActionEvent e) {
+						panel.getConfigCards().setVisible(false);
+					}
+
+				});
+		panel.getConfigCards().getNotificationConfigPanel().getNotiOpenButton().addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+			}
+
+		});
+
+		/*-------------------------------------*/
 
 		// mode done button
 		panel.getConfigCards().getModePanel().getModeDoneButton().addActionListener(new ActionListener() {

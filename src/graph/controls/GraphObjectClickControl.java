@@ -23,21 +23,19 @@ public class GraphObjectClickControl extends ControlAdapter {
 	private DataChain<GoalDrivenConfiguration> chain;
 	private BasicStroke curStroke = new BasicStroke();
 	private Font curFont;
+	private Boolean isHighLevel;
 
 	public GraphObjectClickControl() {
 	}
 
-	public GraphObjectClickControl(DataChain<GoalDrivenConfiguration> chain) {
+	public GraphObjectClickControl(DataChain<GoalDrivenConfiguration> chain, Boolean isHighLevel) {
 		this.chain = chain;
+		this.isHighLevel = isHighLevel;
 	}
 
-	public void itemClicked(VisualItem item, java.awt.event.MouseEvent e) {
+	public void itemClicked(VisualItem item, MouseEvent e) {
 		if (!e.isControlDown() && e.getButton() != MouseEvent.BUTTON3) {
 			if (edgeFilter.getBoolean(item)) {
-				// only highlight edge when not in selected mode
-				if (!GoalDrivenDFGUtils.isInSelectActMode) {
-					item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
-				}
 				// find the source and end of edge
 				EdgeItem edge = (EdgeItem) item;
 				String sourceNode = edge.getSourceItem().getString(GraphConstants.LABEL_FIELD)
@@ -52,12 +50,24 @@ public class GraphObjectClickControl extends ControlAdapter {
 								: edge.getTargetItem().getString(GraphConstants.LABEL_FIELD)
 										.equals(GraphConstants.END_NODE_NAME) ? "end"
 												: edge.getTargetItem().getString(GraphConstants.LABEL_FIELD);
+
+				// only highlight edge when not in selected mode
+				if (!GoalDrivenDFGUtils.isInSelectActMode) {
+					item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
+				}
+
 				HashMap<String, Object> passValues = new HashMap<String, Object>();
 				passValues.put("source", sourceNode);
 				passValues.put("target", targetNode);
 				if (this.chain != null) {
-					this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
+					if (isHighLevel) {
+						this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
+						this.chain.setObject(GoalDrivenObject.selected_path_from_high, passValues);
+					} else {
+						this.chain.setObject(GoalDrivenObject.selected_path_from_low, passValues);
+					}
 				}
+
 			} else if (nodeFilter.getBoolean(item)) {
 				if (item.getString(GraphConstants.NODE_TYPE_FIELD).equals("ACT_NODE")) {
 					if (this.chain != null) {
@@ -81,9 +91,9 @@ public class GraphObjectClickControl extends ControlAdapter {
 				item.setFillColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
 			} else if (nodeFilter.getBoolean(item)) {
 				item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
-				
+
 			}
-			
+
 			item.getVisualization().repaint();
 		}
 	}
@@ -95,7 +105,7 @@ public class GraphObjectClickControl extends ControlAdapter {
 				item.setFillColor(item.getInt(GraphConstants.EDGE_FILL_COLOR_FIELD));
 				item.setStroke(this.curStroke);
 				item.setFont(this.curFont);
-				
+
 			} else if (nodeFilter.getBoolean(item)) {
 				item.setStrokeColor(item.getInt(GraphConstants.NODE_STROKE_COLOR_FIELD));
 			}

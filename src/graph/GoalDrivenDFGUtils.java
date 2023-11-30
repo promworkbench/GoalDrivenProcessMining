@@ -865,7 +865,7 @@ public class GoalDrivenDFGUtils {
 		// edge label to mean throughput
 		HashMap<EdgeObject, String> mapEdgeLabel = new HashMap<EdgeObject, String>();
 		for (EdgeObject edgeObject : mapThroughput.keySet()) {
-			mapEdgeLabel.put(edgeObject, StatUtils.getDateString(mapMeanThroughput.get(edgeObject)));
+			mapEdgeLabel.put(edgeObject, StatUtils.getDurationString(mapMeanThroughput.get(edgeObject)));
 		}
 		goalDrivenDFG.getEdgeRenderer().setMapEdgeLabel(mapEdgeLabel);
 
@@ -891,7 +891,7 @@ public class GoalDrivenDFGUtils {
 		// edge label to mean throughput
 		HashMap<EdgeObject, String> mapEdgeLabel = new HashMap<EdgeObject, String>();
 		for (EdgeObject edgeObject : mapThroughput.keySet()) {
-			mapEdgeLabel.put(edgeObject, StatUtils.getDateString(mapMedianThroughput.get(edgeObject)));
+			mapEdgeLabel.put(edgeObject, StatUtils.getDurationString(mapMedianThroughput.get(edgeObject)));
 		}
 		goalDrivenDFG.getEdgeRenderer().setMapEdgeLabel(mapEdgeLabel);
 
@@ -917,7 +917,7 @@ public class GoalDrivenDFGUtils {
 		// edge label to mean throughput
 		HashMap<EdgeObject, String> mapEdgeLabel = new HashMap<EdgeObject, String>();
 		for (EdgeObject edgeObject : mapThroughput.keySet()) {
-			mapEdgeLabel.put(edgeObject, StatUtils.getDateString(mapMinThroughput.get(edgeObject)));
+			mapEdgeLabel.put(edgeObject, StatUtils.getDurationString(mapMinThroughput.get(edgeObject)));
 		}
 		goalDrivenDFG.getEdgeRenderer().setMapEdgeLabel(mapEdgeLabel);
 
@@ -943,7 +943,7 @@ public class GoalDrivenDFGUtils {
 		// edge label to mean throughput
 		HashMap<EdgeObject, String> mapEdgeLabel = new HashMap<EdgeObject, String>();
 		for (EdgeObject edgeObject : mapThroughput.keySet()) {
-			mapEdgeLabel.put(edgeObject, StatUtils.getDateString(mapMaxThroughput.get(edgeObject)));
+			mapEdgeLabel.put(edgeObject, StatUtils.getDurationString(mapMaxThroughput.get(edgeObject)));
 		}
 		goalDrivenDFG.getEdgeRenderer().setMapEdgeLabel(mapEdgeLabel);
 

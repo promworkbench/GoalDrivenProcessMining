@@ -19,6 +19,7 @@ public class ControlBar extends JPanel {
 	//	private final JButton modeButton;
 	private final JButton filterButton;
 	private final JButton allActivityButton;
+	private final JButton caseButton;
 	private final JButton groupButton;
 	private final JPanel expandPanel;
 	private final JButton expandButton;
@@ -37,15 +38,14 @@ public class ControlBar extends JPanel {
 		{
 			add(configPanel, "0,0");
 			configPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-			//			modeButton = this.drawButton("Mode");
 			filterButton = this.drawButton("Filter edges");
 			allActivityButton = this.drawButton("Activities");
+			caseButton = this.drawButton("Cases");
 			groupButton = this.drawButton("Groups");
 			legendButton = this.drawButton("Legend");
-
-			//			configPanel.add(modeButton);
 			configPanel.add(filterButton);
 			configPanel.add(allActivityButton);
+			configPanel.add(caseButton);
 			configPanel.add(groupButton);
 			configPanel.add(legendButton);
 
@@ -108,4 +108,7 @@ public class ControlBar extends JPanel {
 		return legendButton;
 	}
 
+	public JButton getCaseButton() {
+		return caseButton;
+	}
 }

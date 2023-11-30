@@ -1,5 +1,8 @@
 package org.processmining.goaldrivenprocessmining.algorithms;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,32 +16,64 @@ import prefuse.data.util.TableIterator;
 
 public class StatUtils {
 
-	public static String getDateString(long time) {
+	public static String convertMillisToDateString(long milliseconds) {
+		// Convert milliseconds to LocalDateTime
+		Instant instant = Instant.ofEpochMilli(milliseconds);
+		LocalDateTime dateTime = LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault());
+
+		// Format LocalDateTime to a String
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		return dateTime.format(formatter);
+	}
+
+	public static String getDurationString(long time) {
 		String res = "";
 		if (time != -1) {
+			long year = time / 1000 / 60 / 60 / 24 / 30 / 12;
+			long month = time / 1000 / 60 / 60 / 24 / 30;
 			long day = time / 1000 / 60 / 60 / 24;
-			long hour = (time - day * 1000 * 60 * 60 * 24) / 1000 / 60 / 60;
+			long hour = time / 1000 / 60 / 60;
 
-			if (day != 0) {
-				if (day >= 3) {
-					float comma = ((float) time) / 1000 / 60 / 60 / 24;
-					res = Float.toString(Math.round(comma * 10) / 10f) + " d";
+			if (year != 0) {
+				if (year >= 3) {
+					float comma = ((float) time) / 1000 / 60 / 60 / 24 / 30 / 12;
+					res = Float.toString(Math.round(comma * 10) / 10f) + " yrs";
 				} else {
-					float comma = ((float) time) / 1000 / 60 / 60;
-					res = Float.toString(Math.round(comma * 10) / 10f) + " hrs";
+					float comma = ((float) time) / 1000 / 60 / 60 / 24 / 30;
+					res = Float.toString(Math.round(comma * 10) / 10f) + " mo";
 				}
 			} else {
-				if (hour != 0) {
-					if (hour >= 2) {
-						float comma = ((float) time) / 1000 / 60 / 60;
-						res = Float.toString(Math.round(comma * 10) / 10f) + " hrs";
+				if (month != 0) {
+					if (month >= 3) {
+						float comma = ((float) time) / 1000 / 60 / 60 / 24 / 30;
+						res = Float.toString(Math.round(comma * 10) / 10f) + " mo";
 					} else {
-						float comma = ((float) time) / 1000 / 60;
-						res = Float.toString(Math.round(comma * 10) / 10f) + " mins";
+						float comma = ((float) time) / 1000 / 60 / 60 / 24;
+						res = Float.toString(Math.round(comma * 10) / 10f) + " d";
 					}
 				} else {
-					float comma = ((float) time) / 1000 / 60;
-					res = Float.toString(Math.round(comma * 10) / 10f) + " mins";
+					if (day != 0) {
+						if (day >= 3) {
+							float comma = ((float) time) / 1000 / 60 / 60 / 24;
+							res = Float.toString(Math.round(comma * 10) / 10f) + " d";
+						} else {
+							float comma = ((float) time) / 1000 / 60 / 60;
+							res = Float.toString(Math.round(comma * 10) / 10f) + " hrs";
+						}
+					} else {
+						if (hour != 0) {
+							if (hour >= 2) {
+								float comma = ((float) time) / 1000 / 60 / 60;
+								res = Float.toString(Math.round(comma * 10) / 10f) + " hrs";
+							} else {
+								float comma = ((float) time) / 1000 / 60;
+								res = Float.toString(Math.round(comma * 10) / 10f) + " mins";
+							}
+						} else {
+							float comma = ((float) time) / 1000 / 60;
+							res = Float.toString(Math.round(comma * 10) / 10f) + " mins";
+						}
+					}
 				}
 			}
 		}
@@ -108,7 +143,7 @@ public class StatUtils {
 
 		return result;
 	}
-	
+
 	public static List<String> getDisconnectedActsToEndFromDFG(Graph graph) {
 		List<String> result = new ArrayList<String>();
 		List<String> allActs = new ArrayList<>();
@@ -136,5 +171,5 @@ public class StatUtils {
 
 		return result;
 	}
-	
+
 }
