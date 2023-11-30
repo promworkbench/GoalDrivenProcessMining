@@ -53,6 +53,9 @@ public class GraphConstants {
 	public static final BasicStroke HIGHLIGHT_STROKE = new BasicStroke(10);
 	// unhighlight color
 	public static final int UNHIGHLIGHT_STROKE_COLOR = ColorLib.rgb(51, 51, 51);
+	// table color
+	
+	
 	//action name
 	public static final String NODE_STROKE_COLOR_ACTION = "nodeStrokeColor";
 	public static final String NODE_FILL_COLOR_ACTION = "nodeFillColor";

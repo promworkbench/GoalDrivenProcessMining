@@ -217,8 +217,8 @@ public class FilterEdgePanel extends JPanel {
 			legendLabel.setIcon(legendImage);
 		}
 		panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		String legendLabelTooltip = "<html><font color='orange'>Orange: No path from begin to this act</font>"
-				+ "<br><font color='#FF00FF'>Magenta: No path from this act to end node</font>"
+		String legendLabelTooltip = "<html><font color='orange'> Orange: No path from this act to end node</font>"
+				+ "<br><font color='#FF00FF'>Magenta: No path from begin to this act</font>"
 				+ "<br><font color='red'>Red: Both conditions</font></html>";
 
 		legendLabel.setToolTipText(legendLabelTooltip);

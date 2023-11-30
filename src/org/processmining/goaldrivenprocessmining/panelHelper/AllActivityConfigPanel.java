@@ -1,5 +1,6 @@
 package org.processmining.goaldrivenprocessmining.panelHelper;
 
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -23,9 +24,13 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
+
+import graph.GraphConstants;
+import prefuse.util.ColorLib;
 
 public class AllActivityConfigPanel extends JPanel {
 	/**
@@ -117,27 +122,61 @@ public class AllActivityConfigPanel extends JPanel {
 		JPanel assignButtonJPanel = new JPanel();
 		assignButtonJPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		JButton assignButton = new JButton("Assign Value");
-        assignButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showAssignValueDialog();
-            }
-        });
-        assignButtonJPanel.add(assignButton);
+		assignButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				showAssignValueDialog();
+			}
+		});
+		assignButtonJPanel.add(assignButton);
 		// table
 		String[] columnNames = { "Activity", "Frequency", "Hierarchy", "Priority", "Desirability" };
 		Object[][] data = {};
 		this.model = new NonEditableColumnTableModel(data, columnNames);
 		this.table = new JTable(model);
 		this.table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		this.tr = new TableRowSorter<DefaultTableModel>(this.model);
-
-		RowFilter<Object, Object> rangeFilter = new RowFilter<Object, Object>() {
-			public boolean include(Entry<? extends Object, ? extends Object> entry) {
-				int freq = (int) entry.getValue(1);
-				return freq >= 1 && freq <= 2;
+		// change color of cell in column source, target to highlight the not connect to begin, end nodes.
+		DefaultTableCellRenderer rendererDesired = new DefaultTableCellRenderer() {
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+					boolean hasFocus, int row, int column) {
+				Component cellComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+						column);
+				if (!isSelected) {
+					if (value.equals("High")) {
+						cellComponent.setBackground(ColorLib.getColor(GraphConstants.NODE_HIGH_DESIRED_STROKE_COLOR));
+					} else if (value.equals("Low")) {
+						cellComponent.setBackground(ColorLib.getColor(GraphConstants.NODE_LOW_DESIRED_STROKE_COLOR));
+					} else {
+						cellComponent.setBackground(table.getBackground());
+					}
+				} 
+				
+				return cellComponent;
 			}
+
 		};
+		DefaultTableCellRenderer rendererPriority = new DefaultTableCellRenderer() {
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+					boolean hasFocus, int row, int column) {
+				Component cellComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+						column);
+				if (!isSelected) {
+					if (value.equals("High")) {
+						cellComponent.setBackground(ColorLib.getColor(GraphConstants.NODE_HIGH_PRIORITY_STROKE_COLOR));
+					} else if (value.equals("Low")) {
+						cellComponent.setBackground(ColorLib.getColor(GraphConstants.NODE_LOW_PRIORITY_STROKE_COLOR));
+					} else {
+						cellComponent.setBackground(table.getBackground());
+					}
+				}
+				
+				return cellComponent;
+			}
+
+		};
+		this.table.getColumnModel().getColumn(3).setCellRenderer(rendererPriority);
+		this.table.getColumnModel().getColumn(4).setCellRenderer(rendererDesired);
+		this.tr = new TableRowSorter<DefaultTableModel>(this.model);
 		this.table.setRowSorter(this.tr);
 
 		// Customize the renderer and editor for JComboBox columns
@@ -154,7 +193,6 @@ public class AllActivityConfigPanel extends JPanel {
 		allActConfigDoneButton = new JButton("Done");
 		actEndPanel.add(allActConfigCancelButton);
 		actEndPanel.add(allActConfigDoneButton);
-		
 
 		add(labelJPanel);
 		add(assignButtonJPanel);
@@ -163,49 +201,52 @@ public class AllActivityConfigPanel extends JPanel {
 	}
 
 	private void showAssignValueDialog() {
-	    // Get selected rows
-	    int[] selectedRows = this.table.getSelectedRows();
+		// Get selected rows
+		int[] selectedRows = this.table.getSelectedRows();
 
-	    // Check if any row is selected
-	    if (selectedRows.length == 0) {
-	        JOptionPane.showMessageDialog(this, "Please select at least one row.");
-	        return;
-	    }
+		// Check if any row is selected
+		if (selectedRows.length == 0) {
+			JOptionPane.showMessageDialog(this, "Please select at least one row.");
+			return;
+		}
 
-	    // Create a dialog with three JComboBox components for label hierarchy, priority, and desirability
-	    JComboBox<String> hierarchyComboBox = new JComboBox<>(new String[]{"High", "Low"});
-	    JComboBox<String> priorityComboBox = new JComboBox<>(new String[]{"High", "Neutral", "Low"});
-	    JComboBox<String> desirabilityComboBox = new JComboBox<>(new String[]{"High", "Neutral", "Low"});
+		// Create a dialog with three JComboBox components for label hierarchy, priority, and desirability
+		JComboBox<String> hierarchyComboBox = new JComboBox<>(new String[] { "High", "Low" });
+		JComboBox<String> priorityComboBox = new JComboBox<>(new String[] { "High", "Neutral", "Low" });
+		priorityComboBox.setSelectedItem("Neutral");
+		JComboBox<String> desirabilityComboBox = new JComboBox<>(new String[] { "High", "Neutral", "Low" });
+		desirabilityComboBox.setSelectedItem("Neutral");
+		
+		JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+		panel.add(new JLabel("Hierarchy:"));
+		panel.add(hierarchyComboBox);
+		panel.add(new JLabel("Priority:"));
+		panel.add(priorityComboBox);
+		panel.add(new JLabel("Desirability:"));
+		panel.add(desirabilityComboBox);
 
-	    JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
-	    panel.add(new JLabel("Label Hierarchy:"));
-	    panel.add(hierarchyComboBox);
-	    panel.add(new JLabel("Label Priority:"));
-	    panel.add(priorityComboBox);
-	    panel.add(new JLabel("Label Desirability:"));
-	    panel.add(desirabilityComboBox);
+		int result = JOptionPane.showConfirmDialog(this, panel, "Choose Values to Assign",
+				JOptionPane.OK_CANCEL_OPTION);
 
-	    int result = JOptionPane.showConfirmDialog(this, panel, "Choose Values to Assign", JOptionPane.OK_CANCEL_OPTION);
+		// Check if the user clicked OK
+		if (result == JOptionPane.OK_OPTION) {
+			// Get the chosen values
+			String hierarchyValue = (String) hierarchyComboBox.getSelectedItem();
+			String priorityValue = (String) priorityComboBox.getSelectedItem();
+			String desirabilityValue = (String) desirabilityComboBox.getSelectedItem();
 
-	    // Check if the user clicked OK
-	    if (result == JOptionPane.OK_OPTION) {
-	        // Get the chosen values
-	        String hierarchyValue = (String) hierarchyComboBox.getSelectedItem();
-	        String priorityValue = (String) priorityComboBox.getSelectedItem();
-	        String desirabilityValue = (String) desirabilityComboBox.getSelectedItem();
+			// Assuming the columns for hierarchy, priority, and desirability are 2, 3, and 4 respectively
+			int hierarchyColumnIndex = 2;
+			int priorityColumnIndex = 3;
+			int desirabilityColumnIndex = 4;
 
-	        // Assuming the columns for hierarchy, priority, and desirability are 2, 3, and 4 respectively
-	        int hierarchyColumnIndex = 2;
-	        int priorityColumnIndex = 3;
-	        int desirabilityColumnIndex = 4;
-
-	        // Assign the values to the selected rows in the specified columns
-	        for (int row : selectedRows) {
-	            this.table.setValueAt(hierarchyValue, row, hierarchyColumnIndex);
-	            this.table.setValueAt(priorityValue, row, priorityColumnIndex);
-	            this.table.setValueAt(desirabilityValue, row, desirabilityColumnIndex);
-	        }
-	    }
+			// Assign the values to the selected rows in the specified columns
+			for (int row : selectedRows) {
+				this.table.setValueAt(hierarchyValue, row, hierarchyColumnIndex);
+				this.table.setValueAt(priorityValue, row, priorityColumnIndex);
+				this.table.setValueAt(desirabilityValue, row, desirabilityColumnIndex);
+			}
+		}
 	}
 
 	private void filterAct(String query) {
