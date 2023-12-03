@@ -14,7 +14,6 @@ public class ConfigCards extends JPanel {
 	private final GroupConfigPanel groupConfigPanel;
 	private final AllActivityConfigPanel allActivityConfigPanel;
 	private final CaseConfigPanel caseConfigPanel;
-	private final NotificationConfigPanel notificationConfigPanel;
 	private final LegendPanel legendPanel;
 	private final CardLayout layoutCard;
 	private final double sWidth;
@@ -49,11 +48,8 @@ public class ConfigCards extends JPanel {
 		allActivityConfigPanel = new AllActivityConfigPanel();
 		add(allActivityConfigPanel, "7");
 		// all act config panel
-		caseConfigPanel = new CaseConfigPanel();
+		caseConfigPanel = new CaseConfigPanel(this.getBounds().width);
 		add(caseConfigPanel, "8");
-		// all act config panel
-		notificationConfigPanel = new NotificationConfigPanel();
-		add(notificationConfigPanel, "9");
 
 		setVisible(false);
 	}
@@ -94,10 +90,6 @@ public class ConfigCards extends JPanel {
 		return caseConfigPanel;
 	}
 	
-	public NotificationConfigPanel getNotificationConfigPanel() {
-		return notificationConfigPanel;
-	}
-
 	public double getsWidth() {
 		return sWidth;
 	}

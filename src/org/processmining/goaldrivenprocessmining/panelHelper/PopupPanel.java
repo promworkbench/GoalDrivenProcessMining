@@ -3,10 +3,14 @@ package org.processmining.goaldrivenprocessmining.panelHelper;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JDialog;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.border.LineBorder;
@@ -104,5 +108,31 @@ public class PopupPanel {
 
 		popupMenu.show(parent, popupX, popupY);
 	}
+	
+	 public static void showEdgePopupMenu(Component component,  Point mousePosition, String source, String target, Boolean isHighLevel) {
+	        JPopupMenu popupMenu = new JPopupMenu();
+
+	        JMenuItem closeItem = new JMenuItem("Close");
+	        closeItem.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                // Add code to handle "Close" action
+	                JOptionPane.showMessageDialog(component, "Close button clicked");
+	            }
+	        });
+	        popupMenu.add(closeItem);
+
+	        JMenuItem openItem = new JMenuItem("Open");
+	        openItem.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                // Add code to handle "Open" action
+	                JOptionPane.showMessageDialog(component, "Open button clicked");
+	            }
+	        });
+	        popupMenu.add(openItem);
+
+	        popupMenu.show(component, mousePosition.x, mousePosition.y);
+	    }
 
 }

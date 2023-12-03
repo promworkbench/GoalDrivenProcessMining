@@ -62,6 +62,7 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	public static final IvMObject<GoalDrivenDFG> selected_group_dfg = c("DFG of the selected group", GoalDrivenDFG.class);
 	// selected act
 	public static final IvMObject<String> selected_act = c("Selected act from UI", String.class);
+	public static final IvMObject<String[]> selected_edge = c("Selected act from UI", String[].class);
 	
 	// selected mode 
 	public static final IvMObject<String> selected_mode = c("Selected mode from UI", String.class);

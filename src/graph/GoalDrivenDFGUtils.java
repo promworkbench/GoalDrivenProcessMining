@@ -599,8 +599,91 @@ public class GoalDrivenDFGUtils {
 	/*----------------------------------------------------------------*/
 
 	/*----------------------------------------------------------------*/
+	/* Highlight the selected edge */
+	public static void highlightSelectedEdge(GoalDrivenDFG goalDrivenDFG, String[] edge) {
+		Table nodeTable = goalDrivenDFG.getGraph().getNodeTable();
+		Table edgeTable = goalDrivenDFG.getGraph().getEdgeTable();
+		List<Integer> highlightEdges = new ArrayList<Integer>();
+		List<Integer> unhighlightEdges = new ArrayList<Integer>();
+		String source = edge[0];
+		String target = edge[1];
+		// reset graph
+		resetColorAndStroke(goalDrivenDFG);
+		// set in select mode
+		isInSelectActMode = true;
+
+		TableIterator edges = edgeTable.iterator();
+		while (edges.hasNext()) {
+			int row = edges.nextInt();
+			if (edgeTable.isValidRow(row)) {
+				int sourceRow = edgeTable.getTuple(row).getInt(Graph.DEFAULT_SOURCE_KEY);
+				int targetRow = edgeTable.getTuple(row).getInt(Graph.DEFAULT_TARGET_KEY);
+				String sourceNode = nodeTable.getString(sourceRow, GraphConstants.LABEL_FIELD).equals("**BEGIN**")
+						? "begin"
+						: nodeTable.getString(sourceRow, GraphConstants.LABEL_FIELD);
+				String targetNode = nodeTable.getString(targetRow, GraphConstants.LABEL_FIELD).equals("**END**") ? "end"
+						: nodeTable.getString(targetRow, GraphConstants.LABEL_FIELD);
+				// find the edge match the affected edge
+				if (source.equals(sourceNode) && target.equals(targetNode)) {
+					highlightEdges.add(row);
+					break;
+				}
+			}
+		}
+		// find the unhighlighted edges
+		edges = edgeTable.iterator();
+		while (edges.hasNext()) {
+			int row = edges.nextInt();
+			if (edgeTable.isValidRow(row)) {
+				if (!highlightEdges.contains(row)) {
+					unhighlightEdges.add(row);
+				}
+			}
+		}
+
+		// unhighlight all nodes
+		List<Integer> unhighlightNode = new ArrayList<Integer>();
+		List<Integer> highlightNode = new ArrayList<Integer>();
+		TableIterator nodes = nodeTable.iterator();
+		while (nodes.hasNext()) {
+			int row = nodes.nextInt();
+			if (nodeTable.isValidRow(row)) {
+				if (nodeTable.getString(row, GraphConstants.LABEL_FIELD).equals(source)
+						|| nodeTable.getString(row, GraphConstants.LABEL_FIELD).equals(target)) {
+					highlightNode.add(row);
+				} else {
+					unhighlightNode.add(row);
+				}
+			}
+		}
+		for (Integer i : highlightNode) {
+			VisualItem nodeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
+					edgeTable.getTuple(i));
+			highlightItem(nodeItem);
+		}
+		for (Integer i : unhighlightNode) {
+			VisualItem nodeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
+					edgeTable.getTuple(i));
+			unhighlightItem(nodeItem);
+		}
+		// highlight edges
+		for (Integer i : highlightEdges) {
+			VisualItem edgeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.EDGE_GROUP,
+					edgeTable.getTuple(i));
+			highlightItem(edgeItem);
+		}
+		for (Integer i : unhighlightEdges) {
+			VisualItem edgeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.EDGE_GROUP,
+					edgeTable.getTuple(i));
+			unhighlightItem(edgeItem);
+		}
+
+	}
+
 	/* Highlight the selected act */
 	public static void highlightSelectedAct(GoalDrivenDFG goalDrivenDFG, String act) {
+		// reset graph
+		resetColorAndStroke(goalDrivenDFG);
 		Config config = CONFIG_Update.currentConfig;
 		selectingAct = act;
 		Boolean isActInHigh = false;
@@ -611,8 +694,6 @@ public class GoalDrivenDFGUtils {
 				break;
 			}
 		}
-		// reset graph
-		resetColorAndStroke(goalDrivenDFG);
 		// set in select mode
 		isInSelectActMode = true;
 
@@ -779,6 +860,7 @@ public class GoalDrivenDFGUtils {
 	 * 
 	 */
 	public static void resetColorAndStroke(GoalDrivenDFG goalDrivenDFG) {
+		selectingAct = null;
 		Table nodeTable = goalDrivenDFG.getGraph().getNodeTable();
 		Table edgeTable = goalDrivenDFG.getGraph().getEdgeTable();
 		// set select mode false
@@ -960,7 +1042,8 @@ public class GoalDrivenDFGUtils {
 				VisualItem visualItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node);
 				visualItem.setStroke(GraphConstants.HIGHLIGHT_STROKE);
 				visualItem.setStrokeColor(GraphConstants.NODE_HIGH_DESIRED_STROKE_COLOR);
-				visualItem.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD, GraphConstants.NODE_HIGH_DESIRED_STROKE_COLOR);
+				visualItem.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD,
+						GraphConstants.NODE_HIGH_DESIRED_STROKE_COLOR);
 			}
 		}
 		for (String act : lowActs) {
@@ -986,7 +1069,8 @@ public class GoalDrivenDFGUtils {
 				VisualItem visualItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node);
 				visualItem.setStroke(GraphConstants.HIGHLIGHT_STROKE);
 				visualItem.setStrokeColor(GraphConstants.NODE_HIGH_PRIORITY_STROKE_COLOR);
-				visualItem.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD, GraphConstants.NODE_HIGH_PRIORITY_STROKE_COLOR);
+				visualItem.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD,
+						GraphConstants.NODE_HIGH_PRIORITY_STROKE_COLOR);
 			}
 		}
 		for (String act : lowActs) {
@@ -995,7 +1079,8 @@ public class GoalDrivenDFGUtils {
 				VisualItem visualItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP, node);
 				visualItem.setStroke(GraphConstants.HIGHLIGHT_STROKE);
 				visualItem.setStrokeColor(GraphConstants.NODE_LOW_PRIORITY_STROKE_COLOR);
-				visualItem.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD, GraphConstants.NODE_LOW_PRIORITY_STROKE_COLOR);
+				visualItem.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD,
+						GraphConstants.NODE_LOW_PRIORITY_STROKE_COLOR);
 			}
 		}
 		goalDrivenDFG.revalidate();
@@ -1014,7 +1099,7 @@ public class GoalDrivenDFGUtils {
 				vList.add(visualItem);
 			}
 		}
-		for (VisualItem visualItem: vList) {
+		for (VisualItem visualItem : vList) {
 			visualItem.setStroke(new BasicStroke(2));
 			visualItem.setStrokeColor(GraphConstants.NODE_STROKE_COLOR);
 			visualItem.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD, GraphConstants.NODE_STROKE_COLOR);

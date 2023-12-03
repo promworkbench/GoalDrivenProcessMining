@@ -62,16 +62,14 @@ public class GraphObjectClickControl extends ControlAdapter {
 				if (this.chain != null) {
 					if (isHighLevel) {
 						this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
-						this.chain.setObject(GoalDrivenObject.selected_path_from_high, passValues);
-					} else {
-						this.chain.setObject(GoalDrivenObject.selected_path_from_low, passValues);
-					}
+					} 
 				}
 
 			} else if (nodeFilter.getBoolean(item)) {
 				if (item.getString(GraphConstants.NODE_TYPE_FIELD).equals("ACT_NODE")) {
 					if (this.chain != null) {
-						this.chain.setObject(GoalDrivenObject.selected_node,
+						GoalDrivenDFGUtils.isInSelectActMode = true;
+						this.chain.setObject(GoalDrivenObject.selected_act,
 								item.getString(GraphConstants.LABEL_FIELD));
 					}
 				}

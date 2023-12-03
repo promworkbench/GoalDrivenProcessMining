@@ -256,7 +256,7 @@ public class GoalDrivenController {
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				if (inputs.has(GoalDrivenObject.high_level_dfg)) {
 					GoalDrivenDFG dfg = inputs.get(GoalDrivenObject.high_level_dfg);
-					if (GoalDrivenDFGUtils.isInSelectActMode) {
+					if (GoalDrivenDFGUtils.isInSelectActMode && GoalDrivenDFGUtils.selectingAct != null) {
 						GoalDrivenDFGUtils.highlightSelectedAct(dfg, GoalDrivenDFGUtils.selectingAct);
 					}
 					panel.getContentLeftPanel().remove(panel.getHighDfgPanel());
@@ -291,7 +291,7 @@ public class GoalDrivenController {
 				Boolean isLowClear = false;
 				if (inputs.has(GoalDrivenObject.low_level_dfg)) {
 					GoalDrivenDFG dfg = inputs.get(GoalDrivenObject.low_level_dfg);
-					if (GoalDrivenDFGUtils.isInSelectActMode) {
+					if (GoalDrivenDFGUtils.isInSelectActMode && GoalDrivenDFGUtils.selectingAct != null) {
 						GoalDrivenDFGUtils.highlightSelectedAct(dfg, GoalDrivenDFGUtils.selectingAct);
 					}
 					if (!dfg.getLog().getEdgeHashTable().getEdgeTable().isEmpty()) {
@@ -1041,10 +1041,10 @@ public class GoalDrivenController {
 		List<String> lowPriorityActs = new ArrayList<String>();
 		// get data from table
 		JTable table = panel.getConfigCards().getAllActivityConfigPanel().getTable();
-		for (int row = 0; row < table.getRowCount(); row++) {
-			String act = (String) table.getValueAt(row, 0);
-			String priority = (String) table.getValueAt(row, 2);
-			String desire = (String) table.getValueAt(row, 3);
+		for (int row = 0; row < table.getModel().getRowCount(); row++) {
+			String act = (String) table.getModel().getValueAt(row, 0);
+			String priority = (String) table.getModel().getValueAt(row, 2);
+			String desire = (String) table.getModel().getValueAt(row, 3);
 			// priority
 			if (priority.equals("High")) {
 				highPriorityActs.add(act);
@@ -1077,11 +1077,11 @@ public class GoalDrivenController {
 						List<String> lowPriorityActs = new ArrayList<String>();
 						// get data from table
 						JTable table = panel.getConfigCards().getAllActivityConfigPanel().getTable();
-						for (int row = 0; row < table.getRowCount(); row++) {
-							String act = (String) table.getValueAt(row, 0);
-							String hierarchy = (String) table.getValueAt(row, 2);
-							String priority = (String) table.getValueAt(row, 3);
-							String desire = (String) table.getValueAt(row, 4);
+						for (int row = 0; row < table.getModel().getRowCount(); row++) {
+							String act = (String) table.getModel().getValueAt(row, 0);
+							String hierarchy = (String) table.getModel().getValueAt(row, 2);
+							String priority = (String) table.getModel().getValueAt(row, 3);
+							String desire = (String) table.getModel().getValueAt(row, 4);
 							// hierarchy
 							if (hierarchy.equals("High")) {
 								highLevelActs.add(act);
@@ -1125,7 +1125,6 @@ public class GoalDrivenController {
 				.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						panel.getConfigCards().setVisible(false);
-						panel.getConfigCards().getAllActivityConfigPanel().disableFilterFreq();
 					}
 				});
 		// update the all act config
@@ -1213,7 +1212,7 @@ public class GoalDrivenController {
 		/*--------Case config panel---------*/
 		panel.getControlBar().getCaseButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setBounds(0, 0, (int) (0.5 * panel.getConfigCards().getsWidth()), 400);
+				panel.getConfigCards().setBounds(0, 0, (int) (0.42 * panel.getConfigCards().getsWidth()), 400);
 				panel.getConfigCards().setVisible(true);
 				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "8");
 
@@ -1274,14 +1273,19 @@ public class GoalDrivenController {
 				GDPMLogSkeleton gdpmLogSkeleton = inputs.get(GoalDrivenObject.full_log_skeleton);
 				List<TraceSkeleton> traces = gdpmLogSkeleton.getLog();
 				List<String[]> data = new ArrayList<String[]>();
+				long maxDuration = 0;
 				for (TraceSkeleton trace : traces) {
 					String caseName = trace.getAttributes().get(GoalDrivenConstants.CASE_NAME).toString();
 					long duration = trace.getTrace().get(trace.getTrace().size() - 1).getTime()
 							- trace.getTrace().get(0).getTime();
+					if (duration > maxDuration) {
+						maxDuration = duration;
+					}
 					String className = "Neutral";
 					String[] d = new String[] { caseName, StatUtils.getDurationString(duration), className };
 					data.add(d);
 				}
+				panel.getConfigCards().getCaseConfigPanel().setMaxDuration(maxDuration/1000);
 				panel.getConfigCards().getCaseConfigPanel().updateChooseCaseTable(data);
 
 				List<String> columns = new ArrayList<String>();
@@ -1295,12 +1299,6 @@ public class GoalDrivenController {
 					}
 				}
 
-				for (String att : gdpmLogSkeleton.getLog().get(0).getAttributes().keySet()) {
-					if (!att.equals(GoalDrivenConstants.CASE_NAME) && !att.equals(GoalDrivenConstants.EVENT_ACTIVITY)
-							&& !att.equals(GoalDrivenConstants.EVENT_TIME)) {
-						columns.add(att);
-					}
-				}
 				panel.getConfigCards().getCaseConfigPanel().updateColumnShowCaseTable(columns);
 
 				panel.revalidate();
@@ -1331,6 +1329,13 @@ public class GoalDrivenController {
 				panel.getConfigCards().getCaseConfigPanel().getShowCaseLabel().setText("Case: " + caseName);
 				// update row 
 				List<Object[]> data = new ArrayList<>();
+				List<Object[]> caseAttributeData = new ArrayList<>();
+				for (Map.Entry<String, Object> entry : traceSkeleton.getAttributes().entrySet()) {
+					if (!entry.getKey().equals(GoalDrivenConstants.CASE_NAME)
+							&& !entry.getKey().equals(GoalDrivenConstants.EVENT_ACTIVITY)
+							&& !entry.getKey().equals(GoalDrivenConstants.EVENT_TIME))
+						caseAttributeData.add(new Object[] { entry.getKey(), entry.getValue() });
+				}
 				for (EventSkeleton eventSkeleton : traceSkeleton.getTrace()) {
 					List<Object> row = new ArrayList<>();
 					row.add(eventSkeleton.getActivity());
@@ -1341,15 +1346,10 @@ public class GoalDrivenController {
 								&& !entry.getKey().equals(GoalDrivenConstants.EVENT_TIME))
 							row.add(entry.getValue());
 					}
-					for (Map.Entry<String, Object> entry : traceSkeleton.getAttributes().entrySet()) {
-						if (!entry.getKey().equals(GoalDrivenConstants.CASE_NAME)
-								&& !entry.getKey().equals(GoalDrivenConstants.EVENT_ACTIVITY)
-								&& !entry.getKey().equals(GoalDrivenConstants.EVENT_TIME))
-							row.add(entry.getValue());
-					}
 					data.add(row.toArray(new Object[0]));
 				}
 				panel.getConfigCards().getCaseConfigPanel().updateShowCaseTable(data);
+				panel.getConfigCards().getCaseConfigPanel().updateCaseAttributeTable(caseAttributeData);
 
 				panel.revalidate();
 				panel.repaint();
@@ -1375,11 +1375,6 @@ public class GoalDrivenController {
 				String source = (String) passValues.get("source");
 				String target = (String) passValues.get("target");
 
-				panel.getConfigCards().setBounds(0, 0, (int) (0.4 * panel.getConfigCards().getsWidth()), 50);
-				panel.getConfigCards().setVisible(true);
-				panel.getConfigCards().getNotificationConfigPanel().updateNotificationLabel(source, target);
-				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "9");
-
 				panel.revalidate();
 				panel.repaint();
 			}
@@ -1387,22 +1382,6 @@ public class GoalDrivenController {
 			public void invalidate(GoalDrivenPanel panel) {
 				//no action necessary (combobox will be disabled until new classifiers are computed)
 			}
-		});
-
-		// filter case on path
-		panel.getConfigCards().getNotificationConfigPanel().getNotiCloseButton()
-				.addActionListener(new ActionListener() {
-
-					public void actionPerformed(ActionEvent e) {
-						panel.getConfigCards().setVisible(false);
-					}
-
-				});
-		panel.getConfigCards().getNotificationConfigPanel().getNotiOpenButton().addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-			}
-
 		});
 
 		/*-------------------------------------*/

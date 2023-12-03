@@ -1,10 +1,9 @@
 package org.processmining.goaldrivenprocessmining.panelHelper;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.Comparator;
 import java.util.List;
@@ -12,21 +11,29 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.BoxLayout;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
+import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+
+import info.clearthought.layout.TableLayout;
 
 public class CaseConfigPanel extends JPanel {
 	private JLabel allCaseLabel;
@@ -38,29 +45,56 @@ public class CaseConfigPanel extends JPanel {
 	private JPanel showCasePanel;
 	private JTable showCaseTable;
 	private DefaultTableModel showCaseModel;
+	private JTable caseAttributeTable;
+	private DefaultTableModel caseAttributeModel;
+	
+	private TableRowSorter<DefaultTableModel> chooseCaseTableRowSorter;
+	private RangeSliderPanel rangeSlider;
+	
+	private long maxDuration;
 
 	private JButton caseConfigCancelButton;
 	private JButton caseConfigDoneButton;
 
-	public CaseConfigPanel() {
+	public CaseConfigPanel(int width) {
 		// Set layout for the main panel
-		setLayout(new BorderLayout());
-
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		// frequency slider
+		JPanel sliderPanel = new JPanel();
+		sliderPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		rangeSlider = new RangeSliderPanel(400);
+		rangeSlider.getRangeSlider().addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				RangeSlider slider = (RangeSlider) e.getSource();
+				float lowerPercent = slider.getValue() / 100f;
+				float upperPercent = slider.getUpperValue() / 100f;
+				long lower = (long) (maxDuration * lowerPercent);
+				long upper = (long) (maxDuration * upperPercent);
+				filterFreq(lower, upper);
+			}
+		});
+		sliderPanel.add(rangeSlider);
+		add(sliderPanel);
+		
+		
 		// First row: Label "All cases"
 		this.allCaseLabel = new JLabel("All cases");
 		this.chooseCaseLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		this.chooseCaseLabelPanel.add(this.allCaseLabel);
-		add(this.chooseCaseLabelPanel, BorderLayout.NORTH);
+		add(this.chooseCaseLabelPanel);
 
-		// Second row: JSplitPane
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		add(splitPane, BorderLayout.CENTER);
+		// Second row: panel for 2 tables
+		double[][] sizeFullContent = { { 0.25 * width, TableLayout.FILL }, { TableLayout.FILL } };
+
+		JPanel mainPanel = new JPanel(new TableLayout(sizeFullContent));
+		add(mainPanel);
 		this.createChooseCasePanel();
-		this.createShowCasePanel();
+		this.createShowCasePanel(width);
+		mainPanel.setBorder(new LineBorder(Color.GREEN, 2));
 
-		splitPane.setLeftComponent(this.chooseCasePanel);
-		splitPane.setRightComponent(this.showCasePanel);
-		splitPane.setResizeWeight(0.25);
+		mainPanel.add(this.chooseCasePanel, "0,0");
+		mainPanel.add(this.showCasePanel, "1,0");
 
 		// cancel done button
 		JPanel actEndPanel = new JPanel();
@@ -69,7 +103,19 @@ public class CaseConfigPanel extends JPanel {
 		this.caseConfigDoneButton = new JButton("Done");
 		actEndPanel.add(this.caseConfigCancelButton);
 		actEndPanel.add(this.caseConfigDoneButton);
-		add(actEndPanel, BorderLayout.SOUTH);
+		add(actEndPanel);
+
+		setBorder(new LineBorder(Color.BLUE, 2));
+	}
+
+	private void filterFreq(long lower, long upper) {
+		RowFilter<Object, Object> rangeFilter = new RowFilter<Object, Object>() {
+			public boolean include(Entry<? extends Object, ? extends Object> entry) {
+				long freq = (long) convertTimeStringToSeconds((String) entry.getValue(1));
+				return freq >= lower && freq <= upper;
+			}
+		};
+		this.chooseCaseTableRowSorter.setRowFilter(rangeFilter);
 	}
 
 	private void createChooseCasePanel() {
@@ -88,9 +134,9 @@ public class CaseConfigPanel extends JPanel {
 		this.chooseCaseTable = new JTable(this.chooseCaseModel);
 		this.chooseCaseTable.getColumnModel().getColumn(2)
 				.setCellEditor(new DefaultCellEditor(new JComboBox<>(new String[] { "High", "Neutral", "Low" })));
-		TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(this.chooseCaseModel);
-		sorter.setComparator(1, Comparator.comparingDouble(this::convertTimeStringToSeconds));
-		this.chooseCaseTable.setRowSorter(sorter);
+		this.chooseCaseTableRowSorter = new TableRowSorter<>(this.chooseCaseModel);
+		this.chooseCaseTableRowSorter.setComparator(1, Comparator.comparingDouble(this::convertTimeStringToSeconds));
+		this.chooseCaseTable.setRowSorter(this.chooseCaseTableRowSorter);
 		this.chooseCaseTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.chooseCaseTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.chooseCaseTable.addMouseMotionListener(new MouseInputAdapter() {
@@ -111,28 +157,9 @@ public class CaseConfigPanel extends JPanel {
 
 		JScrollPane leftScrollPane = new JScrollPane(this.chooseCaseTable);
 		this.chooseCasePanel.add(leftScrollPane, BorderLayout.CENTER);
-	}
-
-	public void filterChooseCaseTableOnPath(String source, String target, Set<Integer> displayIndex) {
-		// reset panel
-		this.chooseCaseLabelPanel.removeAll();
-		// change label
-		this.allCaseLabel.setText("<html>All cases<br>Filter by path: " + source + "\u2192" + target + "</html>");
-		this.chooseCaseLabelPanel.add(this.allCaseLabel);
-		JButton clearButton = new JButton("Clear filtering");
-		this.chooseCaseLabelPanel.add(clearButton);
-		clearButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// reset filter
-				chooseCaseTable.setRowSorter(null);
-				chooseCaseLabelPanel.remove(clearButton);
-				allCaseLabel.setText("<html>All cases</html>");
-				revalidate();
-				repaint();
-			}
-		});
-		// update table
-		this.filterCase(displayIndex);
+		JSeparator separator = new JSeparator(SwingConstants.VERTICAL);
+		this.chooseCasePanel.add(separator, BorderLayout.EAST);
+		leftScrollPane.setBorder(new EmptyBorder(0, 0, 0, 5));
 	}
 
 	public void updateChooseCaseTable(List<String[]> data) {
@@ -140,6 +167,52 @@ public class CaseConfigPanel extends JPanel {
 		for (String[] d : data) {
 			this.chooseCaseModel.addRow(d);
 		}
+	}
+
+	private void createShowCasePanel(double width) {
+
+		double[][] sizeRightContent = { { 0.3 * width, TableLayout.FILL },
+				{ TableLayout.MINIMUM, TableLayout.MINIMUM, TableLayout.FILL } };
+
+		this.showCasePanel = new JPanel(new TableLayout(sizeRightContent));
+		// first row: Case
+		this.showCaseLabel = new JLabel("Case: ");
+		this.showCasePanel.add(this.showCaseLabel, "0,0,1,0");
+		// second row: case attributes, case details
+		JLabel caseAttlabel = new JLabel("Case attributes");
+		JLabel caseDetailLabel = new JLabel("Case details");
+		this.showCasePanel.add(caseAttlabel, "0,1");
+		this.showCasePanel.add(caseDetailLabel, "1,1");
+		// third row: tables:
+		String[] columnNames = { "Attribute", "Value" };
+		Object[][] data = {};
+		this.caseAttributeModel = new DefaultTableModel(data, columnNames) {
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+		this.caseAttributeTable = new JTable(this.caseAttributeModel);
+		JScrollPane leftScrollPane = new JScrollPane(this.caseAttributeTable);
+		leftScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+		this.showCaseModel = new DefaultTableModel() {
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+		this.showCaseTable = new JTable(this.showCaseModel);
+		JScrollPane rightScrollPane = new JScrollPane(this.showCaseTable);
+		rightScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		rightScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		this.showCaseTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		;
+
+		this.showCasePanel.add(leftScrollPane, "0,2");
+		this.showCasePanel.add(rightScrollPane, "1,2");
+
+		this.showCasePanel.setBorder(new EmptyBorder(0, 5, 0, 0));
 	}
 
 	public void updateColumnShowCaseTable(List<String> columns) {
@@ -155,6 +228,13 @@ public class CaseConfigPanel extends JPanel {
 		this.showCaseModel.setRowCount(0);
 		for (Object[] d : data) {
 			this.showCaseModel.addRow(d);
+		}
+	}
+
+	public void updateCaseAttributeTable(List<Object[]> data) {
+		this.caseAttributeModel.setRowCount(0);
+		for (Object[] d : data) {
+			this.caseAttributeModel.addRow(d);
 		}
 	}
 
@@ -193,24 +273,6 @@ public class CaseConfigPanel extends JPanel {
 		}
 
 		return 0; // Return 0 if no match is found
-	}
-
-	private void createShowCasePanel() {
-		this.showCasePanel = new JPanel(new BorderLayout());
-		this.showCaseLabel = new JLabel("Case: ");
-		this.showCasePanel.add(this.showCaseLabel, BorderLayout.NORTH);
-		this.showCaseModel = new DefaultTableModel() {
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-		};
-		this.showCaseTable = new JTable(this.showCaseModel);
-		JScrollPane leftScrollPane = new JScrollPane(this.showCaseTable);
-		leftScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-		leftScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		this.showCaseTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		this.showCasePanel.add(leftScrollPane, BorderLayout.CENTER);
 	}
 
 	public void filterCase(Set<Integer> displayIndex) {
@@ -317,4 +379,23 @@ public class CaseConfigPanel extends JPanel {
 		this.showCaseLabel = showCaseLabel;
 	}
 
+	
+	public RangeSliderPanel getRangeSlider() {
+		return rangeSlider;
+	}
+
+	public void setRangeSlider(RangeSliderPanel rangeSlider) {
+		this.rangeSlider = rangeSlider;
+	}
+
+	public long getMaxDuration() {
+		return maxDuration;
+	}
+
+	public void setMaxDuration(long maxDuration) {
+		this.maxDuration = maxDuration;
+	}
+
+	
+	
 }

@@ -10,7 +10,6 @@ import java.util.Map;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -43,7 +42,6 @@ public class AllActivityConfigPanel extends JPanel {
 	private JButton allActConfigDoneButton;
 	private TableRowSorter<DefaultTableModel> tr;
 	private RangeSliderPanel rangeSlider;
-	private JCheckBox enableSliderCheckbox;
 	private int maxActFreq = 1;
 
 	public AllActivityConfigPanel() {
@@ -82,7 +80,6 @@ public class AllActivityConfigPanel extends JPanel {
 		JPanel sliderPanel = new JPanel();
 		sliderPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		rangeSlider = new RangeSliderPanel(400);
-		rangeSlider.getRangeSlider().setEnabled(false);
 		rangeSlider.getRangeSlider().addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -94,22 +91,6 @@ public class AllActivityConfigPanel extends JPanel {
 				filterFreq(lower, upper);
 			}
 		});
-		enableSliderCheckbox = new JCheckBox("Filter with frequency");
-		enableSliderCheckbox.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				boolean enabled = enableSliderCheckbox.isSelected();
-				rangeSlider.getRangeSlider().setEnabled(enabled);
-				if (enabled) {
-					allActConfigDoneButton.setEnabled(false);
-				}
-				if (!enabled) {
-					disableFilterFreq();
-				}
-			}
-		});
-
-		sliderPanel.add(enableSliderCheckbox);
 		sliderPanel.add(rangeSlider);
 		add(sliderPanel);
 
@@ -272,13 +253,6 @@ public class AllActivityConfigPanel extends JPanel {
 		}
 	}
 
-	public void disableFilterFreq() {
-		this.getEnableSliderCheckbox().setSelected(false);
-		this.getRangeSlider().getRangeSlider().setEnabled(false);
-		this.getRangeSlider().getRangeSlider().setValue(0);
-		this.getRangeSlider().getRangeSlider().setUpperValue(100);
-		this.getAllActConfigDoneButton().setEnabled(true);
-	}
 
 	private void customizeComboBoxColumn(JTable table, int columnIndex) {
 		TableColumn column = table.getColumnModel().getColumn(columnIndex);
@@ -371,14 +345,6 @@ public class AllActivityConfigPanel extends JPanel {
 
 	public void setMaxActFreq(int maxActFreq) {
 		this.maxActFreq = maxActFreq;
-	}
-
-	public JCheckBox getEnableSliderCheckbox() {
-		return enableSliderCheckbox;
-	}
-
-	public void setEnableSliderCheckbox(JCheckBox enableSliderCheckbox) {
-		this.enableSliderCheckbox = enableSliderCheckbox;
 	}
 
 }
