@@ -1176,7 +1176,7 @@ public class GoalDrivenController {
 				if (selectedObject.getSelectedAct() != null) {
 					GoalDrivenDFGUtils.highlightSelectedAct(highLevelDFG, selectedObject.getSelectedAct());
 				} else {
-					GoalDrivenDFGUtils.highlightSelectedEdge(highLevelDFG, selectedObject.getSelecEdgeObject());
+					GoalDrivenDFGUtils.highlightSelectedEdge(highLevelDFG, selectedObject.getSelectedEdgeObject());
 				}
 
 			}
@@ -1901,22 +1901,29 @@ public class GoalDrivenController {
 				SelectedObject selectedObject = inputs.get(GoalDrivenObject.selected_object);
 				if (selectedObject.getSelectedAct() != null) {
 					String selectedAct = selectedObject.getSelectedAct();
-					Map<String, String> frequencyMap = StatUtils.getFrequencyStatisticOfAct(selectedAct);
-					List<List<Object[]>> throughputData = StatUtils.getThroughputStatisticOfAct(selectedAct);
+					Map<String, String> frequencyMap = StatUtils.getFrequencyStatForAct(selectedAct);
+					List<List<Object[]>> throughputData = StatUtils.getThroughputStatForAct(selectedAct);
 					List<Object[]> waitingActData = throughputData.get(0);
 					List<Object[]> leadingActData = throughputData.get(1);
 					// update stat panel
 					panel.getSidePanel().getStatisticPanel().createStatisticPanelForActivity(selectedAct, frequencyMap,
 							waitingActData, leadingActData);
-					// open stat panel if closed
-					String label = panel.getControlBar().getExpandButton().getText().split(" ")[0];
-					if (label.equals("Expand")) {
-						panel.getControlBar().getExpandButton().doClick();
-					}
-					panel.revalidate();
-					panel.repaint();
+
 				} else {
+					EdgeObject edgeObject = selectedObject.getSelectedEdgeObject();
+					Map<String, String> frequencyMap = StatUtils.getFrequencyStatForPath(edgeObject);
+					Map<String, String> throughputMap = StatUtils.getThroughputStatForPath(edgeObject);
+					// update stat panel
+					panel.getSidePanel().getStatisticPanel().createStatisticPanelForPath(edgeObject, frequencyMap,
+							throughputMap);
 				}
+				// open stat panel if closed
+				String label = panel.getControlBar().getExpandButton().getText().split(" ")[0];
+				if (label.equals("Expand")) {
+					panel.getControlBar().getExpandButton().doClick();
+				}
+				panel.revalidate();
+				panel.repaint();
 
 			}
 

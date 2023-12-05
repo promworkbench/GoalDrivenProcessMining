@@ -27,7 +27,7 @@ public class StatUtils {
 
 	/*--------------------------------------------------------------------------*/
 	/* Calculate stat for act */
-	public static Map<String, String> getFrequencyStatisticOfAct(String act) {
+	public static Map<String, String> getFrequencyStatForAct(String act) {
 		int freq = 0;
 		List<Integer> affectedCases = new ArrayList<>();
 
@@ -65,7 +65,7 @@ public class StatUtils {
 	}
 
 	/* Calculate waiting and leading acts */
-	public static List<List<Object[]>> getThroughputStatisticOfAct(String act) {
+	public static List<List<Object[]>> getThroughputStatForAct(String act) {
 		List<List<Object[]>> res = new ArrayList<>();
 
 		List<Object[]> waitingActsData = new ArrayList<>();
@@ -110,6 +110,56 @@ public class StatUtils {
 
 		return res;
 	}
+
+	/* Calculate stat for path */
+	public static Map<String, String> getFrequencyStatForPath(EdgeObject edgeObject) {
+		int freq = 0;
+		List<Integer> affectedCases = new ArrayList<>();
+		EdgeHashTable edgeHashTable = null;
+
+		if (HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable.getEdgeTable().containsKey(edgeObject)) {
+			edgeHashTable = HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable;
+		} else if (Cl01GatherAttributes.originalEdgeHashTable.getEdgeTable().containsKey(edgeObject)) {
+			edgeHashTable = Cl01GatherAttributes.originalEdgeHashTable;
+		}
+		if (edgeHashTable != null) {
+			Map<Integer, List<Integer[]>> allPos = edgeHashTable.getEdgePositions(edgeObject);
+			for (Map.Entry<Integer, List<Integer[]>> entry : allPos.entrySet()) {
+				freq += entry.getValue().size();
+				if (!affectedCases.contains(entry.getKey())) {
+					affectedCases.add(entry.getKey());
+				}
+			}
+		}
+
+		Map<String, String> res = new HashMap<>();
+		res.put("Occurence", Integer.toString(freq));
+		res.put("Case", Integer.toString(affectedCases.size()));
+
+		return res;
+	}
+
+	/* Calculate waiting and leading acts */
+	public static Map<String, String> getThroughputStatForPath(EdgeObject edgeObject) {
+		Map<EdgeObject, ThroughputTimeObject> mapEdgeThroughputTime = null;
+		if (HIGH_MakeHighLevelLog.currentMapEdgeThroughputTime.containsKey(edgeObject)) {
+			mapEdgeThroughputTime = HIGH_MakeHighLevelLog.currentMapEdgeThroughputTime;
+		} else if (Cl01GatherAttributes.originalMapEdgeThroughputTime.containsKey(edgeObject)) {
+			mapEdgeThroughputTime = Cl01GatherAttributes.originalMapEdgeThroughputTime;
+		}
+		Map<String, String> res = new HashMap<>();
+		if (mapEdgeThroughputTime != null) {
+			ThroughputTimeObject time = mapEdgeThroughputTime.get(edgeObject);
+			res.put("Mean", StatUtils.getDurationString(time.getMean()));
+			res.put("Median", StatUtils.getDurationString(time.getMedian()));
+			res.put("Min", StatUtils.getDurationString(time.getMin()));
+			res.put("Max", StatUtils.getDurationString(time.getMax()));
+
+		}
+
+		return res;
+	}
+
 	/*--------------------------------------------------------------------------*/
 
 	/*--------------------------------------------------------------------------*/

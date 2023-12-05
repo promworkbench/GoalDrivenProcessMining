@@ -2,11 +2,11 @@ package org.processmining.goaldrivenprocessmining.objectHelper;
 
 public class SelectedObject {
 	private String selectedAct;
-	private EdgeObject selecEdgeObject;
+	private EdgeObject selectedEdgeObject;
 
 	public SelectedObject(String selectedAct, EdgeObject selecEdgeObject) {
 		this.selectedAct = selectedAct;
-		this.selecEdgeObject = selecEdgeObject;
+		this.selectedEdgeObject = selecEdgeObject;
 	}
 
 	public String getSelectedAct() {
@@ -17,12 +17,12 @@ public class SelectedObject {
 		this.selectedAct = selectedAct;
 	}
 
-	public EdgeObject getSelecEdgeObject() {
-		return selecEdgeObject;
+	public EdgeObject getSelectedEdgeObject() {
+		return selectedEdgeObject;
 	}
 
-	public void setSelecEdgeObject(EdgeObject selecEdgeObject) {
-		this.selecEdgeObject = selecEdgeObject;
+	public void setSelectedEdgeObject(EdgeObject selecEdgeObject) {
+		this.selectedEdgeObject = selecEdgeObject;
 	}
 
 }

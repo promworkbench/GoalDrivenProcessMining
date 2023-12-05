@@ -62,10 +62,10 @@ public class GraphObjectClickControl extends ControlAdapter {
 				passValues.put("source", sourceNode);
 				passValues.put("target", targetNode);
 				if (this.chain != null) {
+					EdgeObject selectedEdgeObject = new EdgeObject(sourceNode, targetNode);
+					SelectedObject selectedObject = new SelectedObject(null, selectedEdgeObject);
+					chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 					if (isHighLevel) {
-						EdgeObject selectedEdgeObject = new EdgeObject(sourceNode, targetNode);
-						SelectedObject selectedObject = new SelectedObject(null, selectedEdgeObject);
-						chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
 					}
 				}

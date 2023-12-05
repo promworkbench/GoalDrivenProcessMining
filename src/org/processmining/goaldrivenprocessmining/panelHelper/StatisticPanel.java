@@ -21,6 +21,7 @@ public class StatisticPanel extends JPanel {
 	private JPanel contentPanel;
 	private EdgeObject edgeObject;
 	private StatisticActivityPanel statisticActivityPanel;
+	private StatisticPathPanel statisticPathPanel;
 
 	public StatisticPanel(String act, EdgeObject edgeObject) {
 		this.act = act;
@@ -39,27 +40,6 @@ public class StatisticPanel extends JPanel {
 		contentPanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 		contentPanel.setBackground(GoalDrivenConstants.BACKGROUND_COLOR);
 
-		// Row 1: label
-		JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel label = new JLabel();
-		label.setForeground(Color.WHITE);
-		label.setFont(GoalDrivenConstants.BOLD_L_FONT);
-		labelPanel.setBackground(GoalDrivenConstants.BACKGROUND_COLOR);
-		labelPanel.add(label);
-		labelPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, label.getPreferredSize().height));
-		if (this.act != null) {
-			label.setText("Activity: " + this.act);
-		} else if (this.edgeObject != null) {
-			label.setText("Path: " + this.edgeObject.getNode1() + " \u2192 " + this.edgeObject.getNode2());
-		}
-		contentPanel.add(labelPanel, BorderLayout.NORTH);
-
-		// Row 2: stat panel
-		statisticActivityPanel = new StatisticActivityPanel();
-		statisticActivityPanel
-				.setMaximumSize(new Dimension(Integer.MAX_VALUE, statisticActivityPanel.getPreferredSize().height));
-		contentPanel.add(statisticActivityPanel, BorderLayout.CENTER);
-
 		add(contentPanel, BorderLayout.CENTER);
 	}
 
@@ -67,7 +47,6 @@ public class StatisticPanel extends JPanel {
 			List<Object[]> waitingActData, List<Object[]> leadingActData) {
 		//reset
 		this.resetStatisticPanel();
-		this.act = act;
 		// Row 1: label
 		JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JLabel label = new JLabel();
@@ -76,7 +55,7 @@ public class StatisticPanel extends JPanel {
 		labelPanel.setBackground(GoalDrivenConstants.BACKGROUND_COLOR);
 		labelPanel.add(label);
 		labelPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, label.getPreferredSize().height));
-		label.setText("Activity: " + this.act);
+		label.setText("Activity: " + act);
 		this.contentPanel.add(labelPanel, BorderLayout.NORTH);
 
 		// Row 2: stat panel
@@ -86,6 +65,29 @@ public class StatisticPanel extends JPanel {
 		this.statisticActivityPanel
 				.setMaximumSize(new Dimension(Integer.MAX_VALUE, statisticActivityPanel.getPreferredSize().height));
 		this.contentPanel.add(this.statisticActivityPanel, BorderLayout.CENTER);
+	}
+
+	public void createStatisticPanelForPath(EdgeObject edgeObject, Map<String, String> frequencyMap, Map<String, String> throughputMap) {
+		//reset
+		this.resetStatisticPanel();
+		// Row 1: label
+		JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel label = new JLabel();
+		label.setForeground(Color.WHITE);
+		label.setFont(GoalDrivenConstants.BOLD_L_FONT);
+		labelPanel.setBackground(GoalDrivenConstants.BACKGROUND_COLOR);
+		labelPanel.add(label);
+		labelPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, label.getPreferredSize().height));
+		label.setText("Path: " + edgeObject.getNode1() + " \u2192 " + edgeObject.getNode2());
+		this.contentPanel.add(labelPanel, BorderLayout.NORTH);
+
+		// Row 2: stat panel
+		this.statisticPathPanel = new StatisticPathPanel();
+		this.statisticPathPanel.updatePanel("Frequency", this.statisticPathPanel.getFrequencyPanel(), frequencyMap);
+		this.statisticPathPanel.updatePanel("Throughput", this.statisticPathPanel.getThroughputPanel(), throughputMap);
+		this.statisticPathPanel
+				.setMaximumSize(new Dimension(Integer.MAX_VALUE, statisticPathPanel.getPreferredSize().height));
+		this.contentPanel.add(this.statisticPathPanel, BorderLayout.CENTER);
 	}
 
 	public void resetStatisticPanel() {
