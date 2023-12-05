@@ -8,6 +8,7 @@ import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.SelectedObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.ThroughputTimeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
@@ -61,8 +62,7 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	public static final IvMObject<GoalDrivenDFG> low_level_dfg = c("low-level DFG", GoalDrivenDFG.class);
 	public static final IvMObject<GoalDrivenDFG> selected_group_dfg = c("DFG of the selected group", GoalDrivenDFG.class);
 	// selected act
-	public static final IvMObject<String> selected_act = c("Selected act from UI", String.class);
-	public static final IvMObject<String[]> selected_edge = c("Selected act from UI", String[].class);
+	public static final IvMObject<SelectedObject> selected_object = c("Selected act from UI", SelectedObject.class);
 	
 	// selected mode 
 	public static final IvMObject<String> selected_mode = c("Selected mode from UI", String.class);

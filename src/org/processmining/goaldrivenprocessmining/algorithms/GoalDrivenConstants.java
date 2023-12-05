@@ -42,5 +42,7 @@ public class GoalDrivenConstants {
 	public static final Color BUTTON_HOVER_BACKGROUND_COLOR = Color.WHITE;
 	public static final Color BUTTON_HOVER_FOREGROUND_COLOR = Color.BLACK;
 	// Font
-	public static final Font BOLD_BIG_FONT = new Font("Dialog", Font.BOLD, 20);
+	public static final Font BOLD_XL_FONT = new Font("Dialog", Font.BOLD, 20);
+	public static final Font BOLD_L_FONT = new Font("Dialog", Font.BOLD, 18);
+	public static final Font BOLD_M_FONT = new Font("Dialog", Font.BOLD, 16);
 }

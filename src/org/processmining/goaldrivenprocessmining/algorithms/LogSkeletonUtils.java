@@ -39,7 +39,7 @@ public class LogSkeletonUtils {
 		XesXmlParser parser = new XesXmlParser();
 
 		XLog log = parser.parse(is).get(0);
-		
+
 		System.out.println(log.get(0).get(0).getAttributes().keySet());
 
 	}
@@ -432,11 +432,11 @@ public class LogSkeletonUtils {
 	public static Set<String> getTraceAttributes(XLog log) {
 		return log.get(0).getAttributes().keySet();
 	}
-	
+
 	public static Set<String> getEventAttributes(XLog log) {
 		return log.get(0).get(0).getAttributes().keySet();
 	}
-	
+
 	public static GDPMLogSkeleton getLogSkeleton(XLog log) {
 		GDPMLogSkeleton logSkeleton = new GDPMLogSkeleton();
 		Set<String> traceAttributes = getTraceAttributes(log);
@@ -453,7 +453,7 @@ public class LogSkeletonUtils {
 				traceAttribute.put(attribute, trace.getAttributes().get(attribute));
 			}
 			traceSkeleton.setAttributes(traceAttribute);
-			
+
 			// add events to trace
 			for (int i = 0; i < trace.size(); i++) {
 				XEvent event = trace.get(i);
@@ -466,7 +466,7 @@ public class LogSkeletonUtils {
 				}
 				eventSkeleton.setAttributes(eventAttribute);
 				// add event attributes
-				
+
 				// add event
 				traceSkeleton.getTrace().add(eventSkeleton);
 				EdgeObject edgeObject;

@@ -1,11 +1,14 @@
 package org.processmining.goaldrivenprocessmining.algorithms.chain;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
+import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
+import org.processmining.goaldrivenprocessmining.objectHelper.ThroughputTimeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
@@ -14,6 +17,7 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C> {
 	public static EdgeHashTable currentHighLevelEdgeHashTable;
+	public static Map<EdgeObject, ThroughputTimeObject> currentMapEdgeThroughputTime;
 
 	public String getStatusBusyMessage() {
 		// TODO Auto-generated method stub
@@ -53,6 +57,7 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 				Cl01GatherAttributes.originalEdgeHashTable);
 		CONFIG_Update.currentConfig = updatedConfig;
 		HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable = gdpmLog.getEdgeHashTable();
+		HIGH_MakeHighLevelLog.currentMapEdgeThroughputTime = gdpmLog.getEdgeThroughputTime();
 		
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.high_level_log_skeleton, gdpmLog).s(GoalDrivenObject.config, updatedConfig);

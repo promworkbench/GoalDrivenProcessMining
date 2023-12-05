@@ -3,8 +3,6 @@ package org.processmining.goaldrivenprocessmining.algorithms;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -45,6 +43,7 @@ import org.processmining.goaldrivenprocessmining.objectHelper.EventSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.SelectedObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.TraceSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateType;
@@ -65,6 +64,8 @@ import org.processmining.plugins.inductiveVisualMiner.visualMinerWrapper.miners.
 import graph.GoalDrivenDFG;
 import graph.GoalDrivenDFGUtils;
 import graph.GraphConstants;
+import info.clearthought.layout.TableLayout;
+import info.clearthought.layout.TableLayoutConstants;
 import prefuse.Visualization;
 import prefuse.data.Graph;
 import prefuse.data.Table;
@@ -230,6 +231,7 @@ public class GoalDrivenController {
 		initHighLevelGraph();
 		initLowLevelGraph();
 		initGroupGraph();
+		initStatPanel();
 	}
 
 	protected void initGuiMiner() {
@@ -256,9 +258,6 @@ public class GoalDrivenController {
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				if (inputs.has(GoalDrivenObject.high_level_dfg)) {
 					GoalDrivenDFG dfg = inputs.get(GoalDrivenObject.high_level_dfg);
-					if (GoalDrivenDFGUtils.isInSelectActMode && GoalDrivenDFGUtils.selectingAct != null) {
-						GoalDrivenDFGUtils.highlightSelectedAct(dfg, GoalDrivenDFGUtils.selectingAct);
-					}
 					panel.getContentLeftPanel().remove(panel.getHighDfgPanel());
 					panel.setHighDfgPanel(dfg);
 					panel.getHighDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
@@ -291,9 +290,6 @@ public class GoalDrivenController {
 				Boolean isLowClear = false;
 				if (inputs.has(GoalDrivenObject.low_level_dfg)) {
 					GoalDrivenDFG dfg = inputs.get(GoalDrivenObject.low_level_dfg);
-					if (GoalDrivenDFGUtils.isInSelectActMode && GoalDrivenDFGUtils.selectingAct != null) {
-						GoalDrivenDFGUtils.highlightSelectedAct(dfg, GoalDrivenDFGUtils.selectingAct);
-					}
 					if (!dfg.getLog().getEdgeHashTable().getEdgeTable().isEmpty()) {
 						panel.getContentRightPanel().remove(panel.getLowDfgPanel());
 						panel.setLowDfgPanel(dfg);
@@ -458,7 +454,8 @@ public class GoalDrivenController {
 						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
 							String act = table.getValueAt(row, col).toString();
 							GoalDrivenDFGUtils.isInSelectActMode = true;
-							chain.setObject(GoalDrivenObject.selected_act, act);
+							SelectedObject selectedObject = new SelectedObject(act, null);
+							chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						}
 					}
 				});
@@ -473,7 +470,8 @@ public class GoalDrivenController {
 						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
 							String act = table.getValueAt(row, col).toString();
 							GoalDrivenDFGUtils.isInSelectActMode = true;
-							chain.setObject(GoalDrivenObject.selected_act, act);
+							SelectedObject selectedObject = new SelectedObject(act, null);
+							chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						}
 					}
 				});
@@ -740,7 +738,8 @@ public class GoalDrivenController {
 						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
 							String act = table.getValueAt(row, col).toString();
 							GoalDrivenDFGUtils.isInSelectActMode = true;
-							chain.setObject(GoalDrivenObject.selected_act, act);
+							SelectedObject selectedObject = new SelectedObject(act, null);
+							chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						}
 					}
 				});
@@ -755,7 +754,8 @@ public class GoalDrivenController {
 						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
 							String act = table.getValueAt(row, col).toString();
 							GoalDrivenDFGUtils.isInSelectActMode = true;
-							chain.setObject(GoalDrivenObject.selected_act, act);
+							SelectedObject selectedObject = new SelectedObject(act, null);
+							chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						}
 					}
 				});
@@ -960,24 +960,21 @@ public class GoalDrivenController {
 				panel.add(panel.getControlBar(), BorderLayout.NORTH);
 				panel.add(panel.getLayeredPanel(), BorderLayout.CENTER);
 				if (label.equals("Collapse")) {
-					panel.getContentPanel().setLayout(new GridBagLayout());
-					GridBagConstraints gbcHighDfgPanel = GoalDrivenPanel.createGridBagConstraints(0, 0, 0.5);
+					double contentPanelSize[][] = { { 0.5, 0.5 }, { TableLayoutConstants.FILL } };
+					panel.getContentPanel().setLayout(new TableLayout(contentPanelSize));
 					panel.getContentLeftPanel().add(panel.getHighDfgPanel());
-					panel.getContentPanel().add(panel.getContentLeftPanel(), gbcHighDfgPanel);
-					GridBagConstraints gbcLowDfgPanel = GoalDrivenPanel.createGridBagConstraints(1, 0, 0.5);
+					panel.getContentPanel().add(panel.getContentLeftPanel(), "0,0");
 					panel.getContentRightPanel().add(panel.getLowDfgPanel());
-					panel.getContentPanel().add(panel.getContentRightPanel(), gbcLowDfgPanel);
+					panel.getContentPanel().add(panel.getContentRightPanel(), "1,0");
 					panel.getControlBar().getExpandButton().setText("Expand stat window");
 				} else {
-					panel.getContentPanel().setLayout(new GridBagLayout());
-					GridBagConstraints gbcHighDfgPanel = GoalDrivenPanel.createGridBagConstraints(0, 0, 0.37);
+					double contentPanelSize[][] = { { 0.4, 0.4, 0.2 }, { TableLayoutConstants.FILL } };
+					panel.getContentPanel().setLayout(new TableLayout(contentPanelSize));
 					panel.getContentLeftPanel().add(panel.getHighDfgPanel());
-					panel.getContentPanel().add(panel.getContentLeftPanel(), gbcHighDfgPanel);
-					GridBagConstraints gbcLowDfgPanel = GoalDrivenPanel.createGridBagConstraints(1, 0, 0.37);
+					panel.getContentPanel().add(panel.getContentLeftPanel(), "0,0");
 					panel.getContentRightPanel().add(panel.getLowDfgPanel());
-					panel.getContentPanel().add(panel.getContentRightPanel(), gbcLowDfgPanel);
-					GridBagConstraints gbcSidePanel = GoalDrivenPanel.createGridBagConstraints(2, 0, 0.24);
-					panel.getContentPanel().add(panel.getSidePanel(), gbcSidePanel);
+					panel.getContentPanel().add(panel.getContentRightPanel(), "1,0");
+					panel.getContentPanel().add(panel.getSidePanel(), "2,0");
 					panel.getControlBar().getExpandButton().setText("Collapse stat window");
 				}
 
@@ -1004,13 +1001,14 @@ public class GoalDrivenController {
 		panel.getConfigCards().getAllActivityConfigPanel().getTable().addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent evt) {
-				JTable table = panel.getConfigCards().getAllActivityConfigPanel().getTable();
+				JTable table = (JTable) evt.getSource();
 				int row = table.rowAtPoint(evt.getPoint());
 				int col = table.columnAtPoint(evt.getPoint());
 				if (row >= 0 && col == 0) {
 					String act = table.getValueAt(row, col).toString();
 					GoalDrivenDFGUtils.isInSelectActMode = true;
-					chain.setObject(GoalDrivenObject.selected_act, act);
+					SelectedObject selectedObject = new SelectedObject(act, null);
+					chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 				}
 			}
 		});
@@ -1169,15 +1167,18 @@ public class GoalDrivenController {
 			}
 
 			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.selected_act, GoalDrivenObject.high_level_dfg };
+				return new IvMObject<?>[] { GoalDrivenObject.selected_object, GoalDrivenObject.high_level_dfg };
 			}
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
-				if (GoalDrivenDFGUtils.isInSelectActMode) {
-					GoalDrivenDFG highLevelDFG = inputs.get(GoalDrivenObject.high_level_dfg);
-					String selectedAct = inputs.get(GoalDrivenObject.selected_act);
-					GoalDrivenDFGUtils.highlightSelectedAct(highLevelDFG, selectedAct);
+				GoalDrivenDFG highLevelDFG = inputs.get(GoalDrivenObject.high_level_dfg);
+				SelectedObject selectedObject = inputs.get(GoalDrivenObject.selected_object);
+				if (selectedObject.getSelectedAct() != null) {
+					GoalDrivenDFGUtils.highlightSelectedAct(highLevelDFG, selectedObject.getSelectedAct());
+				} else {
+					GoalDrivenDFGUtils.highlightSelectedEdge(highLevelDFG, selectedObject.getSelecEdgeObject());
 				}
+
 			}
 
 			public void invalidate(GoalDrivenPanel panel) {
@@ -1192,14 +1193,14 @@ public class GoalDrivenController {
 			}
 
 			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.selected_act, GoalDrivenObject.low_level_dfg };
+				return new IvMObject<?>[] { GoalDrivenObject.selected_object, GoalDrivenObject.low_level_dfg };
 			}
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
-				if (GoalDrivenDFGUtils.isInSelectActMode) {
-					GoalDrivenDFG lowLevelDFG = inputs.get(GoalDrivenObject.low_level_dfg);
-					String selectedAct = inputs.get(GoalDrivenObject.selected_act);
-					GoalDrivenDFGUtils.highlightSelectedAct(lowLevelDFG, selectedAct);
+				GoalDrivenDFG lowLevelDFG = inputs.get(GoalDrivenObject.low_level_dfg);
+				SelectedObject selectedObject = inputs.get(GoalDrivenObject.selected_object);
+				if (selectedObject.getSelectedAct() != null) {
+					GoalDrivenDFGUtils.highlightSelectedAct(lowLevelDFG, selectedObject.getSelectedAct());
 				}
 			}
 
@@ -1253,7 +1254,8 @@ public class GoalDrivenController {
 				int col = table.columnAtPoint(evt.getPoint());
 				if (row >= 0 && col == 0) {
 					GoalDrivenDFGUtils.isInSelectActMode = true;
-					chain.setObject(GoalDrivenObject.selected_act, (String) table.getValueAt(row, col));
+					SelectedObject selectedObject = new SelectedObject((String) table.getValueAt(row, col), null);
+					chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 				}
 			}
 		});
@@ -1285,7 +1287,7 @@ public class GoalDrivenController {
 					String[] d = new String[] { caseName, StatUtils.getDurationString(duration), className };
 					data.add(d);
 				}
-				panel.getConfigCards().getCaseConfigPanel().setMaxDuration(maxDuration/1000);
+				panel.getConfigCards().getCaseConfigPanel().setMaxDuration(maxDuration / 1000);
 				panel.getConfigCards().getCaseConfigPanel().updateChooseCaseTable(data);
 
 				List<String> columns = new ArrayList<String>();
@@ -1881,6 +1883,47 @@ public class GoalDrivenController {
 			}
 		});
 
+	}
+
+	protected void initStatPanel() {
+		// display the stat details about the activity/edge
+		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
+
+			public String getName() {
+				return "Display the selected act on the high level graph";
+			}
+
+			public IvMObject<?>[] createInputObjects() {
+				return new IvMObject<?>[] { GoalDrivenObject.selected_object };
+			}
+
+			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
+				SelectedObject selectedObject = inputs.get(GoalDrivenObject.selected_object);
+				if (selectedObject.getSelectedAct() != null) {
+					String selectedAct = selectedObject.getSelectedAct();
+					Map<String, String> frequencyMap = StatUtils.getFrequencyStatisticOfAct(selectedAct);
+					List<List<Object[]>> throughputData = StatUtils.getThroughputStatisticOfAct(selectedAct);
+					List<Object[]> waitingActData = throughputData.get(0);
+					List<Object[]> leadingActData = throughputData.get(1);
+					// update stat panel
+					panel.getSidePanel().getStatisticPanel().createStatisticPanelForActivity(selectedAct, frequencyMap,
+							waitingActData, leadingActData);
+					// open stat panel if closed
+					String label = panel.getControlBar().getExpandButton().getText().split(" ")[0];
+					if (label.equals("Expand")) {
+						panel.getControlBar().getExpandButton().doClick();
+					}
+					panel.revalidate();
+					panel.repaint();
+				} else {
+				}
+
+			}
+
+			public void invalidate(GoalDrivenPanel panel) {
+				//no action necessary (combobox will be disabled until new classifiers are computed)
+			}
+		});
 	}
 
 	private <C> void updateObjectInGui(final IvMObject<C> object, final C value, final boolean fixed) {

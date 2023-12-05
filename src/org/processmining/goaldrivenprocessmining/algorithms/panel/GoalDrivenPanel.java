@@ -3,8 +3,6 @@ package org.processmining.goaldrivenprocessmining.algorithms.panel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.RenderingHints;
@@ -33,6 +31,8 @@ import org.processmining.plugins.inductiveVisualMiner.chain.DataState;
 import org.processmining.plugins.inductiveVisualMiner.helperClasses.ControllerView;
 
 import graph.GoalDrivenDFG;
+import info.clearthought.layout.TableLayout;
+import info.clearthought.layout.TableLayoutConstants;
 
 public class GoalDrivenPanel extends JPanel {
 
@@ -72,7 +72,9 @@ public class GoalDrivenPanel extends JPanel {
 		add(controlBar, BorderLayout.NORTH);
 		layeredPanel = new JLayeredPane();
 		contentPanel = new JPanel();
-		contentPanel.setLayout(new GridBagLayout());
+		double contentPanelSize[][] = { { 0.5, 0.5 },
+				{ TableLayoutConstants.FILL } };
+		contentPanel.setLayout(new TableLayout(contentPanelSize));
 		layeredPanel.add(contentPanel, new Integer(0));
 
 		//		setDynamicBounds(GoalDrivenPanel.this, contentPanel);
@@ -90,7 +92,7 @@ public class GoalDrivenPanel extends JPanel {
 
 			JLabel hightitle = new JLabel("High-level DFG");
 			hightitle.setForeground(Color.WHITE);
-			hightitle.setFont(GoalDrivenConstants.BOLD_BIG_FONT);
+			hightitle.setFont(GoalDrivenConstants.BOLD_XL_FONT);
 			contentLeftPanel.add(hightitle, BorderLayout.NORTH);
 			GDPMLogSkeleton log = null;
 
@@ -99,9 +101,9 @@ public class GoalDrivenPanel extends JPanel {
 			highDfgPanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 			highDfgPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 			contentLeftPanel.add(highDfgPanel, BorderLayout.CENTER);
-			GridBagConstraints gbcContentLeftPanel = createGridBagConstraints(0, 0, 0.5);
+//			GridBagConstraints gbcContentLeftPanel = createGridBagConstraints(0, 0, 0.5);
 
-			contentPanel.add(contentLeftPanel, gbcContentLeftPanel);
+			contentPanel.add(contentLeftPanel, "0,0");
 		}
 
 		{
@@ -111,7 +113,7 @@ public class GoalDrivenPanel extends JPanel {
 			contentRightPanel.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
 			lowDfgTitle = new JLabel("Low-level DFG");
 			lowDfgTitle.setForeground(Color.WHITE);
-			lowDfgTitle.setFont(GoalDrivenConstants.BOLD_BIG_FONT);
+			lowDfgTitle.setFont(GoalDrivenConstants.BOLD_XL_FONT);
 			contentRightPanel.add(lowDfgTitle, BorderLayout.NORTH);
 			GDPMLogSkeleton log = null;
 			lowDfgPanel = new GoalDrivenDFG(log, false);
@@ -119,8 +121,8 @@ public class GoalDrivenPanel extends JPanel {
 			lowDfgPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 			contentRightPanel.add(lowDfgPanel, BorderLayout.CENTER);
 
-			GridBagConstraints gbcContentRightPanel = createGridBagConstraints(1, 0, 0.5);
-			contentPanel.add(contentRightPanel, gbcContentRightPanel);
+//			GridBagConstraints gbcContentRightPanel = createGridBagConstraints(1, 0, 0.5);
+			contentPanel.add(contentRightPanel, "1,0");
 
 		}
 		//controller view
@@ -130,15 +132,15 @@ public class GoalDrivenPanel extends JPanel {
 
 	}
 
-	public static GridBagConstraints createGridBagConstraints(int gridx, int gridy, double weightx) {
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridx = gridx;
-		gbc.gridy = gridy;
-		gbc.weightx = weightx;
-		gbc.weighty = 1;
-		gbc.fill = GridBagConstraints.BOTH;
-		return gbc;
-	}
+//	public static GridBagConstraints createGridBagConstraints(int gridx, int gridy, double weightx) {
+//		GridBagConstraints gbc = new GridBagConstraints();
+//		gbc.gridx = gridx;
+//		gbc.gridy = gridy;
+//		gbc.weightx = weightx;
+//		gbc.weighty = 1;
+//		gbc.fill = GridBagConstraints.BOTH;
+//		return gbc;
+//	}
 
 	private static void setDynamicBounds(JPanel parentPanel, JPanel childPanel) {
 		int parentWidth = parentPanel.getWidth();

@@ -8,18 +8,16 @@ import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
 
 public class SidePanel extends JPanel {
 	private final StatisticPanel statisticPanel;
+
 	public SidePanel() {
 		setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 		setLayout(new BorderLayout());
-		statisticPanel = new StatisticPanel();
-        add(statisticPanel);
-//		JPanel panel = new JPanel();
-//		panel.setBackground(Color.RED);
-//		add(panel, BorderLayout.CENTER);
+		statisticPanel = new StatisticPanel(null, null);
+		add(statisticPanel);
 	}
+
 	public StatisticPanel getStatisticPanel() {
 		return statisticPanel;
 	}
-	
-	
+
 }

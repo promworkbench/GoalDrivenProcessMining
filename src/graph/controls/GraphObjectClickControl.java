@@ -7,6 +7,8 @@ import java.util.HashMap;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.SelectedObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChain;
 
 import graph.GoalDrivenDFGUtils;
@@ -61,16 +63,20 @@ public class GraphObjectClickControl extends ControlAdapter {
 				passValues.put("target", targetNode);
 				if (this.chain != null) {
 					if (isHighLevel) {
+						EdgeObject selectedEdgeObject = new EdgeObject(sourceNode, targetNode);
+						SelectedObject selectedObject = new SelectedObject(null, selectedEdgeObject);
+						chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
-					} 
+					}
 				}
 
 			} else if (nodeFilter.getBoolean(item)) {
 				if (item.getString(GraphConstants.NODE_TYPE_FIELD).equals("ACT_NODE")) {
 					if (this.chain != null) {
 						GoalDrivenDFGUtils.isInSelectActMode = true;
-						this.chain.setObject(GoalDrivenObject.selected_act,
-								item.getString(GraphConstants.LABEL_FIELD));
+						SelectedObject selectedObject = new SelectedObject(item.getString(GraphConstants.LABEL_FIELD),
+								null);
+						this.chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 					}
 				}
 			}

@@ -3,6 +3,7 @@ package org.processmining.goaldrivenprocessmining.algorithms.chain;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
@@ -11,7 +12,9 @@ import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfigurat
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
+import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
+import org.processmining.goaldrivenprocessmining.objectHelper.ThroughputTimeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.TraceSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateType;
@@ -25,6 +28,7 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 
 	public static List<TraceSkeleton> originalLog;
 	public static EdgeHashTable originalEdgeHashTable;
+	public static Map<EdgeObject, ThroughputTimeObject> originalMapEdgeThroughputTime;
 
 	@Override
 	public String getName() {
@@ -44,8 +48,9 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 	@Override
 	public IvMObject<?>[] createOutputObjects() {
 		return new IvMObject<?>[] { GoalDrivenObject.full_xlog, GoalDrivenObject.all_unique_values,
-				GoalDrivenObject.selected_unique_values, GoalDrivenObject.unselected_unique_values, GoalDrivenObject.map_act_freq,
-				GoalDrivenObject.config, GoalDrivenObject.update_config_object, GoalDrivenObject.full_log_skeleton };
+				GoalDrivenObject.selected_unique_values, GoalDrivenObject.unselected_unique_values,
+				GoalDrivenObject.map_act_freq, GoalDrivenObject.config, GoalDrivenObject.update_config_object,
+				GoalDrivenObject.full_log_skeleton };
 	}
 
 	@Override
@@ -83,6 +88,9 @@ public class Cl01GatherAttributes extends DataChainLinkComputationAbstract<GoalD
 		GDPMLogSkeleton gdpmLogSkeleton = new GDPMLogSkeleton(log);
 		originalLog = gdpmLogSkeleton.getLog();
 		originalEdgeHashTable = gdpmLogSkeleton.getEdgeHashTable();
+		LogSkeletonUtils.calculateThroughputForEachEdge(gdpmLogSkeleton);
+		originalMapEdgeThroughputTime = gdpmLogSkeleton.getEdgeThroughputTime();
+		
 
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.full_xlog, log)

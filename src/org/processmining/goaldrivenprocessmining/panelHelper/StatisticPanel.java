@@ -1,78 +1,109 @@
 package org.processmining.goaldrivenprocessmining.panelHelper;
 
 import java.awt.BorderLayout;
-import java.util.HashMap;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.util.List;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
+import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 
 public class StatisticPanel extends JPanel {
-	private String title;
-	private Map<String, String> contentMap;
+
+	private String act;
 	private JPanel contentPanel;
-	private CloseableTabbedPane statPane;
-	private StatisticContentPanel statisticContentPanel;
+	private EdgeObject edgeObject;
+	private StatisticActivityPanel statisticActivityPanel;
 
-	public StatisticPanel() {
+	public StatisticPanel(String act, EdgeObject edgeObject) {
+		this.act = act;
+		this.edgeObject = edgeObject;
+
 		setLayout(new BorderLayout());
-		// Create the content panel
-		contentPanel = new JPanel(new BorderLayout());
-		contentPanel.setBackground(GoalDrivenConstants.STATISTIC_PANEL_BACKGROUND_COLOR);
-		// Create the tabbed pane
-		statPane = new CloseableTabbedPane();
-		
+		setBackground(GoalDrivenConstants.CONTENT_CARD_BACKGROUND_COLOR);
+		setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
+		JLabel statisticLabel = new JLabel("Statistic");
+		statisticLabel.setForeground(Color.WHITE);
+		statisticLabel.setFont(GoalDrivenConstants.BOLD_XL_FONT);
+		add(statisticLabel, BorderLayout.NORTH);
 
-        // Create the panel and add it to a frame
-        statisticContentPanel = new StatisticContentPanel(new HashMap<>(), "");
-		// Add the panels to the tabbed pane
-		statPane.addTab("Statistic", statisticContentPanel);
-//		statPane.addTab("Tab 2", tab2Panel);
-		contentPanel.add(statPane, BorderLayout.CENTER);
+		contentPanel = new JPanel();
+		contentPanel.setLayout(new BorderLayout());
+		contentPanel.setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
+		contentPanel.setBackground(GoalDrivenConstants.BACKGROUND_COLOR);
 
-		// Add the content panel to the DynamicPanel, initially hidden
+		// Row 1: label
+		JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel label = new JLabel();
+		label.setForeground(Color.WHITE);
+		label.setFont(GoalDrivenConstants.BOLD_L_FONT);
+		labelPanel.setBackground(GoalDrivenConstants.BACKGROUND_COLOR);
+		labelPanel.add(label);
+		labelPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, label.getPreferredSize().height));
+		if (this.act != null) {
+			label.setText("Activity: " + this.act);
+		} else if (this.edgeObject != null) {
+			label.setText("Path: " + this.edgeObject.getNode1() + " \u2192 " + this.edgeObject.getNode2());
+		}
+		contentPanel.add(labelPanel, BorderLayout.NORTH);
+
+		// Row 2: stat panel
+		statisticActivityPanel = new StatisticActivityPanel();
+		statisticActivityPanel
+				.setMaximumSize(new Dimension(Integer.MAX_VALUE, statisticActivityPanel.getPreferredSize().height));
+		contentPanel.add(statisticActivityPanel, BorderLayout.CENTER);
+
 		add(contentPanel, BorderLayout.CENTER);
 	}
-	
-	public void updateStatistics() {
-		StatisticContentPanel statisticContentPanel = new StatisticContentPanel(this.contentMap, this.title);
-		this.getStatPane().setComponentAt(0, statisticContentPanel);
-		revalidate();
-		repaint();
+
+	public void createStatisticPanelForActivity(String act, Map<String, String> frequencyMap,
+			List<Object[]> waitingActData, List<Object[]> leadingActData) {
+		//reset
+		this.resetStatisticPanel();
+		this.act = act;
+		// Row 1: label
+		JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel label = new JLabel();
+		label.setForeground(Color.WHITE);
+		label.setFont(GoalDrivenConstants.BOLD_L_FONT);
+		labelPanel.setBackground(GoalDrivenConstants.BACKGROUND_COLOR);
+		labelPanel.add(label);
+		labelPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, label.getPreferredSize().height));
+		label.setText("Activity: " + this.act);
+		this.contentPanel.add(labelPanel, BorderLayout.NORTH);
+
+		// Row 2: stat panel
+		this.statisticActivityPanel = new StatisticActivityPanel();
+		this.statisticActivityPanel.updateFrequencyPanel(frequencyMap);
+		this.statisticActivityPanel.updateThroughputPanel(waitingActData, leadingActData);
+		this.statisticActivityPanel
+				.setMaximumSize(new Dimension(Integer.MAX_VALUE, statisticActivityPanel.getPreferredSize().height));
+		this.contentPanel.add(this.statisticActivityPanel, BorderLayout.CENTER);
 	}
 
-	public String getTitle() {
-		return title;
+	public void resetStatisticPanel() {
+		Component[] components = this.contentPanel.getComponents();
+		for (Component component : components) {
+			this.contentPanel.remove(component);
+		}
+
+		this.contentPanel.revalidate();
+		this.contentPanel.repaint();
 	}
 
-	public void setTitle(String title) {
-		this.title = title;
+	public StatisticActivityPanel getStatisticActivityPanel() {
+		return statisticActivityPanel;
 	}
 
-	public Map<String, String> getContentMap() {
-		return contentMap;
+	public void setStatisticActivityPanel(StatisticActivityPanel statisticActivityPanel) {
+		this.statisticActivityPanel = statisticActivityPanel;
 	}
-
-	public void setContentMap(Map<String, String> contentMap) {
-		this.contentMap = contentMap;
-	}
-
-	public JPanel getContentPanel() {
-		return contentPanel;
-	}
-
-	public void setContentPanel(JPanel contentPanel) {
-		this.contentPanel = contentPanel;
-	}
-
-	public CloseableTabbedPane getStatPane() {
-		return statPane;
-	}
-
-	public void setStatPane(CloseableTabbedPane statPane) {
-		this.statPane = statPane;
-	}
-	
 
 }

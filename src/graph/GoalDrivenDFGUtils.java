@@ -600,13 +600,13 @@ public class GoalDrivenDFGUtils {
 
 	/*----------------------------------------------------------------*/
 	/* Highlight the selected edge */
-	public static void highlightSelectedEdge(GoalDrivenDFG goalDrivenDFG, String[] edge) {
+	public static void highlightSelectedEdge(GoalDrivenDFG goalDrivenDFG, EdgeObject edge) {
 		Table nodeTable = goalDrivenDFG.getGraph().getNodeTable();
 		Table edgeTable = goalDrivenDFG.getGraph().getEdgeTable();
 		List<Integer> highlightEdges = new ArrayList<Integer>();
 		List<Integer> unhighlightEdges = new ArrayList<Integer>();
-		String source = edge[0];
-		String target = edge[1];
+		String source = edge.getNode1();
+		String target = edge.getNode2();
 		// reset graph
 		resetColorAndStroke(goalDrivenDFG);
 		// set in select mode
