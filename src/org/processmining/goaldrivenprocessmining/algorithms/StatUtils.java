@@ -6,8 +6,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -29,8 +31,8 @@ public class StatUtils {
 	/* Calculate stat for act */
 	public static Map<String, String> getFrequencyStatForAct(String act) {
 		int freq = 0;
-		List<Integer> affectedCases = new ArrayList<>();
-
+		Set<Integer> affectedCases = new HashSet();
+		
 		EdgeHashTable originalEdgeHashTable = Cl01GatherAttributes.originalEdgeHashTable;
 		for (EdgeObject edgeObject : originalEdgeHashTable.getEdgeTable().keySet()) {
 			if (edgeObject.getNode1().equals(act) || edgeObject.getNode2().equals(act)) {
@@ -40,21 +42,17 @@ public class StatUtils {
 					for (Map.Entry<Integer, List<Integer[]>> entry : allPos.entrySet()) {
 						// freq
 						freq += entry.getValue().size() * 2;
-						// case
-						if (!affectedCases.contains(entry.getKey())) {
-							affectedCases.add(entry.getKey());
-						}
 					}
 				} else {
 					for (Map.Entry<Integer, List<Integer[]>> entry : allPos.entrySet()) {
 						// freq
 						freq += entry.getValue().size();
-						// case
-						if (!affectedCases.contains(entry.getKey())) {
-							affectedCases.add(entry.getKey());
-						}
+						
 					}
 				}
+				// case
+				affectedCases.removeAll(allPos.keySet());
+				affectedCases.addAll(allPos.keySet());
 			}
 		}
 		Map<String, String> res = new HashMap<>();

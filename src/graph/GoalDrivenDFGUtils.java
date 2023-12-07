@@ -888,33 +888,43 @@ public class GoalDrivenDFGUtils {
 		goalDrivenDFG.getEdgeRenderer().setCustomizedFrequencyEdge(new HashMap<>());
 		// reset all nodes
 		TableIterator nodes = nodeTable.iterator();
+		List<Integer> resettingNodes = new ArrayList<>();
 		while (nodes.hasNext()) {
 			int row = nodes.nextInt();
 			if (nodeTable.isValidRow(row)) {
-				if (nodeTable.getBoolean(row, GraphConstants.IS_SELECTED)) {
-					nodeTable.setBoolean(row, GraphConstants.IS_SELECTED, false);
-				}
-				VisualItem item = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
-						nodeTable.getTuple(row));
-				if (item.getBoolean(GraphConstants.BEGIN_FIELD) || item.getBoolean(GraphConstants.END_FIELD)) {
-					item.setFillColor(GraphConstants.BEGIN_END_NODE_COLOR);
-				} else {
-					item.setFillColor(item.getInt(GraphConstants.NODE_FILL_COLOR_FIELD));
-				}
-				item.setStrokeColor(GraphConstants.NODE_STROKE_COLOR);
+				resettingNodes.add(row);
 			}
 		}
+		for (Integer row : resettingNodes) {
+			if (nodeTable.getBoolean(row, GraphConstants.IS_SELECTED)) {
+				nodeTable.setBoolean(row, GraphConstants.IS_SELECTED, false);
+			}
+			VisualItem item = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
+					nodeTable.getTuple(row));
+			if (item.getBoolean(GraphConstants.BEGIN_FIELD) || item.getBoolean(GraphConstants.END_FIELD)) {
+				item.setFillColor(GraphConstants.BEGIN_END_NODE_COLOR);
+			} else {
+				item.setFillColor(item.getInt(GraphConstants.NODE_FILL_COLOR_FIELD));
+			}
+			item.setStrokeColor(item.getInt(GraphConstants.NODE_STROKE_COLOR_FIELD));
+		}
+
 		//reset all edges 
+		List<Integer> resettingEdges = new ArrayList<>();
 		TableIterator edges = edgeTable.iterator();
 		while (edges.hasNext()) {
 			int row = edges.nextInt();
 			if (edgeTable.isValidRow(row)) {
-				VisualItem item = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.EDGE_GROUP,
-						edgeTable.getTuple(row));
-				item.setStrokeColor(item.getInt(GraphConstants.EDGE_FILL_COLOR_FIELD));
-				item.setFillColor(item.getInt(GraphConstants.EDGE_FILL_COLOR_FIELD));
+				resettingEdges.add(row);
 			}
 		}
+		for (Integer row : resettingEdges) {
+			VisualItem item = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.EDGE_GROUP,
+					edgeTable.getTuple(row));
+			item.setStrokeColor(item.getInt(GraphConstants.EDGE_FILL_COLOR_FIELD));
+			item.setFillColor(item.getInt(GraphConstants.EDGE_FILL_COLOR_FIELD));
+		}
+
 		goalDrivenDFG.revalidate();
 		goalDrivenDFG.repaint();
 	}

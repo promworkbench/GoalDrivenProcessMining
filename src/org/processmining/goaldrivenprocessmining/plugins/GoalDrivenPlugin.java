@@ -1,6 +1,7 @@
 package org.processmining.goaldrivenprocessmining.plugins;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.JComponent;
 
@@ -15,7 +16,8 @@ import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfigurat
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenController;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenLauncher;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.CONFIG_Update;
-import org.processmining.goaldrivenprocessmining.objectHelper.GroupState;
+import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl01GatherAttributes;
+import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.plugins.InductiveMiner.efficienttree.UnknownTreeNodeException;
 
 import graph.GoalDrivenDFGUtils;
@@ -32,7 +34,10 @@ public class GoalDrivenPlugin {
 		XLog log = launcher.xLog.get();
 		// reset global variables
 		CONFIG_Update.currentConfig = null;
-		GoalDrivenDFGUtils.groupStates = new ArrayList<GroupState>();
+		GoalDrivenDFGUtils.groupStates = new ArrayList<>();
+		Cl01GatherAttributes.originalLog = new ArrayList<>() ;
+		Cl01GatherAttributes.originalEdgeHashTable = new EdgeHashTable();
+		Cl01GatherAttributes.originalMapEdgeThroughputTime = new HashMap<>();
 		//initialise configuration and controller
 		GoalDrivenConfigurationDefault configuration = new GoalDrivenConfigurationDefault(canceller,
 				context.getExecutor());
