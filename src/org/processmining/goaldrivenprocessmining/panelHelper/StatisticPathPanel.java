@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -17,6 +18,7 @@ import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
 public class StatisticPathPanel extends JPanel {
 	private JPanel frequencyPanel;
 	private JPanel throughputPanel;
+	private JButton showCaseButton;
 
 	public StatisticPathPanel() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -31,6 +33,9 @@ public class StatisticPathPanel extends JPanel {
 		throughputPanel.setBorder(BorderFactory.createEmptyBorder(0, 6, 6, 6));
 		throughputPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 		add(throughputPanel);
+
+		showCaseButton = new JButton("See cases with this path");
+		add(showCaseButton);
 	}
 
 	public JPanel updatePanel(String label, JPanel panel, Map<String, String> keyValueMap) {
@@ -97,7 +102,13 @@ public class StatisticPathPanel extends JPanel {
 	public void setThroughputPanel(JPanel throughputPanel) {
 		this.throughputPanel = throughputPanel;
 	}
-	
-	
+
+	public JButton getShowCaseButton() {
+		return showCaseButton;
+	}
+
+	public void setShowCaseButton(JButton showCaseButton) {
+		this.showCaseButton = showCaseButton;
+	}
 
 }

@@ -87,7 +87,7 @@ public class StatisticActivityPanel extends JPanel {
 		panel.setBorder(BorderFactory.createEmptyBorder(0, 6, 6, 6));
 		panel.setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 		// Row 1: Label with big font and orange foreground
-		JLabel labelRow = new JLabel("Throughput");
+		JLabel labelRow = new JLabel("Performance");
 		labelRow.setFont(GoalDrivenConstants.BOLD_M_FONT);
 		labelRow.setForeground(new Color(255, 89, 0));
 

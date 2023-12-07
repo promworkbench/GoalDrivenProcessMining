@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -171,7 +172,7 @@ public class AllActivityConfigPanel extends JPanel {
 		JPanel actEndPanel = new JPanel();
 		actEndPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		allActConfigCancelButton = new JButton("Cancel");
-		allActConfigDoneButton = new JButton("Done");
+		allActConfigDoneButton = new JButton("Apply");
 		actEndPanel.add(allActConfigCancelButton);
 		actEndPanel.add(allActConfigDoneButton);
 
@@ -182,52 +183,76 @@ public class AllActivityConfigPanel extends JPanel {
 	}
 
 	private void showAssignValueDialog() {
-		// Get selected rows
-		int[] selectedRows = this.table.getSelectedRows();
+	    // Get selected rows
+	    int[] selectedRows = this.table.getSelectedRows();
 
-		// Check if any row is selected
-		if (selectedRows.length == 0) {
-			JOptionPane.showMessageDialog(this, "Please select at least one row.");
-			return;
-		}
+	    // Check if any row is selected
+	    if (selectedRows.length == 0) {
+	        JOptionPane.showMessageDialog(this, "Please select at least one row.");
+	        return;
+	    }
 
-		// Create a dialog with three JComboBox components for label hierarchy, priority, and desirability
-		JComboBox<String> hierarchyComboBox = new JComboBox<>(new String[] { "High", "Low" });
-		JComboBox<String> priorityComboBox = new JComboBox<>(new String[] { "High", "Neutral", "Low" });
-		priorityComboBox.setSelectedItem("Neutral");
-		JComboBox<String> desirabilityComboBox = new JComboBox<>(new String[] { "High", "Neutral", "Low" });
-		desirabilityComboBox.setSelectedItem("Neutral");
-		
-		JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
-		panel.add(new JLabel("Hierarchy:"));
-		panel.add(hierarchyComboBox);
-		panel.add(new JLabel("Priority:"));
-		panel.add(priorityComboBox);
-		panel.add(new JLabel("Desirability:"));
-		panel.add(desirabilityComboBox);
+	    // Create checkboxes and comboboxes
+	    JCheckBox hierarchyCheckBox = new JCheckBox("Assign Hierarchy:");
+	    JComboBox<String> hierarchyComboBox = new JComboBox<>(new String[]{"High", "Low"});
+	    JCheckBox priorityCheckBox = new JCheckBox("Assign Priority:");
+	    JComboBox<String> priorityComboBox = new JComboBox<>(new String[]{"High", "Neutral", "Low"});
+	    priorityComboBox.setSelectedItem("Neutral");
+	    JCheckBox desirabilityCheckBox = new JCheckBox("Assign Desirability:");
+	    JComboBox<String> desirabilityComboBox = new JComboBox<>(new String[]{"High", "Neutral", "Low"});
+	    desirabilityComboBox.setSelectedItem("Neutral");
 
-		int result = JOptionPane.showConfirmDialog(this, panel, "Choose Values to Assign",
-				JOptionPane.OK_CANCEL_OPTION);
+	    // Create a panel with checkboxes and comboboxes
+	    JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
+	    panel.add(hierarchyCheckBox);
+	    panel.add(hierarchyComboBox);
+	    panel.add(priorityCheckBox);
+	    panel.add(priorityComboBox);
+	    panel.add(desirabilityCheckBox);
+	    panel.add(desirabilityComboBox);
 
-		// Check if the user clicked OK
-		if (result == JOptionPane.OK_OPTION) {
-			// Get the chosen values
-			String hierarchyValue = (String) hierarchyComboBox.getSelectedItem();
-			String priorityValue = (String) priorityComboBox.getSelectedItem();
-			String desirabilityValue = (String) desirabilityComboBox.getSelectedItem();
+	    // Add an ActionListener to each checkbox
+	    ActionListener checkBoxListener = e -> {
+	        hierarchyComboBox.setEnabled(hierarchyCheckBox.isSelected());
+	        priorityComboBox.setEnabled(priorityCheckBox.isSelected());
+	        desirabilityComboBox.setEnabled(desirabilityCheckBox.isSelected());
+	    };
 
-			// Assuming the columns for hierarchy, priority, and desirability are 2, 3, and 4 respectively
-			int hierarchyColumnIndex = 2;
-			int priorityColumnIndex = 3;
-			int desirabilityColumnIndex = 4;
+	    hierarchyCheckBox.addActionListener(checkBoxListener);
+	    priorityCheckBox.addActionListener(checkBoxListener);
+	    desirabilityCheckBox.addActionListener(checkBoxListener);
+	    
+	    hierarchyComboBox.setEnabled(false);
+	    priorityComboBox.setEnabled(false);
+	    desirabilityComboBox.setEnabled(false);
 
-			// Assign the values to the selected rows in the specified columns
-			for (int row : selectedRows) {
-				this.table.setValueAt(hierarchyValue, row, hierarchyColumnIndex);
-				this.table.setValueAt(priorityValue, row, priorityColumnIndex);
-				this.table.setValueAt(desirabilityValue, row, desirabilityColumnIndex);
-			}
-		}
+	    // Show the dialog
+	    int result = JOptionPane.showConfirmDialog(this, panel, "Choose Values to Assign",
+	            JOptionPane.OK_CANCEL_OPTION);
+
+	    // Check if the user clicked OK
+	    if (result == JOptionPane.OK_OPTION) {
+	        // Assign the values to the selected rows only if the corresponding checkboxes are selected
+	        for (int row : selectedRows) {
+	            if (hierarchyCheckBox.isSelected()) {
+	                String hierarchyValue = (String) hierarchyComboBox.getSelectedItem();
+	                // Assuming the column for hierarchy is 2
+	                this.table.setValueAt(hierarchyValue, row, 2);
+	            }
+
+	            if (priorityCheckBox.isSelected()) {
+	                String priorityValue = (String) priorityComboBox.getSelectedItem();
+	                // Assuming the column for priority is 3
+	                this.table.setValueAt(priorityValue, row, 3);
+	            }
+
+	            if (desirabilityCheckBox.isSelected()) {
+	                String desirabilityValue = (String) desirabilityComboBox.getSelectedItem();
+	                // Assuming the column for desirability is 4
+	                this.table.setValueAt(desirabilityValue, row, 4);
+	            }
+	        }
+	    }
 	}
 
 	private void filterAct(String query) {
@@ -252,7 +277,6 @@ public class AllActivityConfigPanel extends JPanel {
 					"Neutral" });
 		}
 	}
-
 
 	private void customizeComboBoxColumn(JTable table, int columnIndex) {
 		TableColumn column = table.getColumnModel().getColumn(columnIndex);

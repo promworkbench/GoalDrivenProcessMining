@@ -1,8 +1,8 @@
 package org.processmining.goaldrivenprocessmining.panelHelper;
 
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -19,7 +19,7 @@ public class LegendPanel extends JPanel {
 
 	public LegendPanel() {
 		// Set layout manager to FlowLayout
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		setLayout(new BorderLayout());
 		// 1st row: Label "Mode" and JComboBox
 		JPanel legend = new JPanel();
 		legend.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -45,8 +45,8 @@ public class LegendPanel extends JPanel {
 		actEndPanel.add(legendCancelButton);
 		actEndPanel.add(legendDoneButton);
 
-		add(legend);
-		add(actEndPanel);
+		add(legend, BorderLayout.NORTH);
+		add(actEndPanel, BorderLayout.SOUTH);
 	}
 
 	public JButton getLegendDoneButton() {

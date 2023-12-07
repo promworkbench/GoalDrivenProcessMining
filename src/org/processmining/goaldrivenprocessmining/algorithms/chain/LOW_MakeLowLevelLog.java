@@ -74,9 +74,11 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 		for (String s : listSources) {
 			for (String t : listTargets) {
 				// create log based on the source and target
-				LogSkeletonUtils.setupEdgeHashTableForLowLevelLog(newGdpmLog, inputs.get(GoalDrivenObject.full_log_skeleton), s, t);
+				LogSkeletonUtils.setupEdgeHashTableForLowLevelLog(newGdpmLog,
+						inputs.get(GoalDrivenObject.full_log_skeleton), s, t);
 			}
 		}
+
 
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.low_level_log_skeleton, newGdpmLog);
@@ -91,7 +93,5 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 		}
 		return res;
 	}
-
-	
 
 }

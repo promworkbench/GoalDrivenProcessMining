@@ -23,8 +23,8 @@ public class RangeSliderPanel extends JPanel {
 		setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
 		setLayout(new GridBagLayout());
 
-		rangeSliderLabel1.setText("Lower frequency percentage:");
-		rangeSliderLabel2.setText("Upper frequency percentage:");
+		rangeSliderLabel1.setText("Lower percentage:");
+		rangeSliderLabel2.setText("Upper percentage:");
 		rangeSliderValue1.setHorizontalAlignment(JLabel.LEFT);
 		rangeSliderValue2.setHorizontalAlignment(JLabel.LEFT);
 		rangeSlider = new RangeSlider();

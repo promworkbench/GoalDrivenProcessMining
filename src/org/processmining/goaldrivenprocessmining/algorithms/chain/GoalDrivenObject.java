@@ -71,10 +71,14 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	public static final IvMObject<String[]> low_desire_acts = c("Low desire act", String[].class);
 	public static final IvMObject<String[]> high_priority_acts = c("High priority act", String[].class);
 	public static final IvMObject<String[]> low_priority_acts = c("Low priority act", String[].class);
+	public static final IvMObject<Integer[]> good_case = c("Low priority act", Integer[].class);
+	public static final IvMObject<Integer[]> bad_case = c("Low priority act", Integer[].class);
+	
+	
 	
 	// filter edge
-	public static final IvMObject<Double> high_edge_threshold = c("frequency threshold for high level dfg", Double.class);
-	public static final IvMObject<Double> low_edge_threshold = c("frequency threshold for low level dfg", Double.class);
+	public static final IvMObject<Double[]> high_edge_threshold = c("frequency threshold for high level dfg", Double[].class);
+	public static final IvMObject<Double[]> low_edge_threshold = c("frequency threshold for low level dfg", Double[].class);
 	
 	// from filter table to graph
 	public static final IvMObject<List> high_removing_path_table = c("removing path table for high level dfg", List.class);

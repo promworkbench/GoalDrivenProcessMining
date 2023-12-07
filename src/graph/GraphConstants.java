@@ -50,6 +50,8 @@ public class GraphConstants {
 	public static final Color EDGE_TIME_NORMAL_COLOR = new Color(255, 255, 255);
 	// highlight color
 	public static final int HIGHLIGHT_STROKE_COLOR = ColorLib.rgb(255, 89, 0);
+	public static final int HIGHLIGHT_STROKE_GOOD_CASE_COLOR = ColorLib.rgb(76, 175, 80);
+	public static final int HIGHLIGHT_STROKE_BAD_CASE_COLOR = ColorLib.rgb(223, 83, 83);
 	public static final BasicStroke HIGHLIGHT_STROKE = new BasicStroke(10);
 	// unhighlight color
 	public static final int UNHIGHLIGHT_STROKE_COLOR = ColorLib.rgb(51, 51, 51);

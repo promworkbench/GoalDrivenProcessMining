@@ -600,13 +600,13 @@ public class GoalDrivenDFGUtils {
 
 	/*----------------------------------------------------------------*/
 	/* Highlight the selected edge */
-	public static void highlightSelectedEdge(GoalDrivenDFG goalDrivenDFG, EdgeObject edge) {
+	public static void highlightSelectedEdge(GoalDrivenDFG goalDrivenDFG, List<EdgeObject> edgeObjects, int color) {
 		Table nodeTable = goalDrivenDFG.getGraph().getNodeTable();
 		Table edgeTable = goalDrivenDFG.getGraph().getEdgeTable();
 		List<Integer> highlightEdges = new ArrayList<Integer>();
 		List<Integer> unhighlightEdges = new ArrayList<Integer>();
-		String source = edge.getNode1();
-		String target = edge.getNode2();
+		List<Integer> unhighlightNodes = new ArrayList<Integer>();
+		List<Integer> highlightNodes = new ArrayList<Integer>();
 		// reset graph
 		resetColorAndStroke(goalDrivenDFG);
 		// set in select mode
@@ -623,10 +623,18 @@ public class GoalDrivenDFGUtils {
 						: nodeTable.getString(sourceRow, GraphConstants.LABEL_FIELD);
 				String targetNode = nodeTable.getString(targetRow, GraphConstants.LABEL_FIELD).equals("**END**") ? "end"
 						: nodeTable.getString(targetRow, GraphConstants.LABEL_FIELD);
+				EdgeObject newEdgeObject = new EdgeObject(sourceNode, targetNode);
 				// find the edge match the affected edge
-				if (source.equals(sourceNode) && target.equals(targetNode)) {
+				if (edgeObjects.contains(newEdgeObject)) {
+					// highlight edge
 					highlightEdges.add(row);
-					break;
+					// highlight node
+					if (!highlightNodes.contains(sourceRow)) {
+						highlightNodes.add(sourceRow);
+					}
+					if (!highlightEdges.contains(targetRow)) {
+						highlightNodes.add(targetRow);
+					}
 				}
 			}
 		}
@@ -642,35 +650,40 @@ public class GoalDrivenDFGUtils {
 		}
 
 		// unhighlight all nodes
-		List<Integer> unhighlightNode = new ArrayList<Integer>();
-		List<Integer> highlightNode = new ArrayList<Integer>();
+
 		TableIterator nodes = nodeTable.iterator();
 		while (nodes.hasNext()) {
 			int row = nodes.nextInt();
 			if (nodeTable.isValidRow(row)) {
-				if (nodeTable.getString(row, GraphConstants.LABEL_FIELD).equals(source)
-						|| nodeTable.getString(row, GraphConstants.LABEL_FIELD).equals(target)) {
-					highlightNode.add(row);
-				} else {
-					unhighlightNode.add(row);
+				if (!highlightNodes.contains(row)) {
+					unhighlightNodes.add(row);
 				}
 			}
 		}
-		for (Integer i : highlightNode) {
+		for (Integer i : highlightNodes) {
 			VisualItem nodeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
-					edgeTable.getTuple(i));
-			highlightItem(nodeItem);
+					nodeTable.getTuple(i));
+			if (color != -1) {
+				highlightItem(nodeItem, color);
+			} else {
+				highlightItem(nodeItem);
+			}
+
 		}
-		for (Integer i : unhighlightNode) {
+		for (Integer i : unhighlightNodes) {
 			VisualItem nodeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
-					edgeTable.getTuple(i));
+					nodeTable.getTuple(i));
 			unhighlightItem(nodeItem);
 		}
 		// highlight edges
 		for (Integer i : highlightEdges) {
 			VisualItem edgeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.EDGE_GROUP,
 					edgeTable.getTuple(i));
-			highlightItem(edgeItem);
+			if (color != -1) {
+				highlightItem(edgeItem, color);
+			} else {
+				highlightItem(edgeItem);
+			}
 		}
 		for (Integer i : unhighlightEdges) {
 			VisualItem edgeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.EDGE_GROUP,
@@ -764,7 +777,7 @@ public class GoalDrivenDFGUtils {
 		}
 		for (Integer i : unhighlightNode) {
 			VisualItem nodeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
-					edgeTable.getTuple(i));
+					nodeTable.getTuple(i));
 			unhighlightItem(nodeItem);
 		}
 		// highlight edges
@@ -846,6 +859,12 @@ public class GoalDrivenDFGUtils {
 	public static void highlightItem(VisualItem item) {
 		item.setFillColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
 		item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
+		item.getVisualization().repaint();
+	}
+
+	public static void highlightItem(VisualItem item, int color) {
+		item.setFillColor(color);
+		item.setStrokeColor(color);
 		item.getVisualization().repaint();
 	}
 

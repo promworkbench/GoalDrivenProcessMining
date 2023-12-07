@@ -114,7 +114,7 @@ public class StatUtils {
 	/* Calculate stat for path */
 	public static Map<String, String> getFrequencyStatForPath(EdgeObject edgeObject) {
 		int freq = 0;
-		List<Integer> affectedCases = new ArrayList<>();
+		int caseNum = 0;
 		EdgeHashTable edgeHashTable = null;
 
 		if (HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable.getEdgeTable().containsKey(edgeObject)) {
@@ -126,15 +126,13 @@ public class StatUtils {
 			Map<Integer, List<Integer[]>> allPos = edgeHashTable.getEdgePositions(edgeObject);
 			for (Map.Entry<Integer, List<Integer[]>> entry : allPos.entrySet()) {
 				freq += entry.getValue().size();
-				if (!affectedCases.contains(entry.getKey())) {
-					affectedCases.add(entry.getKey());
-				}
 			}
+			caseNum = allPos.keySet().size();
 		}
 
 		Map<String, String> res = new HashMap<>();
 		res.put("Occurence", Integer.toString(freq));
-		res.put("Case", Integer.toString(affectedCases.size()));
+		res.put("Case", Integer.toString(caseNum));
 
 		return res;
 	}
