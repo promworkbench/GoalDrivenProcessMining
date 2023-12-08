@@ -34,6 +34,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 
 import info.clearthought.layout.TableLayout;
@@ -68,8 +69,9 @@ public class CaseConfigPanel extends JPanel {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
 		// First row: Label "All cases"
-		this.allCaseLabel = new JLabel("All cases");
-		add(this.allCaseLabel);
+		JLabel titleLable = new JLabel("Case configuration");
+		titleLable.setFont(GoalDrivenConstants.BOLD_M_FONT);
+		add(titleLable);
 		// Filter panel if there is filter
 		filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		add(filterPanel);
@@ -78,6 +80,12 @@ public class CaseConfigPanel extends JPanel {
 		JPanel sliderPanel = new JPanel();
 		sliderPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		rangeSlider = new RangeSliderPanel(400);
+		rangeSlider.getRangeSliderLabel1().setText("Lower duration threshold: ");
+		rangeSlider.getRangeSliderLabel1().setToolTipText("<html>This is the <b>minimum</b> duration an edge can have, <br>"
+				+ "expressed as a percentage of the maximum duration</html>");
+		rangeSlider.getRangeSliderLabel2().setText("Upper duration threshold: ");
+		rangeSlider.getRangeSliderLabel2().setToolTipText("<html>This is the <b>maximum</b> duration an edge can have, <br>"
+				+ "expressed as a percentage of the maximum duration</html>");
 		rangeSlider.getRangeSlider().addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -94,7 +102,7 @@ public class CaseConfigPanel extends JPanel {
 		add(sliderPanel);
 
 		this.chooseCaseLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel caseLabel = new JLabel("Cases:");
+		this.allCaseLabel = new JLabel("Cases:");
 		JButton assignButton = new JButton("Assign Value");
 		showGoodButton = new JButton("Show good cases");
 		showBadButton = new JButton("Show bad cases");
@@ -104,7 +112,7 @@ public class CaseConfigPanel extends JPanel {
 				showAssignValueDialog();
 			}
 		});
-		this.chooseCaseLabelPanel.add(caseLabel);
+		this.chooseCaseLabelPanel.add(this.allCaseLabel);
 		this.chooseCaseLabelPanel.add(assignButton);
 		this.chooseCaseLabelPanel.add(showGoodButton);
 		this.chooseCaseLabelPanel.add(showBadButton);
@@ -246,7 +254,7 @@ public class CaseConfigPanel extends JPanel {
 
 	public void updateChooseCaseTable(List<String[]> data) {
 		// add number of cases in label all cases
-		String newLabel = "<html><b>All cases</b><br><span style='font-weight:normal;'>" + "("
+		String newLabel = "<html><b>Cases: </b><br><span style='font-weight:normal;'>" + "("
 				+ Integer.toString(data.size()) + ")" + "</span></html>";
 		this.allCaseLabel.setText(newLabel);
 

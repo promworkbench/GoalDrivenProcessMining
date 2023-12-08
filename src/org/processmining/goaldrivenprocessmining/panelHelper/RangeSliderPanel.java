@@ -65,4 +65,21 @@ public class RangeSliderPanel extends JPanel {
 		this.rangeSlider = rangeSlider;
 	}
 
+	public JLabel getRangeSliderLabel1() {
+		return rangeSliderLabel1;
+	}
+
+	public void setRangeSliderLabel1(JLabel rangeSliderLabel1) {
+		this.rangeSliderLabel1 = rangeSliderLabel1;
+	}
+
+	public JLabel getRangeSliderLabel2() {
+		return rangeSliderLabel2;
+	}
+
+	public void setRangeSliderLabel2(JLabel rangeSliderLabel2) {
+		this.rangeSliderLabel2 = rangeSliderLabel2;
+	}
+	
+
 }

@@ -346,7 +346,7 @@ public class GoalDrivenController {
 		// filter button
 		panel.getControlBar().getFilterButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setBounds(0, 0, (int) (0.37 * panel.getConfigCards().getsWidth()), 400);
+				panel.getConfigCards().setBounds(0, 0, (int) (0.5 * panel.getConfigCards().getsWidth()), 400);
 				panel.getConfigCards().setVisible(true);
 				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "2");
 
@@ -1091,6 +1091,10 @@ public class GoalDrivenController {
 						updateMap.put("High", highLevelActs.toArray(new String[0]));
 						updateMap.put("Low", lowLevelActs.toArray(new String[0]));
 						UpdateConfig updateConfig = new UpdateConfig(UpdateType.SELECTED_ACT, updateMap);
+						// reset filter edges panel
+						panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().resetFilter();
+						panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().resetFilter();
+						
 						// update
 						chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
 						chain.setObject(GoalDrivenObject.high_desire_acts, highDesireActs.toArray(new String[0]));

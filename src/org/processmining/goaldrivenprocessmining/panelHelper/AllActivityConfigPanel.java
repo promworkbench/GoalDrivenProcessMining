@@ -29,6 +29,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
+import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
+
 import graph.GraphConstants;
 import prefuse.util.ColorLib;
 
@@ -43,10 +45,15 @@ public class AllActivityConfigPanel extends JPanel {
 	private JButton allActConfigDoneButton;
 	private TableRowSorter<DefaultTableModel> tr;
 	private RangeSliderPanel rangeSlider;
+	private JLabel allActLabel;
 	private int maxActFreq = 1;
 
 	public AllActivityConfigPanel() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		// all activity label
+		JLabel allActivitiesLabel = new JLabel("Activity configuration");
+		allActivitiesLabel.setFont(GoalDrivenConstants.BOLD_M_FONT);
+		add(allActivitiesLabel);
 		// First Row: Search Label and TextField
 		JPanel searchPanel = new JPanel();
 		searchPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -81,6 +88,14 @@ public class AllActivityConfigPanel extends JPanel {
 		JPanel sliderPanel = new JPanel();
 		sliderPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		rangeSlider = new RangeSliderPanel(400);
+		rangeSlider.getRangeSliderLabel1().setText("Lower frequency threshold: ");
+		rangeSlider.getRangeSliderLabel1()
+				.setToolTipText("<html>This is the <b>minimum</b> frequency an edge can have, <br>"
+						+ "expressed as a percentage of the maximum frequency</html>");
+		rangeSlider.getRangeSliderLabel2().setText("Upper frequency threshold: ");
+		rangeSlider.getRangeSliderLabel2()
+				.setToolTipText("<html>This is the <b>maximum</b> frequency an edge can have, <br>"
+						+ "expressed as a percentage of the maximum frequency</html>");
 		rangeSlider.getRangeSlider().addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -97,12 +112,10 @@ public class AllActivityConfigPanel extends JPanel {
 
 		// All Activities Label and Scrollable Table
 		JPanel labelJPanel = new JPanel();
-		labelJPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-		JLabel allActivitiesLabel = new JLabel("All activities");
-		labelJPanel.add(allActivitiesLabel);
+		labelJPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		allActLabel = new JLabel("Activities: ");
+		labelJPanel.add(allActLabel);
 		// assign button
-		JPanel assignButtonJPanel = new JPanel();
-		assignButtonJPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		JButton assignButton = new JButton("Assign Value");
 		assignButton.addActionListener(new ActionListener() {
 			@Override
@@ -110,7 +123,7 @@ public class AllActivityConfigPanel extends JPanel {
 				showAssignValueDialog();
 			}
 		});
-		assignButtonJPanel.add(assignButton);
+		labelJPanel.add(assignButton);
 		// table
 		String[] columnNames = { "Activity", "Frequency", "Hierarchy", "Priority", "Desirability" };
 		Object[][] data = {};
@@ -131,8 +144,8 @@ public class AllActivityConfigPanel extends JPanel {
 					} else {
 						cellComponent.setBackground(table.getBackground());
 					}
-				} 
-				
+				}
+
 				return cellComponent;
 			}
 
@@ -151,7 +164,7 @@ public class AllActivityConfigPanel extends JPanel {
 						cellComponent.setBackground(table.getBackground());
 					}
 				}
-				
+
 				return cellComponent;
 			}
 
@@ -177,82 +190,81 @@ public class AllActivityConfigPanel extends JPanel {
 		actEndPanel.add(allActConfigDoneButton);
 
 		add(labelJPanel);
-		add(assignButtonJPanel);
 		add(scrollPane);
 		add(actEndPanel);
 	}
 
 	private void showAssignValueDialog() {
-	    // Get selected rows
-	    int[] selectedRows = this.table.getSelectedRows();
+		// Get selected rows
+		int[] selectedRows = this.table.getSelectedRows();
 
-	    // Check if any row is selected
-	    if (selectedRows.length == 0) {
-	        JOptionPane.showMessageDialog(this, "Please select at least one row.");
-	        return;
-	    }
+		// Check if any row is selected
+		if (selectedRows.length == 0) {
+			JOptionPane.showMessageDialog(this, "Please select at least one row.");
+			return;
+		}
 
-	    // Create checkboxes and comboboxes
-	    JCheckBox hierarchyCheckBox = new JCheckBox("Assign Hierarchy:");
-	    JComboBox<String> hierarchyComboBox = new JComboBox<>(new String[]{"High", "Low"});
-	    JCheckBox priorityCheckBox = new JCheckBox("Assign Priority:");
-	    JComboBox<String> priorityComboBox = new JComboBox<>(new String[]{"High", "Neutral", "Low"});
-	    priorityComboBox.setSelectedItem("Neutral");
-	    JCheckBox desirabilityCheckBox = new JCheckBox("Assign Desirability:");
-	    JComboBox<String> desirabilityComboBox = new JComboBox<>(new String[]{"High", "Neutral", "Low"});
-	    desirabilityComboBox.setSelectedItem("Neutral");
+		// Create checkboxes and comboboxes
+		JCheckBox hierarchyCheckBox = new JCheckBox("Assign Hierarchy:");
+		JComboBox<String> hierarchyComboBox = new JComboBox<>(new String[] { "High", "Low" });
+		JCheckBox priorityCheckBox = new JCheckBox("Assign Priority:");
+		JComboBox<String> priorityComboBox = new JComboBox<>(new String[] { "High", "Neutral", "Low" });
+		priorityComboBox.setSelectedItem("Neutral");
+		JCheckBox desirabilityCheckBox = new JCheckBox("Assign Desirability:");
+		JComboBox<String> desirabilityComboBox = new JComboBox<>(new String[] { "High", "Neutral", "Low" });
+		desirabilityComboBox.setSelectedItem("Neutral");
 
-	    // Create a panel with checkboxes and comboboxes
-	    JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
-	    panel.add(hierarchyCheckBox);
-	    panel.add(hierarchyComboBox);
-	    panel.add(priorityCheckBox);
-	    panel.add(priorityComboBox);
-	    panel.add(desirabilityCheckBox);
-	    panel.add(desirabilityComboBox);
+		// Create a panel with checkboxes and comboboxes
+		JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
+		panel.add(hierarchyCheckBox);
+		panel.add(hierarchyComboBox);
+		panel.add(priorityCheckBox);
+		panel.add(priorityComboBox);
+		panel.add(desirabilityCheckBox);
+		panel.add(desirabilityComboBox);
 
-	    // Add an ActionListener to each checkbox
-	    ActionListener checkBoxListener = e -> {
-	        hierarchyComboBox.setEnabled(hierarchyCheckBox.isSelected());
-	        priorityComboBox.setEnabled(priorityCheckBox.isSelected());
-	        desirabilityComboBox.setEnabled(desirabilityCheckBox.isSelected());
-	    };
+		// Add an ActionListener to each checkbox
+		ActionListener checkBoxListener = e -> {
+			hierarchyComboBox.setEnabled(hierarchyCheckBox.isSelected());
+			priorityComboBox.setEnabled(priorityCheckBox.isSelected());
+			desirabilityComboBox.setEnabled(desirabilityCheckBox.isSelected());
+		};
 
-	    hierarchyCheckBox.addActionListener(checkBoxListener);
-	    priorityCheckBox.addActionListener(checkBoxListener);
-	    desirabilityCheckBox.addActionListener(checkBoxListener);
-	    
-	    hierarchyComboBox.setEnabled(false);
-	    priorityComboBox.setEnabled(false);
-	    desirabilityComboBox.setEnabled(false);
+		hierarchyCheckBox.addActionListener(checkBoxListener);
+		priorityCheckBox.addActionListener(checkBoxListener);
+		desirabilityCheckBox.addActionListener(checkBoxListener);
 
-	    // Show the dialog
-	    int result = JOptionPane.showConfirmDialog(this, panel, "Choose Values to Assign",
-	            JOptionPane.OK_CANCEL_OPTION);
+		hierarchyComboBox.setEnabled(false);
+		priorityComboBox.setEnabled(false);
+		desirabilityComboBox.setEnabled(false);
 
-	    // Check if the user clicked OK
-	    if (result == JOptionPane.OK_OPTION) {
-	        // Assign the values to the selected rows only if the corresponding checkboxes are selected
-	        for (int row : selectedRows) {
-	            if (hierarchyCheckBox.isSelected()) {
-	                String hierarchyValue = (String) hierarchyComboBox.getSelectedItem();
-	                // Assuming the column for hierarchy is 2
-	                this.table.setValueAt(hierarchyValue, row, 2);
-	            }
+		// Show the dialog
+		int result = JOptionPane.showConfirmDialog(this, panel, "Choose Values to Assign",
+				JOptionPane.OK_CANCEL_OPTION);
 
-	            if (priorityCheckBox.isSelected()) {
-	                String priorityValue = (String) priorityComboBox.getSelectedItem();
-	                // Assuming the column for priority is 3
-	                this.table.setValueAt(priorityValue, row, 3);
-	            }
+		// Check if the user clicked OK
+		if (result == JOptionPane.OK_OPTION) {
+			// Assign the values to the selected rows only if the corresponding checkboxes are selected
+			for (int row : selectedRows) {
+				if (hierarchyCheckBox.isSelected()) {
+					String hierarchyValue = (String) hierarchyComboBox.getSelectedItem();
+					// Assuming the column for hierarchy is 2
+					this.table.setValueAt(hierarchyValue, row, 2);
+				}
 
-	            if (desirabilityCheckBox.isSelected()) {
-	                String desirabilityValue = (String) desirabilityComboBox.getSelectedItem();
-	                // Assuming the column for desirability is 4
-	                this.table.setValueAt(desirabilityValue, row, 4);
-	            }
-	        }
-	    }
+				if (priorityCheckBox.isSelected()) {
+					String priorityValue = (String) priorityComboBox.getSelectedItem();
+					// Assuming the column for priority is 3
+					this.table.setValueAt(priorityValue, row, 3);
+				}
+
+				if (desirabilityCheckBox.isSelected()) {
+					String desirabilityValue = (String) desirabilityComboBox.getSelectedItem();
+					// Assuming the column for desirability is 4
+					this.table.setValueAt(desirabilityValue, row, 4);
+				}
+			}
+		}
 	}
 
 	private void filterAct(String query) {
@@ -271,6 +283,12 @@ public class AllActivityConfigPanel extends JPanel {
 	}
 
 	public void updateDefaultConfigTable(Map<String, String> mapActToHierarchy, Map<String, Integer> mapActFreq) {
+		// update num activities
+		String newLabel = "<html><b>Activities: </b><br><span style='font-weight:normal;'>" + "("
+				+ Integer.toString(mapActToHierarchy.size()) + ")" + "</span></html>";
+		this.allActLabel.setText(newLabel);
+
+		// update default config table
 		this.model.setRowCount(0);
 		for (Map.Entry<String, String> entry : mapActToHierarchy.entrySet()) {
 			model.addRow(new Object[] { entry.getKey(), mapActFreq.get(entry.getKey()), entry.getValue(), "Neutral",

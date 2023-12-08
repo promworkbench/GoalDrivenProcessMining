@@ -1,11 +1,14 @@
 package org.processmining.goaldrivenprocessmining.panelHelper;
 
-import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+
+import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
 
 public class FilterConfigPanel extends JPanel {
 	private final FilterEdgePanel highLevelEdgePanel;
@@ -13,7 +16,11 @@ public class FilterConfigPanel extends JPanel {
 	private final JButton filterCloseButton;
 
 	public FilterConfigPanel(int width) {
-		setLayout(new BorderLayout());
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		// title
+		JLabel titleLabel = new JLabel("Filter edges");
+		titleLabel.setFont(GoalDrivenConstants.BOLD_M_FONT);
+		add(titleLabel);
 		// Create a JTabbedPane
 		JTabbedPane tabbedPane = new JTabbedPane();
 
@@ -36,8 +43,8 @@ public class FilterConfigPanel extends JPanel {
 		tabbedPane.addTab("Low Level", lowLevelEdgePanel);
 
 		// Add the JTabbedPane to the center and the button to the south
-		add(tabbedPane, BorderLayout.CENTER);
-		add(filterEndPanel, BorderLayout.SOUTH);
+		add(tabbedPane);
+		add(filterEndPanel);
 	}
 
 	public JButton drawButton(String name) {

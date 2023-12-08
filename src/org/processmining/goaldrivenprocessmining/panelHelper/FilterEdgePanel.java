@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -27,6 +28,8 @@ import javax.swing.table.TableRowSorter;
 import org.processmining.goaldrivenprocessmining.algorithms.ButtonColumn;
 import org.processmining.goaldrivenprocessmining.algorithms.StatUtils;
 
+import info.clearthought.layout.TableLayout;
+import info.clearthought.layout.TableLayoutConstants;
 import prefuse.data.Graph;
 
 public class FilterEdgePanel extends JPanel {
@@ -35,24 +38,44 @@ public class FilterEdgePanel extends JPanel {
 	private final JTable persistentPathsTable;
 	private List<String> disconnectedBeginActs;
 	private List<String> disconnectedEndActs;
+	// checkbox 
+	private JCheckBox hideBeginIsolateActivity;
+	private JCheckBox hideEndIsolateActivity;
 
 	public FilterEdgePanel(String label) {
 		this.disconnectedBeginActs = new ArrayList<>();
 		this.disconnectedEndActs = new ArrayList<>();
+		double filterPanelSize[][] = { { 0.5, 0.5 }, { TableLayoutConstants.FILL } };
+		setLayout(new TableLayout(filterPanelSize));
 
-		setLayout(new BorderLayout());
 		JPanel sliderPanel = new JPanel();
 		sliderPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		edgeSlider = new RangeSliderPanel(400);
-		add(edgeSlider, BorderLayout.NORTH);
+		edgeSlider.getRangeSliderLabel1().setText("Lower frequency threshold: ");
+		edgeSlider.getRangeSliderLabel1()
+				.setToolTipText("<html>This is the <b>minimum</b> frequency an edge can have, <br>"
+						+ "expressed as a percentage of the maximum frequency</html>");
+		edgeSlider.getRangeSliderLabel2().setText("Upper frequency threshold: ");
+		edgeSlider.getRangeSliderLabel2()
+				.setToolTipText("<html>This is the <b>maximum</b> frequency an edge can have, <br>"
+						+ "expressed as a percentage of the maximum frequency</html>");
+
+		JPanel checkboxPanel = this.createCheckboxPanel();
+		JPanel legendLabel = createLegend();
+		sliderPanel.add(edgeSlider);
+		sliderPanel.add(checkboxPanel);
+		sliderPanel.add(legendLabel);
+		add(sliderPanel, "0,0");
 		// panel for removing table and persistent path table
 		JPanel tablePanel = new JPanel();
 		tablePanel.setLayout(new GridLayout(2, 1)); // Two rows, one for each table
-		JLabel removingPathsLabel = new JLabel("Removing Paths");
+		JLabel removingPathsLabel = new JLabel("Removing paths");
+		removingPathsLabel.setToolTipText("<html>The paths removed by the slider</html>");
 		removingPathsTable = createTable();
 		JScrollPane removingPathsScrollPane = new JScrollPane(removingPathsTable);
 
-		JLabel persistentPathsLabel = new JLabel("Persistent Paths");
+		JLabel persistentPathsLabel = new JLabel("Persistent paths");
+		persistentPathsLabel.setToolTipText("<html>The paths that are kept permanently</html>");
 		persistentPathsTable = createTable();
 		JScrollPane persistentPathsScrollPane = new JScrollPane(persistentPathsTable);
 
@@ -86,11 +109,32 @@ public class FilterEdgePanel extends JPanel {
 		tablePanel.add(createTablePanel(removingPathsLabel, removingPathsScrollPane));
 		tablePanel.add(createTablePanel(persistentPathsLabel, persistentPathsScrollPane));
 
-		add(tablePanel, BorderLayout.CENTER);
 
-		JPanel legendLabel = createLegend();
-		add(legendLabel, BorderLayout.SOUTH);
+		add(tablePanel, "1,0");
 
+	}
+
+	private JPanel createCheckboxPanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+		hideBeginIsolateActivity = new JCheckBox("Hide Begin-Isolate Activity");
+		hideEndIsolateActivity = new JCheckBox("Hide End-Isolate Activity");
+
+		panel.add(hideBeginIsolateActivity);
+		panel.add(hideEndIsolateActivity);
+
+		return panel;
+	}
+
+	public void resetFilter() {
+		// clear removing path table
+		((DefaultTableModel) this.removingPathsTable.getModel()).setRowCount(0);
+		// clear persistent path table
+		((DefaultTableModel) this.persistentPathsTable.getModel()).setRowCount(0);
+		// edge slider to 0,1 position
+		edgeSlider.getRangeSlider().setValue(0);
+		edgeSlider.getRangeSlider().setUpperValue(100);
 	}
 
 	public void updateCellColor(Graph graph) {
@@ -217,9 +261,9 @@ public class FilterEdgePanel extends JPanel {
 			legendLabel.setIcon(legendImage);
 		}
 		panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		String legendLabelTooltip = "<html><font color='orange'> Orange: No path from this act to end node</font>"
-				+ "<br><font color='#FF00FF'>Magenta: No path from begin to this act</font>"
-				+ "<br><font color='red'>Red: Both conditions</font></html>";
+		String legendLabelTooltip = "<html><font color='#FF00FF'> Begin-isolate: No path from begin to this act </font>"
+				+ "<br><font color='orange'>End-isolate: No path from this act to end node </font>"
+				+ "<br><font color='red'>Isolate: Both conditions</font></html>";
 
 		legendLabel.setToolTipText(legendLabelTooltip);
 		panel.add(legendLabel);
@@ -259,6 +303,22 @@ public class FilterEdgePanel extends JPanel {
 
 	public void setDisconnectedEndActs(List<String> disconnectedEndActs) {
 		this.disconnectedEndActs = disconnectedEndActs;
+	}
+
+	public JCheckBox getHideBeginIsolateActivity() {
+		return hideBeginIsolateActivity;
+	}
+
+	public void setHideBeginIsolateActivity(JCheckBox hideBeginIsolateActivity) {
+		this.hideBeginIsolateActivity = hideBeginIsolateActivity;
+	}
+
+	public JCheckBox getHideEndIsolateActivity() {
+		return hideEndIsolateActivity;
+	}
+
+	public void setHideEndIsolateActivity(JCheckBox hideEndIsolateActivity) {
+		this.hideEndIsolateActivity = hideEndIsolateActivity;
 	}
 
 }
