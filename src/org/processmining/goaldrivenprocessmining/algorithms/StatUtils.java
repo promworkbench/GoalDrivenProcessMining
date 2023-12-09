@@ -1,5 +1,6 @@
 package org.processmining.goaldrivenprocessmining.algorithms;
 
+import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -10,6 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -20,6 +23,7 @@ import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighL
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.ThroughputTimeObject;
+import org.processmining.goaldrivenprocessmining.objectHelper.TraceSkeleton;
 
 import graph.GraphConstants;
 import prefuse.data.Graph;
@@ -32,7 +36,7 @@ public class StatUtils {
 	public static Map<String, String> getFrequencyStatForAct(String act) {
 		int freq = 0;
 		Set<Integer> affectedCases = new HashSet();
-		
+
 		EdgeHashTable originalEdgeHashTable = Cl01GatherAttributes.originalEdgeHashTable;
 		for (EdgeObject edgeObject : originalEdgeHashTable.getEdgeTable().keySet()) {
 			if (edgeObject.getNode1().equals(act) || edgeObject.getNode2().equals(act)) {
@@ -47,7 +51,7 @@ public class StatUtils {
 					for (Map.Entry<Integer, List<Integer[]>> entry : allPos.entrySet()) {
 						// freq
 						freq += entry.getValue().size();
-						
+
 					}
 				}
 				// case
@@ -157,6 +161,33 @@ public class StatUtils {
 	}
 
 	/*--------------------------------------------------------------------------*/
+	/* Calculate trace attributes */
+	public static Map<String, Map<String, Integer>> getMapCaseAttribute(List<Integer> caseIndex) {
+		Map<String, Map<String, Integer>> res = new HashMap<>();
+
+		List<TraceSkeleton> log = Cl01GatherAttributes.originalLog;
+		for (Integer caseNum : caseIndex) {
+			TraceSkeleton trace = log.get(caseNum);
+			for (Map.Entry<String, Object> entry : trace.getAttributes().entrySet()) {
+				if (entry.getValue() != null) {
+					if (res.containsKey(entry.getKey())) {
+						Map<String, Integer> map = res.get(entry.getKey());
+						if (map.get(entry.getValue().toString()) == null) {
+							map.put(entry.getValue().toString(), 1);
+						} else {
+							map.replace(entry.getValue().toString(), map.get(entry.getValue().toString()) + 1);
+						}
+					} else {
+						Map<String, Integer> map = new HashMap<>();
+						map.put(entry.getValue().toString(), 1);
+						res.put(entry.getKey(), map);
+					}
+				}
+			}
+		}
+
+		return res;
+	}
 
 	/*--------------------------------------------------------------------------*/
 	/* Long time -> Readable string */
@@ -180,48 +211,96 @@ public class StatUtils {
 
 			if (year != 0) {
 				if (year >= 3) {
-					float comma = ((float) time) / 1000 / 60 / 60 / 24 / 30 / 12;
-					res = Float.toString(Math.round(comma * 10) / 10f) + " yrs";
+					double comma = ((double) time) / 1000 / 60 / 60 / 24 / 30.41 / 12;
+					res = String.format("%.1f yrs", comma);
 				} else {
-					float comma = ((float) time) / 1000 / 60 / 60 / 24 / 30;
-					res = Float.toString(Math.round(comma * 10) / 10f) + " mo";
+					double comma = ((double) time) / 1000 / 60 / 60 / 24 / 30.41;
+					res = String.format("%.1f mo", comma);
 				}
 			} else {
 				if (month != 0) {
 					if (month >= 3) {
-						float comma = ((float) time) / 1000 / 60 / 60 / 24 / 30;
-						res = Float.toString(Math.round(comma * 10) / 10f) + " mo";
+						double comma = ((double) time) / 1000 / 60 / 60 / 24 / 30.41;
+						res = String.format("%.1f mo", comma);
 					} else {
 						float comma = ((float) time) / 1000 / 60 / 60 / 24;
-						res = Float.toString(Math.round(comma * 10) / 10f) + " d";
+						res = String.format("%.1f d", comma);
 					}
 				} else {
 					if (day != 0) {
 						if (day >= 3) {
 							float comma = ((float) time) / 1000 / 60 / 60 / 24;
-							res = Float.toString(Math.round(comma * 10) / 10f) + " d";
+							res = String.format("%.1f d", comma);
 						} else {
 							float comma = ((float) time) / 1000 / 60 / 60;
-							res = Float.toString(Math.round(comma * 10) / 10f) + " hrs";
+							res = String.format("%.1f hrs", comma);
 						}
 					} else {
 						if (hour != 0) {
 							if (hour >= 2) {
 								float comma = ((float) time) / 1000 / 60 / 60;
-								res = Float.toString(Math.round(comma * 10) / 10f) + " hrs";
+								res = String.format("%.1f hrs", comma);
 							} else {
 								float comma = ((float) time) / 1000 / 60;
-								res = Float.toString(Math.round(comma * 10) / 10f) + " mins";
+								res = String.format("%.1f mins", comma);
+								;
 							}
 						} else {
 							float comma = ((float) time) / 1000 / 60;
-							res = Float.toString(Math.round(comma * 10) / 10f) + " mins";
+							res = String.format("%.1f mins", comma);
+							;
 						}
 					}
 				}
 			}
 		}
 		return res;
+	}
+
+	public static double convertTimeStringToSeconds(String value) {
+		// Extract numeric part and string
+		Pattern pattern = Pattern.compile("(\\d+\\.?\\d*)\\s*([a-zA-Z]+)");
+		Matcher matcher = pattern.matcher(value);
+
+		if (matcher.find()) {
+			double number = Double.parseDouble(matcher.group(1));
+
+			String unit = matcher.group(2).toLowerCase();
+			// Map of time units to seconds
+			int secondsInMinute = 60;
+			int secondsInHour = 60 * secondsInMinute;
+			int secondsInDay = 24 * secondsInHour;
+			int secondsInMonth = (int) (30.41 * secondsInDay); // Assuming an average month
+			int secondsInYear = 12 * secondsInMonth; // Assuming an average year
+
+			// Convert to seconds
+			switch (unit) {
+				case "mins" :
+					return number * secondsInMinute;
+				case "hrs" :
+					return number * secondsInHour;
+				case "d" :
+					return number * secondsInDay;
+				case "mo" :
+					return number * secondsInMonth;
+				case "yrs" :
+					return number * secondsInYear;
+				default :
+					// Handle unknown units or return 0
+					return 0;
+			}
+		}
+
+		return 0; // Return 0 if no match is found
+	}
+
+	public static void main(String[] args) {
+		System.out.println(StatUtils.getDurationString(566092800000l));
+		NumberFormat numberFormat = NumberFormat.getInstance();
+		numberFormat.setGroupingUsed(false);
+		String formattedValue2 = numberFormat
+				.format(StatUtils.convertTimeStringToSeconds(StatUtils.getDurationString(566092800000l)));
+		System.out.println(formattedValue2);
 	}
 	/*--------------------------------------------------------------------------*/
 

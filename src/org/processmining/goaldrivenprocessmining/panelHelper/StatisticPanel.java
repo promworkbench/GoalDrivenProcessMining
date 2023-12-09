@@ -75,7 +75,8 @@ public class StatisticPanel extends JPanel {
 			Map<String, String> throughputMap) {
 		this.edgeObject = edgeObject;
 		//reset
-		this.resetStatisticPanel();
+		this.statisticActivityPanel.setVisible(false);
+		this.statisticPathPanel.setVisible(true);
 		// Row 1: label
 		JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JLabel label = new JLabel();
@@ -88,7 +89,6 @@ public class StatisticPanel extends JPanel {
 		this.contentPanel.add(labelPanel, BorderLayout.NORTH);
 
 		// Row 2: stat panel
-		this.statisticPathPanel = new StatisticPathPanel();
 		this.statisticPathPanel.updatePanel("Frequency", this.statisticPathPanel.getFrequencyPanel(), frequencyMap);
 		this.statisticPathPanel.updatePanel("Performance", this.statisticPathPanel.getThroughputPanel(), throughputMap);
 		this.statisticPathPanel

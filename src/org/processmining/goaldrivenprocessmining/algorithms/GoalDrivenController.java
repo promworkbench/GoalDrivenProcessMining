@@ -1207,7 +1207,7 @@ public class GoalDrivenController {
 		/*--------Case config panel---------*/
 		panel.getControlBar().getCaseButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setBounds(0, 0, (int) (0.5 * panel.getConfigCards().getsWidth()), 400);
+				panel.getConfigCards().setBounds(0, 0, (int) (0.6 * panel.getConfigCards().getsWidth()), 500);
 				panel.getConfigCards().setVisible(true);
 				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "8");
 
@@ -1274,7 +1274,7 @@ public class GoalDrivenController {
 					String caseName = trace.getAttributes().get(GoalDrivenConstants.CASE_NAME).toString();
 					long duration = trace.getTrace().get(trace.getTrace().size() - 1).getTime()
 							- trace.getTrace().get(0).getTime();
-					if (duration > maxDuration) {
+					if (duration >= maxDuration) {
 						maxDuration = duration;
 					}
 					String className = "Neutral";
@@ -1347,7 +1347,7 @@ public class GoalDrivenController {
 						+ Integer.toString(data.size()) + " events" + ")" + "</span></html>";
 				panel.getConfigCards().getCaseConfigPanel().getShowCaseLabel().setText(newLabel);
 				panel.getConfigCards().getCaseConfigPanel().updateShowCaseTable(data);
-				panel.getConfigCards().getCaseConfigPanel().updateCaseAttributeTable(caseAttributeData);
+				panel.getConfigCards().getCaseConfigPanel().updateShowCaseAttributeTable(caseAttributeData);
 
 				panel.revalidate();
 				panel.repaint();
@@ -1988,7 +1988,7 @@ public class GoalDrivenController {
 				.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						// show case config panel
-						panel.getConfigCards().setBounds(0, 0, (int) (0.37 * panel.getConfigCards().getsWidth()), 400);
+						panel.getConfigCards().setBounds(0, 0, (int) (0.6 * panel.getConfigCards().getsWidth()), 500);
 						panel.getConfigCards().setVisible(true);
 						panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "8");
 						// update filter panel

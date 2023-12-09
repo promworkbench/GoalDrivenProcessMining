@@ -6,11 +6,12 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultCellEditor;
@@ -21,6 +22,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
@@ -35,6 +37,7 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
+import org.processmining.goaldrivenprocessmining.algorithms.StatUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 
 import info.clearthought.layout.TableLayout;
@@ -53,6 +56,8 @@ public class CaseConfigPanel extends JPanel {
 	private DefaultTableModel caseAttributeModel;
 	private JPanel filterPanel;
 
+	private JTabbedPane caseAttributeDetailsPanel;
+
 	private TableRowSorter<DefaultTableModel> chooseCaseTableRowSorter;
 	private RangeSliderPanel rangeSlider;
 
@@ -63,8 +68,12 @@ public class CaseConfigPanel extends JPanel {
 
 	private JButton caseConfigCancelButton;
 	private JButton caseConfigDoneButton;
+	// for filter
+	private Set<Integer> displayIndex;
 
 	public CaseConfigPanel(int width) {
+		// for filter
+		this.displayIndex = new HashSet<>();
 		// Set layout for the main panel
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -79,27 +88,81 @@ public class CaseConfigPanel extends JPanel {
 		// frequency slider
 		JPanel sliderPanel = new JPanel();
 		sliderPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-		rangeSlider = new RangeSliderPanel(400);
+		rangeSlider = new RangeSliderPanel(width);
 		rangeSlider.getRangeSliderLabel1().setText("Lower duration threshold: ");
-		rangeSlider.getRangeSliderLabel1().setToolTipText("<html>This is the <b>minimum</b> duration an edge can have, <br>"
-				+ "expressed as a percentage of the maximum duration</html>");
+		rangeSlider.getRangeSliderLabel1()
+				.setToolTipText("<html>This is the <b>minimum</b> duration an edge can have, <br>"
+						+ "expressed as a percentage of the maximum duration</html>");
 		rangeSlider.getRangeSliderLabel2().setText("Upper duration threshold: ");
-		rangeSlider.getRangeSliderLabel2().setToolTipText("<html>This is the <b>maximum</b> duration an edge can have, <br>"
-				+ "expressed as a percentage of the maximum duration</html>");
+		rangeSlider.getRangeSliderLabel2()
+				.setToolTipText("<html>This is the <b>maximum</b> duration an edge can have, <br>"
+						+ "expressed as a percentage of the maximum duration</html>");
 		rangeSlider.getRangeSlider().addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				RangeSlider slider = (RangeSlider) e.getSource();
 				float lowerPercent = slider.getValue() / 100f;
 				float upperPercent = slider.getUpperValue() / 100f;
-				long lower = (long) (maxDuration * lowerPercent);
-				long upper = (long) (maxDuration * upperPercent);
-				filterFreq(lower, upper);
+				long lower = (long) (maxDuration * lowerPercent) - 1;
+				long upper = (long) (maxDuration * upperPercent) + 1;
+				filterFreq(lower, upper, displayIndex);
 			}
 		});
-
 		sliderPanel.add(rangeSlider);
 		add(sliderPanel);
+
+		// Create a JTabbedPane
+		JTabbedPane tabbedPane = new JTabbedPane();
+
+		//case overview
+		JPanel caseOverviewPanel = this.createCaseOverviewPanel(width);
+
+		//case statistic
+		this.caseAttributeDetailsPanel = new JTabbedPane();
+		tabbedPane.addTab("Case overview", caseOverviewPanel);
+		tabbedPane.addTab("Case attribute details", this.caseAttributeDetailsPanel);
+
+		// cancel done button
+		JPanel actEndPanel = new JPanel();
+		actEndPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		this.caseConfigCancelButton = new JButton("Cancel");
+		this.caseConfigDoneButton = new JButton("Done");
+		actEndPanel.add(this.caseConfigCancelButton);
+		actEndPanel.add(this.caseConfigDoneButton);
+		add(tabbedPane);
+		add(actEndPanel);
+
+	}
+
+	public void updateFilterOnPath(EdgeObject edgeObject, Set<Integer> displayIndex1) {
+		this.displayIndex = displayIndex1;
+		// update filter panel
+		this.filterPanel.removeAll();
+		JLabel filterLabel = new JLabel("Contain path " + edgeObject.getNode1() + " \u2192 " + edgeObject.getNode2());
+		this.filterPanel.add(filterLabel);
+		JButton clearButton = new JButton("Clear filtering");
+		this.filterPanel.add(clearButton);
+		clearButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// reset filter
+				chooseCaseTable.setRowSorter(chooseCaseTableRowSorter);
+				updateAllCaseLabel(chooseCaseModel.getRowCount());
+				displayIndex = new HashSet<>();
+				filterPanel.removeAll();
+				revalidate();
+				repaint();
+			}
+		});
+		// reset show case panel
+		this.resetShowCasePanel();
+		// update table
+		this.filterCase(displayIndex);
+
+	}
+
+	private JPanel createCaseOverviewPanel(double width) {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
 		this.chooseCaseLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		this.allCaseLabel = new JLabel("Cases:");
@@ -116,50 +179,31 @@ public class CaseConfigPanel extends JPanel {
 		this.chooseCaseLabelPanel.add(assignButton);
 		this.chooseCaseLabelPanel.add(showGoodButton);
 		this.chooseCaseLabelPanel.add(showBadButton);
-		add(this.chooseCaseLabelPanel);
+		panel.add(this.chooseCaseLabelPanel);
 
 		// Second row: panel for 2 tables
 		double[][] sizeFullContent = { { 0.4 * width, TableLayout.FILL }, { TableLayout.FILL } };
 
 		JPanel mainPanel = new JPanel(new TableLayout(sizeFullContent));
-		add(mainPanel);
 		this.createChooseCasePanel();
 		this.createShowCasePanel(width);
 
 		mainPanel.add(this.chooseCasePanel, "0,0");
 		mainPanel.add(this.showCasePanel, "1,0");
-
-		// cancel done button
-		JPanel actEndPanel = new JPanel();
-		actEndPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		this.caseConfigCancelButton = new JButton("Cancel");
-		this.caseConfigDoneButton = new JButton("Done");
-		actEndPanel.add(this.caseConfigCancelButton);
-		actEndPanel.add(this.caseConfigDoneButton);
-		add(actEndPanel);
-
+		panel.add(mainPanel);
+		return panel;
 	}
 
-	public void updateFilterOnPath(EdgeObject edgeObject, Set<Integer> displayIndex) {
-		// update filter panel
-		JLabel filterLabel = new JLabel("Contain path " + edgeObject.getNode1() + " \u2192 " + edgeObject.getNode2());
-		this.filterPanel.add(filterLabel);
-		JButton clearButton = new JButton("Clear filtering");
-		this.chooseCaseLabelPanel.add(clearButton);
-		clearButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// reset filter
-				chooseCaseTable.setRowSorter(null);
-				filterPanel.removeAll();
-				revalidate();
-				repaint();
-			}
-		});
-		// reset show case panel
-		this.resetShowCasePanel();
-		// update table
-		this.filterCase(displayIndex);
-
+	private void updateCaseAttributeDetailsPanel(List<Integer> caseIndex) {
+		// calculate case attributes of the cases
+		Map<String, Map<String, Integer>> mapCaseAttribute = StatUtils.getMapCaseAttribute(caseIndex);
+		// reset tab:
+		this.caseAttributeDetailsPanel.removeAll();
+		// each key is a tab 
+		for (Map.Entry<String, Map<String, Integer>> entry : mapCaseAttribute.entrySet()) {
+			JPanel panel = this.createAttributeTablePanel(entry.getValue());
+			this.caseAttributeDetailsPanel.addTab(entry.getKey(), panel);
+		}
 	}
 
 	private void showAssignValueDialog() {
@@ -179,8 +223,6 @@ public class CaseConfigPanel extends JPanel {
 		JPanel panel = new JPanel();
 		panel.add(classCaseComboBox);
 
-		// Add an ActionListener to each checkbox
-
 		// Show the dialog
 		int result = JOptionPane.showConfirmDialog(this, panel, "Choose Values to Assign",
 				JOptionPane.OK_CANCEL_OPTION);
@@ -194,14 +236,93 @@ public class CaseConfigPanel extends JPanel {
 		}
 	}
 
-	private void filterFreq(long lower, long upper) {
+	private void filterFreq(long lower, long upper, Set<Integer> displayIndex) {
+		chooseCaseTable.setRowSorter(this.chooseCaseTableRowSorter);
 		RowFilter<Object, Object> rangeFilter = new RowFilter<Object, Object>() {
 			public boolean include(Entry<? extends Object, ? extends Object> entry) {
-				long freq = (long) convertTimeStringToSeconds((String) entry.getValue(1));
-				return freq >= lower && freq <= upper;
+				long freq = (long) StatUtils.convertTimeStringToSeconds((String) entry.getValue(1));
+				Boolean isDisplayedable = true;
+				if (!displayIndex.isEmpty()) {
+					isDisplayedable = displayIndex.contains((int) entry.getIdentifier());
+				}
+				return (freq >= lower && freq <= upper) && isDisplayedable;
 			}
 		};
 		this.chooseCaseTableRowSorter.setRowFilter(rangeFilter);
+		// update case number label
+		int visibleRowCount = this.chooseCaseTableRowSorter.getViewRowCount();
+		this.updateAllCaseLabel(visibleRowCount);
+
+		// get all view case from Log
+		List<Integer> visibleTraces = new ArrayList<>();
+		for (int i = 0; i < visibleRowCount; i++) {
+			int modelRow = this.chooseCaseTable.convertRowIndexToModel(i);
+			visibleTraces.add(modelRow);
+		}
+		// update attribute details panel
+		this.updateCaseAttributeDetailsPanel(visibleTraces);
+	}
+
+	public void filterCase(Set<Integer> displayIndex) {
+		chooseCaseTable.setRowSorter(null);
+		// Create a RowFilter based on the list of row indices
+		RowFilter<Object, Object> rowFilter = new RowFilter<Object, Object>() {
+			@Override
+			public boolean include(Entry<? extends Object, ? extends Object> entry) {
+				int modelRow = chooseCaseTable.convertRowIndexToModel((int) entry.getIdentifier());
+				return displayIndex.contains(modelRow);
+			}
+		};
+
+		TableRowSorter<TableModel> rowSorter = new TableRowSorter<>(this.chooseCaseModel);
+		rowSorter.setRowFilter(rowFilter);
+		rowSorter.setComparator(1, Comparator.comparingDouble(StatUtils::convertTimeStringToSeconds));
+		chooseCaseTable.setRowSorter(rowSorter);
+		// update case number label
+		int visibleRowCount = rowSorter.getViewRowCount();
+		this.updateAllCaseLabel(visibleRowCount);
+		// get all view case from Log
+		List<Integer> visibleTraces = new ArrayList<>();
+		for (int i = 0; i < visibleRowCount; i++) {
+			int modelRow = this.chooseCaseTable.convertRowIndexToModel(i);
+			visibleTraces.add(modelRow);
+		}
+		// update attribute details panel
+		this.updateCaseAttributeDetailsPanel(visibleTraces);
+	}
+
+	private JPanel createAttributeTablePanel(Map<String, Integer> dataMap) {
+		JPanel panel = new JPanel(new BorderLayout());
+
+		// Create table model and set data
+		DefaultTableModel tableModel = new DefaultTableModel() {
+			// Override the getColumnClass method to specify the class of the values in each column
+			@Override
+			public Class<?> getColumnClass(int columnIndex) {
+				if (columnIndex == 1) { // Column index 1 corresponds to the "Age" column
+					return Integer.class; // Set the class of this column to Integer
+				}
+				return super.getColumnClass(columnIndex);
+			}
+		};
+		tableModel.addColumn("Value");
+		tableModel.addColumn("Frequency");
+
+		for (Map.Entry<String, Integer> entry : dataMap.entrySet()) {
+			tableModel.addRow(new Object[] { entry.getKey(), entry.getValue() });
+		}
+
+		// Create sortable table with the model
+		JTable table = new JTable(tableModel);
+		table.setAutoCreateRowSorter(true);
+
+		// Add table to a scroll pane
+		JScrollPane scrollPane = new JScrollPane(table);
+
+		// Add scroll pane to the panel
+		panel.add(scrollPane, BorderLayout.CENTER);
+
+		return panel;
 	}
 
 	private void createChooseCasePanel() {
@@ -221,7 +342,8 @@ public class CaseConfigPanel extends JPanel {
 		this.chooseCaseTable.getColumnModel().getColumn(2)
 				.setCellEditor(new DefaultCellEditor(new JComboBox<>(new String[] { "Good", "Neutral", "Bad" })));
 		this.chooseCaseTableRowSorter = new TableRowSorter<>(this.chooseCaseModel);
-		this.chooseCaseTableRowSorter.setComparator(1, Comparator.comparingDouble(this::convertTimeStringToSeconds));
+		this.chooseCaseTableRowSorter.setComparator(1,
+				Comparator.comparingDouble(StatUtils::convertTimeStringToSeconds));
 		this.chooseCaseTable.setRowSorter(this.chooseCaseTableRowSorter);
 		this.chooseCaseTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.chooseCaseTable.addMouseMotionListener(new MouseInputAdapter() {
@@ -254,15 +376,25 @@ public class CaseConfigPanel extends JPanel {
 
 	public void updateChooseCaseTable(List<String[]> data) {
 		// add number of cases in label all cases
-		String newLabel = "<html><b>Cases: </b><br><span style='font-weight:normal;'>" + "("
-				+ Integer.toString(data.size()) + ")" + "</span></html>";
-		this.allCaseLabel.setText(newLabel);
-
+		this.updateAllCaseLabel(data.size());
+		List<Integer> showIndex = new ArrayList<>();
+		int index = 0;
 		// add data to table
 		this.chooseCaseModel.setRowCount(0);
 		for (String[] d : data) {
 			this.chooseCaseModel.addRow(d);
+			showIndex.add(index);
+			index++;
 		}
+		// update case attributes details
+		this.updateCaseAttributeDetailsPanel(showIndex);
+	}
+
+	private void updateAllCaseLabel(int caseNum) {
+		// add number of cases in label all cases
+		String newLabel = "<html><b>Cases: </b><br><span style='font-weight:normal;'>" + "(" + Integer.toString(caseNum)
+				+ ")" + "</span></html>";
+		this.allCaseLabel.setText(newLabel);
 	}
 
 	private void createShowCasePanel(double width) {
@@ -335,64 +467,11 @@ public class CaseConfigPanel extends JPanel {
 		}
 	}
 
-	public void updateCaseAttributeTable(List<Object[]> data) {
+	public void updateShowCaseAttributeTable(List<Object[]> data) {
 		this.caseAttributeModel.setRowCount(0);
 		for (Object[] d : data) {
 			this.caseAttributeModel.addRow(d);
 		}
-	}
-
-	private double convertTimeStringToSeconds(String value) {
-		// Extract numeric part and string
-		Pattern pattern = Pattern.compile("(\\d+\\.?\\d*)\\s*([a-zA-Z]+)");
-		Matcher matcher = pattern.matcher(value);
-
-		if (matcher.find()) {
-			double number = Double.parseDouble(matcher.group(1));
-
-			String unit = matcher.group(2).toLowerCase();
-			// Map of time units to seconds
-			int secondsInMinute = 60;
-			int secondsInHour = 60 * secondsInMinute;
-			int secondsInDay = 24 * secondsInHour;
-			int secondsInMonth = 30 * secondsInDay; // Assuming an average month
-			int secondsInYear = 12 * secondsInMonth; // Assuming an average year
-
-			// Convert to seconds
-			switch (unit) {
-				case "mins" :
-					return number * secondsInMinute;
-				case "hrs" :
-					return number * secondsInHour;
-				case "d" :
-					return number * secondsInDay;
-				case "mo" :
-					return number * secondsInMonth;
-				case "yrs" :
-					return number * secondsInYear;
-				default :
-					// Handle unknown units or return 0
-					return 0;
-			}
-		}
-
-		return 0; // Return 0 if no match is found
-	}
-
-	public void filterCase(Set<Integer> displayIndex) {
-		chooseCaseTable.setRowSorter(null);
-		// Create a RowFilter based on the list of row indices
-		RowFilter<Object, Object> rowFilter = new RowFilter<Object, Object>() {
-			@Override
-			public boolean include(Entry<? extends Object, ? extends Object> entry) {
-				int modelRow = chooseCaseTable.convertRowIndexToModel((int) entry.getIdentifier());
-				return displayIndex.contains(modelRow);
-			}
-		};
-		TableRowSorter<TableModel> rowSorter = new TableRowSorter<>(this.chooseCaseModel);
-		rowSorter.setRowFilter(rowFilter);
-		rowSorter.setComparator(1, Comparator.comparingDouble(this::convertTimeStringToSeconds));
-		chooseCaseTable.setRowSorter(rowSorter);
 	}
 
 	public JLabel getAllCaseLabel() {
@@ -521,6 +600,14 @@ public class CaseConfigPanel extends JPanel {
 
 	public void setFilterPanel(JPanel filterPanel) {
 		this.filterPanel = filterPanel;
+	}
+
+	public Set<Integer> getDisplayIndex() {
+		return displayIndex;
+	}
+
+	public void setDisplayIndex(Set<Integer> displayIndex) {
+		this.displayIndex = displayIndex;
 	}
 
 }

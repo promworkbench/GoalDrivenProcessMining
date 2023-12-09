@@ -38,7 +38,8 @@ public class StatisticPathPanel extends JPanel {
 		add(showCaseButton);
 	}
 
-	public JPanel updatePanel(String label, JPanel panel, Map<String, String> keyValueMap) {
+	public void updatePanel(String label, JPanel panel, Map<String, String> keyValueMap) {
+		panel.removeAll();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
 		panel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
@@ -65,7 +66,6 @@ public class StatisticPathPanel extends JPanel {
 		}
 		panel.add(Box.createRigidArea(new Dimension(0, 10))); // Adjust the value to set the desired gap
 
-		return panel;
 	}
 
 	private JPanel createKeyValueRow(String key, String value) {
