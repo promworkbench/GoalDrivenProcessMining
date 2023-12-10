@@ -39,8 +39,7 @@ public class FilterEdgePanel extends JPanel {
 	private List<String> disconnectedBeginActs;
 	private List<String> disconnectedEndActs;
 	// checkbox 
-	private JCheckBox hideBeginIsolateActivity;
-	private JCheckBox hideEndIsolateActivity;
+	private JCheckBox hideIsolateActivity;
 
 	public FilterEdgePanel(String label) {
 		this.disconnectedBeginActs = new ArrayList<>();
@@ -86,6 +85,7 @@ public class FilterEdgePanel extends JPanel {
 				int realModelRow = table.convertRowIndexToView(modelRow);
 				Object[] data = new Object[] { table.getValueAt(realModelRow, 0), table.getValueAt(realModelRow, 1),
 						table.getValueAt(realModelRow, 2), table.getValueAt(realModelRow, 3), "Remove" };
+				hideIsolateActivity.setSelected(false);
 				((DefaultTableModel) persistentPathsTable.getModel()).addRow(data);
 				((DefaultTableModel) table.getModel()).removeRow(modelRow);
 
@@ -98,6 +98,7 @@ public class FilterEdgePanel extends JPanel {
 				int realModelRow = table.convertRowIndexToView(modelRow);
 				Object[] data = new Object[] { table.getValueAt(realModelRow, 0), table.getValueAt(realModelRow, 1),
 						table.getValueAt(realModelRow, 2), table.getValueAt(realModelRow, 3), "Keep" };
+				hideIsolateActivity.setSelected(false);
 				((DefaultTableModel) removingPathsTable.getModel()).addRow(data);
 				((DefaultTableModel) table.getModel()).removeRow(modelRow);
 
@@ -109,7 +110,6 @@ public class FilterEdgePanel extends JPanel {
 		tablePanel.add(createTablePanel(removingPathsLabel, removingPathsScrollPane));
 		tablePanel.add(createTablePanel(persistentPathsLabel, persistentPathsScrollPane));
 
-
 		add(tablePanel, "1,0");
 
 	}
@@ -118,11 +118,9 @@ public class FilterEdgePanel extends JPanel {
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-		hideBeginIsolateActivity = new JCheckBox("Hide Begin-Isolate Activity");
-		hideEndIsolateActivity = new JCheckBox("Hide End-Isolate Activity");
+		hideIsolateActivity = new JCheckBox("Hide isolate activities");
 
-		panel.add(hideBeginIsolateActivity);
-		panel.add(hideEndIsolateActivity);
+		panel.add(hideIsolateActivity);
 
 		return panel;
 	}
@@ -261,9 +259,9 @@ public class FilterEdgePanel extends JPanel {
 			legendLabel.setIcon(legendImage);
 		}
 		panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		String legendLabelTooltip = "<html><font color='#FF00FF'> Begin-isolate: No path from begin to this act </font>"
-				+ "<br><font color='orange'>End-isolate: No path from this act to end node </font>"
-				+ "<br><font color='red'>Isolate: Both conditions</font></html>";
+		String legendLabelTooltip = "<html><font color='#FF00FF'> Begin-isolate activity: No path from begin to this act </font>"
+				+ "<br><font color='orange'>End-isolate activity: No path from this act to end node </font>"
+				+ "<br><font color='red'>Isolate activity: Both conditions</font></html>";
 
 		legendLabel.setToolTipText(legendLabelTooltip);
 		panel.add(legendLabel);
@@ -305,20 +303,12 @@ public class FilterEdgePanel extends JPanel {
 		this.disconnectedEndActs = disconnectedEndActs;
 	}
 
-	public JCheckBox getHideBeginIsolateActivity() {
-		return hideBeginIsolateActivity;
+	public JCheckBox getHideIsolateActivity() {
+		return hideIsolateActivity;
 	}
 
-	public void setHideBeginIsolateActivity(JCheckBox hideBeginIsolateActivity) {
-		this.hideBeginIsolateActivity = hideBeginIsolateActivity;
-	}
-
-	public JCheckBox getHideEndIsolateActivity() {
-		return hideEndIsolateActivity;
-	}
-
-	public void setHideEndIsolateActivity(JCheckBox hideEndIsolateActivity) {
-		this.hideEndIsolateActivity = hideEndIsolateActivity;
+	public void setHideIsolateActivity(JCheckBox hideIsolateActivity) {
+		this.hideIsolateActivity = hideIsolateActivity;
 	}
 
 }

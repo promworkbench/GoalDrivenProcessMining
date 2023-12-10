@@ -328,11 +328,6 @@ public class GoalDrivenController {
 			}
 
 			public void invalidate(GoalDrivenPanel panel) {
-				//here, we could put the graph on blank, but that is annoying
-				//				Dot dot = new Dot();
-				//				DotNode dotNode = dot.addNode("...");
-				//				dotNode.setOption("shape", "plaintext");
-				//				panel.getGraph().changeDot(dot, true);
 			}
 		});
 
@@ -454,6 +449,8 @@ public class GoalDrivenController {
 				});
 		// chain for tables
 		// high level chain
+		// set default not hide isolate activities
+		chain.setObject(GoalDrivenObject.is_high_edge_hide_isolate, false);
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
 
 			public String getName() {
@@ -461,12 +458,14 @@ public class GoalDrivenController {
 			}
 
 			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.high_edge_threshold, GoalDrivenObject.high_level_dfg };
+				return new IvMObject<?>[] { GoalDrivenObject.is_high_edge_hide_isolate,
+						GoalDrivenObject.high_edge_threshold, GoalDrivenObject.high_level_dfg };
 			}
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				GoalDrivenDFG highLevelDfg = inputs.get(GoalDrivenObject.high_level_dfg);
 				Double[] edgeThreshold = inputs.get(GoalDrivenObject.high_edge_threshold);
+				Boolean isHideIsolate = inputs.get(GoalDrivenObject.is_high_edge_hide_isolate);
 				int maxFreq = Collections.max(highLevelDfg.getCurrentFrequencyEdge().values());
 				int lowerThreshold = (int) Math.ceil(maxFreq * edgeThreshold[0]);
 				int upperThreshold = (int) Math.round(maxFreq * edgeThreshold[1]);
@@ -523,6 +522,19 @@ public class GoalDrivenController {
 
 				}
 
+				// first, make all nodes display
+				List<Integer> nodeRows = new ArrayList<>();
+				TableIterator nodes = nodeTable.iterator();
+				while (nodes.hasNext()) {
+					int row = nodes.nextInt();
+					if (nodeTable.isValidRow(row)) {
+						nodeRows.add(row);
+					}
+				}
+				for (Integer i : nodeRows) {
+					nodeTable.setBoolean(i, GraphConstants.IS_DISPLAY, true);
+				}
+
 				// make these filtered edges non display
 				for (Integer i : filteredEdgeRows) {
 					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, false);
@@ -538,6 +550,49 @@ public class GoalDrivenController {
 				// update color cell
 				panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
 						.updateCellColor(highLevelDfg.getGraph());
+
+				// if hide isolate activities is checked => hide all these nodes, otherwise display these
+				if (isHideIsolate) {
+					// find all isolate activities
+					List<String> isolateActs = new ArrayList<String>(panel.getConfigCards().getFilterConfigPanel()
+							.getHighLevelEdgePanel().getDisconnectedBeginActs());
+					isolateActs.retainAll(panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
+							.getDisconnectedEndActs());
+					// hide nodes
+					if (!isolateActs.isEmpty()) {
+						List<Integer> isolateRows = new ArrayList<>();
+						nodes = nodeTable.iterator();
+						while (nodes.hasNext()) {
+							int row = nodes.nextInt();
+							if (nodeTable.isValidRow(row)) {
+								if (isolateActs.contains(nodeTable.getString(row, GraphConstants.LABEL_FIELD))) {
+									isolateRows.add(row);
+								}
+							}
+						}
+						for (Integer i : isolateRows) {
+							nodeTable.setBoolean(i, GraphConstants.IS_DISPLAY, false);
+						}
+						// its corresponding edges
+						List<Integer> hideEdgeRows = new ArrayList<>();
+						edges = edgeTable.iterator();
+						while (edges.hasNext()) {
+							int row = edges.nextInt();
+							if (edgeTable.isValidRow(row)) {
+								int source = edgeTable.getTuple(row).getInt(Graph.DEFAULT_SOURCE_KEY);
+								int target = edgeTable.getTuple(row).getInt(Graph.DEFAULT_TARGET_KEY);
+								if (isolateRows.contains(source) || isolateRows.contains(target)) {
+									hideEdgeRows.add(row);
+								}
+							}
+
+						}
+						for (Integer i : hideEdgeRows) {
+							edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, false);
+						}
+
+					}
+				}
 
 				highLevelDfg.revalidate();
 				highLevelDfg.repaint();
@@ -741,6 +796,7 @@ public class GoalDrivenController {
 				});
 		// chain for tables
 		// low level chain
+		chain.setObject(GoalDrivenObject.is_low_edge_hide_isolate, false);
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
 
 			public String getName() {
@@ -748,7 +804,8 @@ public class GoalDrivenController {
 			}
 
 			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.low_edge_threshold, GoalDrivenObject.low_level_dfg };
+				return new IvMObject<?>[] { GoalDrivenObject.is_low_edge_hide_isolate,
+						GoalDrivenObject.low_edge_threshold, GoalDrivenObject.low_level_dfg };
 			}
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
@@ -757,6 +814,7 @@ public class GoalDrivenController {
 				int maxFreq = Collections.max(lowLevelDfg.getCurrentFrequencyEdge().values());
 				int lowerThreshold = (int) Math.ceil(maxFreq * edgeThreshold[0]);
 				int upperThreshold = (int) Math.round(maxFreq * edgeThreshold[1]);
+				Boolean isHideIsolate = inputs.get(GoalDrivenObject.is_low_edge_hide_isolate);
 
 				// find the edges that need to be filtered and kept. That is has the freq below the threshold
 				List<EdgeObject> filteredEdges = new ArrayList<EdgeObject>();
@@ -809,7 +867,18 @@ public class GoalDrivenController {
 					}
 
 				}
-
+				// first, make all nodes display
+				List<Integer> nodeRows = new ArrayList<>();
+				TableIterator nodes = nodeTable.iterator();
+				while (nodes.hasNext()) {
+					int row = nodes.nextInt();
+					if (nodeTable.isValidRow(row)) {
+						nodeRows.add(row);
+					}
+				}
+				for (Integer i : nodeRows) {
+					nodeTable.setBoolean(i, GraphConstants.IS_DISPLAY, true);
+				}
 				// make these filtered edges non display
 				for (Integer i : filteredEdgeRows) {
 					edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, false);
@@ -824,6 +893,48 @@ public class GoalDrivenController {
 				// update color cell
 				panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
 						.updateCellColor(lowLevelDfg.getGraph());
+				// if hide isolate activities is checked => hide all these nodes, otherwise display these
+				if (isHideIsolate) {
+					// find all isolate activities
+					List<String> isolateActs = new ArrayList<String>(panel.getConfigCards().getFilterConfigPanel()
+							.getLowLevelEdgePanel().getDisconnectedBeginActs());
+					isolateActs.retainAll(panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
+							.getDisconnectedEndActs());
+					// hide nodes
+					if (!isolateActs.isEmpty()) {
+						List<Integer> isolateRows = new ArrayList<>();
+						nodes = nodeTable.iterator();
+						while (nodes.hasNext()) {
+							int row = nodes.nextInt();
+							if (nodeTable.isValidRow(row)) {
+								if (isolateActs.contains(nodeTable.getString(row, GraphConstants.LABEL_FIELD))) {
+									isolateRows.add(row);
+								}
+							}
+						}
+						for (Integer i : isolateRows) {
+							nodeTable.setBoolean(i, GraphConstants.IS_DISPLAY, false);
+						}
+						// its corresponding edges
+						List<Integer> hideEdgeRows = new ArrayList<>();
+						edges = edgeTable.iterator();
+						while (edges.hasNext()) {
+							int row = edges.nextInt();
+							if (edgeTable.isValidRow(row)) {
+								int source = edgeTable.getTuple(row).getInt(Graph.DEFAULT_SOURCE_KEY);
+								int target = edgeTable.getTuple(row).getInt(Graph.DEFAULT_TARGET_KEY);
+								if (isolateRows.contains(source) || isolateRows.contains(target)) {
+									hideEdgeRows.add(row);
+								}
+							}
+
+						}
+						for (Integer i : hideEdgeRows) {
+							edgeTable.setBoolean(i, GraphConstants.IS_DISPLAY, false);
+						}
+
+					}
+				}
 
 				lowLevelDfg.revalidate();
 				lowLevelDfg.repaint();
@@ -932,6 +1043,29 @@ public class GoalDrivenController {
 
 				});
 
+		// checkbox for hide isolate activity
+		panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().getHideIsolateActivity()
+				.addItemListener(new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						if (e.getStateChange() == ItemEvent.SELECTED) {
+							chain.setObject(GoalDrivenObject.is_high_edge_hide_isolate, true);
+						} else {
+							chain.setObject(GoalDrivenObject.is_high_edge_hide_isolate, false);
+						}
+					}
+				});
+		panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getHideIsolateActivity()
+				.addItemListener(new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						if (e.getStateChange() == ItemEvent.SELECTED) {
+							chain.setObject(GoalDrivenObject.is_low_edge_hide_isolate, true);
+						} else {
+							chain.setObject(GoalDrivenObject.is_low_edge_hide_isolate, false);
+						}
+					}
+				});
 		/*------------------------------------------*/
 
 		// expand button
@@ -1094,7 +1228,7 @@ public class GoalDrivenController {
 						// reset filter edges panel
 						panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().resetFilter();
 						panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().resetFilter();
-						
+
 						// update
 						chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
 						chain.setObject(GoalDrivenObject.high_desire_acts, highDesireActs.toArray(new String[0]));

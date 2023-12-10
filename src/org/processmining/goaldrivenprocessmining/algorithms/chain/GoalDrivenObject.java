@@ -78,7 +78,9 @@ public class GoalDrivenObject<C> extends IvMObject<C> {
 	
 	// filter edge
 	public static final IvMObject<Double[]> high_edge_threshold = c("frequency threshold for high level dfg", Double[].class);
+	public static final IvMObject<Boolean> is_high_edge_hide_isolate = c("option if hide isolate activities in high dfg", Boolean.class);
 	public static final IvMObject<Double[]> low_edge_threshold = c("frequency threshold for low level dfg", Double[].class);
+	public static final IvMObject<Boolean> is_low_edge_hide_isolate = c("option if hide isolate activities in low dfg", Boolean.class);
 	
 	// from filter table to graph
 	public static final IvMObject<List> high_removing_path_table = c("removing path table for high level dfg", List.class);
