@@ -27,6 +27,7 @@ public class FilterConfigPanel extends JPanel {
 		//high level
 		{
 			highLevelEdgePanel = new FilterEdgePanel("High level edges");
+			highLevelEdgePanel.getSaveFilterEdgeConfigurationButton().setVisible(false);
 		}
 
 		//low level

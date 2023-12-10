@@ -45,6 +45,7 @@ import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.EventSkeleton;
+import org.processmining.goaldrivenprocessmining.objectHelper.FilterEdgeConfig;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
@@ -81,11 +82,16 @@ public class GoalDrivenController {
 	private static GoalDrivenPanel panel;
 	private static DataChain<GoalDrivenConfiguration> chain;
 
+	// filter edge
+	private static List<FilterEdgeConfig> filterEdgeConfigs;
+	public static EdgeObject currentLowLevelEdge = null;
+
 	public GoalDrivenController(final PluginContext context, final GoalDrivenConfiguration configuration,
 			final XLog log, final ProMCanceller canceller) {
 
 		this.panel = configuration.getPanel();
 		this.chain = configuration.getChain();
+		this.filterEdgeConfigs = new ArrayList<>();
 
 		//initialise gui handlers
 		initGui(canceller, configuration);
@@ -99,6 +105,56 @@ public class GoalDrivenController {
 		//start the chain
 		this.chain.setFixedObject(IvMObject.input_log, log);
 	}
+
+	/****************************************************************************************************************/
+
+	public static void loadConfigForFilterEdges(EdgeObject edgeObject) {
+		FilterEdgeConfig filterEdgeConfig = null;
+		for (FilterEdgeConfig fEC : filterEdgeConfigs) {
+			if (fEC.getEdgeObject().equals(edgeObject)) {
+				filterEdgeConfig = fEC;
+				break;
+			}
+		}
+		// apply the config 
+		if (filterEdgeConfig != null) {
+			// apply the config for low 
+			// apply the threshold
+			double lower = filterEdgeConfig.getThreshold()[0] / 100f;
+			double upper = filterEdgeConfig.getThreshold()[1] / 100f;
+			panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getEdgeSlider().getRangeSlider()
+					.setValue(filterEdgeConfig.getThreshold()[0]);
+			panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getEdgeSlider().getRangeSlider()
+					.setUpperValue(filterEdgeConfig.getThreshold()[1]);
+			chain.setObject(GoalDrivenObject.low_edge_threshold, new Double[] { lower, upper });
+			// apply the hide isolate acts option
+			panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getHideIsolateActivity()
+					.setSelected(filterEdgeConfig.getIsHideIsolateActs());
+			chain.setObject(GoalDrivenObject.is_low_edge_hide_isolate, filterEdgeConfig.getIsHideIsolateActs());
+			// apply the list persistent paths
+			List<Object[]> data = filterEdgeConfig.getPersistentPaths();
+			panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().updatePersistentTable(data);
+		} else {
+			// reset the filter edge panel for low 
+			// apply the threshold
+			panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getEdgeSlider().getRangeSlider()
+					.setValue(0);
+			panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getEdgeSlider().getRangeSlider()
+					.setUpperValue(100);
+			chain.setObject(GoalDrivenObject.low_edge_threshold, new Double[] { 0d, 1d });
+			// apply the hide isolate acts option
+			panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getHideIsolateActivity()
+					.setSelected(false);
+			chain.setObject(GoalDrivenObject.is_low_edge_hide_isolate, false);
+			// apply the list persistent paths
+			((DefaultTableModel) panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
+					.getPersistentPathsTable().getModel()).setRowCount(0);
+
+		}
+
+	}
+
+	/****************************************************************************************************************/
 
 	public static void expandSelectedGroup(GroupSkeleton groupSkeleton, Boolean isHighLevel) {
 		if (isHighLevel) {
@@ -761,6 +817,50 @@ public class GoalDrivenController {
 						chain.setObject(GoalDrivenObject.low_keeping_path_table, labels);
 					}
 				});
+		panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getSaveFilterEdgeConfigurationButton()
+				.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						EdgeObject edgeObject = GoalDrivenController.currentLowLevelEdge;
+						if (edgeObject != null) {
+							// get the threshold
+							int lower = panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
+									.getEdgeSlider().getRangeSlider().getValue();
+							int upper = panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
+									.getEdgeSlider().getRangeSlider().getUpperValue();
+							// get hide isolate activity
+							Boolean isHideIsolateActivity = panel.getConfigCards().getFilterConfigPanel()
+									.getLowLevelEdgePanel().getHideIsolateActivity().isSelected();
+							// get persistent paths
+							List<Object[]> data = new ArrayList<>();
+							DefaultTableModel tableModel = (DefaultTableModel) panel.getConfigCards()
+									.getFilterConfigPanel().getLowLevelEdgePanel().getPersistentPathsTable().getModel();
+
+							for (int i = 0; i < tableModel.getRowCount(); i++) {
+								Object[] row = new Object[tableModel.getColumnCount()];
+								for (int j = 0; j < tableModel.getColumnCount(); j++) {
+									row[j] = tableModel.getValueAt(i, j);
+								}
+								data.add(row);
+							}
+							FilterEdgeConfig filterEdgeConfig = new FilterEdgeConfig(edgeObject,
+									new Integer[] { lower, upper }, isHideIsolateActivity, data);
+							// add to the filter edge configs list
+							Boolean isInList = false;
+							for (FilterEdgeConfig fEC : filterEdgeConfigs) {
+								if (fEC.getEdgeObject().equals(edgeObject)) {
+									// Replace if edgeObject already exists
+									filterEdgeConfigs.set(filterEdgeConfigs.indexOf(fEC), filterEdgeConfig);
+									isInList = true;
+								}
+							}
+							if (!isInList) {
+								filterEdgeConfigs.add(filterEdgeConfig);
+							}
+
+						}
+					}
+				});
+
 		// action for clicking source, target columns
 		panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getRemovingPathsTable()
 				.addMouseListener(new MouseAdapter() {
@@ -1228,7 +1328,14 @@ public class GoalDrivenController {
 						// reset filter edges panel
 						panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel().resetFilter();
 						panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().resetFilter();
-
+						// reset low level dfg panel
+						panel.getContentRightPanel().remove(panel.getLowDfgPanel());
+						GDPMLogSkeleton log = null;
+						panel.setLowDfgPanel(new GoalDrivenDFG(log, false));
+						panel.getLowDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
+						panel.getLowDfgPanel().setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
+						panel.getContentRightPanel().add(panel.getLowDfgPanel(), BorderLayout.CENTER);
+						panel.getLowDfgTitle().setText("Low-level DFG");
 						// update
 						chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
 						chain.setObject(GoalDrivenObject.high_desire_acts, highDesireActs.toArray(new String[0]));

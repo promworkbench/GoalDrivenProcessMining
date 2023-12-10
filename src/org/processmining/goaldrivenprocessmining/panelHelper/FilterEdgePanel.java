@@ -3,6 +3,7 @@ package org.processmining.goaldrivenprocessmining.panelHelper;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -15,12 +16,16 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
@@ -33,11 +38,17 @@ import info.clearthought.layout.TableLayoutConstants;
 import prefuse.data.Graph;
 
 public class FilterEdgePanel extends JPanel {
-	private final RangeSliderPanel edgeSlider;
+	private RangeSliderPanel edgeSlider;
 	private final JTable removingPathsTable;
 	private final JTable persistentPathsTable;
+	private JTable affectedCaseTable;
 	private List<String> disconnectedBeginActs;
 	private List<String> disconnectedEndActs;
+	private JLabel affectedCaseLabel;
+	private JLabel removingPathsLabel;
+	private JLabel persistentPathsLabel;
+
+	private JButton saveFilterEdgeConfigurationButton;
 	// checkbox 
 	private JCheckBox hideIsolateActivity;
 
@@ -45,37 +56,23 @@ public class FilterEdgePanel extends JPanel {
 		this.disconnectedBeginActs = new ArrayList<>();
 		this.disconnectedEndActs = new ArrayList<>();
 		double filterPanelSize[][] = { { 0.5, 0.5 }, { TableLayoutConstants.FILL } };
+
 		setLayout(new TableLayout(filterPanelSize));
-
-		JPanel sliderPanel = new JPanel();
-		sliderPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-		edgeSlider = new RangeSliderPanel(400);
-		edgeSlider.getRangeSliderLabel1().setText("Lower frequency threshold: ");
-		edgeSlider.getRangeSliderLabel1()
-				.setToolTipText("<html>This is the <b>minimum</b> frequency an edge can have, <br>"
-						+ "expressed as a percentage of the maximum frequency</html>");
-		edgeSlider.getRangeSliderLabel2().setText("Upper frequency threshold: ");
-		edgeSlider.getRangeSliderLabel2()
-				.setToolTipText("<html>This is the <b>maximum</b> frequency an edge can have, <br>"
-						+ "expressed as a percentage of the maximum frequency</html>");
-
-		JPanel checkboxPanel = this.createCheckboxPanel();
-		JPanel legendLabel = createLegend();
-		sliderPanel.add(edgeSlider);
-		sliderPanel.add(checkboxPanel);
-		sliderPanel.add(legendLabel);
+		JPanel sliderPanel = this.createLeftPanel();
 		add(sliderPanel, "0,0");
 		// panel for removing table and persistent path table
 		JPanel tablePanel = new JPanel();
 		tablePanel.setLayout(new GridLayout(2, 1)); // Two rows, one for each table
-		JLabel removingPathsLabel = new JLabel("Removing paths");
+		removingPathsLabel = new JLabel(
+				"<html><b>Removing paths: </b><br><span style='font-weight:normal;'> (0)</span></html>");
 		removingPathsLabel.setToolTipText("<html>The paths removed by the slider</html>");
-		removingPathsTable = createTable();
+		removingPathsTable = this.createTable();
 		JScrollPane removingPathsScrollPane = new JScrollPane(removingPathsTable);
 
-		JLabel persistentPathsLabel = new JLabel("Persistent paths");
+		persistentPathsLabel = new JLabel(
+				"<html><b>Persisitent paths: </b><br><span style='font-weight:normal;'> (0)</span></html>");
 		persistentPathsLabel.setToolTipText("<html>The paths that are kept permanently</html>");
-		persistentPathsTable = createTable();
+		persistentPathsTable = this.createTable();
 		JScrollPane persistentPathsScrollPane = new JScrollPane(persistentPathsTable);
 
 		Action keepAct = new AbstractAction() {
@@ -87,7 +84,11 @@ public class FilterEdgePanel extends JPanel {
 						table.getValueAt(realModelRow, 2), table.getValueAt(realModelRow, 3), "Remove" };
 				hideIsolateActivity.setSelected(false);
 				((DefaultTableModel) persistentPathsTable.getModel()).addRow(data);
+				updateLabel(persistentPathsLabel, "Persistent paths",
+						((DefaultTableModel) persistentPathsTable.getModel()).getRowCount());
 				((DefaultTableModel) table.getModel()).removeRow(modelRow);
+				updateLabel(removingPathsLabel, "Removing paths",
+						((DefaultTableModel) removingPathsTable.getModel()).getRowCount());
 
 			}
 		};
@@ -100,7 +101,11 @@ public class FilterEdgePanel extends JPanel {
 						table.getValueAt(realModelRow, 2), table.getValueAt(realModelRow, 3), "Keep" };
 				hideIsolateActivity.setSelected(false);
 				((DefaultTableModel) removingPathsTable.getModel()).addRow(data);
+				updateLabel(removingPathsLabel, "Removing paths",
+						((DefaultTableModel) removingPathsTable.getModel()).getRowCount());
 				((DefaultTableModel) table.getModel()).removeRow(modelRow);
+				updateLabel(persistentPathsLabel, "Persistent paths",
+						((DefaultTableModel) persistentPathsTable.getModel()).getRowCount());
 
 			}
 		};
@@ -112,17 +117,6 @@ public class FilterEdgePanel extends JPanel {
 
 		add(tablePanel, "1,0");
 
-	}
-
-	private JPanel createCheckboxPanel() {
-		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
-
-		hideIsolateActivity = new JCheckBox("Hide isolate activities");
-
-		panel.add(hideIsolateActivity);
-
-		return panel;
 	}
 
 	public void resetFilter() {
@@ -158,7 +152,99 @@ public class FilterEdgePanel extends JPanel {
 		return false; // Value not found in the specified column
 	}
 
+	private JPanel createLeftPanel() {
+		JPanel sliderPanel = new JPanel();
+		sliderPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		edgeSlider = new RangeSliderPanel(400);
+		edgeSlider.getRangeSliderLabel1().setText("Lower frequency threshold: ");
+		edgeSlider.getRangeSliderLabel1()
+				.setToolTipText("<html>This is the <b>minimum</b> frequency an edge can have, <br>"
+						+ "expressed as a percentage of the maximum frequency</html>");
+		edgeSlider.getRangeSliderLabel2().setText("Upper frequency threshold: ");
+		edgeSlider.getRangeSliderLabel2()
+				.setToolTipText("<html>This is the <b>maximum</b> frequency an edge can have, <br>"
+						+ "expressed as a percentage of the maximum frequency</html>");
+
+		JPanel checkboxPanel = this.createCheckboxPanel();
+		JPanel legendLabel = this.createLegend();
+		JPanel affectedCasePanel = this.createAffectedCaseTablePanel();
+		saveFilterEdgeConfigurationButton = new JButton("Save edge configuration");
+
+		sliderPanel.add(edgeSlider);
+		sliderPanel.add(checkboxPanel);
+		sliderPanel.add(legendLabel);
+		sliderPanel.add(saveFilterEdgeConfigurationButton);
+		sliderPanel.add(affectedCasePanel);
+		return sliderPanel;
+	}
+
+	private JPanel createTablePanel(JLabel label, JScrollPane scrollPane) {
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.add(label, BorderLayout.NORTH);
+		panel.add(scrollPane, BorderLayout.CENTER);
+		return panel;
+	}
+
+	private JPanel createAffectedCaseTablePanel() {
+		JPanel mainPanel = new JPanel();
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+		JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
+		separator.setBackground(Color.BLACK);
+		separator.setForeground(Color.BLACK);
+		separator.setPreferredSize(new Dimension(separator.getPreferredSize().width, 5)); // Adjust thickness
+		// 1st Row
+		JPanel firstRowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		affectedCaseLabel = new JLabel("Cases affected by removing paths:");
+		JButton detailsButton = new JButton("See case details");
+
+		firstRowPanel.add(affectedCaseLabel);
+		firstRowPanel.add(detailsButton);
+
+		// 2nd Row - JTable with default row sort
+		String[] columnNames = { "Case", "Path" };
+		Object[][] data = {};
+
+		DefaultTableModel tableModel = new DefaultTableModel(data, columnNames) {
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+		affectedCaseTable = new JTable(tableModel);
+		TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+		affectedCaseTable.setRowSorter(sorter);
+
+		JScrollPane scrollPane = new JScrollPane(affectedCaseTable);
+
+		// Add components to the main panel
+		mainPanel.add(separator);
+		mainPanel.add(firstRowPanel);
+		mainPanel.add(scrollPane);
+
+		return mainPanel;
+	}
+
+	private void updateLabel(JLabel label, String title, int caseNum) {
+		// add number of cases in label all cases
+		String newLabel = "<html><b>" + title + ": </b><br><span style='font-weight:normal;'>" + "("
+				+ Integer.toString(caseNum) + ")" + "</span></html>";
+		label.setText(newLabel);
+	}
+
+	private JPanel createCheckboxPanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+		hideIsolateActivity = new JCheckBox("Hide isolate activities");
+
+		panel.add(hideIsolateActivity);
+
+		return panel;
+	}
+
 	public void updateRemovingTable(List<Object[]> data) {
+		// update label
+		this.updateLabel(this.removingPathsLabel, "Removing paths", data.size());
+		// update table
 		DefaultTableModel model = (DefaultTableModel) this.removingPathsTable.getModel();
 		model.setRowCount(0);
 		for (int i = 0; i < data.size(); i++) {
@@ -166,11 +252,25 @@ public class FilterEdgePanel extends JPanel {
 		}
 	}
 
-	public void updatePersistentTable(List<String[]> data) {
+	public void updatePersistentTable(List<Object[]> data) {
+		// update label
+		this.updateLabel(this.persistentPathsLabel, "Persistent paths", data.size());
+		// update table
 		DefaultTableModel model = (DefaultTableModel) this.persistentPathsTable.getModel();
 		model.setRowCount(0);
 		for (int i = 0; i < data.size(); i++) {
 			model.addRow(new Object[] { data.get(i)[0], data.get(i)[1], data.get(i)[2], data.get(i)[3], "Remove" });
+		}
+	}
+
+	public void updateAffectedCaseTable(List<Object[]> data) {
+		// update label
+		this.updateLabel(this.affectedCaseLabel, "Cases affected by removing paths", data.size());
+		// update table
+		DefaultTableModel model = (DefaultTableModel) this.affectedCaseTable.getModel();
+		model.setRowCount(0);
+		for (int i = 0; i < data.size(); i++) {
+			model.addRow(data.get(i));
 		}
 	}
 
@@ -268,13 +368,6 @@ public class FilterEdgePanel extends JPanel {
 		return panel;
 	}
 
-	private JPanel createTablePanel(JLabel label, JScrollPane scrollPane) {
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(label, BorderLayout.NORTH);
-		panel.add(scrollPane, BorderLayout.CENTER);
-		return panel;
-	}
-
 	public RangeSliderPanel getEdgeSlider() {
 		return edgeSlider;
 	}
@@ -311,4 +404,19 @@ public class FilterEdgePanel extends JPanel {
 		this.hideIsolateActivity = hideIsolateActivity;
 	}
 
+	public JTable getAffectedCaseTable() {
+		return affectedCaseTable;
+	}
+
+	public void setAffectedCaseTable(JTable affectedCaseTable) {
+		this.affectedCaseTable = affectedCaseTable;
+	}
+
+	public JButton getSaveFilterEdgeConfigurationButton() {
+		return saveFilterEdgeConfigurationButton;
+	}
+
+	public void setSaveFilterEdgeConfigurationButton(JButton saveFilterEdgeConfigurationButton) {
+		this.saveFilterEdgeConfigurationButton = saveFilterEdgeConfigurationButton;
+	}
 }

@@ -6,6 +6,7 @@ import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConfiguration;
+import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenController;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.SelectedObject;
@@ -67,6 +68,8 @@ public class GraphObjectClickControl extends ControlAdapter {
 					chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 					if (isHighLevel) {
 						this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
+						GoalDrivenController.currentLowLevelEdge = selectedEdgeObject;
+						GoalDrivenController.loadConfigForFilterEdges(selectedEdgeObject);
 					}
 				}
 
