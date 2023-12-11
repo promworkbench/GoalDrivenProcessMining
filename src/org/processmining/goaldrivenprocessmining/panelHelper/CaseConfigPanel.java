@@ -82,7 +82,7 @@ public class CaseConfigPanel extends JPanel {
 		titleLable.setFont(GoalDrivenConstants.BOLD_M_FONT);
 		add(titleLable);
 		// Filter panel if there is filter
-		filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		filterPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		add(filterPanel);
 
 		// frequency slider
@@ -138,7 +138,8 @@ public class CaseConfigPanel extends JPanel {
 		this.displayIndex = displayIndex1;
 		// update filter panel
 		this.filterPanel.removeAll();
-		JLabel filterLabel = new JLabel("Contain path " + edgeObject.getNode1() + " \u2192 " + edgeObject.getNode2());
+		JLabel filterLabel = new JLabel("Contain path: " + edgeObject.getNode1() + " \u2192 " + edgeObject.getNode2());
+		filterLabel.setFont(GoalDrivenConstants.PLAIN_M_FONT);
 		this.filterPanel.add(filterLabel);
 		JButton clearButton = new JButton("Clear filtering");
 		this.filterPanel.add(clearButton);
@@ -167,8 +168,7 @@ public class CaseConfigPanel extends JPanel {
 		this.chooseCaseLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		this.allCaseLabel = new JLabel("Cases:");
 		JButton assignButton = new JButton("Assign Value");
-		showGoodButton = new JButton("Show good cases");
-		showBadButton = new JButton("Show bad cases");
+		showGoodButton = new JButton("Show good cases"); showBadButton = new JButton("Show bad cases");
 		assignButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {

@@ -167,14 +167,14 @@ public class FilterEdgePanel extends JPanel {
 
 		JPanel checkboxPanel = this.createCheckboxPanel();
 		JPanel legendLabel = this.createLegend();
-		JPanel affectedCasePanel = this.createAffectedCaseTablePanel();
+//		JPanel affectedCasePanel = this.createAffectedCaseTablePanel();
 		saveFilterEdgeConfigurationButton = new JButton("Save edge configuration");
 
 		sliderPanel.add(edgeSlider);
 		sliderPanel.add(checkboxPanel);
 		sliderPanel.add(legendLabel);
 		sliderPanel.add(saveFilterEdgeConfigurationButton);
-		sliderPanel.add(affectedCasePanel);
+//		sliderPanel.add(affectedCasePanel);
 		return sliderPanel;
 	}
 

@@ -68,7 +68,7 @@ public class GraphObjectClickControl extends ControlAdapter {
 					chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 					if (isHighLevel) {
 						this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
-						GoalDrivenController.currentLowLevelEdge = selectedEdgeObject;
+						GoalDrivenController.currentSelectedHighLevelEdge = selectedEdgeObject;
 						GoalDrivenController.loadConfigForFilterEdges(selectedEdgeObject);
 					}
 				}

@@ -36,9 +36,9 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.CONFIG_Update;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl01GatherAttributes;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighLevelLog;
+import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_MakeLowLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
 import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
@@ -84,7 +84,7 @@ public class GoalDrivenController {
 
 	// filter edge
 	private static List<FilterEdgeConfig> filterEdgeConfigs;
-	public static EdgeObject currentLowLevelEdge = null;
+	public static EdgeObject currentSelectedHighLevelEdge = null;
 
 	public GoalDrivenController(final PluginContext context, final GoalDrivenConfiguration configuration,
 			final XLog log, final ProMCanceller canceller) {
@@ -820,7 +820,7 @@ public class GoalDrivenController {
 		panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel().getSaveFilterEdgeConfigurationButton()
 				.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						EdgeObject edgeObject = GoalDrivenController.currentLowLevelEdge;
+						EdgeObject edgeObject = GoalDrivenController.currentSelectedHighLevelEdge;
 						if (edgeObject != null) {
 							// get the threshold
 							int lower = panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
@@ -1433,9 +1433,9 @@ public class GoalDrivenController {
 				if (selectedObject.getSelectedAct() != null) {
 					GoalDrivenDFGUtils.highlightSelectedAct(lowLevelDFG, selectedObject.getSelectedAct());
 				} else {
-					//					List<EdgeObject> listEdgeObjects = new ArrayList<>();
-					//					listEdgeObjects.add(selectedObject.getSelectedEdgeObject());
-					//					GoalDrivenDFGUtils.highlightSelectedEdge(lowLevelDFG, listEdgeObjects, -1);
+					List<EdgeObject> listEdgeObjects = new ArrayList<>();
+					listEdgeObjects.add(selectedObject.getSelectedEdgeObject());
+					GoalDrivenDFGUtils.highlightSelectedEdge(lowLevelDFG, listEdgeObjects, -1);
 				}
 			}
 
@@ -2241,7 +2241,7 @@ public class GoalDrivenController {
 								.containsKey(edgeObject)) {
 							edgeHashTable = HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable;
 						} else {
-							edgeHashTable = Cl01GatherAttributes.originalEdgeHashTable;
+							edgeHashTable = LOW_MakeLowLevelLog.currentLowLevelEdgeHashTable;
 						}
 						if (edgeHashTable.getEdgePositions(edgeObject) != null) {
 							displayIndex = edgeHashTable.getEdgePositions(edgeObject).keySet();

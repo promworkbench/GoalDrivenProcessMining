@@ -864,7 +864,11 @@ public class GoalDrivenDFGUtils {
 
 	public static void highlightItem(VisualItem item, int color) {
 		item.setFillColor(color);
-		item.setStrokeColor(color);
+		if (item.canGetInt(GraphConstants.NODE_STROKE_COLOR_FIELD)) {
+			item.setStrokeColor(item.getInt(GraphConstants.NODE_STROKE_COLOR_FIELD));
+		} else {
+			item.setStrokeColor(color);
+		}
 		item.getVisualization().repaint();
 	}
 

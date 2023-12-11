@@ -20,6 +20,7 @@ import org.jgrapht.graph.DefaultEdge;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.CONFIG_Update;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl01GatherAttributes;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighLevelLog;
+import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_MakeLowLevelLog;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.ThroughputTimeObject;
@@ -77,7 +78,7 @@ public class StatUtils {
 		EdgeHashTable edgeHashTable;
 		// check if act in high or low
 		if (Arrays.asList(CONFIG_Update.currentConfig.getHighActs()).contains(act)) {
-			mapEdgeThroughputTime = HIGH_MakeHighLevelLog.currentMapEdgeThroughputTime;
+			mapEdgeThroughputTime = HIGH_MakeHighLevelLog.currentHighMapEdgeThroughputTime;
 			edgeHashTable = HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable;
 		} else {
 			mapEdgeThroughputTime = Cl01GatherAttributes.originalMapEdgeThroughputTime;
@@ -121,8 +122,11 @@ public class StatUtils {
 
 		if (HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable.getEdgeTable().containsKey(edgeObject)) {
 			edgeHashTable = HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable;
-		} else if (Cl01GatherAttributes.originalEdgeHashTable.getEdgeTable().containsKey(edgeObject)) {
-			edgeHashTable = Cl01GatherAttributes.originalEdgeHashTable;
+
+		}
+		// path is in low level
+		else if (LOW_MakeLowLevelLog.currentLowLevelEdgeHashTable.getEdgeTable().containsKey(edgeObject)) {
+			edgeHashTable = LOW_MakeLowLevelLog.currentLowLevelEdgeHashTable;
 		}
 		if (edgeHashTable != null) {
 			Map<Integer, List<Integer[]>> allPos = edgeHashTable.getEdgePositions(edgeObject);
@@ -142,8 +146,8 @@ public class StatUtils {
 	/* Calculate waiting and leading acts */
 	public static Map<String, String> getThroughputStatForPath(EdgeObject edgeObject) {
 		Map<EdgeObject, ThroughputTimeObject> mapEdgeThroughputTime = null;
-		if (HIGH_MakeHighLevelLog.currentMapEdgeThroughputTime.containsKey(edgeObject)) {
-			mapEdgeThroughputTime = HIGH_MakeHighLevelLog.currentMapEdgeThroughputTime;
+		if (HIGH_MakeHighLevelLog.currentHighMapEdgeThroughputTime.containsKey(edgeObject)) {
+			mapEdgeThroughputTime = HIGH_MakeHighLevelLog.currentHighMapEdgeThroughputTime;
 		} else if (Cl01GatherAttributes.originalMapEdgeThroughputTime.containsKey(edgeObject)) {
 			mapEdgeThroughputTime = Cl01GatherAttributes.originalMapEdgeThroughputTime;
 		}

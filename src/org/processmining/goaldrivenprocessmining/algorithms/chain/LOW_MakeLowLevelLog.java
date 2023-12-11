@@ -3,17 +3,23 @@ package org.processmining.goaldrivenprocessmining.algorithms.chain;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.processmining.goaldrivenprocessmining.algorithms.LogSkeletonUtils;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
+import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
+import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
+import org.processmining.goaldrivenprocessmining.objectHelper.ThroughputTimeObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainLinkComputationAbstract;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMCanceller;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObject;
 import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> {
+	public static EdgeHashTable currentLowLevelEdgeHashTable;
+	public static Map<EdgeObject, ThroughputTimeObject> currentLowMapEdgeThroughputTime;
 
 	@Override
 	public String getName() {
@@ -78,7 +84,9 @@ public class LOW_MakeLowLevelLog<C> extends DataChainLinkComputationAbstract<C> 
 						inputs.get(GoalDrivenObject.full_log_skeleton), s, t);
 			}
 		}
-
+		
+		currentLowLevelEdgeHashTable = newGdpmLog.getEdgeHashTable();
+		currentLowMapEdgeThroughputTime = newGdpmLog.getEdgeThroughputTime();
 
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.low_level_log_skeleton, newGdpmLog);

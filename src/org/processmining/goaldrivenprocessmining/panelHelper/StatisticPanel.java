@@ -42,7 +42,7 @@ public class StatisticPanel extends JPanel {
 
 		statisticPathPanel = new StatisticPathPanel();
 		statisticActivityPanel = new StatisticActivityPanel();
-		
+
 		add(contentPanel, BorderLayout.CENTER);
 	}
 
@@ -55,7 +55,7 @@ public class StatisticPanel extends JPanel {
 		JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JLabel label = new JLabel();
 		label.setForeground(Color.WHITE);
-		label.setFont(GoalDrivenConstants.BOLD_L_FONT);
+		label.setFont(GoalDrivenConstants.BOLD_M_FONT);
 		labelPanel.setBackground(GoalDrivenConstants.BACKGROUND_COLOR);
 		labelPanel.add(label);
 		labelPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, label.getPreferredSize().height));
@@ -81,11 +81,14 @@ public class StatisticPanel extends JPanel {
 		JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JLabel label = new JLabel();
 		label.setForeground(Color.WHITE);
-		label.setFont(GoalDrivenConstants.BOLD_L_FONT);
+		label.setFont(GoalDrivenConstants.BOLD_M_FONT);
 		labelPanel.setBackground(GoalDrivenConstants.BACKGROUND_COLOR);
 		labelPanel.add(label);
 		labelPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, label.getPreferredSize().height));
-		label.setText("Path: " + edgeObject.getNode1() + " \u2192 " + edgeObject.getNode2());
+		String newLabel = "<html><span style='font-weight:normal;'><b> Path: " + edgeObject.getNode1() + "<br> \u2192 "
+				+ edgeObject.getNode2() + "</b></span></html>";
+		label.setText(newLabel);
+		this.contentPanel.removeAll();
 		this.contentPanel.add(labelPanel, BorderLayout.NORTH);
 
 		// Row 2: stat panel

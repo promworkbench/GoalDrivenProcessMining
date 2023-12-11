@@ -270,6 +270,9 @@ public class AllActivityConfigPanel extends JPanel {
 	private void filterAct(String query) {
 		RowFilter<Object, Object> categoryFilter = RowFilter.regexFilter("(?i)" + query, 0);
 		this.tr.setRowFilter(categoryFilter);
+		// update case number label
+		int visibleRowCount = this.tr.getViewRowCount();
+		this.updateAllActLabel(visibleRowCount);
 	}
 
 	private void filterFreq(int lower, int upper) {
@@ -280,13 +283,21 @@ public class AllActivityConfigPanel extends JPanel {
 			}
 		};
 		this.tr.setRowFilter(rangeFilter);
+		// update case number label
+		int visibleRowCount = this.tr.getViewRowCount();
+		this.updateAllActLabel(visibleRowCount);
+	}
+
+	private void updateAllActLabel(int caseNum) {
+		// add number of cases in label all cases
+		String newLabel = "<html><b>Activities: </b><br><span style='font-weight:normal;'>" + "("
+				+ Integer.toString(caseNum) + ")" + "</span></html>";
+		this.allActLabel.setText(newLabel);
 	}
 
 	public void updateDefaultConfigTable(Map<String, String> mapActToHierarchy, Map<String, Integer> mapActFreq) {
 		// update num activities
-		String newLabel = "<html><b>Activities: </b><br><span style='font-weight:normal;'>" + "("
-				+ Integer.toString(mapActToHierarchy.size()) + ")" + "</span></html>";
-		this.allActLabel.setText(newLabel);
+		this.updateAllActLabel(mapActToHierarchy.size());
 
 		// update default config table
 		this.model.setRowCount(0);

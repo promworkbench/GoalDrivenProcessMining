@@ -45,4 +45,8 @@ public class GoalDrivenConstants {
 	public static final Font BOLD_XL_FONT = new Font("Dialog", Font.BOLD, 20);
 	public static final Font BOLD_L_FONT = new Font("Dialog", Font.BOLD, 18);
 	public static final Font BOLD_M_FONT = new Font("Dialog", Font.BOLD, 16);
+	
+	public static final Font PLAIN_XL_FONT = new Font("Dialog", Font.PLAIN, 20);
+	public static final Font PLAIN_L_FONT = new Font("Dialog", Font.PLAIN, 18);
+	public static final Font PLAIN_M_FONT = new Font("Dialog", Font.PLAIN, 16);
 }

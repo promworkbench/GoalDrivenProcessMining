@@ -17,7 +17,7 @@ import org.processmining.plugins.inductiveVisualMiner.chain.IvMObjectValues;
 
 public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C> {
 	public static EdgeHashTable currentHighLevelEdgeHashTable;
-	public static Map<EdgeObject, ThroughputTimeObject> currentMapEdgeThroughputTime;
+	public static Map<EdgeObject, ThroughputTimeObject> currentHighMapEdgeThroughputTime;
 
 	public String getStatusBusyMessage() {
 		// TODO Auto-generated method stub
@@ -57,7 +57,7 @@ public class HIGH_MakeHighLevelLog<C> extends DataChainLinkComputationAbstract<C
 				Cl01GatherAttributes.originalEdgeHashTable);
 		CONFIG_Update.currentConfig = updatedConfig;
 		HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable = gdpmLog.getEdgeHashTable();
-		HIGH_MakeHighLevelLog.currentMapEdgeThroughputTime = gdpmLog.getEdgeThroughputTime();
+		HIGH_MakeHighLevelLog.currentHighMapEdgeThroughputTime = gdpmLog.getEdgeThroughputTime();
 		
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.high_level_log_skeleton, gdpmLog).s(GoalDrivenObject.config, updatedConfig);
