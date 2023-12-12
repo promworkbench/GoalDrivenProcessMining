@@ -20,10 +20,10 @@ public class ControlBar extends JPanel {
 	private final JButton filterButton;
 	private final JButton allActivityButton;
 	private final JButton caseButton;
-	private final JButton groupButton;
+//	private final JButton groupButton;
 	private final JPanel expandPanel;
 	private final JButton expandButton;
-	private final JButton legendButton;
+	private final JButton displaySettingButton;
 
 	public ControlBar() {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -38,23 +38,23 @@ public class ControlBar extends JPanel {
 		{
 			add(configPanel, "0,0");
 			configPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-			filterButton = this.drawButton("Filter edges");
-			allActivityButton = this.drawButton("Activities");
-			caseButton = this.drawButton("Cases");
-			groupButton = this.drawButton("Groups");
-			legendButton = this.drawButton("Legend");
+			filterButton = this.drawButton("Filter paths");
+			allActivityButton = this.drawButton("Activity configuration");
+			caseButton = this.drawButton("Case configuration");
+//			groupButton = this.drawButton("Groups");
+			displaySettingButton = this.drawButton("Display settings");
 			configPanel.add(filterButton);
 			configPanel.add(allActivityButton);
 			configPanel.add(caseButton);
-			configPanel.add(groupButton);
-			configPanel.add(legendButton);
+//			configPanel.add(groupButton);
+			configPanel.add(displaySettingButton);
 
 		}
 		expandPanel = new JPanel();
 		expandPanel.setBackground(GoalDrivenConstants.CONTROL_BAR_BACKGROUND_COLOR);
 		{
 			add(expandPanel, "1, 0");
-			expandButton = this.drawButton("Expand stat window");
+			expandButton = this.drawButton("Expand details window");
 			expandPanel.add(expandButton);
 		}
 	}
@@ -88,9 +88,9 @@ public class ControlBar extends JPanel {
 		return filterButton;
 	}
 
-	public JButton getGroupButton() {
-		return groupButton;
-	}
+//	public JButton getGroupButton() {
+//		return groupButton;
+//	}
 
 	public JPanel getExpandPanel() {
 		return expandPanel;
@@ -104,8 +104,8 @@ public class ControlBar extends JPanel {
 		return allActivityButton;
 	}
 
-	public JButton getLegendButton() {
-		return legendButton;
+	public JButton getDisplaySettingButton() {
+		return displaySettingButton;
 	}
 
 	public JButton getCaseButton() {

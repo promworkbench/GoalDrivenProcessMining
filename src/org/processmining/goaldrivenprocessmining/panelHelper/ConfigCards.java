@@ -14,7 +14,7 @@ public class ConfigCards extends JPanel {
 	private final GroupConfigPanel groupConfigPanel;
 	private final AllActivityConfigPanel allActivityConfigPanel;
 	private final CaseConfigPanel caseConfigPanel;
-	private final LegendPanel legendPanel;
+	private final DisplaySettingPanel legendPanel;
 	private final CardLayout layoutCard;
 	private final double sWidth;
 
@@ -42,7 +42,7 @@ public class ConfigCards extends JPanel {
 		groupConfigPanel = new GroupConfigPanel();
 		add(groupConfigPanel, "5");
 		// legend panel
-		legendPanel = new LegendPanel();
+		legendPanel = new DisplaySettingPanel();
 		add(legendPanel, "6");
 		// all act config panel
 		allActivityConfigPanel = new AllActivityConfigPanel();
@@ -78,7 +78,7 @@ public class ConfigCards extends JPanel {
 		return groupConfigPanel;
 	}
 
-	public LegendPanel getLegendPanel() {
+	public DisplaySettingPanel getLegendPanel() {
 		return legendPanel;
 	}
 

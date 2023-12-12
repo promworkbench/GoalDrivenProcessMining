@@ -1966,14 +1966,14 @@ public class GoalDrivenController {
 		});
 
 		/*--------Group config panel---------*/
-		// group button
-		panel.getControlBar().getGroupButton().addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setVisible(true);
-				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "5");
-			}
-		});
+//		// group button
+//		panel.getControlBar().getGroupButton().addActionListener(new ActionListener() {
+//
+//			public void actionPerformed(ActionEvent e) {
+//				panel.getConfigCards().setVisible(true);
+//				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "5");
+//			}
+//		});
 		// group config done button
 		panel.getConfigCards().getGroupConfigPanel().getDoneButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -2039,16 +2039,16 @@ public class GoalDrivenController {
 				});
 
 		// legend button
-		panel.getControlBar().getLegendButton().addActionListener(new ActionListener() {
+		panel.getControlBar().getDisplaySettingButton().addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setBounds(0, 0, (int) (0.37 * panel.getConfigCards().getsWidth()), 200);
+				panel.getConfigCards().setBounds(0, 0, (int) (0.2 * panel.getConfigCards().getsWidth()), 200);
 				panel.getConfigCards().setVisible(true);
 				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "6");
 			}
 		});
 		// legend done button
-		panel.getConfigCards().getLegendPanel().getLegendDoneButton().addActionListener(new ActionListener() {
+		panel.getConfigCards().getLegendPanel().getDisplaySettingDoneButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				panel.getConfigCards().setVisible(false);
 
@@ -2061,7 +2061,7 @@ public class GoalDrivenController {
 			}
 		});
 		// legend cancel button
-		panel.getConfigCards().getLegendPanel().getLegendCancelButton().addActionListener(new ActionListener() {
+		panel.getConfigCards().getLegendPanel().getDisplaySettingCancelButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				panel.getConfigCards().setVisible(false);
 			}

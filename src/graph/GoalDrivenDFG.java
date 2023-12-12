@@ -275,7 +275,7 @@ public class GoalDrivenDFG extends Display {
 	}
 
 	private void setDefaultLayout() {
-		TreeLayout treeLayout = new NodeLinkTreeLayout("graph", Constants.ORIENT_TOP_BOTTOM, 400, 380, 400);
+		TreeLayout treeLayout = new NodeLinkTreeLayout("graph", Constants.ORIENT_TOP_BOTTOM, 400, 500, 400);
 		m_vis.putAction(GraphConstants.LAYOUT_ACTION, treeLayout);
 		treeLayout.setLayoutAnchor(new Point2D.Double(500, 100));
 		m_vis.run(GraphConstants.LAYOUT_ACTION);

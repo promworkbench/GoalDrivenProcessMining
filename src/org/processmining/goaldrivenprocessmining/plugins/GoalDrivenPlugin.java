@@ -35,7 +35,7 @@ public class GoalDrivenPlugin {
 		// reset global variables
 		CONFIG_Update.currentConfig = null;
 		GoalDrivenDFGUtils.groupStates = new ArrayList<>();
-		Cl01GatherAttributes.originalLog = new ArrayList<>() ;
+		Cl01GatherAttributes.originalLog = new ArrayList<>();
 		Cl01GatherAttributes.originalEdgeHashTable = new EdgeHashTable();
 		Cl01GatherAttributes.originalMapEdgeThroughputTime = new HashMap<>();
 		//initialise configuration and controller
@@ -46,10 +46,10 @@ public class GoalDrivenPlugin {
 		return controller.getPanel();
 	}
 
-	@Plugin(name = "111AAA", returnLabels = { "Goal-driven User-defined Process Mining" }, returnTypes = {
-			GoalDrivenLauncher.class }, parameterLabels = { "Event log" }, userAccessible = true, categories = {
-					PluginCategory.Discovery,
-					PluginCategory.Analytics, }, help = "Discover a directly follows model interactively. (DFvM)")
+	@Plugin(name = "ProDUG: User-guided interactive process discovery tool", returnLabels = {
+			"Goal-driven User-defined Process Mining" }, returnTypes = { GoalDrivenLauncher.class }, parameterLabels = {
+					"Event log" }, userAccessible = true, categories = { PluginCategory.Discovery,
+							PluginCategory.Analytics, }, help = "Discover a directly follows model interactively. (DFvM)")
 
 	@UITopiaVariant(affiliation = "RWTH Aachen", author = "Hieu Le", email = "hieu.le@rwth-aachen.de")
 	public GoalDrivenLauncher mineGuiProcessTree(PluginContext context, XLog xLog) {

@@ -167,7 +167,7 @@ public class CaseConfigPanel extends JPanel {
 
 		this.chooseCaseLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		this.allCaseLabel = new JLabel("Cases:");
-		JButton assignButton = new JButton("Assign Value");
+		JButton assignButton = new JButton("Assign class");
 		showGoodButton = new JButton("Show good cases"); showBadButton = new JButton("Show bad cases");
 		assignButton.addActionListener(new ActionListener() {
 			@Override
@@ -224,7 +224,7 @@ public class CaseConfigPanel extends JPanel {
 		panel.add(classCaseComboBox);
 
 		// Show the dialog
-		int result = JOptionPane.showConfirmDialog(this, panel, "Choose Values to Assign",
+		int result = JOptionPane.showConfirmDialog(this, panel, "Choose class value to assign",
 				JOptionPane.OK_CANCEL_OPTION);
 
 		// Check if the user clicked OK

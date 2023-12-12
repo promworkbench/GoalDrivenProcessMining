@@ -37,7 +37,7 @@ import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
 import prefuse.data.Graph;
 
-public class FilterEdgePanel extends JPanel {
+public class FilterPathPanel extends JPanel {
 	private RangeSliderPanel edgeSlider;
 	private final JTable removingPathsTable;
 	private final JTable persistentPathsTable;
@@ -52,7 +52,7 @@ public class FilterEdgePanel extends JPanel {
 	// checkbox 
 	private JCheckBox hideIsolateActivity;
 
-	public FilterEdgePanel(String label) {
+	public FilterPathPanel() {
 		this.disconnectedBeginActs = new ArrayList<>();
 		this.disconnectedEndActs = new ArrayList<>();
 		double filterPanelSize[][] = { { 0.5, 0.5 }, { TableLayoutConstants.FILL } };
@@ -168,7 +168,7 @@ public class FilterEdgePanel extends JPanel {
 		JPanel checkboxPanel = this.createCheckboxPanel();
 		JPanel legendLabel = this.createLegend();
 //		JPanel affectedCasePanel = this.createAffectedCaseTablePanel();
-		saveFilterEdgeConfigurationButton = new JButton("Save edge configuration");
+		saveFilterEdgeConfigurationButton = new JButton("Save path configuration");
 
 		sliderPanel.add(edgeSlider);
 		sliderPanel.add(checkboxPanel);

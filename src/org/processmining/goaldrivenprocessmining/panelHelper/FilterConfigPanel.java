@@ -11,14 +11,14 @@ import javax.swing.JTabbedPane;
 import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenConstants;
 
 public class FilterConfigPanel extends JPanel {
-	private final FilterEdgePanel highLevelEdgePanel;
-	private final FilterEdgePanel lowLevelEdgePanel;
+	private final FilterPathPanel highLevelEdgePanel;
+	private final FilterPathPanel lowLevelEdgePanel;
 	private final JButton filterCloseButton;
 
 	public FilterConfigPanel(int width) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		// title
-		JLabel titleLabel = new JLabel("Filter edges");
+		JLabel titleLabel = new JLabel("Filter paths");
 		titleLabel.setFont(GoalDrivenConstants.BOLD_M_FONT);
 		add(titleLabel);
 		// Create a JTabbedPane
@@ -26,13 +26,13 @@ public class FilterConfigPanel extends JPanel {
 
 		//high level
 		{
-			highLevelEdgePanel = new FilterEdgePanel("High level edges");
+			highLevelEdgePanel = new FilterPathPanel();
 			highLevelEdgePanel.getSaveFilterEdgeConfigurationButton().setVisible(false);
 		}
 
 		//low level
 		{
-			lowLevelEdgePanel = new FilterEdgePanel("Low level edges");
+			lowLevelEdgePanel = new FilterPathPanel();
 		}
 		JPanel filterEndPanel = new JPanel();
 		filterEndPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -56,11 +56,11 @@ public class FilterConfigPanel extends JPanel {
 		return filterCloseButton;
 	}
 
-	public FilterEdgePanel getHighLevelEdgePanel() {
+	public FilterPathPanel getHighLevelEdgePanel() {
 		return highLevelEdgePanel;
 	}
 
-	public FilterEdgePanel getLowLevelEdgePanel() {
+	public FilterPathPanel getLowLevelEdgePanel() {
 		return lowLevelEdgePanel;
 	}
 
