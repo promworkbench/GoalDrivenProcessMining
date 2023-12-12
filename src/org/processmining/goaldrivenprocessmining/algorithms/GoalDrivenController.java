@@ -481,8 +481,8 @@ public class GoalDrivenController {
 						int col = table.columnAtPoint(evt.getPoint());
 						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
 							String act = table.getValueAt(row, col).toString();
-							GoalDrivenDFGUtils.isInSelectActMode = true;
-							SelectedObject selectedObject = new SelectedObject(act, null);
+							GoalDrivenDFGUtils.isInSelectActModeHigh = true;
+							SelectedObject selectedObject = new SelectedObject(act, null, true);
 							chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						}
 					}
@@ -497,8 +497,8 @@ public class GoalDrivenController {
 						int col = table.columnAtPoint(evt.getPoint());
 						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
 							String act = table.getValueAt(row, col).toString();
-							GoalDrivenDFGUtils.isInSelectActMode = true;
-							SelectedObject selectedObject = new SelectedObject(act, null);
+							GoalDrivenDFGUtils.isInSelectActModeHigh = true;
+							SelectedObject selectedObject = new SelectedObject(act, null, true);
 							chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						}
 					}
@@ -872,8 +872,8 @@ public class GoalDrivenController {
 						int col = table.columnAtPoint(evt.getPoint());
 						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
 							String act = table.getValueAt(row, col).toString();
-							GoalDrivenDFGUtils.isInSelectActMode = true;
-							SelectedObject selectedObject = new SelectedObject(act, null);
+							GoalDrivenDFGUtils.isInSelectActModeLow = true;
+							SelectedObject selectedObject = new SelectedObject(act, null, false);
 							chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						}
 					}
@@ -888,8 +888,8 @@ public class GoalDrivenController {
 						int col = table.columnAtPoint(evt.getPoint());
 						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
 							String act = table.getValueAt(row, col).toString();
-							GoalDrivenDFGUtils.isInSelectActMode = true;
-							SelectedObject selectedObject = new SelectedObject(act, null);
+							GoalDrivenDFGUtils.isInSelectActModeLow = true;
+							SelectedObject selectedObject = new SelectedObject(act, null, false);
 							chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						}
 					}
@@ -1223,8 +1223,9 @@ public class GoalDrivenController {
 				int col = table.columnAtPoint(evt.getPoint());
 				if (row >= 0 && col == 0) {
 					String act = table.getValueAt(row, col).toString();
-					GoalDrivenDFGUtils.isInSelectActMode = true;
-					SelectedObject selectedObject = new SelectedObject(act, null);
+					GoalDrivenDFGUtils.isInSelectActModeHigh = true;
+					GoalDrivenDFGUtils.isInSelectActModeLow = true;
+					SelectedObject selectedObject = new SelectedObject(act, null, true);
 					chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 				}
 			}
@@ -1488,8 +1489,9 @@ public class GoalDrivenController {
 				int row = table.rowAtPoint(evt.getPoint());
 				int col = table.columnAtPoint(evt.getPoint());
 				if (row >= 0 && col == 0) {
-					GoalDrivenDFGUtils.isInSelectActMode = true;
-					SelectedObject selectedObject = new SelectedObject((String) table.getValueAt(row, col), null);
+					GoalDrivenDFGUtils.isInSelectActModeHigh = true;
+					GoalDrivenDFGUtils.isInSelectActModeLow = true;
+					SelectedObject selectedObject = new SelectedObject((String) table.getValueAt(row, col), null, true);
 					chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 				}
 			}
@@ -1966,14 +1968,14 @@ public class GoalDrivenController {
 		});
 
 		/*--------Group config panel---------*/
-//		// group button
-//		panel.getControlBar().getGroupButton().addActionListener(new ActionListener() {
-//
-//			public void actionPerformed(ActionEvent e) {
-//				panel.getConfigCards().setVisible(true);
-//				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "5");
-//			}
-//		});
+		//		// group button
+		//		panel.getControlBar().getGroupButton().addActionListener(new ActionListener() {
+		//
+		//			public void actionPerformed(ActionEvent e) {
+		//				panel.getConfigCards().setVisible(true);
+		//				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "5");
+		//			}
+		//		});
 		// group config done button
 		panel.getConfigCards().getGroupConfigPanel().getDoneButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -2236,17 +2238,20 @@ public class GoalDrivenController {
 						EdgeObject edgeObject = panel.getSidePanel().getStatisticPanel().getEdgeObject();
 						// find the trace index
 						EdgeHashTable edgeHashTable;
+						EdgeObject edgeObjectParent = null;
 						Set<Integer> displayIndex = new HashSet<Integer>();
 						if (HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable.getEdgeTable()
 								.containsKey(edgeObject)) {
 							edgeHashTable = HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable;
 						} else {
 							edgeHashTable = LOW_MakeLowLevelLog.currentLowLevelEdgeHashTable;
+							edgeObjectParent = currentSelectedHighLevelEdge;
 						}
 						if (edgeHashTable.getEdgePositions(edgeObject) != null) {
 							displayIndex = edgeHashTable.getEdgePositions(edgeObject).keySet();
 						}
-						panel.getConfigCards().getCaseConfigPanel().updateFilterOnPath(edgeObject, displayIndex);
+						panel.getConfigCards().getCaseConfigPanel().updateFilterOnPath(edgeObjectParent, edgeObject,
+								displayIndex);
 
 					}
 				});
@@ -2266,8 +2271,10 @@ public class GoalDrivenController {
 				SelectedObject selectedObject = inputs.get(GoalDrivenObject.selected_object);
 				if (selectedObject.getSelectedAct() != null) {
 					String selectedAct = selectedObject.getSelectedAct();
-					Map<String, String> frequencyMap = StatUtils.getFrequencyStatForAct(selectedAct);
-					List<List<Object[]>> throughputData = StatUtils.getThroughputStatForAct(selectedAct);
+					Map<String, String> frequencyMap = StatUtils.getFrequencyStatForAct(selectedAct,
+							selectedObject.getIsHighLevel());
+					List<List<Object[]>> throughputData = StatUtils.getThroughputStatForAct(selectedAct,
+							selectedObject.getIsHighLevel());
 					List<Object[]> waitingActData = throughputData.get(0);
 					List<Object[]> leadingActData = throughputData.get(1);
 					// update stat panel

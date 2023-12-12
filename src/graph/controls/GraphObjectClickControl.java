@@ -39,47 +39,57 @@ public class GraphObjectClickControl extends ControlAdapter {
 	public void itemClicked(VisualItem item, MouseEvent e) {
 		if (!e.isControlDown() && e.getButton() != MouseEvent.BUTTON3) {
 			if (edgeFilter.getBoolean(item)) {
-				// find the source and end of edge
-				EdgeItem edge = (EdgeItem) item;
-				String sourceNode = edge.getSourceItem().getString(GraphConstants.LABEL_FIELD)
-						.equals(GraphConstants.BEGIN_NODE_NAME)
-								? "begin"
-								: edge.getSourceItem().getString(GraphConstants.LABEL_FIELD)
-										.equals(GraphConstants.END_NODE_NAME) ? "end"
-												: edge.getSourceItem().getString(GraphConstants.LABEL_FIELD);
-				String targetNode = edge.getTargetItem().getString(GraphConstants.LABEL_FIELD)
-						.equals(GraphConstants.BEGIN_NODE_NAME)
-								? "begin"
-								: edge.getTargetItem().getString(GraphConstants.LABEL_FIELD)
-										.equals(GraphConstants.END_NODE_NAME) ? "end"
-												: edge.getTargetItem().getString(GraphConstants.LABEL_FIELD);
+				// check if it is displayed
+				if (item.getBoolean(GraphConstants.IS_DISPLAY)) {
+					// find the source and end of edge
+					EdgeItem edge = (EdgeItem) item;
+					String sourceNode = edge.getSourceItem().getString(GraphConstants.LABEL_FIELD)
+							.equals(GraphConstants.BEGIN_NODE_NAME)
+									? "begin"
+									: edge.getSourceItem().getString(GraphConstants.LABEL_FIELD)
+											.equals(GraphConstants.END_NODE_NAME) ? "end"
+													: edge.getSourceItem().getString(GraphConstants.LABEL_FIELD);
+					String targetNode = edge.getTargetItem().getString(GraphConstants.LABEL_FIELD)
+							.equals(GraphConstants.BEGIN_NODE_NAME)
+									? "begin"
+									: edge.getTargetItem().getString(GraphConstants.LABEL_FIELD)
+											.equals(GraphConstants.END_NODE_NAME) ? "end"
+													: edge.getTargetItem().getString(GraphConstants.LABEL_FIELD);
 
-				// only highlight edge when not in selected mode
-				if (!GoalDrivenDFGUtils.isInSelectActMode) {
-					item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
-				}
-
-				HashMap<String, Object> passValues = new HashMap<String, Object>();
-				passValues.put("source", sourceNode);
-				passValues.put("target", targetNode);
-				if (this.chain != null) {
-					EdgeObject selectedEdgeObject = new EdgeObject(sourceNode, targetNode);
-					SelectedObject selectedObject = new SelectedObject(null, selectedEdgeObject);
-					chain.setObject(GoalDrivenObject.selected_object, selectedObject);
+					// only highlight edge when not in selected mode
 					if (isHighLevel) {
-						this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
-						GoalDrivenController.currentSelectedHighLevelEdge = selectedEdgeObject;
-						GoalDrivenController.loadConfigForFilterEdges(selectedEdgeObject);
+						if (!GoalDrivenDFGUtils.isInSelectActModeHigh) {
+							item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
+						}
+					} else {
+						if (!GoalDrivenDFGUtils.isInSelectActModeLow) {
+							item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
+						}
+					}
+
+					HashMap<String, Object> passValues = new HashMap<String, Object>();
+					passValues.put("source", sourceNode);
+					passValues.put("target", targetNode);
+					if (this.chain != null) {
+						EdgeObject selectedEdgeObject = new EdgeObject(sourceNode, targetNode);
+						SelectedObject selectedObject = new SelectedObject(null, selectedEdgeObject, isHighLevel);
+						chain.setObject(GoalDrivenObject.selected_object, selectedObject);
+						if (isHighLevel) {
+							this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
+							GoalDrivenController.currentSelectedHighLevelEdge = selectedEdgeObject;
+							GoalDrivenController.loadConfigForFilterEdges(selectedEdgeObject);
+						}
 					}
 				}
-
 			} else if (nodeFilter.getBoolean(item)) {
 				if (item.getString(GraphConstants.NODE_TYPE_FIELD).equals("ACT_NODE")) {
-					if (this.chain != null) {
-						GoalDrivenDFGUtils.isInSelectActMode = true;
-						SelectedObject selectedObject = new SelectedObject(item.getString(GraphConstants.LABEL_FIELD),
-								null);
-						this.chain.setObject(GoalDrivenObject.selected_object, selectedObject);
+					if (item.getBoolean(GraphConstants.IS_DISPLAY)) {
+						if (this.chain != null) {
+							GoalDrivenDFGUtils.isInSelectActModeHigh = true;
+							SelectedObject selectedObject = new SelectedObject(item.getString(GraphConstants.LABEL_FIELD),
+									null, isHighLevel);
+							this.chain.setObject(GoalDrivenObject.selected_object, selectedObject);
+						}
 					}
 				}
 			}
@@ -88,7 +98,8 @@ public class GraphObjectClickControl extends ControlAdapter {
 	}
 
 	public void itemEntered(VisualItem item, java.awt.event.MouseEvent e) {
-		if (!GoalDrivenDFGUtils.isInSelectActMode) {
+		if ((isHighLevel && !GoalDrivenDFGUtils.isInSelectActModeHigh)
+				|| (!isHighLevel && !GoalDrivenDFGUtils.isInSelectActModeLow)) {
 			if (edgeFilter.getBoolean(item)) {
 				item.setStrokeColor(GraphConstants.HIGHLIGHT_STROKE_COLOR);
 				this.curStroke = item.getStroke();
@@ -106,7 +117,8 @@ public class GraphObjectClickControl extends ControlAdapter {
 	}
 
 	public void itemExited(VisualItem item, java.awt.event.MouseEvent e) {
-		if (!GoalDrivenDFGUtils.isInSelectActMode) {
+		if ((isHighLevel && !GoalDrivenDFGUtils.isInSelectActModeHigh)
+				|| (!isHighLevel && !GoalDrivenDFGUtils.isInSelectActModeLow)) {
 			if (edgeFilter.getBoolean(item)) {
 				item.setStrokeColor(item.getInt(GraphConstants.EDGE_FILL_COLOR_FIELD));
 				item.setFillColor(item.getInt(GraphConstants.EDGE_FILL_COLOR_FIELD));

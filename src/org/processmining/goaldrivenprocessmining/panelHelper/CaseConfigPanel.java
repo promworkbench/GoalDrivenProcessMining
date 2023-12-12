@@ -134,22 +134,38 @@ public class CaseConfigPanel extends JPanel {
 
 	}
 
-	public void updateFilterOnPath(EdgeObject edgeObject, Set<Integer> displayIndex1) {
+	public void updateFilterOnPath(EdgeObject edgeObjectParent, EdgeObject edgeObjectChild,
+			Set<Integer> displayIndex1) {
 		this.displayIndex = displayIndex1;
 		// update filter panel
 		this.filterPanel.removeAll();
-		JLabel filterLabel = new JLabel("Contain path: " + edgeObject.getNode1() + " \u2192 " + edgeObject.getNode2());
-		filterLabel.setFont(GoalDrivenConstants.PLAIN_M_FONT);
+		JLabel filterLabel;
+		if (edgeObjectParent != null) {
+			filterLabel = new JLabel("Contain path: (" + edgeObjectChild.getNode1() + " \u2192 "
+					+ edgeObjectChild.getNode2() + ") inside the path (" + edgeObjectParent.getNode1() + " \u2192 "
+					+ edgeObjectParent.getNode2() + ")");
+			filterLabel.setFont(GoalDrivenConstants.PLAIN_M_FONT);
+		} else {
+			filterLabel = new JLabel(
+					"Contain path: " + edgeObjectChild.getNode1() + " \u2192 " + edgeObjectChild.getNode2());
+			filterLabel.setFont(GoalDrivenConstants.PLAIN_M_FONT);
+		}
+
 		this.filterPanel.add(filterLabel);
 		JButton clearButton = new JButton("Clear filtering");
 		this.filterPanel.add(clearButton);
 		clearButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// reset filter
-				chooseCaseTable.setRowSorter(chooseCaseTableRowSorter);
 				updateAllCaseLabel(chooseCaseModel.getRowCount());
-				displayIndex = new HashSet<>();
+				
 				filterPanel.removeAll();
+				
+				displayIndex = new HashSet<>();
+				for (int i = 0; i < chooseCaseModel.getRowCount(); i++) {
+					displayIndex.add(i);
+				}
+				filterCase(displayIndex);
 				revalidate();
 				repaint();
 			}
@@ -168,7 +184,8 @@ public class CaseConfigPanel extends JPanel {
 		this.chooseCaseLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		this.allCaseLabel = new JLabel("Cases:");
 		JButton assignButton = new JButton("Assign class");
-		showGoodButton = new JButton("Show good cases"); showBadButton = new JButton("Show bad cases");
+		showGoodButton = new JButton("Show good cases");
+		showBadButton = new JButton("Show bad cases");
 		assignButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {

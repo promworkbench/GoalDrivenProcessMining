@@ -29,7 +29,8 @@ import prefuse.visual.VisualItem;
 
 public class GoalDrivenDFGUtils {
 
-	public static Boolean isInSelectActMode = false;
+	public static Boolean isInSelectActModeHigh = false;
+	public static Boolean isInSelectActModeLow = false;
 	public static String selectingAct;
 
 	public static List<GroupState> groupStates = new ArrayList<GroupState>();
@@ -610,7 +611,11 @@ public class GoalDrivenDFGUtils {
 		// reset graph
 		resetColorAndStroke(goalDrivenDFG);
 		// set in select mode
-		isInSelectActMode = true;
+		if (goalDrivenDFG.getIsHighLevel()) {
+			isInSelectActModeHigh = true;
+		} else {
+			isInSelectActModeLow = true;
+		}
 
 		TableIterator edges = edgeTable.iterator();
 		while (edges.hasNext()) {
@@ -708,7 +713,12 @@ public class GoalDrivenDFGUtils {
 			}
 		}
 		// set in select mode
-		isInSelectActMode = true;
+		if (goalDrivenDFG.getIsHighLevel()) {
+			isInSelectActModeHigh = true;
+		} else {
+			isInSelectActModeLow = true;
+		}
+		
 
 		if (isActInHigh && isHighGraph) {
 			// highlight node and its related edges
@@ -887,7 +897,11 @@ public class GoalDrivenDFGUtils {
 		Table nodeTable = goalDrivenDFG.getGraph().getNodeTable();
 		Table edgeTable = goalDrivenDFG.getGraph().getEdgeTable();
 		// set select mode false
-		GoalDrivenDFGUtils.isInSelectActMode = false;
+		if (goalDrivenDFG.getIsHighLevel()) {
+			isInSelectActModeHigh = false;
+		} else {
+			isInSelectActModeLow = false;
+		}
 		// reset label for edges
 		goalDrivenDFG.getEdgeRenderer().setCustomizedFrequencyEdge(new HashMap<>());
 		// reset all nodes

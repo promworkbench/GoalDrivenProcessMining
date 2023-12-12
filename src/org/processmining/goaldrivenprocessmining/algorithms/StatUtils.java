@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.regex.Pattern;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.processmining.goaldrivenprocessmining.algorithms.chain.CONFIG_Update;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl01GatherAttributes;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_MakeLowLevelLog;
@@ -34,14 +32,15 @@ public class StatUtils {
 
 	/*--------------------------------------------------------------------------*/
 	/* Calculate stat for act */
-	public static Map<String, String> getFrequencyStatForAct(String act) {
+	public static Map<String, String> getFrequencyStatForAct(String act, Boolean isHighLevel) {
 		int freq = 0;
-		Set<Integer> affectedCases = new HashSet();
+		Set<Integer> affectedCases = new HashSet<>();
 
-		EdgeHashTable originalEdgeHashTable = Cl01GatherAttributes.originalEdgeHashTable;
-		for (EdgeObject edgeObject : originalEdgeHashTable.getEdgeTable().keySet()) {
+		EdgeHashTable edgeHashTable = isHighLevel ? HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable
+				: LOW_MakeLowLevelLog.currentLowLevelEdgeHashTable;
+		for (EdgeObject edgeObject : edgeHashTable.getEdgeTable().keySet()) {
 			if (edgeObject.getNode1().equals(act) || edgeObject.getNode2().equals(act)) {
-				Map<Integer, List<Integer[]>> allPos = originalEdgeHashTable.getEdgePositions(edgeObject);
+				Map<Integer, List<Integer[]>> allPos = edgeHashTable.getEdgePositions(edgeObject);
 				// case loop -> x2
 				if (edgeObject.getNode1().equals(edgeObject.getNode2())) {
 					for (Map.Entry<Integer, List<Integer[]>> entry : allPos.entrySet()) {
@@ -68,22 +67,19 @@ public class StatUtils {
 	}
 
 	/* Calculate waiting and leading acts */
-	public static List<List<Object[]>> getThroughputStatForAct(String act) {
+	public static List<List<Object[]>> getThroughputStatForAct(String act, Boolean isHighLevel) {
 		List<List<Object[]>> res = new ArrayList<>();
 
 		List<Object[]> waitingActsData = new ArrayList<>();
 		List<Object[]> leadingActsData = new ArrayList<>();
 
-		Map<EdgeObject, ThroughputTimeObject> mapEdgeThroughputTime;
-		EdgeHashTable edgeHashTable;
 		// check if act in high or low
-		if (Arrays.asList(CONFIG_Update.currentConfig.getHighActs()).contains(act)) {
-			mapEdgeThroughputTime = HIGH_MakeHighLevelLog.currentHighMapEdgeThroughputTime;
-			edgeHashTable = HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable;
-		} else {
-			mapEdgeThroughputTime = Cl01GatherAttributes.originalMapEdgeThroughputTime;
-			edgeHashTable = Cl01GatherAttributes.originalEdgeHashTable;
-		}
+		EdgeHashTable edgeHashTable = isHighLevel ? HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable
+				: LOW_MakeLowLevelLog.currentLowLevelEdgeHashTable;
+		Map<EdgeObject, ThroughputTimeObject> mapEdgeThroughputTime = isHighLevel
+				? HIGH_MakeHighLevelLog.currentHighMapEdgeThroughputTime
+				: LOW_MakeLowLevelLog.currentLowMapEdgeThroughputTime;
+
 		// find the affected edge
 		for (EdgeObject edgeObject : mapEdgeThroughputTime.keySet()) {
 			ThroughputTimeObject time = mapEdgeThroughputTime.get(edgeObject);
