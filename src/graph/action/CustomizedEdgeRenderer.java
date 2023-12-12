@@ -105,7 +105,15 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 				}
 			}
 			g.setFont(item.getFont());
-			g.drawString(label, (int) midPoint.getX() + 20, (int) midPoint.getY() - 10);
+
+			double x = midPoint.getX() - 20;
+			double y = midPoint.getY() - 30;
+			while (curve.contains(new Point2D.Double(x, y))) {
+				x += 10;
+				y -= 20;
+			}
+
+			g.drawString(label, (int) x, (int) y);
 			item.getVisualization().repaint();
 		}
 	}
@@ -159,8 +167,8 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 			// create the arrow head shape
 			AffineTransform at;
 			if (item1 == item2) {
-				Point2D fakeStart = new Point2D.Double(end.getX() + 450, end.getY() + 500);
-				Point2D fakeEnd = new Point2D.Double(end.getX(), end.getY() + 20);
+				Point2D fakeStart = new Point2D.Double(end.getX() + 500, end.getY() + 500);
+				Point2D fakeEnd = new Point2D.Double(end.getX(), end.getY() + 35);
 				at = getArrowTrans(fakeStart, fakeEnd, m_curWidth);
 			} else {
 				at = getArrowTrans(start, end, m_curWidth);
@@ -195,12 +203,11 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 				getCurveControlPoints(edge, m_ctrlPoints, n1x, n1y, n2x, n2y);
 				if (item1 == item2) {
 					double radius = 80.0; // Radius of the circular path
-
 					// Create the cubic curve for the circular path
-					m_cubic.setCurve(n1x, n1y - item1.getBounds().getHeight() / 2, n1x + radius, n1y - radius * 2 + 10,
-							n1x + radius + 5, n1y + radius * 2, n1x + 10, n1y + item1.getBounds().getHeight() / 2 + 5);
+					m_cubic.setCurve(n1x, n1y - item1.getBounds().getHeight() / 2 + 5, n1x + radius + 200,
+							n1y - radius * 2 + 20, n1x + radius + 205, n1y + radius * 2 - 10, n1x + 10,
+							n1y + item1.getBounds().getHeight() / 2 + 5);
 
-					//					m_cubic.setCurve(startX, startY, controlX1, controlY1, controlX2, controlY2, endX, endY);
 				} else {
 					m_cubic.setCurve(n1x, n1y, m_ctrlPoints[0].getX(), m_ctrlPoints[0].getY(), m_ctrlPoints[1].getX(),
 							m_ctrlPoints[1].getY(), n2x, n2y);
@@ -260,7 +267,6 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 		m_arrowDoubleHead = updateArrowDoubleHead(width, height);
 	}
 
-
 	public HashMap<EdgeObject, String> getCustomizedFrequencyEdge() {
 		return customizedFrequencyEdge;
 	}
@@ -277,5 +283,4 @@ public class CustomizedEdgeRenderer extends EdgeRenderer {
 		this.mapEdgeLabel = mapEdgeLabel;
 	}
 
-	
 }
