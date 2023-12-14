@@ -32,7 +32,7 @@ public class GraphConstants {
 	//color
 	public static final Color[] CATEGORY_COLOR = { new Color(229, 83, 75), new Color(85, 22, 57), new Color(16, 52, 23),
 			new Color(50, 50, 255) };
-	public static final int BEGIN_END_NODE_COLOR = ColorLib.rgb(3, 218, 197);
+	public static final int BEGIN_END_NODE_COLOR = ColorLib.rgb(51, 255, 187);
 	public static final int TEXT_COLOR = ColorLib.rgb(255, 255, 255);
 	//color node
 	public static final int SELECTED_NODE_FILL_COLOR = ColorLib.rgb(207, 102, 121);

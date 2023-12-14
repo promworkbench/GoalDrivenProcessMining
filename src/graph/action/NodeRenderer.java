@@ -29,7 +29,7 @@ public class NodeRenderer extends LabelRenderer {
 
 	public void render(Graphics2D g, VisualItem item) {
 
-		if (item.getBoolean("begin") || item.getBoolean("end")) {
+		if (item.getBoolean(GraphConstants.BEGIN_FIELD) || item.getBoolean(GraphConstants.END_FIELD)) {
 			Shape shape = getRawShapeNode(item);
 			if (shape != null)
 				drawShape(g, item, shape);
@@ -51,7 +51,7 @@ public class NodeRenderer extends LabelRenderer {
 		double y = item.getY();
 		if (Double.isNaN(y) || Double.isInfinite(y))
 			y = 0;
-		double width = m_baseSize * item.getSize();
+		double width = m_baseSize * item.getSize() + 10;
 
 		// Center the shape around the specified x and y
 		if (width > 1) {

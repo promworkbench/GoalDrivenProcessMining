@@ -1431,12 +1431,14 @@ public class GoalDrivenController {
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				GoalDrivenDFG lowLevelDFG = inputs.get(GoalDrivenObject.low_level_dfg);
 				SelectedObject selectedObject = inputs.get(GoalDrivenObject.selected_object);
-				if (selectedObject.getSelectedAct() != null) {
-					GoalDrivenDFGUtils.highlightSelectedAct(lowLevelDFG, selectedObject.getSelectedAct());
-				} else {
-					List<EdgeObject> listEdgeObjects = new ArrayList<>();
-					listEdgeObjects.add(selectedObject.getSelectedEdgeObject());
-					GoalDrivenDFGUtils.highlightSelectedEdge(lowLevelDFG, listEdgeObjects, -1);
+				if (!selectedObject.getIsHighLevel()) {
+					if (selectedObject.getSelectedAct() != null) {
+						GoalDrivenDFGUtils.highlightSelectedAct(lowLevelDFG, selectedObject.getSelectedAct());
+					} else {
+						List<EdgeObject> listEdgeObjects = new ArrayList<>();
+						listEdgeObjects.add(selectedObject.getSelectedEdgeObject());
+						GoalDrivenDFGUtils.highlightSelectedEdge(lowLevelDFG, listEdgeObjects, -1);
+					}
 				}
 			}
 

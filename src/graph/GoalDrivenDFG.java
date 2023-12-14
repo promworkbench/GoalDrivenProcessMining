@@ -22,6 +22,7 @@ import graph.action.CustomEdgeStrokeColorAction;
 import graph.action.CustomEdgeStrokeWidthAction;
 import graph.action.CustomizedEdgeRenderer;
 import graph.action.NodeRenderer;
+import graph.action.SetEndNodePositionAction;
 import graph.action.SetNodeSizeAction;
 import graph.controls.BackgroundDoubleClickControl;
 import graph.controls.BorderNodeControl;
@@ -129,6 +130,7 @@ public class GoalDrivenDFG extends Display {
 			this.setDefaultLayout();
 			// action
 			this.configDefaultGraph();
+
 		}
 
 	}
@@ -276,9 +278,14 @@ public class GoalDrivenDFG extends Display {
 
 	private void setDefaultLayout() {
 		TreeLayout treeLayout = new NodeLinkTreeLayout("graph", Constants.ORIENT_TOP_BOTTOM, 400, 500, 400);
-		m_vis.putAction(GraphConstants.LAYOUT_ACTION, treeLayout);
 		treeLayout.setLayoutAnchor(new Point2D.Double(500, 100));
+		m_vis.putAction(GraphConstants.LAYOUT_ACTION, treeLayout);
 		m_vis.run(GraphConstants.LAYOUT_ACTION);
+
+		SetEndNodePositionAction setEndNodePositionAction = new SetEndNodePositionAction(
+				m_vis.getVisualItem(GraphConstants.NODE_GROUP, this.graph.getNodeTable().getTuple(endNodeRow)));
+		m_vis.putAction("setEndNodePostion", setEndNodePositionAction);
+		m_vis.alwaysRunAfter(GraphConstants.LAYOUT_ACTION, "setEndNodePostion");
 	}
 
 	public void setDefaultTextColorSizeAndFont() {
