@@ -430,7 +430,13 @@ public class GoalDrivenDFG extends Display {
 
 	public void setDefaultEdgeColor() {
 		this.edgeStrokeColorAction = new ColorAction(GraphConstants.EDGE_GROUP, VisualItem.STROKECOLOR,
-				GraphConstants.EDGE_STROKE_COLOR);
+				GraphConstants.EDGE_STROKE_COLOR) {
+			@Override
+			public int getColor(VisualItem item) {
+				item.setInt(GraphConstants.EDGE_FILL_COLOR_FIELD, GraphConstants.EDGE_STROKE_COLOR);
+				return GraphConstants.EDGE_STROKE_COLOR;
+			}
+		};
 		m_vis.putAction(GraphConstants.EDGE_STROKE_COLOR_ACTION, this.edgeStrokeColorAction);
 		m_vis.run(GraphConstants.EDGE_STROKE_COLOR_ACTION);
 		this.arrowFillColorAction = new ColorAction(GraphConstants.EDGE_GROUP, VisualItem.FILLCOLOR,
