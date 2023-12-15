@@ -478,11 +478,11 @@ public class GoalDrivenController {
 						JTable table = panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
 								.getRemovingPathsTable();
 						int row = table.rowAtPoint(evt.getPoint());
-						int col = table.columnAtPoint(evt.getPoint());
-						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
-							String act = table.getValueAt(row, col).toString();
-							GoalDrivenDFGUtils.isInSelectActModeHigh = true;
-							SelectedObject selectedObject = new SelectedObject(act, null, true);
+						if (row >= 0) {
+							String source = table.getValueAt(row, 1).toString();
+							String target = table.getValueAt(row, 2).toString();
+							EdgeObject edgeObject = new EdgeObject(source, target);
+							SelectedObject selectedObject = new SelectedObject(null, edgeObject, false, false);
 							chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						}
 					}
@@ -494,11 +494,11 @@ public class GoalDrivenController {
 						JTable table = panel.getConfigCards().getFilterConfigPanel().getHighLevelEdgePanel()
 								.getPersistentPathsTable();
 						int row = table.rowAtPoint(evt.getPoint());
-						int col = table.columnAtPoint(evt.getPoint());
-						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
-							String act = table.getValueAt(row, col).toString();
-							GoalDrivenDFGUtils.isInSelectActModeHigh = true;
-							SelectedObject selectedObject = new SelectedObject(act, null, true);
+						if (row >= 0) {
+							String source = table.getValueAt(row, 1).toString();
+							String target = table.getValueAt(row, 2).toString();
+							EdgeObject edgeObject = new EdgeObject(source, target);
+							SelectedObject selectedObject = new SelectedObject(null, edgeObject, true, false);
 							chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						}
 					}
@@ -869,11 +869,11 @@ public class GoalDrivenController {
 						JTable table = panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
 								.getRemovingPathsTable();
 						int row = table.rowAtPoint(evt.getPoint());
-						int col = table.columnAtPoint(evt.getPoint());
-						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
-							String act = table.getValueAt(row, col).toString();
-							GoalDrivenDFGUtils.isInSelectActModeLow = true;
-							SelectedObject selectedObject = new SelectedObject(act, null, false);
+						if (row >= 0) {
+							String source = table.getValueAt(row, 1).toString();
+							String target = table.getValueAt(row, 2).toString();
+							EdgeObject edgeObject = new EdgeObject(source, target);
+							SelectedObject selectedObject = new SelectedObject(null, edgeObject, false, false);
 							chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						}
 					}
@@ -885,11 +885,11 @@ public class GoalDrivenController {
 						JTable table = panel.getConfigCards().getFilterConfigPanel().getLowLevelEdgePanel()
 								.getPersistentPathsTable();
 						int row = table.rowAtPoint(evt.getPoint());
-						int col = table.columnAtPoint(evt.getPoint());
-						if ((row >= 0 && col == 1) || (row >= 0 && col == 2)) {
-							String act = table.getValueAt(row, col).toString();
-							GoalDrivenDFGUtils.isInSelectActModeLow = true;
-							SelectedObject selectedObject = new SelectedObject(act, null, false);
+						if (row >= 0) {
+							String source = table.getValueAt(row, 1).toString();
+							String target = table.getValueAt(row, 2).toString();
+							EdgeObject edgeObject = new EdgeObject(source, target);
+							SelectedObject selectedObject = new SelectedObject(null, edgeObject, false, true);
 							chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						}
 					}
@@ -1225,7 +1225,7 @@ public class GoalDrivenController {
 					String act = table.getValueAt(row, col).toString();
 					GoalDrivenDFGUtils.isInSelectActModeHigh = true;
 					GoalDrivenDFGUtils.isInSelectActModeLow = true;
-					SelectedObject selectedObject = new SelectedObject(act, null, true);
+					SelectedObject selectedObject = new SelectedObject(act, null, true, true);
 					chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 				}
 			}
@@ -1403,14 +1403,15 @@ public class GoalDrivenController {
 				GoalDrivenDFG highLevelDFG = inputs.get(GoalDrivenObject.high_level_dfg);
 				SelectedObject selectedObject = inputs.get(GoalDrivenObject.selected_object);
 
-				if (selectedObject.getSelectedAct() != null) {
-					GoalDrivenDFGUtils.highlightSelectedAct(highLevelDFG, selectedObject.getSelectedAct());
-				} else {
-					List<EdgeObject> listEdgeObjects = new ArrayList<>();
-					listEdgeObjects.add(selectedObject.getSelectedEdgeObject());
-					GoalDrivenDFGUtils.highlightSelectedEdge(highLevelDFG, listEdgeObjects, -1);
+				if (selectedObject.getIsHighLevel()) {
+					if (selectedObject.getSelectedAct() != null) {
+						GoalDrivenDFGUtils.highlightSelectedAct(highLevelDFG, selectedObject.getSelectedAct());
+					} else {
+						List<EdgeObject> listEdgeObjects = new ArrayList<>();
+						listEdgeObjects.add(selectedObject.getSelectedEdgeObject());
+						GoalDrivenDFGUtils.highlightSelectedEdge(highLevelDFG, listEdgeObjects, -1);
+					}
 				}
-
 			}
 
 			public void invalidate(GoalDrivenPanel panel) {
@@ -1431,7 +1432,7 @@ public class GoalDrivenController {
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				GoalDrivenDFG lowLevelDFG = inputs.get(GoalDrivenObject.low_level_dfg);
 				SelectedObject selectedObject = inputs.get(GoalDrivenObject.selected_object);
-				if (!selectedObject.getIsHighLevel()) {
+				if (selectedObject.getIsLowLevel()) {
 					if (selectedObject.getSelectedAct() != null) {
 						GoalDrivenDFGUtils.highlightSelectedAct(lowLevelDFG, selectedObject.getSelectedAct());
 					} else {
@@ -1493,7 +1494,8 @@ public class GoalDrivenController {
 				if (row >= 0 && col == 0) {
 					GoalDrivenDFGUtils.isInSelectActModeHigh = true;
 					GoalDrivenDFGUtils.isInSelectActModeLow = true;
-					SelectedObject selectedObject = new SelectedObject((String) table.getValueAt(row, col), null, true);
+					SelectedObject selectedObject = new SelectedObject((String) table.getValueAt(row, col), null, true,
+							true);
 					chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 				}
 			}

@@ -72,7 +72,7 @@ public class GraphObjectClickControl extends ControlAdapter {
 					passValues.put("target", targetNode);
 					if (this.chain != null) {
 						EdgeObject selectedEdgeObject = new EdgeObject(sourceNode, targetNode);
-						SelectedObject selectedObject = new SelectedObject(null, selectedEdgeObject, isHighLevel);
+						SelectedObject selectedObject = new SelectedObject(null, selectedEdgeObject, isHighLevel, !isHighLevel);
 						chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						if (isHighLevel) {
 							this.chain.setObject(GoalDrivenObject.selected_source_target_node, passValues);
@@ -87,7 +87,7 @@ public class GraphObjectClickControl extends ControlAdapter {
 						if (this.chain != null) {
 							GoalDrivenDFGUtils.isInSelectActModeHigh = true;
 							SelectedObject selectedObject = new SelectedObject(item.getString(GraphConstants.LABEL_FIELD),
-									null, isHighLevel);
+									null, isHighLevel, !isHighLevel);
 							this.chain.setObject(GoalDrivenObject.selected_object, selectedObject);
 						}
 					}
@@ -117,7 +117,8 @@ public class GraphObjectClickControl extends ControlAdapter {
 	}
 
 	public void itemExited(VisualItem item, java.awt.event.MouseEvent e) {
-		if ((isHighLevel && !GoalDrivenDFGUtils.isInSelectActModeHigh)
+		if ((isHighLevel
+				&& !GoalDrivenDFGUtils.isInSelectActModeHigh)
 				|| (!isHighLevel && !GoalDrivenDFGUtils.isInSelectActModeLow)) {
 			if (edgeFilter.getBoolean(item)) {
 				item.setStrokeColor(item.getInt(GraphConstants.EDGE_FILL_COLOR_FIELD));

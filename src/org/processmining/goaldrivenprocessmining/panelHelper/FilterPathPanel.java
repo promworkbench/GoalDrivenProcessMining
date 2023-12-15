@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -67,13 +68,19 @@ public class FilterPathPanel extends JPanel {
 				"<html><b>Removing paths: </b><br><span style='font-weight:normal;'> (0)</span></html>");
 		removingPathsLabel.setToolTipText("<html>The paths removed by the slider</html>");
 		removingPathsTable = this.createTable();
+		removingPathsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		JScrollPane removingPathsScrollPane = new JScrollPane(removingPathsTable);
-
+		removingPathsScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		removingPathsScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		
 		persistentPathsLabel = new JLabel(
 				"<html><b>Persisitent paths: </b><br><span style='font-weight:normal;'> (0)</span></html>");
 		persistentPathsLabel.setToolTipText("<html>The paths that are kept permanently</html>");
 		persistentPathsTable = this.createTable();
+		persistentPathsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		JScrollPane persistentPathsScrollPane = new JScrollPane(persistentPathsTable);
+		persistentPathsScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		persistentPathsScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
 		Action keepAct = new AbstractAction() {
 			public void actionPerformed(ActionEvent e) {
