@@ -1,8 +1,6 @@
 package org.processmining.goaldrivenprocessmining.panelHelper;
 
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -16,20 +14,14 @@ import info.clearthought.layout.TableLayoutConstants;
 
 public class ControlBar extends JPanel {
 	private final JPanel configPanel;
-	//	private final JButton modeButton;
 	private final JButton filterButton;
 	private final JButton allActivityButton;
 	private final JButton caseButton;
-//	private final JButton groupButton;
 	private final JPanel expandPanel;
 	private final JButton expandButton;
-	private final JButton displaySettingButton;
 
 	public ControlBar() {
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		double sWidth = screenSize.getWidth();
-		double controllerBarSize[][] = { { 0.9 * sWidth, 0.1 * sWidth },
-				{ TableLayoutConstants.MINIMUM, TableLayoutConstants.FILL } };
+		double controllerBarSize[][] = { { 0.9, 0.1 }, { TableLayoutConstants.MINIMUM } };
 		setLayout(new TableLayout(controllerBarSize));
 
 		//config panel: filter, activity, case buttons
@@ -41,13 +33,10 @@ public class ControlBar extends JPanel {
 			filterButton = this.drawButton("Filter paths");
 			allActivityButton = this.drawButton("Activity configuration");
 			caseButton = this.drawButton("Case configuration");
-//			groupButton = this.drawButton("Groups");
-			displaySettingButton = this.drawButton("Display settings");
+
 			configPanel.add(filterButton);
 			configPanel.add(allActivityButton);
 			configPanel.add(caseButton);
-//			configPanel.add(groupButton);
-			configPanel.add(displaySettingButton);
 
 		}
 		expandPanel = new JPanel();
@@ -88,9 +77,9 @@ public class ControlBar extends JPanel {
 		return filterButton;
 	}
 
-//	public JButton getGroupButton() {
-//		return groupButton;
-//	}
+	//	public JButton getGroupButton() {
+	//		return groupButton;
+	//	}
 
 	public JPanel getExpandPanel() {
 		return expandPanel;
@@ -102,10 +91,6 @@ public class ControlBar extends JPanel {
 
 	public JButton getAllActivityButton() {
 		return allActivityButton;
-	}
-
-	public JButton getDisplaySettingButton() {
-		return displaySettingButton;
 	}
 
 	public JButton getCaseButton() {

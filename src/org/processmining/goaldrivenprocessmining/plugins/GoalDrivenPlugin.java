@@ -18,7 +18,6 @@ import org.processmining.goaldrivenprocessmining.algorithms.GoalDrivenLauncher;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.CONFIG_Update;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl01GatherAttributes;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
-import org.processmining.plugins.InductiveMiner.efficienttree.UnknownTreeNodeException;
 
 import graph.GoalDrivenDFGUtils;
 
@@ -29,8 +28,8 @@ public class GoalDrivenPlugin {
 					"canceller" }, userAccessible = true)
 	@Visualizer
 	@UITopiaVariant(affiliation = "RWTH Aachen", author = "Hieu Le", email = "hieu.le@rwth-aachen.de")
-	public JComponent visualise(final PluginContext context, final GoalDrivenLauncher launcher, ProMCanceller canceller)
-			throws UnknownTreeNodeException {
+	public JComponent visualise(final PluginContext context, final GoalDrivenLauncher launcher,
+			ProMCanceller canceller) {
 		XLog log = launcher.xLog.get();
 		// reset global variables
 		CONFIG_Update.currentConfig = null;

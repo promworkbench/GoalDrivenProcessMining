@@ -1,6 +1,6 @@
 package org.processmining.goaldrivenprocessmining.algorithms;
 
-import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
+import org.processmining.goaldrivenprocessmining.panelHelper.GoalDrivenPanel;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChain;
 
 public interface GoalDrivenConfiguration {

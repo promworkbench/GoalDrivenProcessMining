@@ -8,7 +8,7 @@ import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighL
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_MakeLowLevelDFG;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_MakeLowLevelLog;
-import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
+import org.processmining.goaldrivenprocessmining.panelHelper.GoalDrivenPanel;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChain;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChainImplNonBlocking;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataState;

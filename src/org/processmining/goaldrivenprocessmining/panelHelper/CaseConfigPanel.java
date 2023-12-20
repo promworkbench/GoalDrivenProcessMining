@@ -63,9 +63,6 @@ public class CaseConfigPanel extends JPanel {
 
 	private long maxDuration;
 
-	private JButton showGoodButton;
-	private JButton showBadButton;
-
 	private JButton caseConfigCancelButton;
 	private JButton caseConfigDoneButton;
 	// for filter
@@ -158,9 +155,9 @@ public class CaseConfigPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				// reset filter
 				updateAllCaseLabel(chooseCaseModel.getRowCount());
-				
+
 				filterPanel.removeAll();
-				
+
 				displayIndex = new HashSet<>();
 				for (int i = 0; i < chooseCaseModel.getRowCount(); i++) {
 					displayIndex.add(i);
@@ -184,8 +181,6 @@ public class CaseConfigPanel extends JPanel {
 		this.chooseCaseLabelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		this.allCaseLabel = new JLabel("Cases:");
 		JButton assignButton = new JButton("Assign class");
-		showGoodButton = new JButton("Show good cases");
-		showBadButton = new JButton("Show bad cases");
 		assignButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -194,8 +189,6 @@ public class CaseConfigPanel extends JPanel {
 		});
 		this.chooseCaseLabelPanel.add(this.allCaseLabel);
 		this.chooseCaseLabelPanel.add(assignButton);
-		this.chooseCaseLabelPanel.add(showGoodButton);
-		this.chooseCaseLabelPanel.add(showBadButton);
 		panel.add(this.chooseCaseLabelPanel);
 
 		// Second row: panel for 2 tables
@@ -593,22 +586,6 @@ public class CaseConfigPanel extends JPanel {
 
 	public void setMaxDuration(long maxDuration) {
 		this.maxDuration = maxDuration;
-	}
-
-	public JButton getShowBadButton() {
-		return showBadButton;
-	}
-
-	public void setShowBadButton(JButton showBadButton) {
-		this.showBadButton = showBadButton;
-	}
-
-	public JButton getShowGoodButton() {
-		return showGoodButton;
-	}
-
-	public void setShowGoodButton(JButton showGoodButton) {
-		this.showGoodButton = showGoodButton;
 	}
 
 	public JPanel getFilterPanel() {

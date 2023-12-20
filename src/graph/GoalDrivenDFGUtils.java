@@ -601,7 +601,7 @@ public class GoalDrivenDFGUtils {
 
 	/*----------------------------------------------------------------*/
 	/* Highlight the selected edge */
-	public static void highlightSelectedEdge(GoalDrivenDFG goalDrivenDFG, List<EdgeObject> edgeObjects, int color) {
+	public static void highlightSelectedEdge(GoalDrivenDFG goalDrivenDFG, List<EdgeObject> edgeObjects, int color, Boolean isDeep) {
 		Table nodeTable = goalDrivenDFG.getGraph().getNodeTable();
 		Table edgeTable = goalDrivenDFG.getGraph().getEdgeTable();
 		List<Integer> highlightEdges = new ArrayList<Integer>();
@@ -678,7 +678,12 @@ public class GoalDrivenDFGUtils {
 		for (Integer i : unhighlightNodes) {
 			VisualItem nodeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.NODE_GROUP,
 					nodeTable.getTuple(i));
-			unhighlightItem(nodeItem);
+			if (isDeep) {
+				deepUnhighlightItem(nodeItem);
+			} else {
+				unhighlightItem(nodeItem);
+			}
+			
 		}
 		// highlight edges
 		for (Integer i : highlightEdges) {
@@ -693,7 +698,11 @@ public class GoalDrivenDFGUtils {
 		for (Integer i : unhighlightEdges) {
 			VisualItem edgeItem = goalDrivenDFG.getVisualization().getVisualItem(GraphConstants.EDGE_GROUP,
 					edgeTable.getTuple(i));
-			unhighlightItem(edgeItem);
+			if (isDeep) {
+				deepUnhighlightItem(edgeItem);
+			} else {
+				unhighlightItem(edgeItem);
+			}
 		}
 
 	}
@@ -718,7 +727,6 @@ public class GoalDrivenDFGUtils {
 		} else {
 			isInSelectActModeLow = true;
 		}
-		
 
 		if (isActInHigh && isHighGraph) {
 			// highlight node and its related edges
@@ -873,18 +881,62 @@ public class GoalDrivenDFGUtils {
 	}
 
 	public static void highlightItem(VisualItem item, int color) {
-		item.setFillColor(color);
-		if (item.canGetInt(GraphConstants.NODE_STROKE_COLOR_FIELD)) {
-			item.setStrokeColor(item.getInt(GraphConstants.NODE_STROKE_COLOR_FIELD));
-		} else {
-			item.setStrokeColor(color);
+		if (item.canGetBoolean(GraphConstants.BEGIN_FIELD)
+				&& (item.getBoolean(GraphConstants.BEGIN_FIELD) || item.getBoolean(GraphConstants.END_FIELD))) {
+			return;
 		}
+		// if is node => unhighlight node fill color
+		if (item.canGetInt(GraphConstants.NODE_FILL_COLOR_FIELD)) {
+			item.setFillColor(color);
+			item.setInt(GraphConstants.NODE_FILL_COLOR_FIELD, color);
+		}
+
+		// if is node => only unhighlight stroke of the node that have border color white
+		if (item.canGetInt(GraphConstants.NODE_STROKE_COLOR_FIELD)) {
+			if (item.getInt(GraphConstants.NODE_STROKE_COLOR_FIELD) == GraphConstants.NODE_STROKE_COLOR) {
+				item.setStrokeColor(color);
+				item.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD, color);
+			}
+		}
+		// if is edge => stroke color unhighlight
+		if (item.canGetInt(GraphConstants.EDGE_FILL_COLOR_FIELD)) {
+			item.setFillColor(color);
+			item.setStrokeColor(color);
+			item.setInt(GraphConstants.EDGE_FILL_COLOR_FIELD, color);
+		}
+		
 		item.getVisualization().repaint();
 	}
-
 	public static void unhighlightItem(VisualItem item) {
 		item.setFillColor(GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
 		item.setStrokeColor(GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
+		item.getVisualization().repaint();
+	}
+
+	public static void deepUnhighlightItem(VisualItem item) {
+		if (item.canGetBoolean(GraphConstants.BEGIN_FIELD)
+				&& (item.getBoolean(GraphConstants.BEGIN_FIELD) || item.getBoolean(GraphConstants.END_FIELD))) {
+			return;
+		}
+		// if is node => unhighlight node fill color
+		if (item.canGetInt(GraphConstants.NODE_FILL_COLOR_FIELD)) {
+			item.setFillColor(GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
+			item.setInt(GraphConstants.NODE_FILL_COLOR_FIELD, GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
+		}
+
+		// if is node => only unhighlight stroke of the node that have border color white
+		if (item.canGetInt(GraphConstants.NODE_STROKE_COLOR_FIELD)) {
+			if (item.getInt(GraphConstants.NODE_STROKE_COLOR_FIELD) == GraphConstants.NODE_STROKE_COLOR) {
+				item.setStrokeColor(GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
+				item.setInt(GraphConstants.NODE_STROKE_COLOR_FIELD, GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
+			}
+		}
+		// if is edge => stroke color unhighlight
+		if (item.canGetInt(GraphConstants.EDGE_FILL_COLOR_FIELD)) {
+			item.setFillColor(GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
+			item.setStrokeColor(GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
+			item.setInt(GraphConstants.EDGE_FILL_COLOR_FIELD, GraphConstants.UNHIGHLIGHT_STROKE_COLOR);
+		}
 		item.getVisualization().repaint();
 	}
 

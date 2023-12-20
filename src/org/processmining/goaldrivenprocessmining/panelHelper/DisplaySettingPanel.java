@@ -1,10 +1,8 @@
 package org.processmining.goaldrivenprocessmining.panelHelper;
 
-import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -15,61 +13,47 @@ import graph.GraphConstants;
 
 public class DisplaySettingPanel extends JPanel {
 
-	private final JButton displaySettingDoneButton;
-	private final JButton displaySettingCancelButton;
 	private final JComboBox<String> modeComboBox;
 	private final JComboBox<String> additionalModeComboBox;
+	private final JComboBox<String> caseModeComboBox;
 
 	public DisplaySettingPanel() {
 		// Set layout manager to FlowLayout
-		setLayout(new BorderLayout());
-		JLabel titleLabel = new JLabel("Display settings");
-		titleLabel.setFont(GoalDrivenConstants.BOLD_M_FONT);
-		JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		titlePanel.add(titleLabel);
-		add(titlePanel, BorderLayout.NORTH);
+		setLayout(new FlowLayout(FlowLayout.CENTER));
 		// 1st row: Label "Mode" and JComboBox
-		JPanel legend = new JPanel();
-		legend.setLayout(new BoxLayout(legend, BoxLayout.Y_AXIS));
 		JLabel modeLabel = new JLabel("Main metric option: ");
+		modeLabel.setFont(GoalDrivenConstants.PLAIN_S_FONT);
+		modeLabel.setForeground(Color.WHITE);
 		modeComboBox = new JComboBox<>(new String[] { GraphConstants.MODE_FREQUENCY,
 				GraphConstants.MODE_MEAN_THROUGHPUT, GraphConstants.MODE_MEDIAN_THROUGHPUT,
 				GraphConstants.MODE_MIN_THROUGHPUT, GraphConstants.MODE_MAX_THROUGHPUT });
 		modeComboBox.setSelectedItem(GraphConstants.MODE_FREQUENCY);
+		// additional metric
 		JLabel additionalModeLabel = new JLabel("Additional metric option: ");
+		additionalModeLabel.setFont(GoalDrivenConstants.PLAIN_S_FONT);
+		additionalModeLabel.setForeground(Color.WHITE);
 		additionalModeComboBox = new JComboBox<>(
 				new String[] { "None", GraphConstants.MODE_PRIORITY, GraphConstants.MODE_DESIRABILITY, });
 		additionalModeComboBox.setSelectedItem("None");
-		
-		JPanel modePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		modePanel.add(modeLabel);
-		modePanel.add(modeComboBox);
-		JPanel additionalPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		additionalPanel.add(additionalModeLabel);
-		additionalPanel.add(additionalModeComboBox);
-		
-		
-		legend.add(modePanel);
-		legend.add(additionalPanel);
+		// case case option
+		JLabel caseMode = new JLabel("Case mode: ");
+		caseMode.setFont(GoalDrivenConstants.PLAIN_S_FONT);
+		caseMode.setForeground(Color.WHITE);
+		caseModeComboBox = new JComboBox<>(new String[] { "None", GraphConstants.CASE_GOOD, GraphConstants.CASE_BAD });
+		caseModeComboBox.setSelectedItem("None");
 
-		// cancel done button
-		JPanel actEndPanel = new JPanel();
-		actEndPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		displaySettingCancelButton = new JButton("Cancel");
-		displaySettingDoneButton = new JButton("Done");
-		actEndPanel.add(displaySettingCancelButton);
-		actEndPanel.add(displaySettingDoneButton);
+		JPanel compoundPanel = new JPanel();
+		compoundPanel.setBackground(GoalDrivenConstants.CONTENT_CARD_BACKGROUND_COLOR);
+		compoundPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+		compoundPanel.add(modeLabel);
+		compoundPanel.add(modeComboBox);
+		compoundPanel.add(additionalModeLabel);
+		compoundPanel.add(additionalModeComboBox);
+		compoundPanel.add(caseMode);
+		compoundPanel.add(caseModeComboBox);
 
-		add(legend, BorderLayout.CENTER);
-		add(actEndPanel, BorderLayout.SOUTH);
-	}
+		add(compoundPanel);
 
-	public JButton getDisplaySettingDoneButton() {
-		return displaySettingDoneButton;
-	}
-
-	public JButton getDisplaySettingCancelButton() {
-		return displaySettingCancelButton;
 	}
 
 	public JComboBox<String> getModeComboBox() {
@@ -79,4 +63,9 @@ public class DisplaySettingPanel extends JPanel {
 	public JComboBox<String> getAdditionalModeComboBox() {
 		return additionalModeComboBox;
 	}
+
+	public JComboBox<String> getCaseModeComboBox() {
+		return caseModeComboBox;
+	}
+
 }

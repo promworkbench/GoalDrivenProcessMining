@@ -38,6 +38,19 @@ public class StatUtils {
 
 		EdgeHashTable edgeHashTable = isHighLevel ? HIGH_MakeHighLevelLog.currentHighLevelEdgeHashTable
 				: LOW_MakeLowLevelLog.currentLowLevelEdgeHashTable;
+
+		// check if edge hash table has this act
+		Boolean hasAct = false;
+		for (EdgeObject edgeObject : edgeHashTable.getEdgeTable().keySet()) {
+			if (edgeObject.getNode1().equals(act) || edgeObject.getNode2().equals(act)) {
+				hasAct = true;
+				break;
+			}
+		}
+		if (!hasAct) {
+			edgeHashTable = Cl01GatherAttributes.originalEdgeHashTable;
+		}
+
 		for (EdgeObject edgeObject : edgeHashTable.getEdgeTable().keySet()) {
 			if (edgeObject.getNode1().equals(act) || edgeObject.getNode2().equals(act)) {
 				Map<Integer, List<Integer[]>> allPos = edgeHashTable.getEdgePositions(edgeObject);
@@ -79,6 +92,19 @@ public class StatUtils {
 		Map<EdgeObject, ThroughputTimeObject> mapEdgeThroughputTime = isHighLevel
 				? HIGH_MakeHighLevelLog.currentHighMapEdgeThroughputTime
 				: LOW_MakeLowLevelLog.currentLowMapEdgeThroughputTime;
+
+		// check if edge hash table has this act
+		Boolean hasAct = false;
+		for (EdgeObject edgeObject : edgeHashTable.getEdgeTable().keySet()) {
+			if (edgeObject.getNode1().equals(act) || edgeObject.getNode2().equals(act)) {
+				hasAct = true;
+				break;
+			}
+		}
+		if (!hasAct) {
+			edgeHashTable = Cl01GatherAttributes.originalEdgeHashTable;
+			mapEdgeThroughputTime = Cl01GatherAttributes.originalMapEdgeThroughputTime;
+		}
 
 		// find the affected edge
 		for (EdgeObject edgeObject : mapEdgeThroughputTime.keySet()) {

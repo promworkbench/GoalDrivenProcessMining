@@ -18,14 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -39,8 +34,6 @@ import org.processmining.goaldrivenprocessmining.algorithms.chain.CONFIG_Update;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.GoalDrivenObject;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighLevelLog;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.LOW_MakeLowLevelLog;
-import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
-import org.processmining.goaldrivenprocessmining.objectHelper.CategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeHashTable;
 import org.processmining.goaldrivenprocessmining.objectHelper.EdgeObject;
@@ -48,15 +41,12 @@ import org.processmining.goaldrivenprocessmining.objectHelper.EventSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.FilterEdgeConfig;
 import org.processmining.goaldrivenprocessmining.objectHelper.GDPMLogSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.GroupSkeleton;
-import org.processmining.goaldrivenprocessmining.objectHelper.MapActivityCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.SelectedObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.TraceSkeleton;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig;
 import org.processmining.goaldrivenprocessmining.objectHelper.UpdateConfig.UpdateType;
-import org.processmining.goaldrivenprocessmining.objectHelper.ValueCategoryObject;
 import org.processmining.goaldrivenprocessmining.objectHelper.enumaration.NodeType;
-import org.processmining.goaldrivenprocessmining.panelHelper.GroupActConfig;
-import org.processmining.goaldrivenprocessmining.panelHelper.NewCategoryPanel;
+import org.processmining.goaldrivenprocessmining.panelHelper.GoalDrivenPanel;
 import org.processmining.goaldrivenprocessmining.panelHelper.PopupPanel;
 import org.processmining.plugins.InductiveMiner.AttributeClassifiers.AttributeClassifier;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChain;
@@ -76,6 +66,7 @@ import prefuse.Visualization;
 import prefuse.data.Graph;
 import prefuse.data.Table;
 import prefuse.data.util.TableIterator;
+import prefuse.util.ColorLib;
 import prefuse.visual.VisualItem;
 
 public class GoalDrivenController {
@@ -365,7 +356,7 @@ public class GoalDrivenController {
 						panel.getLowDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 						panel.getLowDfgPanel().setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 						panel.getContentRightPanel().add(panel.getLowDfgPanel(), BorderLayout.CENTER);
-						panel.getLowDfgTitle().setText("Low-level DFG");
+						panel.getLowDfgEdgeTitle().setVisible(false);
 						isLowClear = true;
 					}
 
@@ -375,7 +366,8 @@ public class GoalDrivenController {
 						HashMap<String, Object> passValues = inputs.get(GoalDrivenObject.selected_source_target_node);
 						String source = (String) passValues.get("source");
 						String target = (String) passValues.get("target");
-						panel.getLowDfgTitle().setText("Low-level DFG - " + source + " \u2192 " + target);
+						panel.getLowDfgEdgeTitle().setVisible(true);
+						panel.getLowDfgEdgeTitle().setText(" - " + source + " \u2192 " + target);
 					}
 				}
 
@@ -387,7 +379,29 @@ public class GoalDrivenController {
 			}
 		});
 
-		//mode switch
+		//show edge on high level
+		panel.getLowDfgEdgeTitle().addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				panel.getLowDfgEdgeTitle().setCursor(new Cursor(Cursor.HAND_CURSOR));
+				panel.getLowDfgEdgeTitle().setForeground(ColorLib.getColor(GraphConstants.HIGHLIGHT_STROKE_COLOR));
+				SelectedObject selectedObject = new SelectedObject(null, currentSelectedHighLevelEdge, true, false);
+				chain.setObject(GoalDrivenObject.selected_object, selectedObject);
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				panel.getLowDfgEdgeTitle().setCursor(new Cursor(Cursor.HAND_CURSOR));
+				panel.getLowDfgEdgeTitle().setForeground(ColorLib.getColor(GraphConstants.HIGHLIGHT_STROKE_COLOR));
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				panel.getLowDfgEdgeTitle().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+				panel.getLowDfgEdgeTitle().setForeground(Color.WHITE); // Reset to the default color
+			}
+		});
 
 	}
 
@@ -1177,21 +1191,32 @@ public class GoalDrivenController {
 				panel.add(panel.getControlBar(), BorderLayout.NORTH);
 				panel.add(panel.getLayeredPanel(), BorderLayout.CENTER);
 				if (label.equals("Collapse")) {
-					double contentPanelSize[][] = { { 0.5, 0.5 }, { TableLayoutConstants.FILL } };
+					double contentPanelSize[][] = { { 0.5, 0.5 },
+							{ TableLayoutConstants.MINIMUM, TableLayoutConstants.FILL } };
 					panel.getContentPanel().setLayout(new TableLayout(contentPanelSize));
+					// display setting 
+					panel.getContentPanel().add(panel.getDisplaySettingPanel(), "0,0,1,0");
+					// left
 					panel.getContentLeftPanel().add(panel.getHighDfgPanel());
-					panel.getContentPanel().add(panel.getContentLeftPanel(), "0,0");
+					panel.getContentPanel().add(panel.getContentLeftPanel(), "0,1");
+					// right
 					panel.getContentRightPanel().add(panel.getLowDfgPanel());
-					panel.getContentPanel().add(panel.getContentRightPanel(), "1,0");
+					panel.getContentPanel().add(panel.getContentRightPanel(), "1,1");
 					panel.getControlBar().getExpandButton().setText("Expand stat window");
 				} else {
-					double contentPanelSize[][] = { { 0.4, 0.4, 0.2 }, { TableLayoutConstants.FILL } };
+					double contentPanelSize[][] = { { 0.4, 0.4, 0.2 },
+							{ TableLayoutConstants.MINIMUM, TableLayoutConstants.FILL } };
 					panel.getContentPanel().setLayout(new TableLayout(contentPanelSize));
+					// display setting 
+					panel.getContentPanel().add(panel.getDisplaySettingPanel(), "0,0,2,0");
+					// left
 					panel.getContentLeftPanel().add(panel.getHighDfgPanel());
-					panel.getContentPanel().add(panel.getContentLeftPanel(), "0,0");
+					panel.getContentPanel().add(panel.getContentLeftPanel(), "0,1");
+					// right
 					panel.getContentRightPanel().add(panel.getLowDfgPanel());
-					panel.getContentPanel().add(panel.getContentRightPanel(), "1,0");
-					panel.getContentPanel().add(panel.getSidePanel(), "2,0");
+					panel.getContentPanel().add(panel.getContentRightPanel(), "1,1");
+					// side
+					panel.getContentPanel().add(panel.getSidePanel(), "2,1");
 					panel.getControlBar().getExpandButton().setText("Collapse stat window");
 				}
 
@@ -1251,34 +1276,15 @@ public class GoalDrivenController {
 			}
 		});
 		// inti first all act object
-		List<String> highDesireActs = new ArrayList<String>();
-		List<String> lowDesireActs = new ArrayList<String>();
-		List<String> highPriorityActs = new ArrayList<String>();
-		List<String> lowPriorityActs = new ArrayList<String>();
-		// get data from table
-		JTable table = panel.getConfigCards().getAllActivityConfigPanel().getTable();
-		for (int row = 0; row < table.getModel().getRowCount(); row++) {
-			String act = (String) table.getModel().getValueAt(row, 0);
-			String priority = (String) table.getModel().getValueAt(row, 2);
-			String desire = (String) table.getModel().getValueAt(row, 3);
-			// priority
-			if (priority.equals("High")) {
-				highPriorityActs.add(act);
-			} else if (priority.equals("Low")) {
-				lowPriorityActs.add(act);
-			}
-			// desire
-			if (desire.equals("High")) {
-				highDesireActs.add(act);
-			} else if (desire.equals("Low")) {
-				lowDesireActs.add(act);
-			}
-		}
-		chain.setObject(GoalDrivenObject.high_desire_acts, highDesireActs.toArray(new String[0]));
-		chain.setObject(GoalDrivenObject.low_desire_acts, lowDesireActs.toArray(new String[0]));
-		chain.setObject(GoalDrivenObject.high_priority_acts, highPriorityActs.toArray(new String[0]));
-		chain.setObject(GoalDrivenObject.low_priority_acts, lowPriorityActs.toArray(new String[0]));
+		chain.setObject(GoalDrivenObject.high_desire_acts, new String[0]);
+		chain.setObject(GoalDrivenObject.low_desire_acts, new String[0]);
+		chain.setObject(GoalDrivenObject.high_priority_acts, new String[0]);
+		chain.setObject(GoalDrivenObject.low_priority_acts, new String[0]);
+		chain.setObject(GoalDrivenObject.good_case, new Integer[0]);
+		chain.setObject(GoalDrivenObject.bad_case, new Integer[0]);
+		chain.setObject(GoalDrivenObject.selected_mode, "Frequency");
 		chain.setObject(GoalDrivenObject.selected_additional_mode, "None");
+		chain.setObject(GoalDrivenObject.selected_case_mode, "None");
 		// all act config done button
 		panel.getConfigCards().getAllActivityConfigPanel().getAllActConfigDoneButton()
 				.addActionListener(new ActionListener() {
@@ -1336,7 +1342,7 @@ public class GoalDrivenController {
 						panel.getLowDfgPanel().setBorder(GoalDrivenConstants.BETWEEN_PANEL_BORDER);
 						panel.getLowDfgPanel().setBackground(GoalDrivenConstants.CONTENT_CARD_COLOR);
 						panel.getContentRightPanel().add(panel.getLowDfgPanel(), BorderLayout.CENTER);
-						panel.getLowDfgTitle().setText("Low-level DFG");
+						panel.getLowDfgEdgeTitle().setVisible(false);
 						// update
 						chain.setObject(GoalDrivenObject.update_config_object, updateConfig);
 						chain.setObject(GoalDrivenObject.high_desire_acts, highDesireActs.toArray(new String[0]));
@@ -1346,13 +1352,6 @@ public class GoalDrivenController {
 						panel.getConfigCards().setVisible(false);
 					}
 
-				});
-		// all act config cancel button
-		panel.getConfigCards().getAllActivityConfigPanel().getAllActConfigCancelButton()
-				.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						panel.getConfigCards().setVisible(false);
-					}
 				});
 		// update the all act config
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
@@ -1409,7 +1408,7 @@ public class GoalDrivenController {
 					} else {
 						List<EdgeObject> listEdgeObjects = new ArrayList<>();
 						listEdgeObjects.add(selectedObject.getSelectedEdgeObject());
-						GoalDrivenDFGUtils.highlightSelectedEdge(highLevelDFG, listEdgeObjects, -1);
+						GoalDrivenDFGUtils.highlightSelectedEdge(highLevelDFG, listEdgeObjects, -1, false);
 					}
 				}
 			}
@@ -1438,7 +1437,7 @@ public class GoalDrivenController {
 					} else {
 						List<EdgeObject> listEdgeObjects = new ArrayList<>();
 						listEdgeObjects.add(selectedObject.getSelectedEdgeObject());
-						GoalDrivenDFGUtils.highlightSelectedEdge(lowLevelDFG, listEdgeObjects, -1);
+						GoalDrivenDFGUtils.highlightSelectedEdge(lowLevelDFG, listEdgeObjects, -1, false);
 					}
 				}
 			}
@@ -1459,16 +1458,29 @@ public class GoalDrivenController {
 			}
 
 		});
-		panel.getConfigCards().getCaseConfigPanel().getCaseConfigCancelButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setVisible(false);
-
-			}
-		});
 		panel.getConfigCards().getCaseConfigPanel().getCaseConfigDoneButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				panel.getConfigCards().setVisible(false);
 
+				List<Integer> goodCase = new ArrayList<>();
+				List<Integer> badCase = new ArrayList<>();
+				// get data from table
+				JTable table = panel.getConfigCards().getCaseConfigPanel().getChooseCaseTable();
+				for (int row = 0; row < table.getModel().getRowCount(); row++) {
+					String classCase = (String) table.getModel().getValueAt(row, 2);
+					if (classCase.equals("Good")) {
+						goodCase.add(row);
+					}
+				}
+				// get data from table
+				for (int row = 0; row < table.getModel().getRowCount(); row++) {
+					String classCase = (String) table.getModel().getValueAt(row, 2);
+					if (classCase.equals("Bad")) {
+						badCase.add(row);
+					}
+				}
+				chain.setObject(GoalDrivenObject.good_case, goodCase.toArray(new Integer[0]));
+				chain.setObject(GoalDrivenObject.bad_case, badCase.toArray(new Integer[0]));
 			}
 		});
 		// action when choose case table clicked
@@ -1627,373 +1639,7 @@ public class GoalDrivenController {
 				//no action necessary (combobox will be disabled until new classifiers are computed)
 			}
 		});
-		// listener for show good case in choose case table
-		panel.getConfigCards().getCaseConfigPanel().getShowGoodButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				List<Integer> goodCase = new ArrayList<>();
-				// get data from table
-				JTable table = panel.getConfigCards().getCaseConfigPanel().getChooseCaseTable();
-				for (int row = 0; row < table.getModel().getRowCount(); row++) {
-					String classCase = (String) table.getModel().getValueAt(row, 2);
-					if (classCase.equals("Good")) {
-						goodCase.add(row);
-					}
-				}
-				// get highlighting edge from high level
-				List<EdgeObject> highlightingEdgeHigh = new ArrayList<>();
-				GoalDrivenDFG highLevelDfg = panel.getHighDfgPanel();
-				GDPMLogSkeleton highLevelLog = highLevelDfg.getLog();
-				for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : highLevelLog.getEdgeHashTable()
-						.getEdgeTable().entrySet()) {
-					Set<Integer> affectedCases = entry.getValue().keySet();
-					Set<Integer> setCopy = new HashSet<>(affectedCases);
-					setCopy.retainAll(goodCase);
-					if (!setCopy.isEmpty()) {
-						highlightingEdgeHigh.add(entry.getKey());
-					}
-				}
-				GoalDrivenDFGUtils.highlightSelectedEdge(highLevelDfg, highlightingEdgeHigh,
-						GraphConstants.HIGHLIGHT_STROKE_GOOD_CASE_COLOR);
 
-				// get highlighting edge from low level
-				List<EdgeObject> highlightingEdgeLow = new ArrayList<>();
-				GoalDrivenDFG lowLevelDfg = panel.getLowDfgPanel();
-				GDPMLogSkeleton lowLevelLog = lowLevelDfg.getLog();
-				if (lowLevelLog.getEdgeHashTable() != null) {
-					for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : lowLevelLog.getEdgeHashTable()
-							.getEdgeTable().entrySet()) {
-						Set<Integer> affectedCases = entry.getValue().keySet();
-						Set<Integer> setCopy = new HashSet<>(affectedCases);
-						setCopy.retainAll(goodCase);
-						if (!setCopy.isEmpty()) {
-							highlightingEdgeLow.add(entry.getKey());
-						}
-					}
-					GoalDrivenDFGUtils.highlightSelectedEdge(lowLevelDfg, highlightingEdgeLow,
-							GraphConstants.HIGHLIGHT_STROKE_GOOD_CASE_COLOR);
-				}
-
-				panel.getConfigCards().setVisible(false);
-			}
-
-		});
-
-		// listener for show bad case in choose case table
-		panel.getConfigCards().getCaseConfigPanel().getShowBadButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				List<Integer> badCase = new ArrayList<>();
-				// get data from table
-				JTable table = panel.getConfigCards().getCaseConfigPanel().getChooseCaseTable();
-				for (int row = 0; row < table.getModel().getRowCount(); row++) {
-					String classCase = (String) table.getModel().getValueAt(row, 2);
-					if (classCase.equals("Bad")) {
-						badCase.add(row);
-					}
-				}
-				// get highlighting edge from high level
-				List<EdgeObject> highlightingEdgeHigh = new ArrayList<>();
-				GoalDrivenDFG highLevelDfg = panel.getHighDfgPanel();
-				GDPMLogSkeleton highLevelLog = highLevelDfg.getLog();
-				for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : highLevelLog.getEdgeHashTable()
-						.getEdgeTable().entrySet()) {
-					Set<Integer> affectedCases = entry.getValue().keySet();
-					Set<Integer> setCopy = new HashSet<>(affectedCases);
-					setCopy.retainAll(badCase);
-					if (!setCopy.isEmpty()) {
-						highlightingEdgeHigh.add(entry.getKey());
-					}
-				}
-				GoalDrivenDFGUtils.highlightSelectedEdge(highLevelDfg, highlightingEdgeHigh,
-						GraphConstants.HIGHLIGHT_STROKE_BAD_CASE_COLOR);
-
-				// get highlighting edge from low level
-				List<EdgeObject> highlightingEdgeLow = new ArrayList<>();
-				GoalDrivenDFG lowLevelDfg = panel.getLowDfgPanel();
-				GDPMLogSkeleton lowLevelLog = lowLevelDfg.getLog();
-				if (lowLevelLog.getEdgeHashTable() != null) {
-					for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : lowLevelLog.getEdgeHashTable()
-							.getEdgeTable().entrySet()) {
-						Set<Integer> affectedCases = entry.getValue().keySet();
-						Set<Integer> setCopy = new HashSet<>(affectedCases);
-						setCopy.retainAll(badCase);
-						if (!setCopy.isEmpty()) {
-							highlightingEdgeLow.add(entry.getKey());
-						}
-					}
-					GoalDrivenDFGUtils.highlightSelectedEdge(lowLevelDfg, highlightingEdgeLow,
-							GraphConstants.HIGHLIGHT_STROKE_BAD_CASE_COLOR);
-				}
-
-				panel.getConfigCards().setVisible(false);
-			}
-
-		});
-
-		/*-------------------------------------*/
-
-		// mode done button
-		panel.getConfigCards().getModePanel().getModeDoneButton().addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				String selectedCategory = "";
-				CategoryObject selectedCategoryObject = null;
-
-				if (panel.getConfigCards().getModePanel().getCategoryCheckBox().isSelected()) {
-					for (JCheckBox cB : panel.getConfigCards().getModePanel().getListCategoriesCheckBox()) {
-						if (cB.isSelected()) {
-							selectedCategory = cB.getText();
-							break;
-						}
-					}
-
-					for (CategoryObject cO : panel.getConfigCards().getModePanel().getListCategories()) {
-						if (cO.getName().equals(selectedCategory)) {
-							selectedCategoryObject = cO;
-							break;
-						}
-					}
-					if (selectedCategoryObject != null) {
-						chain.setObject(GoalDrivenObject.selected_mode_category, selectedCategoryObject);
-					}
-
-				}
-
-				panel.getConfigCards().setVisible(false);
-			}
-
-		});
-		// mode cancel button
-		panel.getConfigCards().getModePanel().getModeCancelButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setVisible(false);
-			}
-		});
-
-		/*-----------------------------------------*/
-		// act config new group button
-		panel.getConfigCards().getActConfigPanel().getActConfigNewGroupButton().addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				NewCategoryPanel myPanel = new NewCategoryPanel();
-
-				int result = JOptionPane.showConfirmDialog(null, myPanel, "Category configuration",
-						JOptionPane.OK_CANCEL_OPTION);
-				if (result == JOptionPane.OK_OPTION) {
-					Color categoryColor = (Color) myPanel.getCmb().getSelectedItem();
-					String categoryName = myPanel.getGroupNameField().getText();
-					GroupActConfig newGroup = new GroupActConfig(
-							panel.getConfigCards().getActConfigPanel().getAllGroupPane().getBounds().width,
-							categoryName, categoryColor, 0);
-					panel.getConfigCards().getActConfigPanel().addNextGroup(newGroup);
-					panel.revalidate();
-					panel.repaint();
-					List<ValueCategoryObject> values = new ArrayList<>();
-					for (int i = 0; i < myPanel.getValueTable().getRowCount(); i++) {
-						ValueCategoryObject val = new ValueCategoryObject(categoryName,
-								(String) myPanel.getValueTable().getValueAt(i, 0),
-								(Color) myPanel.getValueTable().getValueAt(i, 1));
-						values.add(val);
-					}
-					CategoryObject newCate = new CategoryObject(categoryName, values);
-					panel.getConfigCards().getModePanel().addCategory(newCate);
-					panel.getConfigCards().getModePanel().updateCategoryPanel();
-					panel.revalidate();
-					panel.repaint();
-					chain.setObject(GoalDrivenObject.new_category, newCate);
-
-				}
-
-			}
-
-		});
-		// act config cancel button
-		panel.getConfigCards().getActConfigPanel().getActConfigCancelButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setVisible(false);
-			}
-		});
-		// update category group act
-		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
-
-			public String getName() {
-				return "Update new category to gui";
-			}
-
-			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.new_category };
-			}
-
-			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
-				CategoryObject newCate = inputs.get(GoalDrivenObject.new_category);
-				// create jcombobox
-				JComboBox<ValueCategoryObject> cmb = new JComboBox<>();
-				for (ValueCategoryObject val : newCate.getValues()) {
-					cmb.addItem(val);
-				}
-				// add new column + config that column
-				JTable table = panel.getConfigCards().getActConfigPanel().getActConfigTable();
-				panel.getConfigCards().getActConfigPanel().addNewColumnToActConfigTable(newCate.getName());
-				panel.getConfigCards().getActConfigPanel().setUpColumn(table,
-						table.getColumnModel().getColumn(table.getColumnCount() - 1), cmb);
-
-				panel.revalidate();
-				panel.repaint();
-			}
-
-			public void invalidate(GoalDrivenPanel panel) {
-				//no action necessary (combobox will be disabled until new classifiers are computed)
-			}
-		});
-		// update all unique values
-		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
-
-			public String getName() {
-				return "Unique values to act config table";
-			}
-
-			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.all_unique_values };
-			}
-
-			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
-				AttributeClassifier[] allGroupAct = inputs.get(GoalDrivenObject.all_unique_values);
-				List<AttributeClassifier> currAtt = new ArrayList<AttributeClassifier>();
-				MapActivityCategoryObject currMapActCategory = panel.getConfigCards().getActConfigPanel()
-						.getMapActGroup();
-				DefaultTableModel actConfigTable = (DefaultTableModel) panel.getConfigCards().getActConfigPanel()
-						.getActConfigTable().getModel();
-				for (int i = 0; i < actConfigTable.getRowCount(); i++) {
-					AttributeClassifier att = (AttributeClassifier) actConfigTable.getValueAt(i, 0);
-					currAtt.add(att);
-					List<ValueCategoryObject> valueCategories = new ArrayList<>();
-					for (int j = 0; j < actConfigTable.getColumnCount(); j++) {
-						valueCategories.add((ValueCategoryObject) actConfigTable.getValueAt(i, j));
-					}
-					if (!currMapActCategory.getMapActivityCategory().containsKey(att)) {
-						panel.getConfigCards().getActConfigPanel().getMapActGroup().put(att, valueCategories);
-					}
-					if (!Arrays.asList(allGroupAct).contains(att)) {
-						actConfigTable.removeRow(i);
-					}
-				}
-				if (currAtt.size() < allGroupAct.length) {
-					for (AttributeClassifier att : allGroupAct) {
-						if (!currAtt.contains(att)) {
-							Object[] data = new Object[actConfigTable.getColumnCount()];
-							data[0] = att;
-							if (currMapActCategory.getMapActivityCategory().containsKey(att)) {
-								List<ValueCategoryObject> valueCategories = currMapActCategory.getMapActivityCategory()
-										.get(att);
-								for (int i = 1; i < data.length; i++) {
-									String cate = actConfigTable.getColumnName(i);
-									for (ValueCategoryObject vCO : valueCategories) {
-										if (vCO.getCategory().equals(cate)) {
-											data[i] = vCO;
-										} else {
-											data[i] = new ValueCategoryObject(cate, "", Color.WHITE);
-										}
-									}
-								}
-
-							} else {
-								List<ValueCategoryObject> valueCategories = new ArrayList<>();
-								for (int i = 1; i < data.length; i++) {
-									valueCategories.add(
-											new ValueCategoryObject(actConfigTable.getColumnName(i), "", Color.WHITE));
-								}
-							}
-							actConfigTable.addRow(data);
-						}
-					}
-				}
-				chain.setObject(GoalDrivenObject.map_activity_category, currMapActCategory);
-				panel.revalidate();
-				panel.repaint();
-			}
-
-			public void invalidate(GoalDrivenPanel panel) {
-				//no action necessary (combobox will be disabled until new classifiers are computed)
-			}
-		});
-		// act config done button
-		panel.getConfigCards().getActConfigPanel().getActConfigDoneButton().addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				DefaultTableModel actConfigTable = (DefaultTableModel) panel.getConfigCards().getActConfigPanel()
-						.getActConfigTable().getModel();
-				MapActivityCategoryObject mapActCategory = new MapActivityCategoryObject();
-				MapActivityCategoryObject currMapValueGroup = panel.getConfigCards().getActConfigPanel()
-						.getMapActGroup();
-				for (int i = 0; i < actConfigTable.getRowCount(); i++) {
-					AttributeClassifier att = (AttributeClassifier) actConfigTable.getValueAt(i, 0);
-					List<ValueCategoryObject> listValueCategories = new ArrayList<>();
-					for (int j = 1; j < actConfigTable.getColumnCount(); j++) {
-						ValueCategoryObject valueCategory = (ValueCategoryObject) actConfigTable.getValueAt(i, j);
-						if (valueCategory == null) {
-							valueCategory = new ValueCategoryObject(actConfigTable.getColumnName(j), "", Color.WHITE);
-						}
-						listValueCategories.add(valueCategory);
-					}
-					mapActCategory.put(att, listValueCategories);
-					if (!currMapValueGroup.getMapActivityCategory().containsKey(att)) {
-						panel.getConfigCards().getActConfigPanel().getMapActGroup().put(att, listValueCategories);
-					} else {
-						currMapValueGroup.getMapActivityCategory().replace(att, listValueCategories);
-					}
-
-				}
-				chain.setObject(GoalDrivenObject.map_activity_category, mapActCategory);
-
-				panel.getConfigCards().setVisible(false);
-			}
-
-		});
-		// checkbox for category in mode panel
-		panel.getConfigCards().getModePanel().getCategoryCheckBox().addItemListener(new ItemListener() {
-
-			public void itemStateChanged(ItemEvent e) {
-				List<JCheckBox> listCheckBoxes = panel.getConfigCards().getModePanel().getListCategoriesCheckBox();
-				if (panel.getConfigCards().getModePanel().getCategoryCheckBox().isSelected()) {
-					for (JCheckBox cB : listCheckBoxes) {
-						cB.setEnabled(true);
-					}
-
-				} else {
-					for (JCheckBox cB : listCheckBoxes) {
-						cB.setSelected(false);
-						cB.setEnabled(false);
-					}
-
-				}
-				panel.revalidate();
-				panel.repaint();
-			}
-
-		});
-
-		/*--------Group config panel---------*/
-		//		// group button
-		//		panel.getControlBar().getGroupButton().addActionListener(new ActionListener() {
-		//
-		//			public void actionPerformed(ActionEvent e) {
-		//				panel.getConfigCards().setVisible(true);
-		//				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "5");
-		//			}
-		//		});
-		// group config done button
-		panel.getConfigCards().getGroupConfigPanel().getDoneButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setVisible(false);
-			}
-		});
-
-		// group config cancel button
-		panel.getConfigCards().getGroupConfigPanel().getCancelButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().getGroupConfigPanel().getDisplayPanel().removeAll();
-				panel.getConfigCards().setVisible(false);
-			}
-		});
 		/*-----------------------------------*/
 
 		// update all group in the group config panel
@@ -2032,46 +1678,32 @@ public class GoalDrivenController {
 			}
 
 		});
-		// trigger action when clicking on a row of group config panel
-		panel.getConfigCards().getGroupConfigPanel().getGroupTable().getSelectionModel()
-				.addListSelectionListener(new ListSelectionListener() {
-					@Override
-					public void valueChanged(ListSelectionEvent e) {
-						int selectedRow = panel.getConfigCards().getGroupConfigPanel().getGroupTable().getSelectedRow();
-						if (selectedRow >= 0) {
-							panel.getConfigCards().getGroupConfigPanel().updateDisplayPanel(selectedRow);
-						}
-					}
-				});
-
-		// legend button
-		panel.getControlBar().getDisplaySettingButton().addActionListener(new ActionListener() {
-
+		// main metric option
+		panel.getDisplaySettingPanel().getModeComboBox().addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setBounds(0, 0, (int) (0.2 * panel.getConfigCards().getsWidth()), 200);
-				panel.getConfigCards().setVisible(true);
-				panel.getConfigCards().getLayoutCard().show(panel.getConfigCards(), "6");
+				String selectedOption = (String) panel.getDisplaySettingPanel().getModeComboBox().getSelectedItem();
+				chain.setObject(GoalDrivenObject.selected_mode, selectedOption);
 			}
 		});
-		// legend done button
-		panel.getConfigCards().getLegendPanel().getDisplaySettingDoneButton().addActionListener(new ActionListener() {
+		// additional metric option
+		panel.getDisplaySettingPanel().getAdditionalModeComboBox().addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setVisible(false);
-
-				String selectedMode = (String) panel.getConfigCards().getLegendPanel().getModeComboBox()
+				String selectedOption = (String) panel.getDisplaySettingPanel().getAdditionalModeComboBox()
 						.getSelectedItem();
-				String selectedAdditionalMode = (String) panel.getConfigCards().getLegendPanel()
-						.getAdditionalModeComboBox().getSelectedItem();
-				chain.setObject(GoalDrivenObject.selected_mode, selectedMode);
-				chain.setObject(GoalDrivenObject.selected_additional_mode, selectedAdditionalMode);
+				chain.setObject(GoalDrivenObject.selected_additional_mode, selectedOption);
 			}
 		});
-		// legend cancel button
-		panel.getConfigCards().getLegendPanel().getDisplaySettingCancelButton().addActionListener(new ActionListener() {
+		// case option
+		panel.getDisplaySettingPanel().getCaseModeComboBox().addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
-				panel.getConfigCards().setVisible(false);
+				String selectedOption = (String) panel.getDisplaySettingPanel().getCaseModeComboBox().getSelectedItem();
+				chain.setObject(GoalDrivenObject.selected_case_mode, selectedOption);
 			}
 		});
+
 		// update legend in high level dfg
 		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
 
@@ -2082,14 +1714,16 @@ public class GoalDrivenController {
 			public IvMObject<?>[] createInputObjects() {
 				return new IvMObject<?>[] { GoalDrivenObject.high_desire_acts, GoalDrivenObject.low_desire_acts,
 						GoalDrivenObject.high_priority_acts, GoalDrivenObject.low_priority_acts,
+						GoalDrivenObject.good_case, GoalDrivenObject.bad_case,
 						GoalDrivenObject.selected_additional_mode, GoalDrivenObject.selected_mode,
-						GoalDrivenObject.high_level_dfg };
+						GoalDrivenObject.selected_case_mode, GoalDrivenObject.high_level_dfg };
 			}
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				GoalDrivenDFG highLevelDFG = inputs.get(GoalDrivenObject.high_level_dfg);
 				String selectedMode = inputs.get(GoalDrivenObject.selected_mode);
 				String selectedAdditionalMode = inputs.get(GoalDrivenObject.selected_additional_mode);
+				String selectedCaseMode = inputs.get(GoalDrivenObject.selected_case_mode);
 				// mode legend: frequency, throughput
 				switch (selectedMode) {
 					case GraphConstants.MODE_FREQUENCY :
@@ -2128,6 +1762,41 @@ public class GoalDrivenController {
 					default :
 						break;
 				}
+				// case mode: good, bad
+				List<EdgeObject> highlightingEdgeHigh = new ArrayList<>();
+				GDPMLogSkeleton highLevelLog = highLevelDFG.getLog();
+				switch (selectedCaseMode) {
+					case "Good" :
+						// get highlighting edge from high level
+						List<Integer> goodCase = Arrays.asList(inputs.get(GoalDrivenObject.good_case));
+						for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : highLevelLog
+								.getEdgeHashTable().getEdgeTable().entrySet()) {
+							Set<Integer> affectedCases = entry.getValue().keySet();
+							Set<Integer> setCopy = new HashSet<>(affectedCases);
+							setCopy.retainAll(goodCase);
+							if (!setCopy.isEmpty()) {
+								highlightingEdgeHigh.add(entry.getKey());
+							}
+						}
+						GoalDrivenDFGUtils.highlightSelectedEdge(highLevelDFG, highlightingEdgeHigh,
+								GraphConstants.HIGHLIGHT_STROKE_GOOD_CASE_COLOR, true);
+						break;
+					case "Bad" :
+						// get highlighting edge from high level
+						List<Integer> badCase = Arrays.asList(inputs.get(GoalDrivenObject.bad_case));
+						for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : highLevelLog
+								.getEdgeHashTable().getEdgeTable().entrySet()) {
+							Set<Integer> affectedCases = entry.getValue().keySet();
+							Set<Integer> setCopy = new HashSet<>(affectedCases);
+							setCopy.retainAll(badCase);
+							if (!setCopy.isEmpty()) {
+								highlightingEdgeHigh.add(entry.getKey());
+							}
+						}
+						GoalDrivenDFGUtils.highlightSelectedEdge(highLevelDFG, highlightingEdgeHigh,
+								GraphConstants.HIGHLIGHT_STROKE_BAD_CASE_COLOR, true);
+						break;
+				}
 
 			}
 
@@ -2145,14 +1814,16 @@ public class GoalDrivenController {
 			public IvMObject<?>[] createInputObjects() {
 				return new IvMObject<?>[] { GoalDrivenObject.high_desire_acts, GoalDrivenObject.low_desire_acts,
 						GoalDrivenObject.high_priority_acts, GoalDrivenObject.low_priority_acts,
+						GoalDrivenObject.good_case, GoalDrivenObject.bad_case,
 						GoalDrivenObject.selected_additional_mode, GoalDrivenObject.selected_mode,
-						GoalDrivenObject.low_level_dfg };
+						GoalDrivenObject.selected_case_mode, GoalDrivenObject.low_level_dfg };
 			}
 
 			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
 				GoalDrivenDFG lowLevelDFG = inputs.get(GoalDrivenObject.low_level_dfg);
 				String selectedMode = inputs.get(GoalDrivenObject.selected_mode);
 				String selectedAdditionalMode = inputs.get(GoalDrivenObject.selected_additional_mode);
+				String selectedCaseMode = inputs.get(GoalDrivenObject.selected_case_mode);
 				switch (selectedMode) {
 					case GraphConstants.MODE_FREQUENCY :
 						GoalDrivenDFGUtils.displayModeFrequency(lowLevelDFG);
@@ -2190,36 +1861,41 @@ public class GoalDrivenController {
 						break;
 
 				}
-			}
-
-			public void invalidate(GoalDrivenPanel panel) {
-				//no action necessary (combobox will be disabled until new classifiers are computed)
-			}
-		});
-
-		// update the hierarchy config
-		chain.register(new DataChainLinkGuiAbstract<GoalDrivenConfiguration, GoalDrivenPanel>() {
-
-			public String getName() {
-				return "Unique value to gui";
-			}
-
-			public IvMObject<?>[] createInputObjects() {
-				return new IvMObject<?>[] { GoalDrivenObject.selected_unique_values,
-						GoalDrivenObject.unselected_unique_values };
-			}
-
-			public void updateGui(GoalDrivenPanel panel, IvMObjectValues inputs) throws Exception {
-				//				AttributeClassifier[] allUniqueValues = inputs.get(GoalDrivenObject.all_unique_values);
-				AttributeClassifier[] selectedUniqueValues = inputs.get(GoalDrivenObject.selected_unique_values);
-				AttributeClassifier[] unselectedUniqueValues = inputs.get(GoalDrivenObject.unselected_unique_values);
-
-				panel.getConfigCards().getActDisplayPanel().updateConfigTable(
-						panel.getConfigCards().getActDisplayPanel().getIncludeTable(), selectedUniqueValues, "Exclude");
-				panel.getConfigCards().getActDisplayPanel().updateConfigTable(
-						panel.getConfigCards().getActDisplayPanel().getExcludeTable(), unselectedUniqueValues,
-						"Include");
-
+				// case mode: good, bad
+				List<EdgeObject> highlightingEdgeHigh = new ArrayList<>();
+				GDPMLogSkeleton lowLevelLog = lowLevelDFG.getLog();
+				switch (selectedCaseMode) {
+					case "Good" :
+						// get highlighting edge from high level
+						List<Integer> goodCase = Arrays.asList(inputs.get(GoalDrivenObject.good_case));
+						for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : lowLevelLog.getEdgeHashTable()
+								.getEdgeTable().entrySet()) {
+							Set<Integer> affectedCases = entry.getValue().keySet();
+							Set<Integer> setCopy = new HashSet<>(affectedCases);
+							setCopy.retainAll(goodCase);
+							if (!setCopy.isEmpty()) {
+								highlightingEdgeHigh.add(entry.getKey());
+							}
+						}
+						GoalDrivenDFGUtils.highlightSelectedEdge(lowLevelDFG, highlightingEdgeHigh,
+								GraphConstants.HIGHLIGHT_STROKE_GOOD_CASE_COLOR, true);
+						break;
+					case "Bad" :
+						// get highlighting edge from high level
+						List<Integer> badCase = Arrays.asList(inputs.get(GoalDrivenObject.bad_case));
+						for (Map.Entry<EdgeObject, Map<Integer, List<Integer[]>>> entry : lowLevelLog.getEdgeHashTable()
+								.getEdgeTable().entrySet()) {
+							Set<Integer> affectedCases = entry.getValue().keySet();
+							Set<Integer> setCopy = new HashSet<>(affectedCases);
+							setCopy.retainAll(badCase);
+							if (!setCopy.isEmpty()) {
+								highlightingEdgeHigh.add(entry.getKey());
+							}
+						}
+						GoalDrivenDFGUtils.highlightSelectedEdge(lowLevelDFG, highlightingEdgeHigh,
+								GraphConstants.HIGHLIGHT_STROKE_BAD_CASE_COLOR, true);
+						break;
+				}
 			}
 
 			public void invalidate(GoalDrivenPanel panel) {

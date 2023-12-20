@@ -3,7 +3,7 @@ package org.processmining.goaldrivenprocessmining.algorithms;
 import java.util.concurrent.Executor;
 
 import org.processmining.framework.plugin.ProMCanceller;
-import org.processmining.goaldrivenprocessmining.algorithms.panel.GoalDrivenPanel;
+import org.processmining.goaldrivenprocessmining.panelHelper.GoalDrivenPanel;
 import org.processmining.plugins.inductiveVisualMiner.chain.DataChain;
 
 /**

@@ -23,7 +23,8 @@ public class GoalDrivenConstants {
 	// Color in panel
 	public static final Color BACKGROUND_COLOR = new Color(26, 26, 26);
 	public static final Color CONTENT_CARD_COLOR = BACKGROUND_COLOR;
-	public static final Color CONTENT_CARD_BACKGROUND_COLOR = new Color(51, 51, 51);
+	public static final Color CONTENT_CARD_BACKGROUND_COLOR = new Color(38, 38, 38);
+	public static final Color DISPLAY_SETTING_BACKGROUND_COLOR = new Color(51, 51, 51);
 	public static final Color SIDE_PANEL_CARD_COLOR = new Color(255, 255, 255);
 	public static final Color STATISTIC_PANEL_BACKGROUND_COLOR = BACKGROUND_COLOR;
 	public static final Color STATISTIC_PANEL_TAB_SELECTED_COLOR = new Color(151, 89, 57);
@@ -49,4 +50,5 @@ public class GoalDrivenConstants {
 	public static final Font PLAIN_XL_FONT = new Font("Dialog", Font.PLAIN, 20);
 	public static final Font PLAIN_L_FONT = new Font("Dialog", Font.PLAIN, 18);
 	public static final Font PLAIN_M_FONT = new Font("Dialog", Font.PLAIN, 16);
+	public static final Font PLAIN_S_FONT = new Font("Dialog", Font.PLAIN, 14);
 }

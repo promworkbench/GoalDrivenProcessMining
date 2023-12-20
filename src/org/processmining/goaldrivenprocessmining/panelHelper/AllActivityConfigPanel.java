@@ -41,7 +41,6 @@ public class AllActivityConfigPanel extends JPanel {
 	private static final long serialVersionUID = -9055472507384816059L;
 	private DefaultTableModel model;
 	private JTable table;
-	private JButton allActConfigCancelButton;
 	private JButton allActConfigDoneButton;
 	private TableRowSorter<DefaultTableModel> tr;
 	private RangeSliderPanel rangeSlider;
@@ -184,9 +183,7 @@ public class AllActivityConfigPanel extends JPanel {
 		// cancel done button
 		JPanel actEndPanel = new JPanel();
 		actEndPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		allActConfigCancelButton = new JButton("Cancel");
 		allActConfigDoneButton = new JButton("Apply");
-		actEndPanel.add(allActConfigCancelButton);
 		actEndPanel.add(allActConfigDoneButton);
 
 		add(labelJPanel);
@@ -366,14 +363,6 @@ public class AllActivityConfigPanel extends JPanel {
 
 	public void setTable(JTable table) {
 		this.table = table;
-	}
-
-	public JButton getAllActConfigCancelButton() {
-		return allActConfigCancelButton;
-	}
-
-	public void setAllActConfigCancelButton(JButton allActConfigCancelButton) {
-		this.allActConfigCancelButton = allActConfigCancelButton;
 	}
 
 	public JButton getAllActConfigDoneButton() {

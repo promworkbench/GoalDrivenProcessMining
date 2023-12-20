@@ -19,7 +19,7 @@ public class GraphConstants {
 	public static final String IS_SELECTED = "select";
 	public static final String IS_INDIRECTED_EDGE_FIELD = "isDirectedEdge";
 	public static final String STROKE_WIDTH_EDGE_FIELD = "strokeWidth";
-	public static final String NODE_FILL_COLOR_FIELD = "freqFillColorNode";
+	public static final String NODE_FILL_COLOR_FIELD = "FillColorNode";
 	public static final String NODE_STROKE_COLOR_FIELD = "StrokeColorNode"; 
 	public static final String EDGE_FILL_COLOR_FIELD = "edgeFillColor";
 	public static final String NODE_TYPE_FIELD = "nodeType";
@@ -82,5 +82,7 @@ public class GraphConstants {
 	public static final String MODE_MAX_THROUGHPUT = "Max throughput";
 	public static final String MODE_DESIRABILITY = "Desirability";
 	public static final String MODE_PRIORITY = "Priority";
+	public static final String CASE_GOOD= "Good";
+	public static final String CASE_BAD = "Bad";
 
 }
