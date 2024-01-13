@@ -7,13 +7,11 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BoxLayout;
@@ -72,7 +70,7 @@ public class FilterPathPanel extends JPanel {
 		JScrollPane removingPathsScrollPane = new JScrollPane(removingPathsTable);
 		removingPathsScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 		removingPathsScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		
+
 		persistentPathsLabel = new JLabel(
 				"<html><b>Persisitent paths: </b><br><span style='font-weight:normal;'> (0)</span></html>");
 		persistentPathsLabel.setToolTipText("<html>The paths that are kept permanently</html>");
@@ -174,14 +172,14 @@ public class FilterPathPanel extends JPanel {
 
 		JPanel checkboxPanel = this.createCheckboxPanel();
 		JPanel legendLabel = this.createLegend();
-//		JPanel affectedCasePanel = this.createAffectedCaseTablePanel();
+		//		JPanel affectedCasePanel = this.createAffectedCaseTablePanel();
 		saveFilterEdgeConfigurationButton = new JButton("Save path configuration");
 
 		sliderPanel.add(edgeSlider);
 		sliderPanel.add(checkboxPanel);
 		sliderPanel.add(legendLabel);
 		sliderPanel.add(saveFilterEdgeConfigurationButton);
-//		sliderPanel.add(affectedCasePanel);
+		//		sliderPanel.add(affectedCasePanel);
 		return sliderPanel;
 	}
 
@@ -342,20 +340,13 @@ public class FilterPathPanel extends JPanel {
 	}
 
 	private ImageIcon createLegendImageIcon() {
-		try {
-			// Load your image file
-			File imageFile = new File("./fig/icon/info.png");
-			Image image = ImageIO.read(imageFile);
-			Image resizedImage = image.getScaledInstance(12, 12, Image.SCALE_SMOOTH);
+		// Load your image file
+		Image image = Toolkit.getDefaultToolkit().getImage(
+				FilterPathPanel.class.getResource("/org/processmining/goaldrivenprocessmining/panelHelper/info.png"));
+		Image resizedImage = image.getScaledInstance(12, 12, Image.SCALE_SMOOTH);
+		// Create an ImageIcon from the scaled image
+		return new ImageIcon(resizedImage);
 
-			// Scale the image to fit the label (adjust as needed)
-
-			// Create an ImageIcon from the scaled image
-			return new ImageIcon(resizedImage);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
 	}
 
 	private JPanel createLegend() {

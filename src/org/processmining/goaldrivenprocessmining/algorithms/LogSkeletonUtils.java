@@ -13,10 +13,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.deckfour.xes.in.XesXmlParser;
+import org.deckfour.xes.model.XAttributeTimestamp;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
-import org.deckfour.xes.model.impl.XAttributeTimestampImpl;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.Cl01GatherAttributes;
 import org.processmining.goaldrivenprocessmining.algorithms.chain.HIGH_MakeHighLevelLog;
 import org.processmining.goaldrivenprocessmining.objectHelper.Config;
@@ -458,7 +458,7 @@ public class LogSkeletonUtils {
 			for (int i = 0; i < trace.size(); i++) {
 				XEvent event = trace.get(i);
 				String act = event.getAttributes().get(classifier).toString();
-				Long time = ((XAttributeTimestampImpl) event.getAttributes().get(TIME_CLASSIFIER)).getValueMillis();
+				Long time = ((XAttributeTimestamp ) event.getAttributes().get(TIME_CLASSIFIER)).getValueMillis();
 				EventSkeleton eventSkeleton = new EventSkeleton(act, time, true);
 				HashMap<String, Object> eventAttribute = new HashMap<String, Object>();
 				for (String attribute : eventAttributes) {
