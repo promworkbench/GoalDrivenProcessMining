@@ -1483,6 +1483,11 @@ public class GoalDrivenController {
 				chain.setObject(GoalDrivenObject.bad_case, badCase.toArray(new Integer[0]));
 			}
 		});
+		panel.getConfigCards().getCaseConfigPanel().getCaseConfigCancelButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				panel.getConfigCards().setVisible(false);
+			}
+		});
 		// action when choose case table clicked
 		panel.getConfigCards().getCaseConfigPanel().getChooseCaseTable().addMouseListener(new MouseAdapter() {
 			@Override

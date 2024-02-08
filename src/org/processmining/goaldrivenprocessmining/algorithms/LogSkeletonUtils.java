@@ -458,7 +458,7 @@ public class LogSkeletonUtils {
 			for (int i = 0; i < trace.size(); i++) {
 				XEvent event = trace.get(i);
 				String act = event.getAttributes().get(classifier).toString();
-				Long time = ((XAttributeTimestamp ) event.getAttributes().get(TIME_CLASSIFIER)).getValueMillis();
+				Long time = ((XAttributeTimestamp) event.getAttributes().get(TIME_CLASSIFIER)).getValueMillis();
 				EventSkeleton eventSkeleton = new EventSkeleton(act, time, true);
 				HashMap<String, Object> eventAttribute = new HashMap<String, Object>();
 				for (String attribute : eventAttributes) {

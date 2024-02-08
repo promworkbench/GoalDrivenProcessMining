@@ -39,7 +39,6 @@ public class HIGH_MakeHighLevelDFG<C> extends DataChainLinkComputationAbstract<C
 		GoalDrivenDFG dfg = new GoalDrivenDFG(gdpmLogSkeleton, true);
 		dfg.setEdgeClickControl(new GraphObjectClickControl(((GoalDrivenConfiguration) configuration).getChain(), true));
 		dfg.addControlListener(dfg.getEdgeClickControl());
-//		GoalDrivenDFGUtils.updateDfg(dfg);
 		return new IvMObjectValues().//
 				s(GoalDrivenObject.high_level_dfg, dfg)
 				;

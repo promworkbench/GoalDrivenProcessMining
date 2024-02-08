@@ -24,7 +24,7 @@ import graph.GoalDrivenDFGUtils;
 public class GoalDrivenPlugin {
 
 	@Plugin(name = "Goal Driven Visualizer", returnLabels = { "Goal Driven visualization" }, returnTypes = {
-			JComponent.class }, parameterLabels = { "Inductive visual Miner launcher",
+			JComponent.class }, parameterLabels = { "ProDUG",
 					"canceller" }, userAccessible = true)
 	@Visualizer
 	@UITopiaVariant(affiliation = "RWTH Aachen", author = "Hieu Le", email = "hieu.le@rwth-aachen.de")
@@ -41,14 +41,14 @@ public class GoalDrivenPlugin {
 		GoalDrivenConfigurationDefault configuration = new GoalDrivenConfigurationDefault(canceller,
 				context.getExecutor());
 		GoalDrivenController controller = new GoalDrivenController(context, configuration, log, canceller);
-
+		System.out.println("done");
 		return controller.getPanel();
 	}
 
 	@Plugin(name = "ProDUG: User-guided interactive process discovery tool", returnLabels = {
-			"Goal-driven User-defined Process Mining" }, returnTypes = { GoalDrivenLauncher.class }, parameterLabels = {
+			"ProDUG" }, returnTypes = { GoalDrivenLauncher.class }, parameterLabels = {
 					"Event log" }, userAccessible = true, categories = { PluginCategory.Discovery,
-							PluginCategory.Analytics, }, help = "Discover a directly follows model interactively. (DFvM)")
+							PluginCategory.Analytics, })
 
 	@UITopiaVariant(affiliation = "RWTH Aachen", author = "Hieu Le", email = "hieu.le@rwth-aachen.de")
 	public GoalDrivenLauncher mineGuiProcessTree(PluginContext context, XLog xLog) {
